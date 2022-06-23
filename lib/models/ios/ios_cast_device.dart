@@ -1,0 +1,29 @@
+import 'package:google_cast/entities/cast_device.dart';
+
+class IosCastDevice extends GoogleCastDevice {
+  IosCastDevice({
+    required super.index,
+    required super.deviceID,
+    required super.friendlyName,
+    required super.modelName,
+    required super.statusText,
+    required super.deviceVersion,
+    required super.isOnLocalNetwork,
+    required super.category,
+    required super.uniqueID,
+  });
+
+  factory IosCastDevice.fromMap(Map<String, dynamic> map) {
+    return IosCastDevice(
+      index: map['index'],
+      deviceID: map['deviceID'] as String,
+      friendlyName: map['friendlyName'] ?? '',
+      modelName: map['modelName'],
+      statusText: map['statusText'],
+      deviceVersion: map['deviceVersion'] ?? '',
+      isOnLocalNetwork: map['isOnLocalNetwork'] as bool,
+      category: map['category'] as String,
+      uniqueID: map['uniqueID'] as String,
+    );
+  }
+}
