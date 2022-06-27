@@ -1,6 +1,8 @@
 import 'package:flutter/services.dart';
 import 'package:google_cast/discovery_session/ios_discovery_manager.dart';
 import 'package:google_cast/entities/cast_device.dart';
+import 'package:google_cast/entities/request.dart';
+import 'package:google_cast/entities/media_information.dart';
 import 'package:google_cast/google_cast_context/google_cast_context_plataform_interface.dart';
 import 'package:google_cast/google_cast_options/cast_options.dart';
 import 'package:google_cast/session_manager/ios_cast_session_manager.dart';
@@ -19,8 +21,8 @@ class FlutterIOSGoogleCastContextMethodChannel
       GoogleCastIOSDiscoveryManager();
 
   @override
-  GoogleCastIOSSessionManager get sessionManager =>
-      GoogleCastIOSSessionManager.instance;
+  final GoogleCastIOSSessionManagerMethodChannel sessionManager =
+      GoogleCastIOSSessionManagerMethodChannel.instance;
 
   FlutterIOSGoogleCastContextMethodChannel._() {
     _methodChannel.setMethodCallHandler(_handleMethodCall);
@@ -48,7 +50,7 @@ class FlutterIOSGoogleCastContextMethodChannel
 
   void _onDevicesChanged(List arguments) {
     final devices = List.from(arguments)
-        .map((device) => IosCastDevice.fromMap(Map.from(device)))
+        .map((device) => GoogleCastIosDevice.fromMap(Map.from(device)))
         .toList();
 
     _devicesStreamController.add(devices);
@@ -63,5 +65,54 @@ class FlutterIOSGoogleCastContextMethodChannel
       default:
         print('No Handler for method ${call.method}');
     }
+  }
+
+  @override
+  Future<GoogleCastRequest> loadMedia(GoogleCastMediaInformation mediaInfo,
+      {bool autoPlay = true}) {
+    // TODO: implement loadMedia
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<GoogleCastRequest> pause() {
+    // TODO: implement pause
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<GoogleCastRequest> play() {
+    // TODO: implement play
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<GoogleCastRequest> setActiveTrackIDs(List<int> activeTrackIDs) {
+    // TODO: implement setActiveTrackIDs
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<GoogleCastRequest> setPlaybackRate(double rate) {
+    // TODO: implement setPlaybackRate
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<GoogleCastRequest> setTextTrackStyle(TextTrackStyle textTrackStyle) {
+    // TODO: implement setTextTrackStyle
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<bool> startSessionWithDevice(GoogleCastDevice device) {
+    // TODO: implement startSessionWithDevice
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<GoogleCastRequest> stop() {
+    // TODO: implement stop
+    throw UnimplementedError();
   }
 }

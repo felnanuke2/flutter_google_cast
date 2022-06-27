@@ -1,7 +1,7 @@
 import 'package:google_cast/entities/cast_device.dart';
 
-class IosCastDevice extends GoogleCastDevice {
-  IosCastDevice({
+class GoogleCastIosDevice extends GoogleCastDevice {
+  GoogleCastIosDevice({
     required super.index,
     required super.deviceID,
     required super.friendlyName,
@@ -13,8 +13,8 @@ class IosCastDevice extends GoogleCastDevice {
     required super.uniqueID,
   });
 
-  factory IosCastDevice.fromMap(Map<String, dynamic> map) {
-    return IosCastDevice(
+  factory GoogleCastIosDevice.fromMap(Map<String, dynamic> map) {
+    return GoogleCastIosDevice(
       index: map['index'],
       deviceID: map['deviceID'] as String,
       friendlyName: map['friendlyName'] ?? '',

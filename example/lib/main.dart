@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:google_cast/discovery_criteria.dart/discovery_criteria.dart';
 import 'package:google_cast/entities/cast_device.dart';
+import 'package:google_cast/entities/media_information.dart';
 import 'dart:async';
 import 'package:google_cast/google_cast.dart';
 import 'package:google_cast/google_cast_context/google_cast_context.dart';
 import 'package:google_cast/google_cast_context/google_cast_context_method_channel.dart';
 import 'package:google_cast/google_cast_options/ios_cast_options.dart';
+import 'package:google_cast/models/ios/ios_media_information.dart';
 
 void main() {
   runApp(const MyApp());
@@ -56,9 +58,20 @@ class _MyAppState extends State<MyApp> {
                       title: Text(device.friendlyName),
                       subtitle: Text(device.modelName ?? ''),
                       onTap: () async {
-                        FlutterIOSGoogleCastContextMethodChannel
+                        await FlutterIOSGoogleCastContextMethodChannel
                             .instance.sessionManager
                             .startSessionWithDevice(device);
+
+                        FlutterIOSGoogleCastContextMethodChannel.instance
+                            .sessionManager.currentSession?.remoteMediaClient
+                            .loadMedia(
+                          GoogleCastIOSMediaInformation(
+                              contentId: '',
+                              streamType: CastMediaStreamType.BUFFERED,
+                              contentUrl:
+                                  'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+                              contentType: 'video/mp4'),
+                        );
                       },
                     );
                   })

@@ -1,5 +1,5 @@
 class GoogleCastDevice {
-  final int index;
+  final int? index;
   final String deviceID;
   final String friendlyName;
   final String? modelName;

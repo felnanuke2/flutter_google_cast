@@ -1,19 +1,14 @@
 //
-//  FlutterGoogleCastOption.swift
+//  CastOptionsExtensions.swift
 //  google_cast
 //
-//  Created by LUIZ FELIPE ALVES LIMA on 23/06/22.
+//  Created by LUIZ FELIPE ALVES LIMA on 24/06/22.
 //
 
 import Foundation
 import GoogleCast
 
-class FlutterGoogleCastOptions : GCKCastOptions {
-    
-}
-
-
-extension  FlutterGoogleCastContext{
+extension  GCKCastOptions{
     
     static func fromMap(_ map : [String : Any]) ->  GCKCastOptions {
         
@@ -60,8 +55,3 @@ extension  FlutterGoogleCastContext{
     
     
 }
-
-
-
-
-
