@@ -1,10 +1,8 @@
-import 'package:google_cast/entities/cast_device.dart';
 import 'package:google_cast/entities/cast_session.dart';
 import 'package:google_cast/enums/connection_satate.dart';
 import 'package:google_cast/models/ios/ios_cast_device.dart';
 import 'package:google_cast/remote_media_client/ios_remote_media_client.dart';
 import 'package:google_cast/remote_media_client/remote_media_client.dart';
-import 'package:google_cast/session_manager/ios_cast_session_manager.dart';
 
 class IOSGoogleCastSessions extends GoogleCastSession {
   IOSGoogleCastSessions({
@@ -17,8 +15,8 @@ class IOSGoogleCastSessions extends GoogleCastSession {
   });
 
   @override
-  GoogleCastRemoteMediaClientPlatformInterface get remoteMediaClient =>
-      GoogleCastIOSRemoteMediaClient();
+  final GoogleCastRemoteMediaClientPlatformInterface remoteMediaClient =
+      GoogleCastIOSRemoteMediaClient.instance;
 
   static IOSGoogleCastSessions? fromMap(Map<String, dynamic>? json) {
     if (json == null) return null;

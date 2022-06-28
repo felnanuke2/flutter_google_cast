@@ -25,8 +25,6 @@ extension GCKMediaInformation{
         builder.streamType = streamType
         builder.contentURL = contentUrl
         let buildedMediaInfo = builder.build()
-    
-        
         
         return buildedMediaInfo
     

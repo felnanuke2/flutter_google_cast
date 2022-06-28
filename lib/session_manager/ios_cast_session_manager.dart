@@ -47,20 +47,18 @@ class GoogleCastIOSSessionManagerMethodChannel
       _currentSessionStreamController.value;
 
   @override
-  Future<bool> endSession() {
-    // TODO: implement endSession
-    throw UnimplementedError();
+  Future<bool> endSession() async {
+    return await _channel.invokeMethod('endSession');
   }
 
   @override
-  Future<bool> endSessionAndStopCasting(bool stopCasting) {
-    // TODO: implement endSessionAndStopCasting
-    throw UnimplementedError();
+  Future<bool> endSessionAndStopCasting() async {
+    return await _channel.invokeMethod('endSessionAndStopCasting');
   }
 
   @override
-  // TODO: implement hasConnectedSession
-  bool get hasConnectedSession => throw UnimplementedError();
+  bool get hasConnectedSession =>
+      connectionState == GoogleCastConnectState.ConnectionStateConnected;
 
   @override
   Future<void> setDefaultSessionOptions() {
@@ -90,7 +88,6 @@ class GoogleCastIOSSessionManagerMethodChannel
   void _onCurrentSessionChanged(arguments) async {
     final session =
         IOSGoogleCastSessions.fromMap(Map<String, dynamic>.from(arguments));
-    print(session);
     _currentSessionStreamController.add(session);
   }
 }

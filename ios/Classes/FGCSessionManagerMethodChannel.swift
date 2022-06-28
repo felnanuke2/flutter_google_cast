@@ -32,6 +32,7 @@ public class FGCSessionManagerMethodChannel : UIResponder, FlutterPlugin, GCKSes
     
     var connectState: GCKConnectionState{
         sessionManager.connectionState
+        
     }
     
     
@@ -99,6 +100,8 @@ public class FGCSessionManagerMethodChannel : UIResponder, FlutterPlugin, GCKSes
     
     public func sessionManager(_ sessionManager: GCKSessionManager, didStart session: GCKSession) {
         onSessionChanged(session)
+        RemoteMediaClienteMethodChannel.instance.startListen()
+  
         
     }
     
@@ -146,6 +149,7 @@ public class FGCSessionManagerMethodChannel : UIResponder, FlutterPlugin, GCKSes
     
     public func sessionManager(_ sessionManager: GCKSessionManager, didResumeSession session: GCKSession) {
         onSessionChanged(session)
+        RemoteMediaClienteMethodChannel.instance.startListen()
     }
     
     public func sessionManager(_ sessionManager: GCKSessionManager, didResumeCastSession session: GCKCastSession) {

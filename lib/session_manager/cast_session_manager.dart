@@ -99,7 +99,7 @@ abstract class AGoogleCastSessionManagerPlatformInterface
   /// Returns
   ///     YES if the operation to end the session started successfully, NO if there is no session currently established or if the operation could not be started.
 
-  Future<bool> endSessionAndStopCasting(bool stopCasting);
+  Future<bool> endSessionAndStopCasting();
 
   Future<void> setDefaultSessionOptions(
       // nullable GCKSessionOptions *	sessionOptions
