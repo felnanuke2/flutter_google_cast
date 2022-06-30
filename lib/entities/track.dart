@@ -5,7 +5,7 @@ import 'package:google_cast/common/text_track_type.dart';
 import 'package:google_cast/common/track_type.dart';
 
 ///Describes track metadata information.
-class Track {
+class GoogleCastMediaTrack {
   ///Custom application data.
   final Map<String, dynamic>? customData;
 
@@ -40,7 +40,7 @@ class Track {
   ///  The track content type, if provided, must be
   /// consistent with the track type.
 
-  final String? trackContentType;
+  final String trackContentType;
 
 // Unique identifier of the track within the context
 //of a chrome.cast.media.MediaInfo object.
@@ -49,13 +49,13 @@ class Track {
 
   ///The type of track.
   final TrackType type;
-  Track({
+  GoogleCastMediaTrack({
     this.customData,
     this.language,
     this.name,
     this.subtype,
     this.trackContentId,
-    this.trackContentType,
+    required this.trackContentType,
     required this.trackId,
     required this.type,
   });
@@ -65,31 +65,32 @@ class Track {
       'customData': customData,
       'language': language?.toString(),
       'name': name,
-      'subtype': subtype?.name,
+      'subtype': subtype?.index,
       'trackContentId': trackContentId,
       'trackContentType': trackContentType,
       'trackId': trackId,
-      'type': type.name,
+      'type': type.index,
     };
   }
 
-  factory Track.fromMap(Map<String, dynamic> map) {
-    return Track(
+  factory GoogleCastMediaTrack.fromMap(Map<String, dynamic> map) {
+    return GoogleCastMediaTrack(
       customData: Map<String, dynamic>.from(map['customData'] ?? {}),
       language: map['language'] != null
           ? RFC5646_LANGUAGE.fromMap(map['language'])
           : null,
       name: map['name'],
       subtype:
-          map['subtype'] != null ? TextTrackType.fromMap(map['subtype']) : null,
+          map['subtype'] != null ? TextTrackType.values[map['subtype']] : null,
       trackContentId: map['trackContentId'],
       trackContentType: map['trackContentType'],
       trackId: map['trackId']?.toInt() ?? 0,
-      type: TrackType.fromMap(map['type']),
+      type: TrackType.values[map['type']],
     );
   }
 
   String toJson() => json.encode(toMap());
 
-  factory Track.fromJson(String source) => Track.fromMap(json.decode(source));
+  factory GoogleCastMediaTrack.fromJson(String source) =>
+      GoogleCastMediaTrack.fromMap(json.decode(source));
 }

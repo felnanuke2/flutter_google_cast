@@ -2,7 +2,7 @@ import Flutter
 import UIKit
 import GoogleCast
 
-public class SwiftGoogleCastPlugin:GCKCastContext,GCKDiscoveryManagerListener, FlutterPlugin, UIApplicationDelegate, GCKLoggerDelegate   {
+public class SwiftGoogleCastPlugin:GCKCastContext,GCKDiscoveryManagerListener,GCKLoggerDelegate, FlutterPlugin, UIApplicationDelegate    {
     
     var devices : [UInt : GCKDevice] = [:]
     let kReceiverAppID = kGCKDefaultMediaReceiverApplicationID
@@ -61,8 +61,11 @@ public class SwiftGoogleCastPlugin:GCKCastContext,GCKDiscoveryManagerListener, F
     private func setSharedInstanceWithOption(arguments: Dictionary<String, Any> ,result: @escaping FlutterResult){
         let option = GCKCastOptions.fromMap(arguments)
         GCKCastContext.setSharedInstanceWith(option)
+        GCKLogger.sharedInstance().consoleLoggingEnabled = true
+        GCKLogger.sharedInstance().delegate = self
         discoveryManager.add(self)
-        sessionManager.add( FGCSessionManagerMethodChannel.instance )
+        sessionManager.add(FGCSessionManagerMethodChannel.instance )
+        discoveryManager.startDiscovery()
        
     
     }

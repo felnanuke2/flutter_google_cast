@@ -1,9 +1,9 @@
 import 'dart:convert';
 
-import 'package:google_cast/common/media_metadata/cast_media_metadata.dart';
+import 'cast_media_metadata.dart';
 
-class CastPhotoMediaMetadata extends CastMediaMetadata {
-  CastPhotoMediaMetadata({
+class GoogleCastPhotoMediaMetadata extends GoogleCastMediaMetadata {
+  GoogleCastPhotoMediaMetadata({
     this.title,
     this.artist,
     this.location,
@@ -77,12 +77,12 @@ class CastPhotoMediaMetadata extends CastMediaMetadata {
       'longitude': longitude,
       'width': width,
       'height': height,
-      'creationDateTime': creationDateTime?.toIso8601String(),
+      'creationDateTime': creationDateTime?.millisecondsSinceEpoch,
     };
   }
 
-  factory CastPhotoMediaMetadata.fromMap(Map<String, dynamic> map) {
-    return CastPhotoMediaMetadata(
+  factory GoogleCastPhotoMediaMetadata.fromMap(Map<String, dynamic> map) {
+    return GoogleCastPhotoMediaMetadata(
       metadataType: map['metadataType'],
       title: map['title'],
       artist: map['artist'],
@@ -99,6 +99,6 @@ class CastPhotoMediaMetadata extends CastMediaMetadata {
 
   String toJson() => json.encode(toMap());
 
-  factory CastPhotoMediaMetadata.fromJson(String source) =>
-      CastPhotoMediaMetadata.fromMap(json.decode(source));
+  factory GoogleCastPhotoMediaMetadata.fromJson(String source) =>
+      GoogleCastPhotoMediaMetadata.fromMap(json.decode(source));
 }

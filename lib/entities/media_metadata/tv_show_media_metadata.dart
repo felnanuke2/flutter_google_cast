@@ -1,18 +1,19 @@
 import 'dart:convert';
 
 import 'package:google_cast/common/image.dart';
-import 'package:google_cast/common/media_metadata/cast_media_metadata.dart';
+import 'package:google_cast/enums/media_metadata_type.dart';
+
+import 'cast_media_metadata.dart';
 
 ///Describes a television show episode media artifact.
-class CastTvShowMediaMetadata extends CastMediaMetadata {
-  CastTvShowMediaMetadata({
+class GoogleCastTvShowMediaMetadata extends GoogleCastMediaMetadata {
+  GoogleCastTvShowMediaMetadata({
     this.seriesTitle,
-    this.subtitle,
     this.season,
     this.episode,
-    this.images,
+    super.images,
     this.originalAirDate,
-  }) : super(metadataType: MediaMetadataType.tvShowMediaMetadata);
+  }) : super(metadataType: GoogleCastMediaMetadataType.tvShowMediaMetadata);
 
   ///optional Descriptive title of the t.v. series.
   ///Player can independently retrieve title
@@ -24,7 +25,6 @@ class CastTvShowMediaMetadata extends CastMediaMetadata {
   ///  episode. Player can independently retrieve
   ///  title using content_id or it can be
   ///  given by the sender in the Load message
-  final String? subtitle;
 
   ///optional Season number of the t.v. show
   final int? season;
@@ -36,7 +36,6 @@ class CastTvShowMediaMetadata extends CastMediaMetadata {
   /// with the content. The initial value of the
   /// field can be provided by the sender in
   /// the Load message. Should provide recommended sizes
-  final List<CastImage>? images;
 
   ///optional ISO 8601 date and time
   /// this episode was released. Player
@@ -50,23 +49,21 @@ class CastTvShowMediaMetadata extends CastMediaMetadata {
     return {
       'metadataType': metadataType.value,
       'seriesTitle': seriesTitle,
-      'subtitle': subtitle,
       'season': season,
       'episode': episode,
       'images': images?.map((x) => x.toMap()).toList(),
-      'originalAirDate': originalAirDate?.toIso8601String(),
+      'creationDate': originalAirDate?.millisecondsSinceEpoch,
     };
   }
 
-  factory CastTvShowMediaMetadata.fromMap(Map<String, dynamic> map) {
-    return CastTvShowMediaMetadata(
+  factory GoogleCastTvShowMediaMetadata.fromMap(Map<String, dynamic> map) {
+    return GoogleCastTvShowMediaMetadata(
       seriesTitle: map['seriesTitle'],
-      subtitle: map['subtitle'],
       season: map['season']?.toInt(),
       episode: map['episode']?.toInt(),
       images: map['images'] != null
-          ? List<CastImage>.from(
-              map['images']?.map((x) => CastImage.fromMap(x)))
+          ? List<GoogleCastImage>.from(
+              map['images']?.map((x) => GoogleCastImage.fromMap(x)))
           : null,
       originalAirDate: map['originalAirDate'] != null
           ? DateTime.tryParse(map['originalAirDate'])
@@ -76,6 +73,6 @@ class CastTvShowMediaMetadata extends CastMediaMetadata {
 
   String toJson() => json.encode(toMap());
 
-  factory CastTvShowMediaMetadata.fromJson(String source) =>
-      CastTvShowMediaMetadata.fromMap(json.decode(source));
+  factory GoogleCastTvShowMediaMetadata.fromJson(String source) =>
+      GoogleCastTvShowMediaMetadata.fromMap(json.decode(source));
 }

@@ -5,21 +5,21 @@ import 'package:google_cast/common/repeat_mode.dart';
 export 'package:google_cast/common/queue_item.dart';
 export 'package:google_cast/common/repeat_mode.dart';
 
-class CastQueueData {
+class GoogleCastMediaQueueData {
   final String? id;
   final String? name;
   final String? description;
-  final QueueRepeatMode? repeatMode;
+  final GoogleCastMediaRepeatMode? repeatMode;
 
   /// if you will run LOAD command, you will
   ///  prefer put only one item
   /// in queue with id equals 0 and
   /// then you can use QUEUE_INSERT
   ///  command to add items to queue
-  final List<CastQueueItem>? items;
+  final List<GoogleCastQueueItem>? items;
   final int? startIndex;
   final Duration? startTime;
-  CastQueueData({
+  GoogleCastMediaQueueData({
     this.id,
     this.name,
     this.description,
@@ -41,17 +41,17 @@ class CastQueueData {
     };
   }
 
-  factory CastQueueData.fromMap(Map<String, dynamic> map) {
-    return CastQueueData(
+  factory GoogleCastMediaQueueData.fromMap(Map<String, dynamic> map) {
+    return GoogleCastMediaQueueData(
       id: map['id'],
       name: map['name'],
       description: map['description'],
       repeatMode: map['repeatMode'] != null
-          ? QueueRepeatMode.fromMap(map['repeatMode'])
+          ? GoogleCastMediaRepeatMode.values[map['repeatMode']]
           : null,
       items: map['items'] != null
-          ? List<CastQueueItem>.from(
-              map['items']?.map((x) => CastQueueItem.fromMap(x)))
+          ? List<GoogleCastQueueItem>.from(
+              map['items']?.map((x) => GoogleCastQueueItem.fromMap(x)))
           : null,
       startIndex: map['startIndex']?.toInt(),
       startTime: map['startTime'] != null
@@ -62,6 +62,6 @@ class CastQueueData {
 
   String toJson() => json.encode(toMap());
 
-  factory CastQueueData.fromJson(String source) =>
-      CastQueueData.fromMap(json.decode(source));
+  factory GoogleCastMediaQueueData.fromJson(String source) =>
+      GoogleCastMediaQueueData.fromMap(json.decode(source));
 }

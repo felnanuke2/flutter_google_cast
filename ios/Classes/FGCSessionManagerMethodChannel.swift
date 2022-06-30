@@ -62,8 +62,13 @@ public class FGCSessionManagerMethodChannel : UIResponder, FlutterPlugin, GCKSes
         case "startSessionWithDevice":
             
         result(startSessionWithDevice(deviceIndex: call.arguments as! Int))
-            
-           
+            break
+        case "endSession":
+            endSession(result)
+            break
+        case "endSessionAndStopCasting":
+            endSessionAndStopCasting(result)
+            break
             
    
             
@@ -82,9 +87,15 @@ public class FGCSessionManagerMethodChannel : UIResponder, FlutterPlugin, GCKSes
         
         let device = discoveryManager.device(at: UInt(deviceIndex))
         return sessionManager.startSession(with: device)
-        
-        
-        
+           
+    }
+    
+    private func endSession(_ result : FlutterResult) {
+      print( self.sessionManager.endSession())
+    }
+    
+    private func endSessionAndStopCasting(_ result : FlutterResult) {
+        print( self.sessionManager.endSessionAndStopCasting(true))
     }
     
     //MARK: -GCKSessionManagerListener

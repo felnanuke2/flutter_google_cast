@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-class CastImage {
+class GoogleCastImage {
   ///url 	URI 	URI for the image
   final Uri url;
 
@@ -9,7 +9,7 @@ class CastImage {
 
   ///width 	integer 	optional Width of the image
   final int? width;
-  CastImage({
+  GoogleCastImage({
     required this.url,
     this.height,
     this.width,
@@ -23,8 +23,8 @@ class CastImage {
     };
   }
 
-  factory CastImage.fromMap(Map<String, dynamic> map) {
-    return CastImage(
+  factory GoogleCastImage.fromMap(Map<String, dynamic> map) {
+    return GoogleCastImage(
       url: Uri.parse(map['url']),
       height: map['height']?.toInt(),
       width: map['width']?.toInt(),
@@ -33,6 +33,6 @@ class CastImage {
 
   String toJson() => json.encode(toMap());
 
-  factory CastImage.fromJson(String source) =>
-      CastImage.fromMap(json.decode(source));
+  factory GoogleCastImage.fromJson(String source) =>
+      GoogleCastImage.fromMap(json.decode(source));
 }

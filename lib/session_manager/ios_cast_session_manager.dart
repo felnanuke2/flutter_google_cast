@@ -22,6 +22,9 @@ class GoogleCastIOSSessionManagerMethodChannel
 
   final _channel = const MethodChannel('google_cast.session_manager');
 
+  Stream<GoogleCastSession?> get currentSessionStream =>
+      _currentSessionStreamController.stream;
+
   final _currentSessionStreamController = BehaviorSubject<GoogleCastSession?>()
     ..add(null);
 
@@ -86,8 +89,13 @@ class GoogleCastIOSSessionManagerMethodChannel
   }
 
   void _onCurrentSessionChanged(arguments) async {
-    final session =
-        IOSGoogleCastSessions.fromMap(Map<String, dynamic>.from(arguments));
-    _currentSessionStreamController.add(session);
+    try {
+      final session =
+          IOSGoogleCastSessions.fromMap(Map<String, dynamic>.from(arguments));
+      _currentSessionStreamController.add(session);
+    } catch (e, s) {
+      print(e);
+      print(s);
+    }
   }
 }

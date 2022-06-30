@@ -7,7 +7,7 @@ class GoogleCastMediaSeekOption {
   final GoogleCastMediaResumeState resumeState;
   final bool seekToInfinity;
 
-  GoogleCastMediaSeekOption._({
+  GoogleCastMediaSeekOption({
     required this.position,
     this.relative = false,
     this.resumeState = GoogleCastMediaResumeState.GCKMediaResumeStatePlay,

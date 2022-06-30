@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 ///Provides the live seekable range with start and end time in seconds.
-class CastLiveSeekableRange {
+class GoogleCastMediaLiveSeekableRange {
   ///End of the seekable range in seconds.
   /// This member is only updated sporadically,
   /// so its value is often out of date. Use
@@ -31,7 +31,7 @@ class CastLiveSeekableRange {
   ///  based on the last information reported
   ///  by the receiver.
   final Duration? start;
-  CastLiveSeekableRange({
+  GoogleCastMediaLiveSeekableRange({
     this.end,
     this.isLiveDone,
     this.isMovingWindow,
@@ -47,8 +47,8 @@ class CastLiveSeekableRange {
     };
   }
 
-  factory CastLiveSeekableRange.fromMap(Map<String, dynamic> map) {
-    return CastLiveSeekableRange(
+  factory GoogleCastMediaLiveSeekableRange.fromMap(Map<String, dynamic> map) {
+    return GoogleCastMediaLiveSeekableRange(
       end: map['end'] != null ? Duration(seconds: map['end'].toInt()) : null,
       isLiveDone: map['isLiveDone'],
       isMovingWindow: map['isMovingWindow'],
@@ -59,6 +59,6 @@ class CastLiveSeekableRange {
 
   String toJson() => json.encode(toMap());
 
-  factory CastLiveSeekableRange.fromJson(String source) =>
-      CastLiveSeekableRange.fromMap(json.decode(source));
+  factory GoogleCastMediaLiveSeekableRange.fromJson(String source) =>
+      GoogleCastMediaLiveSeekableRange.fromMap(json.decode(source));
 }

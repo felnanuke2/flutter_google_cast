@@ -1,8 +1,11 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:google_cast/entities/cast_media_status.dart';
 import 'package:google_cast/entities/media_seek_option.dart';
 import 'package:google_cast/entities/request.dart';
 import 'package:google_cast/entities/media_information.dart';
 import 'package:google_cast/models/ios/ios_media_information.dart';
+import 'package:google_cast/models/ios/ios_media_status.dart';
 import 'package:google_cast/models/ios/ios_request.dart';
 import 'package:google_cast/remote_media_client/ios_remote_media_client_method_channel.dart';
 import 'package:rxdart/rxdart.dart';
@@ -20,10 +23,18 @@ class GoogleCastIOSRemoteMediaClient
 
   final _channel = const MethodChannel('google_cast.remote_media_client');
 
-  final _mediaStatusStreamController = BehaviorSubject()..add(null);
+  final _mediaStatusStreamController = BehaviorSubject<GoggleCastMediaStatus?>()
+    ..add(null);
 
   final _playerPositionStreamController = BehaviorSubject<Duration>()
     ..add(Duration.zero);
+
+  @override
+  GoggleCastMediaStatus? get mediaStatus => _mediaStatusStreamController.value;
+
+  @override
+  Stream<GoggleCastMediaStatus?> get mediaStatusStream =>
+      _mediaStatusStreamController.stream;
 
   @override
   Duration get playerPosition => _playerPositionStreamController.value;
@@ -33,10 +44,33 @@ class GoogleCastIOSRemoteMediaClient
       _playerPositionStreamController.stream;
 
   @override
-  Future<GoogleCastRequest> loadMedia(
-      GoogleCastMediaInformation mediaInfo) async {
+  Future<GoogleCastRequest?> loadMedia(
+    GoogleCastMediaInformation mediaInfo, {
+    bool autoPlay = true,
+    Duration playPosition = Duration.zero,
+    double playbackRate = 1.0,
+    List<int>? activeTrackIds,
+    String? credentials,
+    String? credentialsType,
+  }) async {
     mediaInfo as GoogleCastIOSMediaInformation;
-    final result = await _channel.invokeMethod('loadMedia', mediaInfo.toMap());
+    final result = await _channel.invokeMethod(
+        'loadMedia',
+        mediaInfo.toMap()
+          ..addAll(
+            {
+              'autoPlay': autoPlay,
+              'playPosition': playPosition.inSeconds,
+              'playbackRate': playbackRate,
+              'activeTrackIds': activeTrackIds,
+              'credentials': credentials,
+              'credentialsType': credentialsType,
+            }..removeWhere((key, value) => value == null),
+          ));
+    if (result == null) {
+      if (kDebugMode) print('load media failed. current session is null');
+      return null;
+    }
     return GoogleCastIosRequest.fromMap(Map<String, dynamic>.from(result));
   }
 
@@ -101,7 +135,7 @@ class GoogleCastIOSRemoteMediaClient
   Future _methodCallHandler(MethodCall call) async {
     switch (call.method) {
       case "onUpdateMediaStatus":
-        break;
+        return await _onUpdateMediaStatus(call.arguments);
       case "onUpdatePlayerPosition":
         return await _onUpdatePlayerPosition(call.arguments);
       default:
@@ -111,5 +145,13 @@ class GoogleCastIOSRemoteMediaClient
   Future _onUpdatePlayerPosition(int seconds) async {
     final duration = Duration(seconds: seconds);
     _playerPositionStreamController.add(duration);
+  }
+
+  _onUpdateMediaStatus(arguments) {
+    if (arguments != null) {
+      arguments = Map<String, dynamic>.from(arguments);
+      final mediaStatus = GoogleCastIOSMediaStatus.fromMap(arguments);
+      _mediaStatusStreamController.add(mediaStatus);
+    }
   }
 }

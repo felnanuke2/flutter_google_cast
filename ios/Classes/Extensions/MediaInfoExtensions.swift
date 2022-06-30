@@ -15,18 +15,46 @@ extension GCKMediaInformation{
         
         let contentID = arguments["contentID"] as! String
         let streamType = GCKMediaStreamType.unknown
-       
         guard let  contentUrl = URL.init(string: arguments["contentURL"] as! String) else { return nil}
-        
-        
         let builder =  GCKMediaInformationBuilder.init()
         builder.contentID  = contentID
-      
         builder.streamType = streamType
         builder.contentURL = contentUrl
+        
+    
+        if let tracksDict = arguments["tracks"] as? [Dictionary<String, Any>] {
+    builder.mediaTracks = tracksDict.map{
+                dict in
+                GCKMediaTrack.fromMap(dict)
+            }
+        }
+      
+        if let metadataDict = arguments["metadata"] {
+        builder.metadata = GCKMediaMetadata.fromMap(metadataDict as! Dictionary<String, Any>)
+        }
+      
         let buildedMediaInfo = builder.build()
         
         return buildedMediaInfo
     
     }
+    
+    
+    
+    
+    func toMap() -> Dictionary<String, Any> {
+        var dict = Dictionary<String, Any>()
+        dict["contentID"] = self.contentID
+        dict["contentType"] = self.contentType
+        dict["streamType"] = self.streamType.rawValue
+        dict["contentURL"] = self.contentURL?.absoluteString
+        dict["duration"] = self.streamDuration
+        dict["metadata"] = self.metadata?.toMap()
+      
+        
+        
+        
+        return dict
+    }
+    
 }

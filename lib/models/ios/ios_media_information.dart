@@ -1,5 +1,7 @@
 import 'package:google_cast/entities/media_information.dart';
 
+import '../../entities/media_metadata/cast_media_metadata.dart';
+
 class GoogleCastIOSMediaInformation extends GoogleCastMediaInformation {
   GoogleCastIOSMediaInformation({
     required super.contentId,
@@ -53,10 +55,10 @@ class GoogleCastIOSMediaInformation extends GoogleCastMediaInformation {
               map['breakClips']?.map((x) => CastBreakClips.fromMap(x)))
           : null,
       contentId: map['contentId'] ?? '',
-      streamType: CastMediaStreamType.fromMap(map['streamType']),
+      streamType: CastMediaStreamType.values[map['streamType']],
       contentType: map['contentType'] ?? '',
       metadata: map['metadata'] != null
-          ? getCastMediaMetadata(map['metadata'])
+          ? getCastMediaMetadata(Map.from(map['metadata']))
           : null,
       duration: map['duration'] != null
           ? Duration(seconds: map['duration'].round())
@@ -81,7 +83,8 @@ class GoogleCastIOSMediaInformation extends GoogleCastMediaInformation {
           ? TextTrackStyle.fromMap(map['textTrackStyle'])
           : null,
       tracks: map['tracks'] != null
-          ? List<Track>.from(map['tracks']?.map((x) => Track.fromMap(x)))
+          ? List<GoogleCastMediaTrack>.from(
+              map['tracks']?.map((x) => GoogleCastMediaTrack.fromMap(x)))
           : null,
       userActionStates: map['userActionStates'] != null
           ? List<UserActionState>.from(
@@ -94,6 +97,6 @@ class GoogleCastIOSMediaInformation extends GoogleCastMediaInformation {
   }
 }
 
-CastMediaMetadata? getCastMediaMetadata(Map<String, dynamic> map) {
+GoogleCastMediaMetadata? getCastMediaMetadata(Map<String, dynamic> map) {
   return null;
 }

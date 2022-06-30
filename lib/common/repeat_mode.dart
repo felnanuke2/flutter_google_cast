@@ -1,17 +1,20 @@
 ///Possible states of queue repeat mode.
-enum QueueRepeatMode {
+enum GoogleCastMediaRepeatMode {
+  ///A repeat mode indicating that the repeat mode should be left unchanged.
+  UNCHANGED,
+
   ///Items are played in order, and when the
   /// queue is completed (the last item has ended)
   /// the media session is terminated.
   OFF,
 
+  ///The current item will be repeated indefinitely.
+  SINGLE,
+
   ///The items in the queue will be played
   /// indefinitely. When the last item has
   ///  ended, the first item will be played again.
   ALL,
-
-  ///The current item will be repeated indefinitely.
-  SINGLE,
 
   ///The items in the queue will be played indefinitely.
   /// When the last item has ended, the list of items
@@ -20,19 +23,4 @@ enum QueueRepeatMode {
   /// first item of the shuffled items.
 
   ALL_AND_SHUFFLE;
-
-  static QueueRepeatMode fromMap(String? map) {
-    switch (map) {
-      case 'OFF':
-        return QueueRepeatMode.OFF;
-      case 'ALL':
-        return QueueRepeatMode.ALL;
-      case 'SINGLE':
-        return QueueRepeatMode.SINGLE;
-      case 'ALL_AND_SHUFFLE':
-        return QueueRepeatMode.ALL_AND_SHUFFLE;
-      default:
-        return QueueRepeatMode.OFF;
-    }
-  }
 }

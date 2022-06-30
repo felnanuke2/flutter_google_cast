@@ -1,11 +1,13 @@
 import 'dart:convert';
 
 import 'package:google_cast/common/image.dart';
-import 'package:google_cast/common/media_metadata/cast_media_metadata.dart';
+import 'package:google_cast/enums/media_metadata_type.dart';
+
+import 'cast_media_metadata.dart';
 
 ///Describes a music track media artifact.
-class CastMusicMediaMetadata extends CastMediaMetadata {
-  CastMusicMediaMetadata({
+class GoogleCastMusicMediaMetadata extends GoogleCastMediaMetadata {
+  GoogleCastMusicMediaMetadata({
     this.albumName,
     this.title,
     this.albumArtist,
@@ -13,7 +15,7 @@ class CastMusicMediaMetadata extends CastMediaMetadata {
     this.composer,
     this.trackNumber,
     this.discNumber,
-    this.images,
+    super.images,
     this.releaseDate,
     required super.metadataType,
   });
@@ -61,7 +63,6 @@ class CastMusicMediaMetadata extends CastMediaMetadata {
   ///with the content. The initial value of the
   ///field can be provided by the sender in
   ///the Load message. Should provide recommended sizes
-  final List<CastImage>? images;
 
   ///optional ISO 8601 date and time
   /// this content was released. Player
@@ -81,13 +82,13 @@ class CastMusicMediaMetadata extends CastMediaMetadata {
       'trackNumber': trackNumber,
       'discNumber': discNumber,
       'images': images?.map((x) => x.toMap()).toList(),
-      'releaseDate': releaseDate?.toIso8601String(),
+      'releaseDate': releaseDate?.millisecondsSinceEpoch,
     };
   }
 
-  factory CastMusicMediaMetadata.fromMap(Map<String, dynamic> map) {
-    return CastMusicMediaMetadata(
-      metadataType: MediaMetadataType.fromMap(map['metadataType']),
+  factory GoogleCastMusicMediaMetadata.fromMap(Map<String, dynamic> map) {
+    return GoogleCastMusicMediaMetadata(
+      metadataType: GoogleCastMediaMetadataType.fromMap(map['metadataType']),
       albumName: map['albumName'],
       title: map['title'],
       albumArtist: map['albumArtist'],
@@ -96,8 +97,8 @@ class CastMusicMediaMetadata extends CastMediaMetadata {
       trackNumber: map['trackNumber']?.toInt(),
       discNumber: map['discNumber']?.toInt(),
       images: map['images'] != null
-          ? List<CastImage>.from(
-              map['images']?.map((x) => CastImage.fromMap(x)))
+          ? List<GoogleCastImage>.from(
+              map['images']?.map((x) => GoogleCastImage.fromMap(x)))
           : null,
       releaseDate: map['releaseDate'] != null
           ? DateTime.tryParse(map['releaseDate'])
@@ -107,6 +108,6 @@ class CastMusicMediaMetadata extends CastMediaMetadata {
 
   String toJson() => json.encode(toMap());
 
-  factory CastMusicMediaMetadata.fromJson(String source) =>
-      CastMusicMediaMetadata.fromMap(json.decode(source));
+  factory GoogleCastMusicMediaMetadata.fromJson(String source) =>
+      GoogleCastMusicMediaMetadata.fromMap(json.decode(source));
 }

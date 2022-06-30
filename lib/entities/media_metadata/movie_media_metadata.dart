@@ -1,18 +1,20 @@
 import 'dart:convert';
 
 import 'package:google_cast/common/image.dart';
-import 'package:google_cast/common/media_metadata/cast_media_metadata.dart';
+import 'package:google_cast/enums/media_metadata_type.dart';
+
+import 'cast_media_metadata.dart';
 
 ///Describes a movie media artifact.
-class CastMovieMediaMetadata extends CastMediaMetadata {
-  CastMovieMediaMetadata({
+class GoogleCastMovieMediaMetadata extends GoogleCastMediaMetadata {
+  GoogleCastMovieMediaMetadata({
     this.title,
     this.subtitle,
     this.studio,
-    this.images,
+    super.images,
     this.releaseDate,
   }) : super(
-          metadataType: MediaMetadataType.movieMediaMetadata,
+          metadataType: GoogleCastMediaMetadataType.movieMediaMetadata,
         );
 
   /// 	optional Descriptive title
@@ -40,7 +42,6 @@ class CastMovieMediaMetadata extends CastMediaMetadata {
   /// with the content. The initial value of the field
   /// can be provided by the sender in the Load message.
   ///  Should provide recommended sizes
-  final List<CastImage>? images;
 
   ///optional ISO 8601 date and time this content
   ///was released. Player can independently retrieve
@@ -56,18 +57,18 @@ class CastMovieMediaMetadata extends CastMediaMetadata {
       'subtitle': subtitle,
       'studio': studio,
       'images': images?.map((x) => x.toMap()).toList(),
-      'releaseDate': releaseDate?.toIso8601String(),
+      'broadcastDate': releaseDate?.millisecondsSinceEpoch,
     };
   }
 
-  factory CastMovieMediaMetadata.fromMap(Map<String, dynamic> map) {
-    return CastMovieMediaMetadata(
+  factory GoogleCastMovieMediaMetadata.fromMap(Map<String, dynamic> map) {
+    return GoogleCastMovieMediaMetadata(
       title: map['title'],
       subtitle: map['subtitle'],
       studio: map['studio'],
       images: map['images'] != null
-          ? List<CastImage>.from(
-              map['images']?.map((x) => CastImage.fromMap(x)))
+          ? List<GoogleCastImage>.from(
+              map['images']?.map((x) => GoogleCastImage.fromMap(x)))
           : null,
       releaseDate: map['releaseDate'] != null
           ? DateTime.tryParse(map['releaseDate'] ?? '')
@@ -77,6 +78,6 @@ class CastMovieMediaMetadata extends CastMediaMetadata {
 
   String toJson() => json.encode(toMap());
 
-  factory CastMovieMediaMetadata.fromJson(String source) =>
-      CastMovieMediaMetadata.fromMap(json.decode(source));
+  factory GoogleCastMovieMediaMetadata.fromJson(String source) =>
+      GoogleCastMovieMediaMetadata.fromMap(json.decode(source));
 }

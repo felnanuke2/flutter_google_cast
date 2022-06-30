@@ -3,7 +3,7 @@ import 'dart:convert';
 import '../entities/media_information.dart';
 
 ///Represents an item in a media queue.
-class CastQueueItem {
+class GoogleCastQueueItem {
   /// Array of Track trackIds that should be active. If the array is not provided, the default tracks will be active. If two incompatible trackIds are provided (for example two active audio tracks) the command will fail with INVALID_PARAMETER.
   final List<int>? activeTrackIds;
 
@@ -28,7 +28,7 @@ class CastQueueItem {
 
   /// Seconds from the beginning of the media to start playback.
   final Duration? startTime;
-  CastQueueItem({
+  GoogleCastQueueItem({
     this.activeTrackIds,
     this.autoplay = true,
     this.customData,
@@ -52,8 +52,8 @@ class CastQueueItem {
     }..removeWhere((key, value) => value == null);
   }
 
-  factory CastQueueItem.fromMap(Map<String, dynamic> map) {
-    return CastQueueItem(
+  factory GoogleCastQueueItem.fromMap(Map<String, dynamic> map) {
+    return GoogleCastQueueItem(
       activeTrackIds: map['activeTrackIds'] != null
           ? List<int>.from(map['activeTrackIds'])
           : null,
@@ -80,10 +80,10 @@ class CastQueueItem {
 
   String toJson() => json.encode(toMap());
 
-  factory CastQueueItem.fromJson(String source) =>
-      CastQueueItem.fromMap(json.decode(source));
+  factory GoogleCastQueueItem.fromJson(String source) =>
+      GoogleCastQueueItem.fromMap(json.decode(source));
 
-  CastQueueItem copyWith({
+  GoogleCastQueueItem copyWith({
     List<int>? activeTrackIds,
     bool? autoplay,
     Map<String, dynamic>? customData,
@@ -93,7 +93,7 @@ class CastQueueItem {
     Duration? preloadTime,
     Duration? startTime,
   }) {
-    return CastQueueItem(
+    return GoogleCastQueueItem(
       activeTrackIds: activeTrackIds ?? this.activeTrackIds,
       autoplay: autoplay ?? this.autoplay,
       customData: customData ?? this.customData,

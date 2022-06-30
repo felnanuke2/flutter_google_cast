@@ -2,20 +2,20 @@ import 'package:google_cast/common/break.dart';
 import 'package:google_cast/common/break_clips.dart';
 import 'package:google_cast/common/hls_segment_format.dart';
 import 'package:google_cast/common/hls_video_segment_format.dart';
-import 'package:google_cast/common/media_metadata/cast_media_metadata.dart';
 import 'package:google_cast/common/text_track_style.dart';
-import 'package:google_cast/common/track.dart';
+import 'package:google_cast/entities/track.dart';
 import 'package:google_cast/common/user_action_state.dart';
 import 'package:google_cast/common/vast_ads_request.dart';
 import 'package:google_cast/enums/stream_type.dart';
+
+import 'media_metadata/cast_media_metadata.dart';
 
 export 'package:google_cast/common/break.dart';
 export 'package:google_cast/common/break_clips.dart';
 export 'package:google_cast/common/hls_segment_format.dart';
 export 'package:google_cast/common/hls_video_segment_format.dart';
-export 'package:google_cast/common/media_metadata/cast_media_metadata.dart';
 export 'package:google_cast/common/text_track_style.dart';
-export 'package:google_cast/common/track.dart';
+export 'package:google_cast/entities/track.dart';
 export 'package:google_cast/common/user_action_state.dart';
 export 'package:google_cast/common/vast_ads_request.dart';
 export 'package:google_cast/enums/stream_type.dart';
@@ -57,7 +57,7 @@ class GoogleCastMediaInformation {
   ///2  TvShowMediaMetadata
   ///3  MusicTrackMediaMetadata
   ///4  PhotoMediaMetadata
-  final CastMediaMetadata? metadata;
+  final GoogleCastMediaMetadata? metadata;
 
   ///optional Duration of the currently playing stream in seconds
   final Duration? duration;
@@ -98,7 +98,7 @@ class GoogleCastMediaInformation {
   final TextTrackStyle? textTrackStyle;
 
   /// Array of Track objects.
-  final List<Track>? tracks;
+  final List<GoogleCastMediaTrack>? tracks;
 
   /// Indicates the user action state for media.
   /// Indicate user like, dislike, or

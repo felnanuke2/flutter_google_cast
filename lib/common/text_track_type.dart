@@ -1,4 +1,6 @@
 enum TextTrackType {
+  UNKNOWN,
+
   ///Transcription or translation of the dialogue,
   /// suitable for when the sound is available
   /// but not understood (e.g. because the user
@@ -35,12 +37,4 @@ enum TextTrackType {
   /// Tracks intended for use from script.
 
   METADATA;
-
-  factory TextTrackType.fromMap(String value) =>
-      values.firstWhere((element) => element.toString() == value);
-
-  @override
-  String toString() {
-    return name;
-  }
 }
