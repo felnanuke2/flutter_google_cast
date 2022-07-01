@@ -1,11 +1,11 @@
-class AFlutterGoogleCastOptions {
+class GoogleCastOptions {
   final bool physicalVolumeButtonsWillControlDeviceVolume;
   final bool disableDiscoveryAutostart;
   final bool disableAnalyticsLogging;
   final bool suspendSessionsWhenBackgrounded;
   final bool stopReceiverApplicationWhenEndingSession;
   final bool startDiscoveryAfterFirstTapOnCastButton;
-  AFlutterGoogleCastOptions({
+  GoogleCastOptions({
     this.physicalVolumeButtonsWillControlDeviceVolume = true,
     this.disableDiscoveryAutostart = false,
     this.disableAnalyticsLogging = false,

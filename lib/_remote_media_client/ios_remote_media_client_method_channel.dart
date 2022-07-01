@@ -1,23 +1,20 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:google_cast/_remote_media_client/remote_media_client_platform.dart';
 import 'package:google_cast/entities/cast_media_status.dart';
+import 'package:google_cast/entities/load_options.dart';
 import 'package:google_cast/entities/media_seek_option.dart';
+import 'package:google_cast/entities/queue_item.dart';
 import 'package:google_cast/entities/request.dart';
 import 'package:google_cast/entities/media_information.dart';
 import 'package:google_cast/models/ios/ios_media_information.dart';
 import 'package:google_cast/models/ios/ios_media_status.dart';
 import 'package:google_cast/models/ios/ios_request.dart';
-import 'package:google_cast/remote_media_client/ios_remote_media_client_method_channel.dart';
 import 'package:rxdart/rxdart.dart';
 
-class GoogleCastIOSRemoteMediaClient
-    extends GoogleCastIOSRemoteMediaClientMethodChannel {
-  static final GoogleCastIOSRemoteMediaClient _instance =
-      GoogleCastIOSRemoteMediaClient._();
-
-  static GoogleCastIOSRemoteMediaClient get instance => _instance;
-
-  GoogleCastIOSRemoteMediaClient._() {
+class GoogleCastRemoteMediaClientIOSMethodChannel
+    implements GoogleCastRemoteMediaClientPlatformInterface {
+  GoogleCastRemoteMediaClientIOSMethodChannel() {
     _channel.setMethodCallHandler(_methodCallHandler);
   }
 
@@ -153,5 +150,21 @@ class GoogleCastIOSRemoteMediaClient
       final mediaStatus = GoogleCastIOSMediaStatus.fromMap(arguments);
       _mediaStatusStreamController.add(mediaStatus);
     }
+  }
+
+  @override
+  Future<GoogleCastRequest?> queueLoadItems(
+    List<GoogleCastQueueItem> queueItems, {
+    GoogleCastQueueLoadOptions? options,
+  }) async {
+    final result = await _channel.invokeMethod(
+      'queueLoadItems',
+      {
+        'items': queueItems.map((item) => item.toMap()).toList(),
+        if (options != null) 'options': options.toMap(),
+      },
+    );
+    if (result == null) return null;
+    return GoogleCastIosRequest.fromMap(Map<String, dynamic>.from(result));
   }
 }

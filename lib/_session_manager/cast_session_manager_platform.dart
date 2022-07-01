@@ -10,9 +10,9 @@ import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 /// <p>Whether or not the application uses the <a class="el notranslate" href="/cast/docs/reference/ios/interface_g_c_k_session_manager" data-title="A class that manages sessions. ">GCKSessionManager</a> to control sessions, it can attach a <a class="el notranslate" href="/cast/docs/reference/ios/protocol_g_c_k_session_manager_listener-p" data-title="The GCKSessionManager listener protocol. ">GCKSessionManagerListener</a> to be notified of session events, and can also use KVO to monitor the <a class="el notranslate" href="/cast/docs/reference/ios/interface_g_c_k_session_manager#a8b48906a8910f328343e2260e6bef6a0" data-title="The current session connection state. ">connectionState</a> property to track the current session lifecycle state.</p>
 /// <dl class="section since"><dt>Since</dt><dd>3.0 </dd></dl>
 
-abstract class AGoogleCastSessionManagerPlatformInterface
+abstract class GoogleCastSessionManagerPlatformInterface
     extends PlatformInterface {
-  AGoogleCastSessionManagerPlatformInterface({required super.token});
+  GoogleCastSessionManagerPlatformInterface({required super.token});
 
   /// Tests if a session is currently being managed by this session manager, and it is currently connected.
 

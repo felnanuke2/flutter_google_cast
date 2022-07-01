@@ -1,6 +1,4 @@
-import 'dart:convert';
-
-import '../entities/media_information.dart';
+import 'media_information.dart';
 
 ///Represents an item in a media queue.
 class GoogleCastQueueItem {
@@ -8,7 +6,7 @@ class GoogleCastQueueItem {
   final List<int>? activeTrackIds;
 
   /// Whether the media will automatically play.
-  final bool autoplay;
+  final bool autoPlay;
 
   /// Custom data set by the receiver application.
   final Map<String, dynamic>? customData;
@@ -17,91 +15,65 @@ class GoogleCastQueueItem {
   final int? itemId;
 
   /// Media description.
-  final GoogleCastMediaInformation? media;
+  final GoogleCastMediaInformation mediaInformation;
 
   /// Playback duration of the item in seconds. If it is larger than the actual duration - startTime it will be limited to the actual duration - startTime. It can be negative, in such case the duration will be the actual item duration minus the duration provided. A duration of value zero effectively means that the item will not be played.
   final Duration? playbackDuration;
 
   /// This parameter is a hint for the receiver to preload this media item before it is played. It allows for a smooth transition between items played from the queue.
   ///The time is expressed in seconds, relative to the beginning of this item playback (usually the end of the previous item playback). Only positive values are valid. For example, if the value is 10 seconds, this item will be preloaded 10 seconds before the previous item has finished. The receiver will try to honor this value but will not guarantee it, for example if the value is larger than the previous item duration the receiver may just preload this item shortly after the previous item has started playing (there will never be two items being preloaded in parallel). Also, if an item is inserted in the queue just after the currentItem and the time to preload is higher than the time left on the currentItem, the preload will just happen as soon as possible.
-  final Duration? preloadTime;
+  final Duration? preLoadTime;
 
   /// Seconds from the beginning of the media to start playback.
   final Duration? startTime;
+
   GoogleCastQueueItem({
     this.activeTrackIds,
-    this.autoplay = true,
+    this.autoPlay = true,
     this.customData,
     this.itemId,
-    required this.media,
+    required this.mediaInformation,
     this.playbackDuration,
-    this.preloadTime,
+    this.preLoadTime,
     this.startTime,
   });
 
   Map<String, dynamic> toMap() {
     return {
       'activeTrackIds': activeTrackIds,
-      'autoplay': autoplay,
+      'autoplay': autoPlay,
       'customData': customData,
       'itemId': itemId,
-      // 'media': media?.toMap(),
+      'media': mediaInformation.toMap(),
       'playbackDuration': playbackDuration?.inSeconds,
-      'preloadTime': preloadTime?.inSeconds,
+      'preloadTime': preLoadTime?.inSeconds,
       'startTime': startTime?.inSeconds,
     }..removeWhere((key, value) => value == null);
   }
 
-  factory GoogleCastQueueItem.fromMap(Map<String, dynamic> map) {
-    return GoogleCastQueueItem(
-      activeTrackIds: map['activeTrackIds'] != null
-          ? List<int>.from(map['activeTrackIds'])
-          : null,
-      autoplay: map['autoplay'] ?? false,
-      customData: map['customData'] != null
-          ? Map<String, dynamic>.from(map['customData'])
-          : null,
-      itemId: map['itemId']?.toInt(),
-      media: null,
-      // media: map['media'] != null
-      //     ? GoogleCastMediaInformation.fromMap(map['media'])
-      //     : null,
-      playbackDuration: map['playbackDuration'] != null
-          ? Duration(seconds: (map['playbackDuration'])?.toInt() ?? 0)
-          : null,
-      preloadTime: map['preloadTime'] != null
-          ? Duration(seconds: map['preloadTime']?.toInt() ?? 0)
-          : null,
-      startTime: map['startTime'] != null
-          ? Duration(seconds: map['startTime']?.toInt() ?? 0)
-          : null,
-    );
-  }
-
-  String toJson() => json.encode(toMap());
-
-  factory GoogleCastQueueItem.fromJson(String source) =>
-      GoogleCastQueueItem.fromMap(json.decode(source));
-
-  GoogleCastQueueItem copyWith({
-    List<int>? activeTrackIds,
-    bool? autoplay,
-    Map<String, dynamic>? customData,
-    int? itemId,
-    GoogleCastMediaInformation? media,
-    Duration? playbackDuration,
-    Duration? preloadTime,
-    Duration? startTime,
-  }) {
-    return GoogleCastQueueItem(
-      activeTrackIds: activeTrackIds ?? this.activeTrackIds,
-      autoplay: autoplay ?? this.autoplay,
-      customData: customData ?? this.customData,
-      itemId: itemId ?? this.itemId,
-      media: media ?? this.media,
-      playbackDuration: playbackDuration ?? this.playbackDuration,
-      preloadTime: preloadTime ?? this.preloadTime,
-      startTime: startTime ?? this.startTime,
-    );
-  }
+  // factory GoogleCastQueueItem.fromMap(Map<String, dynamic> map) {
+  //   return GoogleCastQueueItem(
+  //     activeTrackIds: map['activeTrackIds'] != null
+  //         ? List<int>.from(map['activeTrackIds'])
+  //         : null,
+  //     autoPlay: map['autoplay'] ?? false,
+  //     customData: map['customData'] != null
+  //         ? Map<String, dynamic>.from(map['customData'])
+  //         : null,
+  //     itemId: map['itemId']?.toInt(),
+  //     mediaInformation: null,
+  //     // media: map['media'] != null
+  //     //     ? GoogleCastMediaInformation.fromMap(map['media'])
+  //     //     : null,
+  //     playbackDuration: map['playbackDuration'] != null
+  //         ? Duration(seconds: (map['playbackDuration'])?.toInt() ?? 0)
+  //         : null,
+  //     preLoadTime: map['preloadTime'] != null
+  //         ? Duration(seconds: map['preloadTime']?.toInt() ?? 0)
+  //         : null,
+  //     startTime: map['startTime'] != null
+  //         ? Duration(seconds: map['startTime']?.toInt() ?? 0)
+  //         : null,
+  //   );
+  // }
 }

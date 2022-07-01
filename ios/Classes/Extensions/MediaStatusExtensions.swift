@@ -21,6 +21,8 @@ extension GCKMediaStatus {
         dict["mediaInformation"] = self.mediaInformation?.toMap()
         dict["repeatMode"] = self.queueRepeatMode.rawValue
         dict["activeTrackIds"] = self.activeTrackIDs
+        dict["queueHasNextItem"] = self.queueHasNextItem
+        dict["queueHasPreviousItem"] =  self.queueHasPreviousItem
         
         
         return dict

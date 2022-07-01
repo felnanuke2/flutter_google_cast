@@ -26,7 +26,7 @@ class GoogleCastIOSMediaStatus extends GoggleCastMediaStatus {
     super.liveSeekableRange,
     super.mediaInformation,
     super.nextQueueItem,
-    super.queueData,
+    // super.queueData,
   });
 
   factory GoogleCastIOSMediaStatus.fromMap(Map<String, dynamic> map) {

@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:google_cast/common/image.dart';
 import 'package:google_cast/enums/media_metadata_type.dart';
 

@@ -2,23 +2,18 @@ import 'package:flutter/services.dart';
 import 'package:google_cast/entities/cast_session.dart';
 import 'package:google_cast/entities/cast_device.dart';
 import 'package:google_cast/enums/connection_satate.dart';
-import 'package:google_cast/session_manager/cast_session_manager.dart';
 import 'package:rxdart/subjects.dart';
 
 import '../models/ios/ios_cast_sessions.dart';
+import 'cast_session_manager_platform.dart';
 
-class GoogleCastIOSSessionManagerMethodChannel
-    implements AGoogleCastSessionManagerPlatformInterface {
-  GoogleCastIOSSessionManagerMethodChannel._() {
+class GoogleCastSessionManagerIOSMethodChannel
+    implements GoogleCastSessionManagerPlatformInterface {
+  GoogleCastSessionManagerIOSMethodChannel() {
     _channel.setMethodCallHandler(
       (call) => _methodCallHandler(call),
     );
   }
-
-  static final GoogleCastIOSSessionManagerMethodChannel _instance =
-      GoogleCastIOSSessionManagerMethodChannel._();
-
-  static GoogleCastIOSSessionManagerMethodChannel get instance => _instance;
 
   final _channel = const MethodChannel('google_cast.session_manager');
 
@@ -90,8 +85,8 @@ class GoogleCastIOSSessionManagerMethodChannel
 
   void _onCurrentSessionChanged(arguments) async {
     try {
-      final session =
-          IOSGoogleCastSessions.fromMap(Map<String, dynamic>.from(arguments));
+      final session = IOSGoogleCastSessions.fromMap(
+          arguments == null ? null : Map<String, dynamic>.from(arguments));
       _currentSessionStreamController.add(session);
     } catch (e, s) {
       print(e);

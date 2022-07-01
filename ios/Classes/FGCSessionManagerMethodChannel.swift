@@ -139,6 +139,7 @@ public class FGCSessionManagerMethodChannel : UIResponder, FlutterPlugin, GCKSes
     }
     
     public func sessionManager(_ sessionManager: GCKSessionManager, didEnd session: GCKCastSession, withError error: Error?) {
+        onSessionChanged(nil)
         
     }
     
@@ -200,7 +201,7 @@ public class FGCSessionManagerMethodChannel : UIResponder, FlutterPlugin, GCKSes
     }
     
     
-    private func onSessionChanged(_ session : GCKSession){
-        channel?.invokeMethod("onCurrentSessionChanged", arguments: session.toDict())
+    private func onSessionChanged(_ session : GCKSession?){
+        channel?.invokeMethod("onCurrentSessionChanged", arguments: session?.toDict())
     }
 }

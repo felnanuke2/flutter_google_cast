@@ -130,4 +130,27 @@ class GoogleCastMediaInformation {
     this.userActionStates,
     this.vmapAdsRequest,
   });
+
+  Map<String, dynamic> toMap() {
+    return {
+      'atvEntity': atvEntity,
+      'breakClips': breakClips?.map((x) => x.toMap()).toList(),
+      'contentID': contentId,
+      'streamType': streamType.value,
+      'contentType': contentType,
+      'metadata': metadata?.toMap(),
+      'duration': duration?.inSeconds,
+      'customData': customData,
+      'breaks': breaks?.map((x) => x.toMap()).toList(),
+      'contentURL': contentUrl,
+      'entity': entity,
+      'hlsSegmentFormat': hlsSegmentFormat?.name,
+      'hlsVideoSegmentFormat': hlsVideoSegmentFormat?.name,
+      'startAbsoluteTime': startAbsoluteTime?.millisecondsSinceEpoch,
+      'textTrackStyle': textTrackStyle?.toMap(),
+      'tracks': tracks?.map((x) => x.toMap()).toList(),
+      'userActionStates': userActionStates?.map((x) => x.toMap()).toList(),
+      'vmapAdsRequest': vmapAdsRequest?.toMap(),
+    }..removeWhere((key, value) => value == null);
+  }
 }

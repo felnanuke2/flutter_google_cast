@@ -51,6 +51,9 @@ class RemoteMediaClienteMethodChannel :UIResponder, FlutterPlugin, GCKRemoteMedi
         case "loadMedia":
             loadMedia(call.arguments as! Dictionary<String,Any>,result: result)
             break
+        case "queueLoadItems":
+            queueLoadItem(call.arguments as! Dictionary, result: result)
+            break
         case "stop":
             stop(result)
             break
@@ -79,6 +82,21 @@ class RemoteMediaClienteMethodChannel :UIResponder, FlutterPlugin, GCKRemoteMedi
         
     }
     
+    private func queueLoadItem(_ arguments: Dictionary<String,Any>, result : FlutterResult) {
+        let itemsDict = arguments["items"] as! [Dictionary<String, Any>]
+        let items = itemsDict.map{
+            map in
+            GCKMediaQueueItem.fromMap(map)
+        }
+        var options : GCKMediaQueueLoadOptions?
+        if let optionsDict = arguments["options"] as? Dictionary<String, Any> {
+          
+            options = GCKMediaQueueLoadOptions.fromMap(optionsDict)
+        }
+        print("\(options)")
+        let request =  currentRemoteMediaCliente?.queueLoad(items, with: options ?? GCKMediaQueueLoadOptions.init() )
+        result(request?.toMap())
+    }
     
     private  func loadMedia(_ arguments : Dictionary<String,Any>, result : FlutterResult )  {
         guard let mediaInfo = GCKMediaInformation.fromMap(arguments) else {
@@ -87,6 +105,9 @@ class RemoteMediaClienteMethodChannel :UIResponder, FlutterPlugin, GCKRemoteMedi
             return
             
         }
+        
+       
+        
         let options = GCKMediaLoadOptions.init()
         if let autoPlay = arguments["autoPlay"] as? Bool {
             options.autoplay = autoPlay
@@ -122,6 +143,7 @@ class RemoteMediaClienteMethodChannel :UIResponder, FlutterPlugin, GCKRemoteMedi
     }
     
     private func stop(_ result : FlutterResult){
+        
         let request =  currentRemoteMediaCliente?.stop()
         result(  request?.toMap() )
         

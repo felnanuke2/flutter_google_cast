@@ -1,6 +1,8 @@
 import 'package:google_cast/common/live_seekable_range.dart';
 import 'package:google_cast/common/queue_data.dart';
+import 'package:google_cast/common/repeat_mode.dart';
 import 'package:google_cast/entities/media_information.dart';
+import 'package:google_cast/entities/queue_item.dart';
 import 'package:google_cast/enums/idle_reason.dart';
 import 'package:google_cast/enums/player_state.dart';
 import 'break_status.dart';
@@ -99,7 +101,7 @@ class GoggleCastMediaStatus {
   /// loading.
 
   /// Queue data
-  final GoogleCastMediaQueueData? queueData;
+  // final GoogleCastMediaQueueData? queueData;
   GoggleCastMediaStatus({
     required this.mediaSessionID,
     required this.playerState,
@@ -121,6 +123,6 @@ class GoggleCastMediaStatus {
     this.activeTrackIds,
     this.adBreakStatus,
     this.liveSeekableRange,
-    this.queueData,
+    // this.queueData,
   });
 }

@@ -1,11 +1,13 @@
 import 'package:google_cast/entities/cast_media_status.dart';
+import 'package:google_cast/entities/load_options.dart';
 import 'package:google_cast/entities/media_information.dart';
 import 'package:google_cast/entities/media_seek_option.dart';
+import 'package:google_cast/entities/queue_item.dart';
 import 'package:google_cast/entities/request.dart';
-import 'package:google_cast/remote_media_client/remote_media_client.dart';
+import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
-abstract class GoogleCastIOSRemoteMediaClientMethodChannel
-    implements GoogleCastRemoteMediaClientPlatformInterface {
+abstract class GoogleCastRemoteMediaClientPlatformInterface
+    implements PlatformInterface {
   GoggleCastMediaStatus? get mediaStatus;
 
   Stream<GoggleCastMediaStatus?> get mediaStatusStream;
@@ -14,7 +16,6 @@ abstract class GoogleCastIOSRemoteMediaClientMethodChannel
 
   Stream<Duration> get playerPositionStream;
 
-  @override
   Future<GoogleCastRequest?> loadMedia(
     GoogleCastMediaInformation mediaInfo, {
     bool autoPlay = true,
@@ -23,6 +24,11 @@ abstract class GoogleCastIOSRemoteMediaClientMethodChannel
     List<int>? activeTrackIds,
     String? credentials,
     String? credentialsType,
+  });
+
+  Future<GoogleCastRequest?> queueLoadItems(
+    List<GoogleCastQueueItem> queueItems, {
+    GoogleCastQueueLoadOptions? options,
   });
 
   Future<GoogleCastRequest> setPlaybackRate(double rate);
