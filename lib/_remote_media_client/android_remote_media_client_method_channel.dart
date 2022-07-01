@@ -30,6 +30,23 @@ class GoogleCastRemoteMediaClientAndroidMethodChannel
       throw UnimplementedError();
 
   @override
+  // TODO: implement queueItems
+  List<GoogleCastQueueItem> get queueItems => throw UnimplementedError();
+
+  @override
+  // TODO: implement queueItemsStream
+  Stream<List<GoogleCastQueueItem>> get queueItemsStream =>
+      throw UnimplementedError();
+
+  @override
+  // TODO: implement playerPosition
+  Duration get playerPosition => throw UnimplementedError();
+
+  @override
+  // TODO: implement playerPositionStream
+  Stream<Duration> get playerPositionStream => throw UnimplementedError();
+
+  @override
   Future<GoogleCastRequest> pause() {
     // TODO: implement pause
     throw UnimplementedError();
@@ -40,14 +57,6 @@ class GoogleCastRemoteMediaClientAndroidMethodChannel
     // TODO: implement play
     throw UnimplementedError();
   }
-
-  @override
-  // TODO: implement playerPosition
-  Duration get playerPosition => throw UnimplementedError();
-
-  @override
-  // TODO: implement playerPositionStream
-  Stream<Duration> get playerPositionStream => throw UnimplementedError();
 
   @override
   Future<GoogleCastRequest?> queueLoadItems(
@@ -100,13 +109,6 @@ class GoogleCastRemoteMediaClientAndroidMethodChannel
   }
 
   @override
-  Future<GoogleCastRequest> queueInsertItems(
-      List<GoogleCastQueueItem> items, int beforeItemWithId) {
-    // TODO: implement queueInsertItems
-    throw UnimplementedError();
-  }
-
-  @override
   Future<GoogleCastRequest> queueJumpToItemWithId(int itemId) {
     // TODO: implement queueJumpToItemWithId
     throw UnimplementedError();
@@ -117,4 +119,26 @@ class GoogleCastRemoteMediaClientAndroidMethodChannel
     // TODO: implement queueRemoveItemsWithIds
     throw UnimplementedError();
   }
+
+  @override
+  Future<GoogleCastRequest> queueInsertItemAndPlay(GoogleCastQueueItem item,
+      {required int beforeItemWithId}) {
+    // TODO: implement queueInsertItemAndPlay
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<GoogleCastRequest> queueInsertItems(List<GoogleCastQueueItem> items,
+      {required int beforeItemWithId}) {
+    // TODO: implement queueInsertItems
+    throw UnimplementedError();
+  }
+
+  @override
+  // TODO: implement queueHasNextItem
+  bool get queueHasNextItem => throw UnimplementedError();
+
+  @override
+  // TODO: implement queueHasPreviousItem
+  bool get queueHasPreviousItem => throw UnimplementedError();
 }

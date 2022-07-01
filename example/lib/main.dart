@@ -33,6 +33,23 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
+          floatingActionButton: Container(
+            margin: const EdgeInsets.only(bottom: 40),
+            child: StreamBuilder(
+                stream: GoogleCastSessionManager.instance.currentSessionStream,
+                builder: (context, snapshot) {
+                  final isConnected =
+                      GoogleCastSessionManager.instance.connectionState ==
+                          GoogleCastConnectState.ConnectionStateConnected;
+                  return Visibility(
+                    visible: isConnected,
+                    child: FloatingActionButton(
+                      onPressed: _insertQueueItemAndPlay,
+                      child: const Icon(Icons.add),
+                    ),
+                  );
+                }),
+          ),
           appBar: AppBar(
             title: const Text('Plugin example app'),
             actions: [
@@ -116,13 +133,15 @@ class _MyAppState extends State<MyApp> {
                                 ),
                               ),
                               IconButton(
-                                onPressed: _previous,
+                                onPressed: !GoogleCastRemoteMediaClient
+                                        .instance.queueHasPreviousItem
+                                    ? null
+                                    : _previous,
                                 icon: const Icon(Icons.skip_previous),
                               ),
                               IconButton(
-                                onPressed: GoogleCastRemoteMediaClient.instance
-                                            .mediaStatus?.queueHasNextItem ==
-                                        null
+                                onPressed: !GoogleCastRemoteMediaClient
+                                        .instance.queueHasNextItem
                                     ? null
                                     : _next,
                                 icon: const Icon(Icons.skip_next),
@@ -162,7 +181,7 @@ class _MyAppState extends State<MyApp> {
     await GoogleCastSessionManager.instance.startSessionWithDevice(device);
 
     GoogleCastRemoteMediaClient.instance.loadMedia(
-      GoogleCastIOSMediaInformation(
+      GoogleCastMediaInformationIOS(
         contentId: '',
         streamType: CastMediaStreamType.BUFFERED,
         contentUrl: Uri.parse(
@@ -210,7 +229,7 @@ class _MyAppState extends State<MyApp> {
       [
         GoogleCastQueueItem(
           activeTrackIds: [0],
-          mediaInformation: GoogleCastIOSMediaInformation(
+          mediaInformation: GoogleCastMediaInformationIOS(
             contentId: '0',
             streamType: CastMediaStreamType.BUFFERED,
             contentUrl: Uri.parse(
@@ -249,7 +268,7 @@ class _MyAppState extends State<MyApp> {
         ),
         GoogleCastQueueItem(
           preLoadTime: const Duration(seconds: 15),
-          mediaInformation: GoogleCastIOSMediaInformation(
+          mediaInformation: GoogleCastMediaInformationIOS(
             contentId: '1',
             streamType: CastMediaStreamType.BUFFERED,
             contentUrl: Uri.parse(
@@ -285,5 +304,71 @@ class _MyAppState extends State<MyApp> {
 
   void _next() {
     GoogleCastRemoteMediaClient.instance.queueNextItem();
+  }
+
+  void _insertQueueItem() {
+    GoogleCastRemoteMediaClient.instance.queueInsertItems(
+      [
+        GoogleCastQueueItem(
+          preLoadTime: const Duration(seconds: 15),
+          mediaInformation: GoogleCastMediaInformationIOS(
+            contentId: '3',
+            streamType: CastMediaStreamType.BUFFERED,
+            contentUrl: Uri.parse(
+                    'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4')
+                .toString(),
+            contentType: 'video/mp4',
+            metadata: GoogleCastMovieMediaMetadata(
+              title: 'For Bigger Blazes',
+              subtitle:
+                  'Song : Raja Raja Kareja Mein Samaja\nAlbum : Raja Kareja Mein Samaja\nArtist : Radhe Shyam Rasia\nSinger : Radhe Shyam Rasia\nMusic Director : Sohan Lal, Dinesh Kumar\nLyricist : Vinay Bihari, Shailesh Sagar, Parmeshwar Premi\nMusic Label : T-Series',
+              releaseDate: DateTime(2011),
+              studio: 'T-Series Regional',
+              images: [
+                GoogleCastImage(
+                  url: Uri.parse(
+                      'https://i.ytimg.com/vi/Dr9C2oswZfA/maxresdefault.jpg'),
+                  height: 480,
+                  width: 854,
+                ),
+              ],
+            ),
+          ),
+        )
+      ],
+      beforeItemWithId: 2,
+    );
+  }
+
+  void _insertQueueItemAndPlay() {
+    GoogleCastRemoteMediaClient.instance.queueInsertItemAndPlay(
+      GoogleCastQueueItem(
+        preLoadTime: const Duration(seconds: 15),
+        mediaInformation: GoogleCastMediaInformationIOS(
+          contentId: '3',
+          streamType: CastMediaStreamType.BUFFERED,
+          contentUrl: Uri.parse(
+                  'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4')
+              .toString(),
+          contentType: 'video/mp4',
+          metadata: GoogleCastMovieMediaMetadata(
+            title: 'For Bigger Blazes',
+            subtitle:
+                'Song : Raja Raja Kareja Mein Samaja\nAlbum : Raja Kareja Mein Samaja\nArtist : Radhe Shyam Rasia\nSinger : Radhe Shyam Rasia\nMusic Director : Sohan Lal, Dinesh Kumar\nLyricist : Vinay Bihari, Shailesh Sagar, Parmeshwar Premi\nMusic Label : T-Series',
+            releaseDate: DateTime(2011),
+            studio: 'T-Series Regional',
+            images: [
+              GoogleCastImage(
+                url: Uri.parse(
+                    'https://i.ytimg.com/vi/Dr9C2oswZfA/maxresdefault.jpg'),
+                height: 480,
+                width: 854,
+              ),
+            ],
+          ),
+        ),
+      ),
+      beforeItemWithId: 2,
+    );
   }
 }

@@ -23,8 +23,7 @@ extension GCKMediaStatus {
         dict["activeTrackIds"] = self.activeTrackIDs
         dict["queueHasNextItem"] = self.queueHasNextItem
         dict["queueHasPreviousItem"] =  self.queueHasPreviousItem
-        
-        
+        dict["currentItemId"] = self.currentItemID
         return dict
     }
     

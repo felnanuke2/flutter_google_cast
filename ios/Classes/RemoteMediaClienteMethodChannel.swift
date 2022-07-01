@@ -8,7 +8,7 @@
 import Foundation
 import GoogleCast
 
-class RemoteMediaClienteMethodChannel :UIResponder, FlutterPlugin, GCKRemoteMediaClientListener {
+class RemoteMediaClienteMethodChannel :UIResponder, FlutterPlugin, GCKRemoteMediaClientListener, GCKMediaQueueDelegate {
     private override init() {
         
     }
@@ -27,6 +27,22 @@ class RemoteMediaClienteMethodChannel :UIResponder, FlutterPlugin, GCKRemoteMedi
     
     private  var positionTimer: Timer?
     
+    private var queueOrder : [NSNumber] = []
+    
+    private var queueItems  : Dictionary<UInt, GCKMediaQueueItem> = [:]
+    
+    private var orderedQueueItems : Array<GCKMediaQueueItem> {
+        var items : [GCKMediaQueueItem] = []
+        
+        for queueItemId in queueOrder {
+            if let value = queueItems[UInt(truncating: queueItemId)] {
+                items.append(value)
+            }
+    
+        }
+        return items
+    }
+    
     
     
     
@@ -44,9 +60,6 @@ class RemoteMediaClienteMethodChannel :UIResponder, FlutterPlugin, GCKRemoteMedi
     
     
     func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
-        
-        
-        
         switch call.method {
         case "loadMedia":
             loadMedia(call.arguments as! Dictionary<String,Any>,result: result)
@@ -75,6 +88,12 @@ class RemoteMediaClienteMethodChannel :UIResponder, FlutterPlugin, GCKRemoteMedi
         case "queuePrevItem":
             queuePreviousItem(result)
             break
+        case "queueInsertItems":
+            queueInsertItems(call.arguments as! Dictionary<String, Any>, result:result)
+            break
+        case "queueInsertItemAndPlay":
+            queueInsertItemAndPlay(call.arguments as! Dictionary<String, Any>, result:result)
+            break
         default:
             break
         }
@@ -82,8 +101,24 @@ class RemoteMediaClienteMethodChannel :UIResponder, FlutterPlugin, GCKRemoteMedi
         
     }
     
-    private func queuInserItems(_ arguments: Dictionary<String,Any>, result : FlutterResult) {
-        currentRemoteMediaCliente?.queueInsert(<#T##queueItems: [GCKMediaQueueItem]##[GCKMediaQueueItem]#>, beforeItemWithID: 100)
+    
+    private func queueInsertItemAndPlay(_ arguments: Dictionary<String,Any>, result : FlutterResult) {
+        let itemDict = arguments["item"] as! Dictionary<String,Any>
+        let beforItemWithId = arguments["beforeItemWithId"] as! UInt
+        let item = GCKMediaQueueItem.fromMap(itemDict)
+        let request =  currentRemoteMediaCliente?.queueInsertAndPlay(item, beforeItemWithID: beforItemWithId)
+        result(request?.toMap())
+    }
+    
+    private func queueInsertItems(_ arguments: Dictionary<String,Any>, result : FlutterResult) {
+        let itemsDict = arguments["items"] as! [Dictionary<String,Any>]
+        let beforItemWithId = arguments["beforeItemWithId"] as! UInt
+        let items = itemsDict.map{
+            dict in
+            GCKMediaQueueItem.fromMap(dict)
+        }
+        let request =  currentRemoteMediaCliente?.queueInsert(items, beforeItemWithID: beforItemWithId)
+        result(request?.toMap())
     }
     
     private func queueLoadItem(_ arguments: Dictionary<String,Any>, result : FlutterResult) {
@@ -94,10 +129,9 @@ class RemoteMediaClienteMethodChannel :UIResponder, FlutterPlugin, GCKRemoteMedi
         }
         var options : GCKMediaQueueLoadOptions?
         if let optionsDict = arguments["options"] as? Dictionary<String, Any> {
-          
+            
             options = GCKMediaQueueLoadOptions.fromMap(optionsDict)
         }
-        print("\(options)")
         let request =  currentRemoteMediaCliente?.queueLoad(items, with: options ?? GCKMediaQueueLoadOptions.init() )
         result(request?.toMap())
     }
@@ -110,7 +144,7 @@ class RemoteMediaClienteMethodChannel :UIResponder, FlutterPlugin, GCKRemoteMedi
             
         }
         
-       
+        
         
         let options = GCKMediaLoadOptions.init()
         if let autoPlay = arguments["autoPlay"] as? Bool {
@@ -119,7 +153,7 @@ class RemoteMediaClienteMethodChannel :UIResponder, FlutterPlugin, GCKRemoteMedi
         if let playPosition = arguments["playPosition"] as? TimeInterval {
             options.playPosition = playPosition
         }
-
+        
         if let playbackRate = arguments["playbackRate"] as? Float {
             options.playbackRate = playbackRate
         }
@@ -188,9 +222,7 @@ class RemoteMediaClienteMethodChannel :UIResponder, FlutterPlugin, GCKRemoteMedi
     
     //MARK: - GCKRemoteMediaClientListener
     
-    func remoteMediaClient(_ client: GCKRemoteMediaClient, didReceiveQueueItemIDs queueItemIDs: [NSNumber]) {
-        
-    }
+
     func remoteMediaClient(_ client: GCKRemoteMediaClient, didUpdate mediaStatus: GCKMediaStatus?) {
         self.positionTimer?.invalidate()
         self.positionTimer = nil
@@ -201,21 +233,55 @@ class RemoteMediaClienteMethodChannel :UIResponder, FlutterPlugin, GCKRemoteMedi
     }
     
     func remoteMediaClient(_ client: GCKRemoteMediaClient, didUpdate mediaMetadata: GCKMediaMetadata?) {
-        
+      
     }
+    
     func remoteMediaClient(_ client: GCKRemoteMediaClient, didReceive queueItems: [GCKMediaQueueItem]) {
-        
+        for queuItem in queueItems {
+            self.queueItems[queuItem.itemID] = queuItem
+        }
+        updateQueueItems()
+      
     }
     func remoteMediaClient(_ client: GCKRemoteMediaClient, didStartMediaSessionWithID sessionID: Int) {
         
     }
+    
     func remoteMediaClient(_ client: GCKRemoteMediaClient, didRemoveQueueItemsWithIDs queueItemIDs: [NSNumber]) {
         
+        self.queueOrder.removeAll{
+            index in
+            queueItemIDs.contains(index)
+        }
+        
+        for index in queueItemIDs {
+            self.queueItems.removeValue(forKey: UInt(truncating: index))
+        }
+        
+        updateQueueItems()
     }
+    
     func remoteMediaClient(_ client: GCKRemoteMediaClient, didUpdateQueueItemsWithIDs queueItemIDs: [NSNumber]) {
-        
+        client.queueFetchItems(forIDs: queueItemIDs)
     }
+    
     func remoteMediaClient(_ client: GCKRemoteMediaClient, didInsertQueueItemsWithIDs queueItemIDs: [NSNumber], beforeItemWithID beforeItemID: UInt) {
+        guard let index = queueOrder.firstIndex(of: NSNumber(value: beforeItemID)) else { return }
+        queueOrder.insert(contentsOf: queueItemIDs, at: index)
+        client.queueFetchItems(forIDs: queueItemIDs)
         
     }
+    
+    func remoteMediaClient(_ client: GCKRemoteMediaClient, didReceiveQueueItemIDs queueItemIDs: [NSNumber]) {
+        queueOrder = queueItemIDs
+        client.queueFetchItems(forIDs: queueItemIDs)
+    }
+    
+    private func updateQueueItems() {
+        channel?.invokeMethod("updateQueueItems", arguments: orderedQueueItems.map{
+            queueItem in
+            queueItem.toMap()
+        })
+    }
+   
 }

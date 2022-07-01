@@ -7,6 +7,7 @@ import 'package:google_cast/entities/media_seek_option.dart';
 import 'package:google_cast/entities/queue_item.dart';
 import 'package:google_cast/entities/request.dart';
 import 'package:google_cast/entities/media_information.dart';
+import 'package:google_cast/models/ios/ios_cast_queue_item.dart';
 import 'package:google_cast/models/ios/ios_media_information.dart';
 import 'package:google_cast/models/ios/ios_media_status.dart';
 import 'package:google_cast/models/ios/ios_request.dart';
@@ -26,6 +27,9 @@ class GoogleCastRemoteMediaClientIOSMethodChannel
   final _playerPositionStreamController = BehaviorSubject<Duration>()
     ..add(Duration.zero);
 
+  final _queueItemsStreamController =
+      BehaviorSubject<List<GoogleCastQueueItem>>()..add([]);
+
   @override
   GoggleCastMediaStatus? get mediaStatus => _mediaStatusStreamController.value;
 
@@ -41,6 +45,33 @@ class GoogleCastRemoteMediaClientIOSMethodChannel
       _playerPositionStreamController.stream;
 
   @override
+  List<GoogleCastQueueItem> get queueItems => _queueItemsStreamController.value;
+
+  @override
+  Stream<List<GoogleCastQueueItem>> get queueItemsStream =>
+      _queueItemsStreamController.stream;
+
+  @override
+  bool get queueHasNextItem {
+    final index = queueItems
+        .map((e) => e.itemId)
+        .toList()
+        .lastIndexOf(mediaStatus?.currentItemId);
+
+    final lastIndex = queueItems.length - 1;
+    return (index) < lastIndex;
+  }
+
+  @override
+  bool get queueHasPreviousItem {
+    final index = queueItems
+        .map((e) => e.itemId)
+        .toList()
+        .lastIndexOf(mediaStatus?.currentItemId);
+    return index > 0;
+  }
+
+  @override
   Future<GoogleCastRequest?> loadMedia(
     GoogleCastMediaInformation mediaInfo, {
     bool autoPlay = true,
@@ -50,7 +81,7 @@ class GoogleCastRemoteMediaClientIOSMethodChannel
     String? credentials,
     String? credentialsType,
   }) async {
-    mediaInfo as GoogleCastIOSMediaInformation;
+    mediaInfo as GoogleCastMediaInformationIOS;
     final result = await _channel.invokeMethod(
         'loadMedia',
         mediaInfo.toMap()
@@ -135,6 +166,8 @@ class GoogleCastRemoteMediaClientIOSMethodChannel
         return await _onUpdateMediaStatus(call.arguments);
       case "onUpdatePlayerPosition":
         return await _onUpdatePlayerPosition(call.arguments);
+      case "updateQueueItems":
+        return await _updateQueueItems(call.arguments);
       default:
     }
   }
@@ -169,10 +202,27 @@ class GoogleCastRemoteMediaClientIOSMethodChannel
   }
 
   @override
-  Future<GoogleCastRequest> queueInsertItems(
-      List<GoogleCastQueueItem> items, int beforeItemWithId) {
-    // TODO: implement queueInsertItems
-    throw UnimplementedError();
+  Future<GoogleCastRequest> queueInsertItems(List<GoogleCastQueueItem> items,
+      {required int beforeItemWithId}) async {
+    assert(beforeItemWithId >= 0, 'beforeItemWithId must be greater than 0');
+    final result = await _channel.invokeMethod('queueInsertItems', {
+      'items': items.map((item) => item.toMap()).toList(),
+      'beforeItemWithId': beforeItemWithId,
+    });
+    return GoogleCastIosRequest.fromMap(Map<String, dynamic>.from(result));
+  }
+
+  @override
+  Future<GoogleCastRequest> queueInsertItemAndPlay(
+    GoogleCastQueueItem item, {
+    required int beforeItemWithId,
+  }) async {
+    assert(beforeItemWithId >= 0, 'beforeItemWithId must be greater than 0');
+    final result = await _channel.invokeMethod('queueInsertItemAndPlay', {
+      'item': item.toMap(),
+      'beforeItemWithId': beforeItemWithId,
+    });
+    return GoogleCastIosRequest.fromMap(Map<String, dynamic>.from(result));
   }
 
   @override
@@ -185,5 +235,14 @@ class GoogleCastRemoteMediaClientIOSMethodChannel
   Future<GoogleCastRequest> queueRemoveItemsWithIds(List<int> itemIds) {
     // TODO: implement queueRemoveItemsWithIds
     throw UnimplementedError();
+  }
+
+  _updateQueueItems(arguments) {
+    final items = List.from(arguments ?? []);
+    final queueItems = items
+        .map((item) =>
+            GoogleCastQueueItemIOS.fromMap(Map<String, dynamic>.from(item)))
+        .toList();
+    _queueItemsStreamController.add(queueItems);
   }
 }

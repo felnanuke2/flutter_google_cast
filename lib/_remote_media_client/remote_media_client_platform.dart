@@ -16,6 +16,14 @@ abstract class GoogleCastRemoteMediaClientPlatformInterface
 
   Stream<Duration> get playerPositionStream;
 
+  Stream<List<GoogleCastQueueItem>> get queueItemsStream;
+
+  List<GoogleCastQueueItem> get queueItems;
+
+  bool get queueHasNextItem;
+
+  bool get queueHasPreviousItem;
+
   Future<GoogleCastRequest?> loadMedia(
     GoogleCastMediaInformation mediaInfo, {
     bool autoPlay = true,
@@ -50,9 +58,13 @@ abstract class GoogleCastRemoteMediaClientPlatformInterface
   Future<GoogleCastRequest> seek(GoogleCastMediaSeekOption option);
 
   Future<GoogleCastRequest> queueInsertItems(
-    List<GoogleCastQueueItem> items,
-    int beforeItemWithId,
-  );
+    List<GoogleCastQueueItem> items, {
+    required int beforeItemWithId,
+  });
+  Future<GoogleCastRequest> queueInsertItemAndPlay(
+    GoogleCastQueueItem item, {
+    required int beforeItemWithId,
+  });
 
   Future<GoogleCastRequest> queueRemoveItemsWithIds(
     List<int> itemIds,

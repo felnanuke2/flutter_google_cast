@@ -2,8 +2,8 @@ import 'package:google_cast/entities/media_information.dart';
 
 import '../../entities/media_metadata/cast_media_metadata.dart';
 
-class GoogleCastIOSMediaInformation extends GoogleCastMediaInformation {
-  GoogleCastIOSMediaInformation({
+class GoogleCastMediaInformationIOS extends GoogleCastMediaInformation {
+  GoogleCastMediaInformationIOS({
     required super.contentId,
     required super.streamType,
     required super.contentType,
@@ -24,8 +24,8 @@ class GoogleCastIOSMediaInformation extends GoogleCastMediaInformation {
     super.vmapAdsRequest,
   });
 
-  factory GoogleCastIOSMediaInformation.fromMap(Map<String, dynamic> map) {
-    return GoogleCastIOSMediaInformation(
+  factory GoogleCastMediaInformationIOS.fromMap(Map<String, dynamic> map) {
+    return GoogleCastMediaInformationIOS(
       atvEntity: map['atvEntity'],
       breakClips: map['breakClips'] != null
           ? List<CastBreakClips>.from(
