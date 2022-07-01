@@ -1,7 +1,9 @@
 export 'break_status.dart';
 export 'cast_device.dart';
 export 'cast_media_status.dart';
+export 'cast_options.dart';
 export 'cast_session.dart';
+export 'discovery_criteria.dart';
 export 'load_options.dart';
 export 'media_information.dart';
 export 'media_metadata/media_metadata.dart';

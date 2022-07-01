@@ -57,4 +57,9 @@ class GoogleCastSessionManagerAndroidMethodChannel
     // TODO: implement suspendSessionWithReason
     throw UnimplementedError();
   }
+
+  @override
+  // TODO: implement currentSessionStream
+  Stream<GoogleCastSession?> get currentSessionStream =>
+      throw UnimplementedError();
 }

@@ -1,4 +1,4 @@
-abstract class AGoogleCastDiscoveryCriteria {
+abstract class GoogleCastDiscoveryCriteria {
   static GoogleCastDiscoveryCriteriaInitialize initialize(
           GoogleCastDiscoveryCriteriaInitialize initializeWith) =>
       initializeWith;

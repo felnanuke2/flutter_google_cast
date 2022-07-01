@@ -98,4 +98,23 @@ class GoogleCastRemoteMediaClientAndroidMethodChannel
     // TODO: implement stop
     throw UnimplementedError();
   }
+
+  @override
+  Future<GoogleCastRequest> queueInsertItems(
+      List<GoogleCastQueueItem> items, int beforeItemWithId) {
+    // TODO: implement queueInsertItems
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<GoogleCastRequest> queueJumpToItemWithId(int itemId) {
+    // TODO: implement queueJumpToItemWithId
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<GoogleCastRequest> queueRemoveItemsWithIds(List<int> itemIds) {
+    // TODO: implement queueRemoveItemsWithIds
+    throw UnimplementedError();
+  }
 }

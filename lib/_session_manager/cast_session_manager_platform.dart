@@ -24,6 +24,8 @@ abstract class GoogleCastSessionManagerPlatformInterface
   /// The current session, if any.
   GoogleCastSession? get currentSession;
 
+  Stream<GoogleCastSession?> get currentSessionStream;
+
   /// 	readnonatomicstrong
 
   /// The current Cast session, if any.

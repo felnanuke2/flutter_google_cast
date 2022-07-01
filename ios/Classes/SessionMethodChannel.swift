@@ -33,9 +33,7 @@ class FGCSessionMethodChannel: UIResponder, FlutterPlugin{
             
             break
      
-            
-            
-            
+
         default:
             result(FlutterError(code: "1", message: "No Handler for \(call.method)", details: nil))
             break

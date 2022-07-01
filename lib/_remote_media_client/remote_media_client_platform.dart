@@ -48,4 +48,15 @@ abstract class GoogleCastRemoteMediaClientPlatformInterface
   Future<GoogleCastRequest> queuePrevItem();
 
   Future<GoogleCastRequest> seek(GoogleCastMediaSeekOption option);
+
+  Future<GoogleCastRequest> queueInsertItems(
+    List<GoogleCastQueueItem> items,
+    int beforeItemWithId,
+  );
+
+  Future<GoogleCastRequest> queueRemoveItemsWithIds(
+    List<int> itemIds,
+  );
+
+  Future<GoogleCastRequest> queueJumpToItemWithId(int itemId);
 }

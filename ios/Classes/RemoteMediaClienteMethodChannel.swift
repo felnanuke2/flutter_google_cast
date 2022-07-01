@@ -82,6 +82,10 @@ class RemoteMediaClienteMethodChannel :UIResponder, FlutterPlugin, GCKRemoteMedi
         
     }
     
+    private func queuInserItems(_ arguments: Dictionary<String,Any>, result : FlutterResult) {
+        currentRemoteMediaCliente?.queueInsert(<#T##queueItems: [GCKMediaQueueItem]##[GCKMediaQueueItem]#>, beforeItemWithID: 100)
+    }
+    
     private func queueLoadItem(_ arguments: Dictionary<String,Any>, result : FlutterResult) {
         let itemsDict = arguments["items"] as! [Dictionary<String, Any>]
         let items = itemsDict.map{

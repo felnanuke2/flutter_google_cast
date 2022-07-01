@@ -5,12 +5,12 @@ import 'package:google_cast/_google_cast_context/google_cast_context_plataform_i
 
 import 'ios_google_cast_context_method_channel.dart';
 
-class FlutterGoogleCastContext {
+class GoogleCastContext {
   static final GoogleCastContextPlatformInterface _instance = Platform.isAndroid
       ? GoogleCastContextAndroidMethodChannel()
       : FlutterIOSGoogleCastContextMethodChannel();
 
   static GoogleCastContextPlatformInterface instance = _instance;
 
-  FlutterGoogleCastContext._();
+  GoogleCastContext._();
 }
