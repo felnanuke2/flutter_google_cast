@@ -30,5 +30,10 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
+       <meta-data
+           android:name=
+               "com.google.android.gms.cast.framework.OPTIONS_PROVIDER_CLASS_NAME"
+           android:value="GoogleCastOptionsProvider" />
+
     </application>
 </manifest>

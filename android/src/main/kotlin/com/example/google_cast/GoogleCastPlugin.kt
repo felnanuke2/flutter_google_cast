@@ -15,10 +15,12 @@ class GoogleCastPlugin: FlutterPlugin, MethodCallHandler {
   /// This local reference serves to register the plugin with the Flutter Engine and unregister it
   /// when the Flutter Engine is detached from the Activity
   private lateinit var channel : MethodChannel
+  private val castContextMethodChannel =  CastContextMethodChannel()
 
   override fun onAttachedToEngine(@NonNull flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
     channel = MethodChannel(flutterPluginBinding.binaryMessenger, "google_cast")
     channel.setMethodCallHandler(this)
+    castContextMethodChannel.onAttachedToEngine(flutterPluginBinding)
   }
 
   override fun onMethodCall(@NonNull call: MethodCall, @NonNull result: Result) {
