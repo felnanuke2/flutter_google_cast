@@ -5,9 +5,13 @@ import 'package:google_cast/entities/media_information.dart';
 import 'package:google_cast/entities/queue_item.dart';
 import 'package:google_cast/entities/media_seek_option.dart';
 import 'package:google_cast/entities/request.dart';
+import 'package:rxdart/subjects.dart';
 
 class GoogleCastRemoteMediaClientAndroidMethodChannel
     implements GoogleCastRemoteMediaClientPlatformInterface {
+  final _mediaStatusStreamController = BehaviorSubject<GoggleCastMediaStatus?>()
+    ..add(null);
+
   @override
   Future<GoogleCastRequest?> loadMedia(GoogleCastMediaInformation mediaInfo,
       {bool autoPlay = true,
@@ -22,12 +26,12 @@ class GoogleCastRemoteMediaClientAndroidMethodChannel
 
   @override
   // TODO: implement mediaStatus
-  GoggleCastMediaStatus? get mediaStatus => throw UnimplementedError();
+  GoggleCastMediaStatus? get mediaStatus => _mediaStatusStreamController.value;
 
   @override
   // TODO: implement mediaStatusStream
   Stream<GoggleCastMediaStatus?> get mediaStatusStream =>
-      throw UnimplementedError();
+      _mediaStatusStreamController.stream;
 
   @override
   // TODO: implement queueItems

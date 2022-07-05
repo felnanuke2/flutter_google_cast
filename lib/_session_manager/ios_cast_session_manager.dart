@@ -2,6 +2,7 @@ import 'package:flutter/services.dart';
 import 'package:google_cast/entities/cast_session.dart';
 import 'package:google_cast/entities/cast_device.dart';
 import 'package:google_cast/enums/connection_satate.dart';
+import 'package:google_cast/lib.dart';
 import 'package:rxdart/subjects.dart';
 
 import '../models/ios/ios_cast_sessions.dart';
@@ -17,6 +18,7 @@ class GoogleCastSessionManagerIOSMethodChannel
 
   final _channel = const MethodChannel('google_cast.session_manager');
 
+  @override
   Stream<GoogleCastSession?> get currentSessionStream =>
       _currentSessionStreamController.stream;
 
@@ -25,6 +27,7 @@ class GoogleCastSessionManagerIOSMethodChannel
 
   @override
   Future<bool> startSessionWithDevice(GoogleCastDevice device) async {
+    device as GoogleCastIosDevice;
     return await _channel.invokeMethod(
       'startSessionWithDevice',
       device.index,

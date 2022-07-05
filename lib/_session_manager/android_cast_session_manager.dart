@@ -1,21 +1,31 @@
+import 'dart:convert';
+
+import 'package:flutter/services.dart';
 import 'package:google_cast/enums/connection_satate.dart';
 import 'package:google_cast/entities/cast_session.dart';
 import 'package:google_cast/entities/cast_device.dart';
+import 'package:google_cast/models/android/cast_device.dart';
+import 'package:rxdart/subjects.dart';
 
 import 'cast_session_manager_platform.dart';
 
 class GoogleCastSessionManagerAndroidMethodChannel
     implements GoogleCastSessionManagerPlatformInterface {
-  @override
-  // TODO: implement connectionState
-  GoogleCastConnectState get connectionState => throw UnimplementedError();
+  final _channel =
+      const MethodChannel('com.felnanuke.google_cast.session_manager');
+
+  final _currentSessionStreamController = BehaviorSubject<GoogleCastSession?>()
+    ..add(null);
 
   @override
-  // TODO: implement currentCastSession
+  GoogleCastConnectState get connectionState =>
+      _currentSessionStreamController.value?.connectionState ??
+      GoogleCastConnectState.ConnectionStateDisconnected;
+
+  @override
   GoogleCastSession? get currentCastSession => throw UnimplementedError();
 
   @override
-  // TODO: implement currentSession
   GoogleCastSession? get currentSession => throw UnimplementedError();
 
   @override
@@ -41,9 +51,13 @@ class GoogleCastSessionManagerAndroidMethodChannel
   }
 
   @override
-  Future<bool> startSessionWithDevice(GoogleCastDevice device) {
-    // TODO: implement startSessionWithDevice
-    throw UnimplementedError();
+  Future<bool> startSessionWithDevice(GoogleCastDevice device) async {
+    device as GoogleCastAndroidDevice;
+    return (await _channel.invokeMethod(
+          'startSessionWithDeviceId',
+          device.deviceID,
+        )) ==
+        true;
   }
 
   @override
@@ -59,7 +73,6 @@ class GoogleCastSessionManagerAndroidMethodChannel
   }
 
   @override
-  // TODO: implement currentSessionStream
   Stream<GoogleCastSession?> get currentSessionStream =>
-      throw UnimplementedError();
+      _currentSessionStreamController.stream;
 }
