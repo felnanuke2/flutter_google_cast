@@ -17,12 +17,10 @@ class GoogleCastPlugin : FlutterPlugin, MethodCallHandler {
     private lateinit var channel: MethodChannel
     private val castContextMethodChannel = CastContextMethodChannel()
 
-
     override fun onAttachedToEngine(@NonNull flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
         channel = MethodChannel(flutterPluginBinding.binaryMessenger, "google_cast")
         channel.setMethodCallHandler(this)
         castContextMethodChannel.onAttachedToEngine(flutterPluginBinding)
-
     }
 
     override fun onMethodCall(@NonNull call: MethodCall, @NonNull result: Result) {

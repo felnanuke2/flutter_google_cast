@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:google_cast/_discovery_manager/discovery_manager_platform_interface.dart';
 import 'package:google_cast/entities/cast_device.dart';
@@ -27,20 +28,19 @@ class GoogleCastDiscoveryManagerMethodChannelAndroid
 
   @override
   Future<bool> isDiscoveryActiveForDeviceCategory(String deviceCategory) {
-    // TODO: implement isDiscoveryActiveForDeviceCategory
-    throw UnimplementedError();
+    throw UnimplementedError('IOS Only');
   }
 
   @override
-  Future<void> startDiscovery() {
-    // TODO: implement startDiscovery
-    throw UnimplementedError();
+  Future<void> startDiscovery() async {
+    if (kDebugMode) print('startDiscovery() only works on android');
+    return;
   }
 
   @override
-  Future<void> stopDiscovery() {
-    // TODO: implement stopDiscovery
-    throw UnimplementedError();
+  Future<void> stopDiscovery() async {
+    if (kDebugMode) print('stopDiscovery() only works on android');
+    return;
   }
 
   Future _onMethodCallHandler(MethodCall call) async {
@@ -56,11 +56,7 @@ class GoogleCastDiscoveryManagerMethodChannelAndroid
     arguments as String;
     final list = jsonDecode(arguments);
     final listMap = List.from(list);
-    final devices = listMap
-        .map(
-          (e) => GoogleCastAndroidDevice.fromMap(e),
-        )
-        .toList();
+    final devices = GoogleCastAndroidDevices.fromMap(listMap);
     _devicesStreamController.add(devices);
   }
 }

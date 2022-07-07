@@ -2,7 +2,7 @@ import 'package:google_cast/entities/cast_device.dart';
 import 'package:google_cast/enums/connection_satate.dart';
 
 abstract class GoogleCastSession {
-  final GoogleCastDevice device;
+  final GoogleCastDevice? device;
   final String? sessionID;
   final GoogleCastConnectState connectionState;
   final bool currentDeviceMuted;

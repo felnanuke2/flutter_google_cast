@@ -1,5 +1,13 @@
 import 'package:google_cast/lib.dart';
 
+extension GoogleCastAndroidDevices on GoogleCastAndroidDevice {
+  static List<GoogleCastAndroidDevice> fromMap(List maps) {
+    final devices =
+        maps.map((e) => GoogleCastAndroidDevice.fromMap(e)).toList();
+    return devices;
+  }
+}
+
 class GoogleCastAndroidDevice extends GoogleCastDevice {
   GoogleCastAndroidDevice({
     required super.deviceID,

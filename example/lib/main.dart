@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:google_cast/entities/discovery_criteria.dart';
 import 'package:google_cast/lib.dart';
 import 'dart:async';
 
@@ -24,15 +25,15 @@ class _MyAppState extends State<MyApp> {
 
   // Platform messages are asynchronous, so we initialize in an async method.
   Future<void> initPlatformState() async {
+    const appId = GoogleCastDiscoveryCriteria.kDefaultApplicationId;
     GoogleCastOptions? options;
     if (Platform.isIOS) {
       options = IOSGoogleCastOptions(
-        GoogleCastDiscoveryCriteriaInitialize.initWithApplicationID(
-            GoogleCastDiscoveryCriteria.kDefaultApplicationId),
+        GoogleCastDiscoveryCriteriaInitialize.initWithApplicationID(appId),
       );
     } else if (Platform.isAndroid) {
       options = GoogleCastOptionsAndroid(
-        appId: GoogleCastDiscoveryCriteria.kDefaultApplicationId,
+        appId: appId,
       );
     }
     GoogleCastContext.instance.setSharedInstanceWithOptions(options!);

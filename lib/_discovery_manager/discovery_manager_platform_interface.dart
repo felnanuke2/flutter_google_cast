@@ -16,9 +16,11 @@ abstract class GoogleCastDiscoveryManagerPlatformInterface
   Stream<List<GoogleCastDevice>> get devicesStream;
 
   /// Starts the discovery process.
+  /// this only affect IOS apps
   Future<void> startDiscovery();
 
   ///Stops the discovery process.
+  ///this only affect IOS apps
   Future<void> stopDiscovery();
 
   ///Tests whether discovery is currently active for the given device category.

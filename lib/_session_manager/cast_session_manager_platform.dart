@@ -26,12 +26,6 @@ abstract class GoogleCastSessionManagerPlatformInterface
 
   Stream<GoogleCastSession?> get currentSessionStream;
 
-  /// 	readnonatomicstrong
-
-  /// The current Cast session, if any.
-
-  GoogleCastSession? get currentCastSession;
-
   /// 	readnonatomicassign
 
   /// The current session connection state.
@@ -103,6 +97,7 @@ abstract class GoogleCastSessionManagerPlatformInterface
 
   Future<bool> endSessionAndStopCasting();
 
+  ///iosOnly
   Future<void> setDefaultSessionOptions(
       // nullable GCKSessionOptions *	sessionOptions
       // forDeviceCategory: 		(NSString *)  	category

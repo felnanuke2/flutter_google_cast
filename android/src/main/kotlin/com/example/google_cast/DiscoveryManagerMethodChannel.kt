@@ -24,11 +24,9 @@ class DiscoveryManagerMethodChannel : FlutterPlugin, MethodChannel.MethodCallHan
         channel.setMethodCallHandler(null)
     }
 
-
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
 
     }
-
 
     inner class DiscoveryRouterCallback : MediaRouter.Callback() {
 
@@ -37,80 +35,58 @@ class DiscoveryManagerMethodChannel : FlutterPlugin, MethodChannel.MethodCallHan
             route: MediaRouter.RouteInfo?,
             reason: Int
         ) {
-
             super.onRouteUnselected(router, route, reason)
             print("routes ${router?.routes?.size}")
         }
 
         override fun onRouteAdded(router: MediaRouter?, route: MediaRouter.RouteInfo?) {
-            var devices = mutableListOf<CastDevice>()
             super.onRouteAdded(router, route)
-            val routes = router?.routes ?: listOf()
-            for (routeInfo in routes) {
-                val device = CastDevice.getFromBundle(routeInfo.extras)
-                if (device != null) {
-                    devices.add(device)
-                }
-
-            }
-
-
-            print("devices is ${devices}")
+            if (router != null)
+                getCastDevicesMap(router.routes)
         }
 
         override fun onRouteRemoved(router: MediaRouter?, route: MediaRouter.RouteInfo?) {
-
             super.onRouteRemoved(router, route)
-            print("routes ${router?.routes?.size}")
+            if (router != null)
+                getCastDevicesMap(router.routes)
         }
 
         override fun onRouteChanged(router: MediaRouter?, route: MediaRouter.RouteInfo?) {
-
             super.onRouteChanged(router, route)
             this@DiscoveryManagerMethodChannel.router = router
-
             if (router != null)
                 getCastDevicesMap(router.routes)
-
         }
 
         override fun onRouteVolumeChanged(router: MediaRouter?, route: MediaRouter.RouteInfo?) {
-
             super.onRouteVolumeChanged(router, route)
-            print("routes ${router?.routes?.size}")
+            if (router != null)
+                getCastDevicesMap(router.routes)
         }
 
         override fun onRoutePresentationDisplayChanged(
             router: MediaRouter?,
             route: MediaRouter.RouteInfo?
         ) {
-
             super.onRoutePresentationDisplayChanged(router, route)
-            print("routes ${router?.routes?.size}")
         }
 
         override fun onProviderAdded(router: MediaRouter?, provider: MediaRouter.ProviderInfo?) {
-
-
             super.onProviderAdded(router, provider)
             print("routes ${router?.routes?.size}")
         }
 
         override fun onProviderRemoved(router: MediaRouter?, provider: MediaRouter.ProviderInfo?) {
-
             super.onProviderRemoved(router, provider)
             print("routes ${router?.routes?.size}")
         }
 
         override fun onProviderChanged(router: MediaRouter?, provider: MediaRouter.ProviderInfo?) {
-
-
             super.onProviderChanged(router, provider)
             print("routes ${router?.routes?.size}")
         }
 
-
-        private fun getCastDevice(routeInfo: MediaRouter.RouteInfo?): CastDevice? {
+         fun getCastDevice(routeInfo: MediaRouter.RouteInfo?): CastDevice? {
             if (routeInfo == null) return null
             return CastDevice.getFromBundle(routeInfo.extras)
         }
@@ -133,11 +109,11 @@ class DiscoveryManagerMethodChannel : FlutterPlugin, MethodChannel.MethodCallHan
     fun selectRoute(id: String) {
         val routes = router?.routes
         val selectedRoute = routes?.find {
-            it.id == id
+            val device = CastDevice.getFromBundle(it.extras)
+            device?.deviceId  == id
         }
         if (selectedRoute != null) {
-
-
+            this.router?.selectRoute(selectedRoute)
         }
     }
 

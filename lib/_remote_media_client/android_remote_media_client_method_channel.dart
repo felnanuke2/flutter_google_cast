@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart';
 import 'package:google_cast/_remote_media_client/remote_media_client_platform.dart';
 import 'package:google_cast/entities/cast_media_status.dart';
 import 'package:google_cast/entities/load_options.dart';
@@ -9,140 +10,192 @@ import 'package:rxdart/subjects.dart';
 
 class GoogleCastRemoteMediaClientAndroidMethodChannel
     implements GoogleCastRemoteMediaClientPlatformInterface {
+  GoogleCastRemoteMediaClientAndroidMethodChannel() {
+    _channel.setMethodCallHandler(_onMethodCallHandler);
+  }
+
+  final _channel =
+      const MethodChannel('com.felnanuke.google_cast.remote_media_client');
+
+  // Media Status
   final _mediaStatusStreamController = BehaviorSubject<GoggleCastMediaStatus?>()
     ..add(null);
 
   @override
-  Future<GoogleCastRequest?> loadMedia(GoogleCastMediaInformation mediaInfo,
-      {bool autoPlay = true,
-      Duration playPosition = Duration.zero,
-      double playbackRate = 1.0,
-      List<int>? activeTrackIds,
-      String? credentials,
-      String? credentialsType}) {
-    // TODO: implement loadMedia
-    throw UnimplementedError();
-  }
-
-  @override
-  // TODO: implement mediaStatus
   GoggleCastMediaStatus? get mediaStatus => _mediaStatusStreamController.value;
 
   @override
-  // TODO: implement mediaStatusStream
   Stream<GoggleCastMediaStatus?> get mediaStatusStream =>
       _mediaStatusStreamController.stream;
 
-  @override
-  // TODO: implement queueItems
-  List<GoogleCastQueueItem> get queueItems => throw UnimplementedError();
+// QueueItems
+  final _queueItemsStreamController =
+      BehaviorSubject<List<GoogleCastQueueItem>>()..add([]);
 
   @override
-  // TODO: implement queueItemsStream
+  List<GoogleCastQueueItem> get queueItems => _queueItemsStreamController.value;
+
+  @override
   Stream<List<GoogleCastQueueItem>> get queueItemsStream =>
-      throw UnimplementedError();
+      _queueItemsStreamController.stream;
+
+// PlayerPosition
+  final _playerPositionStreamController = BehaviorSubject<Duration>()
+    ..add(Duration.zero);
+  @override
+  Duration get playerPosition => _playerPositionStreamController.value;
 
   @override
-  // TODO: implement playerPosition
-  Duration get playerPosition => throw UnimplementedError();
+  Stream<Duration> get playerPositionStream =>
+      _playerPositionStreamController.stream;
 
+  // Queue has Next or revious item
   @override
-  // TODO: implement playerPositionStream
-  Stream<Duration> get playerPositionStream => throw UnimplementedError();
-
-  @override
-  Future<GoogleCastRequest> pause() {
-    // TODO: implement pause
-    throw UnimplementedError();
+  bool get queueHasNextItem {
+    final currentQueueItemId = mediaStatus?.currentItemId;
+    final currentItemIndex = queueItems
+        .map((e) => e.itemId)
+        .toList()
+        .lastIndexOf(currentQueueItemId);
+    return (queueItems.length - 1) > currentItemIndex;
   }
 
   @override
-  Future<GoogleCastRequest> play() {
-    // TODO: implement play
-    throw UnimplementedError();
+  bool get queueHasPreviousItem => true;
+
+  @override
+  Future<GoogleCastRequest?> loadMedia(
+    GoogleCastMediaInformation mediaInfo, {
+    bool autoPlay = true,
+    Duration playPosition = Duration.zero,
+    double playbackRate = 1.0,
+    List<int>? activeTrackIds,
+    String? credentials,
+    String? credentialsType,
+  }) async {
+    return _channel.invokeMethod(
+      'loadMedia',
+      {
+        'mediaInfo': mediaInfo.toMap(),
+        'autoPlay': autoPlay,
+        'playPosition': playPosition.inSeconds,
+        'playbackRate': playbackRate,
+        'activeTrackIds': activeTrackIds,
+        'credentials': credentials,
+        'credentialsType': credentialsType
+      },
+    );
+  }
+
+  @override
+  Future<GoogleCastRequest> pause() async {
+    return await _channel.invokeMethod('pause');
+  }
+
+  @override
+  Future<GoogleCastRequest> play() async {
+    return await _channel.invokeMethod('play');
   }
 
   @override
   Future<GoogleCastRequest?> queueLoadItems(
-      List<GoogleCastQueueItem> queueItems,
-      {GoogleCastQueueLoadOptions? options}) {
-    // TODO: implement queueLoadItems
-    throw UnimplementedError();
+    List<GoogleCastQueueItem> queueItems, {
+    GoogleCastQueueLoadOptions? options,
+  }) async {
+    return await _channel.invokeMethod('queueLoadItems', {
+      'queueItems': queueItems.map((item) => item.toMap()).toList(),
+      'options': options?.toMap(),
+    });
   }
 
   @override
-  Future<GoogleCastRequest> queueNextItem() {
-    // TODO: implement queueNextItem
-    throw UnimplementedError();
+  Future<GoogleCastRequest> queueNextItem() async {
+    return await _channel.invokeMethod('queueNextItem');
   }
 
   @override
-  Future<GoogleCastRequest> queuePrevItem() {
-    // TODO: implement queuePrevItem
-    throw UnimplementedError();
+  Future<GoogleCastRequest> queuePrevItem() async {
+    return await _channel.invokeMethod('queuePrevItem');
   }
 
   @override
-  Future<GoogleCastRequest> seek(GoogleCastMediaSeekOption option) {
-    // TODO: implement seek
-    throw UnimplementedError();
+  Future<GoogleCastRequest> seek(GoogleCastMediaSeekOption option) async {
+    return await _channel.invokeMethod(
+      'seek',
+      option.toMap(),
+    );
   }
 
   @override
-  Future<GoogleCastRequest> setActiveTrackIDs(List<int> activeTrackIDs) {
-    // TODO: implement setActiveTrackIDs
-    throw UnimplementedError();
+  Future<GoogleCastRequest> setActiveTrackIDs(List<int> activeTrackIDs) async {
+    return await _channel.invokeMethod(
+      'setActiveTrackIds',
+      activeTrackIDs,
+    );
   }
 
   @override
-  Future<GoogleCastRequest> setPlaybackRate(double rate) {
-    // TODO: implement setPlaybackRate
-    throw UnimplementedError();
+  Future<GoogleCastRequest> setPlaybackRate(double rate) async {
+    return await _channel.invokeMethod('setPlaybackRate', rate);
   }
 
   @override
-  Future<GoogleCastRequest> setTextTrackStyle(TextTrackStyle textTrackStyle) {
-    // TODO: implement setTextTrackStyle
-    throw UnimplementedError();
+  Future<GoogleCastRequest> setTextTrackStyle(
+      TextTrackStyle textTrackStyle) async {
+    return await _channel.invokeMethod(
+      'setTextTrackStyle',
+      textTrackStyle.toMap(),
+    );
   }
 
   @override
-  Future<GoogleCastRequest> stop() {
-    // TODO: implement stop
-    throw UnimplementedError();
+  Future<GoogleCastRequest> stop() async {
+    return await _channel.invokeMethod('stop');
   }
 
   @override
-  Future<GoogleCastRequest> queueJumpToItemWithId(int itemId) {
-    // TODO: implement queueJumpToItemWithId
-    throw UnimplementedError();
+  Future<GoogleCastRequest> queueJumpToItemWithId(int itemId) async {
+    return await _channel.invokeMethod('queueJumpToItemWithId', itemId);
   }
 
   @override
-  Future<GoogleCastRequest> queueRemoveItemsWithIds(List<int> itemIds) {
-    // TODO: implement queueRemoveItemsWithIds
-    throw UnimplementedError();
+  Future<GoogleCastRequest> queueRemoveItemsWithIds(List<int> itemIds) async {
+    return await _channel.invokeMethod('queueRemoveItemsWithIds', itemIds);
   }
 
   @override
   Future<GoogleCastRequest> queueInsertItemAndPlay(GoogleCastQueueItem item,
-      {required int beforeItemWithId}) {
-    // TODO: implement queueInsertItemAndPlay
-    throw UnimplementedError();
+      {required int beforeItemWithId}) async {
+    return await _channel.invokeMethod('queueInsertItemAndPlay', {
+      'item': item.toMap(),
+      'beforeItemWithId': beforeItemWithId,
+    });
   }
 
   @override
   Future<GoogleCastRequest> queueInsertItems(List<GoogleCastQueueItem> items,
-      {required int beforeItemWithId}) {
-    // TODO: implement queueInsertItems
-    throw UnimplementedError();
+      {required int beforeItemWithId}) async {
+    return await _channel.invokeMethod('queueInsertItems', {
+      'items': items.map((item) => item.toMap()).toList(),
+      'beforeItemWithId': beforeItemWithId,
+    });
   }
 
-  @override
-  // TODO: implement queueHasNextItem
-  bool get queueHasNextItem => throw UnimplementedError();
+  Future _onMethodCallHandler(MethodCall call) async {
+    switch (call.method) {
+      case 'onMediaStatusChanged':
+        return _onMediaStatusChanged(call.arguments);
+      case 'onQueueStatusChanged':
+        return _onQueueStatusChanged(call.arguments);
+      case 'onPlayerPositionChanged':
+        return _onPlayerPositionChanged(call.arguments);
+      default:
+    }
+  }
 
-  @override
-  // TODO: implement queueHasPreviousItem
-  bool get queueHasPreviousItem => throw UnimplementedError();
+  Future _onMediaStatusChanged(arguments) async {}
+
+  Future _onQueueStatusChanged(arguments) async {}
+
+  Future _onPlayerPositionChanged(arguments) async {}
 }

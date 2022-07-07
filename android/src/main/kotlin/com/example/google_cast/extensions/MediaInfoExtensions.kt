@@ -1,0 +1,31 @@
+package com.example.google_cast.extensions
+
+import com.google.android.gms.cast.MediaInfo
+import com.google.android.gms.cast.MediaMetadata
+
+
+class GoogleCastMediaInfo {
+    companion object {
+        fun fromMap(map: Map<String, Any?>): MediaInfo? {
+            val contentId = map["contentID"] as String
+            val contentUrl = map["contentURL"] as String?
+            val contentType = map["contentType"] as String?
+            val tracks = GoogleCastMediaTrackBuilder.listFromMap(
+                map["tracks"] as List<Map<String, Any?>>? ?: listOf()
+            )
+
+            val metaData = GoogleCastMetadataBuilder.fromMap(map["metadata"] as Map<String,Any?>? ?: mapOf())
+
+            val builder = MediaInfo.Builder(contentId)
+            if (contentUrl != null)
+                builder.setContentUrl(contentUrl)
+            if (contentType != null)
+                builder.setContentType(contentType)
+            if (tracks.isNotEmpty())
+                builder.setMediaTracks(tracks)
+            if(metaData != null)
+                builder.setMetadata(metaData)
+            return builder.build()
+        }
+    }
+}

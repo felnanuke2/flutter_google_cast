@@ -68,8 +68,7 @@ class CastContextMethodChannel : FlutterPlugin, MethodChannel.MethodCallHandler 
             .build()
         MediaRouter.getInstance(appContext)
             .addCallback(selector, discoveryManager.routerCallBack, CALLBACK_FLAG_REQUEST_DISCOVERY)
-
-
+        castContext?.sessionManager?.addSessionManagerListener(sessionManagerMethodChannel)
         return true
     }
 }
