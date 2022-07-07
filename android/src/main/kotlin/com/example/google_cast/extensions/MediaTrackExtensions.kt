@@ -15,13 +15,16 @@ class GoogleCastMediaTrackBuilder {
             val subType = map["subtype"] as Int?
             val name = map["name"] as String?
             val language = map["language"] as String?
-            val customDataData = map["customData"] as Map<String, Any?>
-            val customData = JSONObject(customDataData)
+            val customDataData = map["customData"] as Map<String, Any?>?
             val builder = MediaTrack.Builder(trackId.toLong(), trackType)
             builder.setContentId(contentId)
             if (contentType != null)
                 builder.setContentType(contentType)
-            builder.setCustomData(customData)
+            if(customDataData!=null){
+                val customData = JSONObject(customDataData)
+                builder.setCustomData(customData)
+            }
+
             if (subType != null)
                 builder.setSubtype(subType)
             builder.setName(name)

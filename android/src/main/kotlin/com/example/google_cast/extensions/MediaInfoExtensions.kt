@@ -13,9 +13,7 @@ class GoogleCastMediaInfo {
             val tracks = GoogleCastMediaTrackBuilder.listFromMap(
                 map["tracks"] as List<Map<String, Any?>>? ?: listOf()
             )
-
             val metaData = GoogleCastMetadataBuilder.fromMap(map["metadata"] as Map<String,Any?>? ?: mapOf())
-
             val builder = MediaInfo.Builder(contentId)
             if (contentUrl != null)
                 builder.setContentUrl(contentUrl)
@@ -23,6 +21,7 @@ class GoogleCastMediaInfo {
                 builder.setContentType(contentType)
             if (tracks.isNotEmpty())
                 builder.setMediaTracks(tracks)
+
             if(metaData != null)
                 builder.setMetadata(metaData)
             return builder.build()

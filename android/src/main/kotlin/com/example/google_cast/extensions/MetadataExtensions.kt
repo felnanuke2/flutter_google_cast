@@ -4,6 +4,7 @@ package com.example.google_cast.extensions
 import android.net.Uri
 import com.google.android.gms.cast.MediaMetadata
 import com.google.android.gms.common.images.WebImage
+import java.util.*
 
 class GoogleCastMetadataBuilder {
     companion object {
@@ -11,7 +12,10 @@ class GoogleCastMetadataBuilder {
 
             var map = args.toMutableMap()
             if (map.isEmpty()) return null
-            val metadata = MediaMetadata()
+            val type = args["metadataType"] as Int
+            val metadata = MediaMetadata(type)
+
+
             for (item in map) {
                 val datesKey = listOf(
                     "releaseDate",
@@ -20,17 +24,33 @@ class GoogleCastMetadataBuilder {
                     "creationDate"
                 )
                 if (item.key in datesKey) {
-                    metadata.putTimeMillis(item.key, (item.value as Int).toLong())
-                    map.remove(item.key)
-                }
-                when (item.value) {
-                    is String -> metadata.putString(item.key, item.value as String)
-                    is Int -> metadata.putInt(
-                        item.key, item.value as Int
-                    )
-                    is Double -> metadata.putDouble(item.key, item.value as Double)
+                    val calendar = Calendar.getInstance()
+                    calendar.timeInMillis = item.value as Long
+                    when (item.key) {
+                        "releaseDate" -> metadata.putDate(MediaMetadata.KEY_RELEASE_DATE, calendar)
+                        "broadcastDate" -> metadata.putDate(
+                            MediaMetadata.KEY_BROADCAST_DATE, calendar
+                        )
+                        "creationDateTime" -> metadata.putDate(
+                            MediaMetadata.KEY_CREATION_DATE, calendar
+                        )
+                        "creationDate" -> metadata.putDate(
+                            MediaMetadata.KEY_CREATION_DATE, calendar
+                        )
+                    }
 
+
+                } else {
+                    when (item.value) {
+                        is String -> metadata.putString(item.key, item.value as String)
+                        is Int -> metadata.putInt(
+                            item.key, item.value as Int
+                        )
+                        is Double -> metadata.putDouble(item.key, item.value as Double)
+
+                    }
                 }
+
             }
             val imagesData = map["images"] as List<Map<String, Any?>>?
             if (imagesData != null) {

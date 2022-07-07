@@ -1,6 +1,8 @@
 package com.example.google_cast
 
+import com.example.google_cast.extensions.GoogleCastSeekOptionsBuilder
 import com.example.google_cast.extensions.QueueItemBuilder
+import com.google.android.gms.cast.MediaSeekOptions
 import com.google.android.gms.cast.framework.CastContext
 import com.google.android.gms.cast.framework.media.RemoteMediaClient
 import io.flutter.embedding.engine.plugins.FlutterPlugin
@@ -34,16 +36,16 @@ class RemoteMediaClientMethodChannel : FlutterPlugin, MethodChannel.MethodCallHa
             "queueLoadItems" -> queueLoadItems(call.arguments as Map<String, Any?>)
             "queueInsertItems" -> queueInsertItems(call.arguments)
             "queueInsertItemAndPlay" -> queueInsertItemAndPlay(call.arguments)
-            "queueNextItem" -> queueNextItem(call.arguments)
-            "queuePrevItem" -> queuePrevItem(call.arguments)
+            "queueNextItem" -> queueNextItem()
+            "queuePrevItem" -> queuePrevItem()
             "queueJumpToItemWithId" -> queueJumpToItemWithId(call.arguments)
             "queueRemoveItemsWithIds" -> queueRemoveItemsWithIds(call.arguments)
             "seek" -> seek(call.arguments)
             "setActiveTrackIds" -> setActiveTrackIds(call.arguments)
             "setPlaybackRate" -> setPlaybackRate(call.arguments)
             "setTextTrackStyle" -> setTextTrackStyle(call.arguments)
-            "play" -> play(call.arguments)
-            "pause" -> pause(call.arguments)
+            "play" -> play()
+            "pause" -> pause()
 
 
         }
@@ -54,31 +56,42 @@ class RemoteMediaClientMethodChannel : FlutterPlugin, MethodChannel.MethodCallHa
     }
 
     private fun setPlaybackRate(arguments: Any?) {
-
+        val playbackRate = arguments as Double
+        currentRemoteMediaClient?.setPlaybackRate(playbackRate)
     }
 
     private fun setActiveTrackIds(arguments: Any?) {
+        arguments as IntArray
+        val longArray = arguments.map {
+            it.toLong()
+        }
+        currentRemoteMediaClient?.setActiveMediaTracks(longArray.toLongArray())
 
     }
 
     private fun seek(arguments: Any?) {
-
+        arguments as Map<String, Any?>
+        val options = GoogleCastSeekOptionsBuilder.fromMap(arguments)
+        currentRemoteMediaClient?.seek(options)
     }
 
     private fun queueRemoveItemsWithIds(arguments: Any?) {
-
+        arguments as IntArray
+        currentRemoteMediaClient?.queueRemoveItems(arguments, JSONObject())
     }
 
     private fun queueJumpToItemWithId(arguments: Any?) {
+        val itemId = arguments as Int
+        currentRemoteMediaClient?.queueJumpToItem(itemId, JSONObject())
 
     }
 
-    private fun queuePrevItem(arguments: Any?) {
-
+    private fun queuePrevItem() {
+        currentRemoteMediaClient?.queuePrev(JSONObject())
     }
 
-    private fun queueNextItem(arguments: Any?) {
-
+    private fun queueNextItem() {
+        currentRemoteMediaClient?.queueNext(JSONObject())
     }
 
     private fun queueInsertItemAndPlay(arguments: Any?) {
@@ -89,11 +102,12 @@ class RemoteMediaClientMethodChannel : FlutterPlugin, MethodChannel.MethodCallHa
 
     }
 
-    private fun pause(arguments: Any?) {
-
+    private fun pause() {
+        currentRemoteMediaClient?.pause()
     }
 
-    private fun play(arguments: Any?) {
+    private fun play() {
+        currentRemoteMediaClient?.play()
 
     }
 
@@ -108,16 +122,14 @@ class RemoteMediaClientMethodChannel : FlutterPlugin, MethodChannel.MethodCallHa
             queueItems.toTypedArray(),
             startIndex,
             repeatMode,
-            playPosition.toLong(),
+            playPosition.toLong() * 1000,
             JSONObject()
         )
-
 
 
     }
 
     private fun loadMedia(arguments: Any) {
-        currentRemoteMediaClient?.loadingItem
 
 
     }

@@ -12,7 +12,7 @@ class GoogleCastIosDevice extends GoogleCastDevice {
     required super.uniqueID,
     required this.index,
   });
-  final int index;
+  final int? index;
 
   factory GoogleCastIosDevice.fromMap(Map<String, dynamic> map) {
     return GoogleCastIosDevice(

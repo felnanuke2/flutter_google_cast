@@ -57,7 +57,7 @@ class GoogleCastMovieMediaMetadata extends GoogleCastMediaMetadata {
       'subtitle': subtitle,
       'studio': studio,
       'images': images?.map((x) => x.toMap()).toList(),
-      'broadcastDate': releaseDate?.millisecondsSinceEpoch,
+      'releaseDate': releaseDate?.millisecondsSinceEpoch,
     };
   }
 
