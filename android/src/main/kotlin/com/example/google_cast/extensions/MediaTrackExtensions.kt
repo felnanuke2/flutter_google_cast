@@ -7,6 +7,7 @@ import org.json.JSONObject
 
 class GoogleCastMediaTrackBuilder {
     companion object {
+
         fun fromMap(map: Map<String, Any?>): MediaTrack {
             val trackId = map["trackId"] as Int
             val trackType = map["type"] as Int
@@ -20,7 +21,7 @@ class GoogleCastMediaTrackBuilder {
             builder.setContentId(contentId)
             if (contentType != null)
                 builder.setContentType(contentType)
-            if(customDataData!=null){
+            if (customDataData != null) {
                 val customData = JSONObject(customDataData)
                 builder.setCustomData(customData)
             }
@@ -36,10 +37,19 @@ class GoogleCastMediaTrackBuilder {
             val list = items.map {
                 fromMap(it)
             }
-
             return list
-
-
         }
     }
+}
+
+fun MediaTrack.toMap(): Map<String, Any?> {
+    val map = mutableMapOf<String, Any?>()
+    map["trackId"] = id
+    map["type"] = type
+    map["trackContentId"] = contentId
+    map["trackContentType"] = contentType
+    map["subtype"] = subtype
+    map["name"] = name
+    map["language"] = language
+    return map
 }

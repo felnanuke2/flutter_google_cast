@@ -1,8 +1,6 @@
 package com.example.google_cast
 
-import com.example.google_cast.extensions.GoogleCastSeekOptionsBuilder
-import com.example.google_cast.extensions.QueueItemBuilder
-import com.google.android.gms.cast.MediaSeekOptions
+import com.example.google_cast.extensions.*
 import com.google.android.gms.cast.framework.CastContext
 import com.google.android.gms.cast.framework.media.RemoteMediaClient
 import io.flutter.embedding.engine.plugins.FlutterPlugin
@@ -32,10 +30,10 @@ class RemoteMediaClientMethodChannel : FlutterPlugin, MethodChannel.MethodCallHa
     // MethodCallHandler
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
         when (call.method) {
-            "loadMedia" -> loadMedia(call.arguments)
+            "loadMedia" -> loadMedia(call.arguments as Map<String, Any?>)
             "queueLoadItems" -> queueLoadItems(call.arguments as Map<String, Any?>)
-            "queueInsertItems" -> queueInsertItems(call.arguments)
-            "queueInsertItemAndPlay" -> queueInsertItemAndPlay(call.arguments)
+            "queueInsertItems" -> queueInsertItems(call.arguments as Map<String, Any?>)
+            "queueInsertItemAndPlay" -> queueInsertItemAndPlay(call.arguments as Map<String, Any?>)
             "queueNextItem" -> queueNextItem()
             "queuePrevItem" -> queuePrevItem()
             "queueJumpToItemWithId" -> queueJumpToItemWithId(call.arguments)
@@ -46,7 +44,6 @@ class RemoteMediaClientMethodChannel : FlutterPlugin, MethodChannel.MethodCallHa
             "setTextTrackStyle" -> setTextTrackStyle(call.arguments)
             "play" -> play()
             "pause" -> pause()
-
 
         }
     }
@@ -94,11 +91,25 @@ class RemoteMediaClientMethodChannel : FlutterPlugin, MethodChannel.MethodCallHa
         currentRemoteMediaClient?.queueNext(JSONObject())
     }
 
-    private fun queueInsertItemAndPlay(arguments: Any?) {
+    private fun queueInsertItemAndPlay(arguments: Map<String, Any?>) {
+        val item =
+            GoogleCastQueueItemBuilder.fromMap(arguments["item"] as Map<String, Any?>) ?: return
+        val beforeItemWithId = arguments["beforeItemWithId"] as Int
+        var jsonObject = JSONObject()
+        currentRemoteMediaClient?.queueInsertAndPlayItem(item, beforeItemWithId, jsonObject)
 
     }
 
-    private fun queueInsertItems(arguments: Any?) {
+    private fun queueInsertItems(arguments: Map<String, Any?>) {
+        val items =
+            GoogleCastQueueItemBuilder.listFromMap(arguments["items"] as List<Map<String, Any?>>)
+        val beforeItemWithId = arguments["beforeItemWithId"] as Int
+        var jsonObject = JSONObject()
+        currentRemoteMediaClient?.queueInsertItems(
+            items.toTypedArray(),
+            beforeItemWithId,
+            jsonObject
+        )
 
     }
 
@@ -117,7 +128,7 @@ class RemoteMediaClientMethodChannel : FlutterPlugin, MethodChannel.MethodCallHa
         val startIndex = optionsData["startIndex"] as Int
         val repeatMode = optionsData["repeatMode"] as Int
         val playPosition = optionsData["playPosition"] as Int
-        val queueItems = QueueItemBuilder.listFromMap(queueItemsData)
+        val queueItems = GoogleCastQueueItemBuilder.listFromMap(queueItemsData)
         currentRemoteMediaClient?.queueLoad(
             queueItems.toTypedArray(),
             startIndex,
@@ -125,13 +136,13 @@ class RemoteMediaClientMethodChannel : FlutterPlugin, MethodChannel.MethodCallHa
             playPosition.toLong() * 1000,
             JSONObject()
         )
-
-
     }
 
-    private fun loadMedia(arguments: Any) {
-
-
+    private fun loadMedia(arguments: Map<String, Any?>) {
+        val mediaInfo =
+            GoogleCastMediaInfo.fromMap(arguments["mediaInfo"] as Map<String, Any?>) ?: return
+        val options = GoogleCastMediaLoadOptions.fromMap(arguments)
+        currentRemoteMediaClient?.load(mediaInfo, options)
     }
 
     fun startListen() {
@@ -155,10 +166,8 @@ class RemoteMediaClientMethodChannel : FlutterPlugin, MethodChannel.MethodCallHa
     // RemoteMediaCallBack
 
     override fun onStatusUpdated() {
-
         super.onStatusUpdated()
-        println("onStatusChanged")
-
-
+        val map = currentRemoteMediaClient?.mediaStatus?.toMap()
+        channel.invokeMethod("onMediaStatusChanged", map)
     }
 }

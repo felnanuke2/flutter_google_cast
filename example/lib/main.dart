@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:google_cast/entities/discovery_criteria.dart';
 import 'package:google_cast/lib.dart';
 import 'dart:async';
 

@@ -1,16 +1,14 @@
 package com.example.google_cast.extensions
 
-import android.media.MediaDescription
-import android.media.session.MediaSession
-import android.os.Build
 import com.google.android.gms.cast.MediaInfo
 import com.google.android.gms.cast.MediaQueueItem
 import org.json.JSONObject
 
-object QueueItemBuilder {
+object GoogleCastQueueItemBuilder {
 
     fun fromMap(map: Map<String, Any?>): MediaQueueItem? {
-        val activeTrackIds = map["activeTrackIds"] as LongArray?
+        val activeTrackIds = (map["activeTrackIds"] as ArrayList<Number>? ?: arrayListOf())
+        val activeTrackIdsLongArray = activeTrackIds.map { it.toLong() }.toLongArray()
         val startTime = map["startTime"] as Int?
         val id = map["itemId"] as Int?
         val preloadTime = map["preloadTime"] as Int?
@@ -21,7 +19,7 @@ object QueueItemBuilder {
             GoogleCastMediaInfo.fromMap(map["media"] as Map<String, Any?>) ?: return null
         var builder = MediaQueueItem.Builder(mediaInfo!!)
         if (activeTrackIds != null)
-            builder.setActiveTrackIds(activeTrackIds)
+            builder.setActiveTrackIds(activeTrackIdsLongArray)
         if (id != null)
             builder.setItemId(id)
         if (preloadTime != null)
@@ -42,7 +40,7 @@ object QueueItemBuilder {
     fun listFromMap(items: List<Map<String, Any?>>): List<MediaQueueItem> {
         val list = mutableListOf<MediaQueueItem>()
         for (item in items) {
-            val queueItem = QueueItemBuilder.fromMap(item)
+            val queueItem = GoogleCastQueueItemBuilder.fromMap(item)
             if (queueItem != null)
                 list.add(queueItem)
         }

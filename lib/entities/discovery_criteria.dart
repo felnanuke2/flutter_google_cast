@@ -5,7 +5,7 @@ abstract class GoogleCastDiscoveryCriteria {
 
   /// this command is useful to native execute a custom command
 
-  static const String kDefaultApplicationId = 'C0868879';
+  static const String kDefaultApplicationId = 'CC1AD845';
 
   Set<String>? get applicationIds;
 

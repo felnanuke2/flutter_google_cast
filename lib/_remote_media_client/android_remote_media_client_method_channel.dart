@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/services.dart';
 import 'package:google_cast/_remote_media_client/remote_media_client_platform.dart';
 import 'package:google_cast/entities/cast_media_status.dart';
@@ -6,6 +8,8 @@ import 'package:google_cast/entities/media_information.dart';
 import 'package:google_cast/entities/queue_item.dart';
 import 'package:google_cast/entities/media_seek_option.dart';
 import 'package:google_cast/entities/request.dart';
+import 'package:google_cast/models/android/android_media_status.dart';
+import 'package:google_cast/models/android/cast_device.dart';
 import 'package:rxdart/subjects.dart';
 
 class GoogleCastRemoteMediaClientAndroidMethodChannel
@@ -193,9 +197,28 @@ class GoogleCastRemoteMediaClientAndroidMethodChannel
     }
   }
 
-  Future _onMediaStatusChanged(arguments) async {}
+  Future _onMediaStatusChanged(arguments) async {
+    if (arguments == null) {
+      _mediaStatusStreamController.add(null);
+      return null;
+    }
+    final mediaStatus = GoogleCastAndroidMediaStatus.fromMap(
+      Map<String, dynamic>.from(arguments),
+    );
+
+    _mediaStatusStreamController.add(mediaStatus);
+  }
 
   Future _onQueueStatusChanged(arguments) async {}
 
-  Future _onPlayerPositionChanged(arguments) async {}
+  Future _onPlayerPositionChanged(arguments) async {
+    if (arguments == null) {
+      _playerPositionStreamController.add(Duration.zero);
+      return null;
+    }
+    arguments = Map<String, dynamic>.from(arguments);
+
+    final playerPosition = Duration(milliseconds: arguments["progress"] ?? 0);
+    _playerPositionStreamController.add(playerPosition);
+  }
 }

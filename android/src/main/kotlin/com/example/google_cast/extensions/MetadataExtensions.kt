@@ -74,3 +74,11 @@ class GoogleCastMetadataBuilder {
 
     }
 }
+
+fun MediaMetadata.toMap(): Map<String, Any?> {
+    val map = mutableMapOf<String, Any?>()
+   for ( key in  this.keySet() ){
+       MediaMetadata.getTypeForKey(key)
+   }
+    return map
+}
