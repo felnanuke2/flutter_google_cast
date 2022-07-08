@@ -1,6 +1,4 @@
-import 'dart:convert';
-
-import 'cast_media_metadata.dart';
+import 'package:google_cast/lib.dart';
 
 class GoogleCastPhotoMediaMetadata extends GoogleCastMediaMetadata {
   GoogleCastPhotoMediaMetadata({
@@ -12,8 +10,7 @@ class GoogleCastPhotoMediaMetadata extends GoogleCastMediaMetadata {
     this.width,
     this.height,
     this.creationDateTime,
-    required super.metadataType,
-  });
+  }) : super(metadataType: GoogleCastMediaMetadataType.photoMediaMetadata);
 
   ///string 	optional Title of the photograph.
   /// Player can independently retrieve title
@@ -80,25 +77,4 @@ class GoogleCastPhotoMediaMetadata extends GoogleCastMediaMetadata {
       'creationDateTime': creationDateTime?.millisecondsSinceEpoch,
     };
   }
-
-  factory GoogleCastPhotoMediaMetadata.fromMap(Map<String, dynamic> map) {
-    return GoogleCastPhotoMediaMetadata(
-      metadataType: map['metadataType'],
-      title: map['title'],
-      artist: map['artist'],
-      location: map['location'],
-      latitude: map['latitude']?.toDouble(),
-      longitude: map['longitude']?.toDouble(),
-      width: map['width']?.toInt(),
-      height: map['height']?.toInt(),
-      creationDateTime: map['creationDateTime'] != null
-          ? DateTime.tryParse(map['creationDateTime'])
-          : null,
-    );
-  }
-
-  String toJson() => json.encode(toMap());
-
-  factory GoogleCastPhotoMediaMetadata.fromJson(String source) =>
-      GoogleCastPhotoMediaMetadata.fromMap(json.decode(source));
 }

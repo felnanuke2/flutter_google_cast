@@ -30,17 +30,17 @@ class GoogleCastMediaInfo {
     }
 }
 
-fun MediaInfo.toMap(): Map<String, Any?> {
-    var map = mutableMapOf<String, Any?>()
-    map["contentID"] = contentId
-    map["contentURL"] = contentUrl
-    map["contentType"] = contentType
-    map["streamType"] = streamType
-    map["streamDuration"] = streamDuration
-    map["tracks"] = mediaTracks?.map {
-        it.toMap()
-    }
-    map["metadata"] = null
-    return map
-
-}
+//fun MediaInfo.toMap(): Map<String, Any?> {
+//    var map = mutableMapOf<String, Any?>()
+//    map["contentID"] = contentId
+//    map["contentURL"] = contentUrl
+//    map["contentType"] = contentType
+//    map["streamType"] = streamType
+//    map["streamDuration"] = streamDuration
+//    map["tracks"] = mediaTracks?.map {
+//        it.toMap()
+//    }
+//    map["metadata"] = null
+//    return map
+//
+//}

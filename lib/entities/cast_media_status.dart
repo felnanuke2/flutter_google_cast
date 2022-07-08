@@ -1,8 +1,7 @@
 import 'package:google_cast/common/live_seekable_range.dart';
 import 'package:google_cast/common/queue_data.dart';
-import 'package:google_cast/common/repeat_mode.dart';
+import 'package:google_cast/enums/repeat_mode.dart';
 import 'package:google_cast/entities/media_information.dart';
-import 'package:google_cast/entities/queue_item.dart';
 import 'package:google_cast/enums/idle_reason.dart';
 import 'package:google_cast/enums/player_state.dart';
 import 'break_status.dart';
@@ -54,31 +53,6 @@ class GoggleCastMediaStatus {
   ///  at the time the media status change happened.
   final int? currentItemId;
 
-  ///Whether there is a current item in the queue.
-  final bool queueHasCurrentItem;
-
-  ///The current queue item, if any.
-  final GoogleCastQueueItem? currentQueueItem;
-
-  //Checks if there is an item after the currently playing item in the queue.
-
-  final bool queueHasNextItem;
-
-  ///The next queue item, if any.
-  final GoogleCastQueueItem? nextQueueItem;
-
-  ///Whether there is an item before the currently playing item in the queue.
-  final bool queueHasPreviousItem;
-
-  ///Whether there is an item being preloaded in the queue.
-  final bool queueHasLoadingItem;
-
-  ///The ID of the item that is currently preloaded, if any.
-  final int preloadedItemId;
-
-  ///The ID of the item that is currently loading, if any.
-  final int loadingItemId;
-
   ///List of IDs corresponding to the active Tracks.
   final List<int>? activeTrackIds;
 
@@ -112,14 +86,6 @@ class GoggleCastMediaStatus {
     required this.isMuted,
     required this.repeatMode,
     this.currentItemId,
-    required this.queueHasCurrentItem,
-    this.currentQueueItem,
-    required this.queueHasNextItem,
-    this.nextQueueItem,
-    required this.queueHasPreviousItem,
-    required this.queueHasLoadingItem,
-    required this.preloadedItemId,
-    required this.loadingItemId,
     this.activeTrackIds,
     this.adBreakStatus,
     this.liveSeekableRange,

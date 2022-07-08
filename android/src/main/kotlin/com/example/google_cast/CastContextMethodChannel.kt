@@ -14,6 +14,7 @@ import io.flutter.plugin.common.MethodChannel
 import androidx.mediarouter.media.MediaRouteSelector
 import androidx.mediarouter.media.MediaRouter
 import androidx.mediarouter.media.MediaRouter.CALLBACK_FLAG_REQUEST_DISCOVERY
+import androidx.mediarouter.media.MediaRouter.CALLBACK_FLAG_UNFILTERED_EVENTS
 import com.google.android.gms.cast.LaunchOptions
 import com.google.android.gms.cast.framework.CastButtonFactory
 
@@ -61,6 +62,8 @@ class CastContextMethodChannel : FlutterPlugin, MethodChannel.MethodCallHandler 
         optionsBuilder.setReceiverApplicationId(map["appId"] as String)
         val launcherOptions = LaunchOptions.Builder().setAndroidReceiverCompatible(true).build()
         optionsBuilder.setLaunchOptions(launcherOptions)
+        optionsBuilder.setResumeSavedSession(true)
+        optionsBuilder.setEnableReconnectionService(true)
         GoogleCastOptionsProvider.options = optionsBuilder.build()
         CastContext.getSharedInstance(appContext)
         val selector = MediaRouteSelector.Builder()

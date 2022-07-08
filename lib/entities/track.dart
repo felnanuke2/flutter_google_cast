@@ -1,8 +1,10 @@
 import 'dart:convert';
 
 import 'package:google_cast/common/rfc5646_language.dart';
-import 'package:google_cast/common/text_track_type.dart';
-import 'package:google_cast/common/track_type.dart';
+import 'package:google_cast/enums/text_track_type.dart';
+import 'package:google_cast/enums/track_type.dart';
+import 'package:google_cast/models/android/extensions/text_track_type.dart';
+import 'package:google_cast/models/android/extensions/track_type.dart';
 
 ///Describes track metadata information.
 class GoogleCastMediaTrack {
@@ -80,12 +82,13 @@ class GoogleCastMediaTrack {
           ? RFC5646_LANGUAGE.fromMap(map['language'])
           : null,
       name: map['name'],
-      subtype:
-          map['subtype'] != null ? TextTrackType.values[map['subtype']] : null,
+      subtype: map['subtype'] != null
+          ? GoogleCastTextTrackStyleAndroid.fromMap(map['subtype'])
+          : null,
       trackContentId: map['trackContentId'],
       trackContentType: map['trackContentType'],
       trackId: map['trackId']?.toInt() ?? 0,
-      type: TrackType.values[map['type']],
+      type: GoogleCastTrackTypeAndroid.fromMap(map['type']),
     );
   }
 

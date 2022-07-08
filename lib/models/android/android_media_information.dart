@@ -1,6 +1,10 @@
-import 'package:google_cast/entities/media_information.dart';
-
-import '../../entities/media_metadata/cast_media_metadata.dart';
+import 'package:google_cast/lib.dart';
+import 'package:google_cast/models/android/metadata/generic.dart';
+import 'package:google_cast/models/android/metadata/movie.dart';
+import 'package:google_cast/models/android/metadata/music.dart';
+import 'package:google_cast/models/android/metadata/photo.dart';
+import 'package:google_cast/models/android/metadata/tv_show.dart';
+import 'extensions/stream_type.dart';
 
 class GoogleCastMediaInformationAndroid extends GoogleCastMediaInformation {
   GoogleCastMediaInformationAndroid({
@@ -32,13 +36,13 @@ class GoogleCastMediaInformationAndroid extends GoogleCastMediaInformation {
               map['breakClips']?.map((x) => CastBreakClips.fromMap(x)))
           : null,
       contentId: map['contentId'] ?? '',
-      streamType: CastMediaStreamType.values[map['streamType']],
+      streamType: GoogleCastAndroidStreamType.fromMap(map['streamType']),
       contentType: map['contentType'] ?? '',
       metadata: map['metadata'] != null
           ? getCastMediaMetadata(Map.from(map['metadata']))
           : null,
-      duration: map['streamDuration'] != null
-          ? Duration(milliseconds: map['streamDuration'].round())
+      duration: map['duration'] != null
+          ? Duration(seconds: map['duration'].round())
           : null,
       customData: Map<String, dynamic>.from(map['customData'] ?? {}),
       breaks: map['breaks'] != null
@@ -75,5 +79,30 @@ class GoogleCastMediaInformationAndroid extends GoogleCastMediaInformation {
 }
 
 GoogleCastMediaMetadata? getCastMediaMetadata(Map<String, dynamic> map) {
-  return null;
+  final type = map['metadataType'] as int;
+  GoogleCastMediaMetadata? metadata;
+  switch (type) {
+    //Generic
+    case 0:
+      metadata = GoogleCastGenericMediaMetadataAndroid.fromMap(map);
+      break;
+    //MOVIE
+    case 1:
+      metadata = GoogleCastMovieMediaMetadataAndroid.fromMap(map);
+      break;
+    //TV SHOW
+    case 2:
+      metadata = GoogleCastTvShowMediaMetadataAndroid.fromMap(map);
+      break;
+    //Music
+    case 3:
+      metadata = GoogleCastMusicMediaMetadataAndroid.fromMap(map);
+      break;
+    //Photo
+    case 4:
+      metadata = GooglCastPhotoMediaMetadataAndroid.fromMap(map);
+      break;
+    default:
+  }
+  return metadata;
 }

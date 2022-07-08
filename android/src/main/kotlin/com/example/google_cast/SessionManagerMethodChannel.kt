@@ -34,6 +34,8 @@ class SessionManagerMethodChannel(discoveryManager: DiscoveryManagerMethodChanne
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
         when (call.method) {
             "startSessionWithDeviceId" -> startSession(call.arguments, result)
+            "endSessionAndStopCasting"-> sessionManager?.endCurrentSession(true)
+            "endSession"-> sessionManager?.endCurrentSession(false)
         }
     }
 
@@ -47,6 +49,7 @@ class SessionManagerMethodChannel(discoveryManager: DiscoveryManagerMethodChanne
 
     //SessionManagerLister
     override fun onSessionEnded(session: Session, p1: Int) {
+
         onSessionChanged()
     }
 

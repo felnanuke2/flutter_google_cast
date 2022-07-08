@@ -1,4 +1,3 @@
-import 'package:google_cast/common/image.dart';
 import 'package:google_cast/enums/media_metadata_type.dart';
 import 'cast_media_metadata.dart';
 
@@ -42,19 +41,5 @@ class GoogleCastGenericMediaMetadata extends GoogleCastMediaMetadata {
       'images': images?.map((x) => x.toMap()).toList(),
       'releaseDate': releaseDate?.millisecondsSinceEpoch,
     }..removeWhere((key, value) => value == null);
-  }
-
-  factory GoogleCastGenericMediaMetadata.fromMap(Map<String, dynamic> map) {
-    return GoogleCastGenericMediaMetadata(
-      title: map['title'],
-      subtitle: map['subtitle'],
-      images: map['images'] != null
-          ? List<GoogleCastImage>.from(
-              map['images']?.map((x) => GoogleCastImage.fromMap(x)))
-          : null,
-      releaseDate: map['releaseDate'] != null
-          ? DateTime.tryParse(map['releaseDate'] ?? '')
-          : null,
-    );
   }
 }

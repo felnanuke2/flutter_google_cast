@@ -3,6 +3,7 @@ package com.example.google_cast
 import com.example.google_cast.extensions.*
 import com.google.android.gms.cast.framework.CastContext
 import com.google.android.gms.cast.framework.media.RemoteMediaClient
+import com.google.gson.Gson
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
@@ -167,7 +168,20 @@ class RemoteMediaClientMethodChannel : FlutterPlugin, MethodChannel.MethodCallHa
 
     override fun onStatusUpdated() {
         super.onStatusUpdated()
-        val map = currentRemoteMediaClient?.mediaStatus?.toMap()
-        channel.invokeMethod("onMediaStatusChanged", map)
+        val mediaStatus = currentRemoteMediaClient?.mediaStatus
+        val jsonObject = currentRemoteMediaClient?.mediaStatus?.toJson()
+        jsonObject?.put("activeTrackIds", Gson().toJson(mediaStatus?.activeTrackIds))
+        val json = jsonObject?.toString()
+        channel.invokeMethod("onMediaStatusChanged", json)
+    }
+
+    override fun onQueueStatusUpdated() {
+        super.onQueueStatusUpdated()
+        val list = currentRemoteMediaClient?.mediaStatus?.queueItems?.map {
+            it.toJson().toString()
+        }
+        channel.invokeMethod("onQueueStatusChanged", list)
+
+
     }
 }

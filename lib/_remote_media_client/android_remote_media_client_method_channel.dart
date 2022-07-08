@@ -9,6 +9,7 @@ import 'package:google_cast/entities/queue_item.dart';
 import 'package:google_cast/entities/media_seek_option.dart';
 import 'package:google_cast/entities/request.dart';
 import 'package:google_cast/models/android/android_media_status.dart';
+import 'package:google_cast/models/android/android_queue_item.dart';
 import 'package:google_cast/models/android/cast_device.dart';
 import 'package:rxdart/subjects.dart';
 
@@ -203,13 +204,27 @@ class GoogleCastRemoteMediaClientAndroidMethodChannel
       return null;
     }
     final mediaStatus = GoogleCastAndroidMediaStatus.fromMap(
-      Map<String, dynamic>.from(arguments),
+      Map<String, dynamic>.from(jsonDecode(arguments)),
     );
 
     _mediaStatusStreamController.add(mediaStatus);
   }
 
-  Future _onQueueStatusChanged(arguments) async {}
+  Future _onQueueStatusChanged(arguments) async {
+    if (arguments == null) {
+      _queueItemsStreamController.add([]);
+      return null;
+    }
+
+    final map = List.from(arguments);
+
+    final queueItems = map
+        .map((e) => GoogleCastAndroidQueueItem.fromMap(
+            Map<String, dynamic>.from(
+                Map<String, dynamic>.from(jsonDecode(e)))))
+        .toList();
+    _queueItemsStreamController.add(queueItems);
+  }
 
   Future _onPlayerPositionChanged(arguments) async {
     if (arguments == null) {

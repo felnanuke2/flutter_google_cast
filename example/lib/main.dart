@@ -96,74 +96,82 @@ class _MyAppState extends State<MyApp> {
                       ],
                     ),
                   ),
-                  StreamBuilder<GoggleCastMediaStatus?>(
-                      stream: GoogleCastRemoteMediaClient
-                          .instance.mediaStatusStream,
-                      builder: (context, snapshot) {
-                        if (snapshot.data == null) return Container();
-                        final mediaDuration =
-                            snapshot.data?.mediaInformation?.duration ??
-                                Duration.zero;
-
-                        return Card(
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: StreamBuilder<Duration>(
-                                    stream: GoogleCastRemoteMediaClient
-                                        .instance.playerPositionStream,
-                                    builder: (context, snapshot) {
-                                      final progress =
-                                          snapshot.data ?? Duration.zero;
-                                      print(progress);
-                                      print(mediaDuration);
-                                      var percent = progress.inMilliseconds /
-                                          mediaDuration.inMilliseconds;
-                                      if (percent.toString() == 'NaN') {
-                                        percent = 0;
-                                      }
-                                      if (percent > 1 || percent < 0) {
-                                        percent = 0;
-                                      }
-                                      return Slider(
-                                        value: percent,
-                                        onChanged: _changeCurrentTime,
-                                      );
-                                    }),
-                              ),
-                              IconButton(
-                                onPressed: _togglePLayPause,
-                                icon: Icon(
-                                  GoogleCastRemoteMediaClient.instance
-                                              .mediaStatus?.playerState ==
-                                          CastMediaPlayerState.playing
-                                      ? Icons.pause
-                                      : Icons.play_arrow,
-                                ),
-                              ),
-                              IconButton(
-                                onPressed: !GoogleCastRemoteMediaClient
-                                        .instance.queueHasPreviousItem
-                                    ? null
-                                    : _previous,
-                                icon: const Icon(Icons.skip_previous),
-                              ),
-                              IconButton(
-                                onPressed: !GoogleCastRemoteMediaClient
-                                        .instance.queueHasNextItem
-                                    ? null
-                                    : _next,
-                                icon: const Icon(Icons.skip_next),
-                              ),
-                            ],
-                          ),
-                        );
-                      })
+                  _buildBottom()
                 ],
               );
             },
           )),
     );
+  }
+
+  StreamBuilder<GoggleCastMediaStatus?> _buildBottom() {
+    return StreamBuilder<GoggleCastMediaStatus?>(
+        stream: GoogleCastRemoteMediaClient.instance.mediaStatusStream,
+        builder: (context, snapshot) {
+          if (snapshot.data == null) return Container();
+          final mediaDuration =
+              snapshot.data?.mediaInformation?.duration ?? Duration.zero;
+
+          return Card(
+            child: Row(
+              children: [
+                if (_getImage(GoogleCastRemoteMediaClient
+                        .instance.mediaStatus?.mediaInformation?.metadata) !=
+                    null)
+                  Image.network(
+                    _getImage(GoogleCastRemoteMediaClient
+                        .instance.mediaStatus?.mediaInformation?.metadata)!,
+                    width: 60,
+                    height: 60,
+                  ),
+                Expanded(
+                  child: StreamBuilder<Duration>(
+                      stream: GoogleCastRemoteMediaClient
+                          .instance.playerPositionStream,
+                      builder: (context, snapshot) {
+                        final progress = snapshot.data ?? Duration.zero;
+                        var percent = progress.inMilliseconds /
+                            mediaDuration.inMilliseconds;
+                        if (percent.toString() == 'NaN') {
+                          percent = 0;
+                        }
+                        if (percent > 1 || percent < 0) {
+                          percent = 0;
+                        }
+                        return Slider(
+                          value: percent,
+                          onChanged: _changeCurrentTime,
+                        );
+                      }),
+                ),
+                IconButton(
+                  onPressed: _togglePLayPause,
+                  icon: Icon(
+                    GoogleCastRemoteMediaClient
+                                .instance.mediaStatus?.playerState ==
+                            CastMediaPlayerState.playing
+                        ? Icons.pause
+                        : Icons.play_arrow,
+                  ),
+                ),
+                IconButton(
+                  onPressed:
+                      !GoogleCastRemoteMediaClient.instance.queueHasPreviousItem
+                          ? null
+                          : _previous,
+                  icon: const Icon(Icons.skip_previous),
+                ),
+                IconButton(
+                  onPressed:
+                      !GoogleCastRemoteMediaClient.instance.queueHasNextItem
+                          ? null
+                          : _next,
+                  icon: const Icon(Icons.skip_next),
+                ),
+              ],
+            ),
+          );
+        });
   }
 
   void _changeCurrentTime(double value) {
@@ -379,5 +387,15 @@ class _MyAppState extends State<MyApp> {
       ),
       beforeItemWithId: 2,
     );
+  }
+
+  String? _getImage(GoogleCastMediaMetadata? metadata) {
+    if (metadata == null) {
+      return null;
+    }
+    if (metadata.images?.isEmpty ?? true) {
+      return null;
+    }
+    return metadata.images!.first.url.toString();
   }
 }

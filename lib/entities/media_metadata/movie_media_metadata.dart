@@ -60,24 +60,4 @@ class GoogleCastMovieMediaMetadata extends GoogleCastMediaMetadata {
       'releaseDate': releaseDate?.millisecondsSinceEpoch,
     };
   }
-
-  factory GoogleCastMovieMediaMetadata.fromMap(Map<String, dynamic> map) {
-    return GoogleCastMovieMediaMetadata(
-      title: map['title'],
-      subtitle: map['subtitle'],
-      studio: map['studio'],
-      images: map['images'] != null
-          ? List<GoogleCastImage>.from(
-              map['images']?.map((x) => GoogleCastImage.fromMap(x)))
-          : null,
-      releaseDate: map['releaseDate'] != null
-          ? DateTime.tryParse(map['releaseDate'] ?? '')
-          : null,
-    );
-  }
-
-  String toJson() => json.encode(toMap());
-
-  factory GoogleCastMovieMediaMetadata.fromJson(String source) =>
-      GoogleCastMovieMediaMetadata.fromMap(json.decode(source));
 }

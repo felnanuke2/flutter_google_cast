@@ -1,5 +1,6 @@
 package com.example.google_cast
 
+import android.content.Context
 import androidx.mediarouter.media.MediaRouter
 import com.google.android.gms.cast.CastDevice
 import com.google.gson.Gson
@@ -11,13 +12,16 @@ class DiscoveryManagerMethodChannel : FlutterPlugin, MethodChannel.MethodCallHan
 
     lateinit var channel: MethodChannel
     val routerCallBack: MediaRouter.Callback = DiscoveryRouterCallback()
-    var router: MediaRouter? = null
+    val router: MediaRouter?
+        get() = MediaRouter.getInstance(context)
+    private lateinit var context: Context
 
 
     override fun onAttachedToEngine(binding: FlutterPlugin.FlutterPluginBinding) {
         channel =
             MethodChannel(binding.binaryMessenger, "com.felnanuke.google_cast.discovery_manager")
         channel.setMethodCallHandler(this)
+        context = binding.applicationContext
     }
 
     override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
@@ -36,32 +40,32 @@ class DiscoveryManagerMethodChannel : FlutterPlugin, MethodChannel.MethodCallHan
             reason: Int
         ) {
             super.onRouteUnselected(router, route, reason)
+
             print("routes ${router?.routes?.size}")
         }
 
         override fun onRouteAdded(router: MediaRouter?, route: MediaRouter.RouteInfo?) {
             super.onRouteAdded(router, route)
             if (router != null)
-                getCastDevicesMap(router.routes)
+                getCastDevicesMap()
         }
 
         override fun onRouteRemoved(router: MediaRouter?, route: MediaRouter.RouteInfo?) {
             super.onRouteRemoved(router, route)
             if (router != null)
-                getCastDevicesMap(router.routes)
+                getCastDevicesMap()
         }
 
         override fun onRouteChanged(router: MediaRouter?, route: MediaRouter.RouteInfo?) {
             super.onRouteChanged(router, route)
-            this@DiscoveryManagerMethodChannel.router = router
             if (router != null)
-                getCastDevicesMap(router.routes)
+                getCastDevicesMap()
         }
 
         override fun onRouteVolumeChanged(router: MediaRouter?, route: MediaRouter.RouteInfo?) {
             super.onRouteVolumeChanged(router, route)
             if (router != null)
-                getCastDevicesMap(router.routes)
+                getCastDevicesMap()
         }
 
         override fun onRoutePresentationDisplayChanged(
@@ -69,6 +73,7 @@ class DiscoveryManagerMethodChannel : FlutterPlugin, MethodChannel.MethodCallHan
             route: MediaRouter.RouteInfo?
         ) {
             super.onRoutePresentationDisplayChanged(router, route)
+
         }
 
         override fun onProviderAdded(router: MediaRouter?, provider: MediaRouter.ProviderInfo?) {
@@ -86,14 +91,15 @@ class DiscoveryManagerMethodChannel : FlutterPlugin, MethodChannel.MethodCallHan
             print("routes ${router?.routes?.size}")
         }
 
-         fun getCastDevice(routeInfo: MediaRouter.RouteInfo?): CastDevice? {
+        fun getCastDevice(routeInfo: MediaRouter.RouteInfo?): CastDevice? {
             if (routeInfo == null) return null
             return CastDevice.getFromBundle(routeInfo.extras)
         }
 
-        private fun getCastDevicesMap(routes: List<MediaRouter.RouteInfo>) {
+        private fun getCastDevicesMap() {
+            if (router == null) return
             var devices = mutableListOf<CastDevice>()
-            for (route in routes) {
+            for (route in router!!.routes) {
                 val device = getCastDevice(route)
                 if (device != null) {
                     devices.add(device)
@@ -102,15 +108,14 @@ class DiscoveryManagerMethodChannel : FlutterPlugin, MethodChannel.MethodCallHan
             val json = Gson().toJson(devices)
             this@DiscoveryManagerMethodChannel.channel.invokeMethod("onDevicesChanged", json)
         }
-
-
     }
 
     fun selectRoute(id: String) {
         val routes = router?.routes
+
         val selectedRoute = routes?.find {
             val device = CastDevice.getFromBundle(it.extras)
-            device?.deviceId  == id
+            device?.deviceId == id
         }
         if (selectedRoute != null) {
             this.router?.selectRoute(selectedRoute)

@@ -1,4 +1,4 @@
-import 'package:google_cast/common/repeat_mode.dart';
+import 'package:google_cast/enums/repeat_mode.dart';
 
 class GoogleCastQueueLoadOptions {
   final int startIndex;

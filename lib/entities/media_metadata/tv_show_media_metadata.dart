@@ -55,24 +55,4 @@ class GoogleCastTvShowMediaMetadata extends GoogleCastMediaMetadata {
       'creationDate': originalAirDate?.millisecondsSinceEpoch,
     };
   }
-
-  factory GoogleCastTvShowMediaMetadata.fromMap(Map<String, dynamic> map) {
-    return GoogleCastTvShowMediaMetadata(
-      seriesTitle: map['seriesTitle'],
-      season: map['season']?.toInt(),
-      episode: map['episode']?.toInt(),
-      images: map['images'] != null
-          ? List<GoogleCastImage>.from(
-              map['images']?.map((x) => GoogleCastImage.fromMap(x)))
-          : null,
-      originalAirDate: map['originalAirDate'] != null
-          ? DateTime.tryParse(map['originalAirDate'])
-          : null,
-    );
-  }
-
-  String toJson() => json.encode(toMap());
-
-  factory GoogleCastTvShowMediaMetadata.fromJson(String source) =>
-      GoogleCastTvShowMediaMetadata.fromMap(json.decode(source));
 }

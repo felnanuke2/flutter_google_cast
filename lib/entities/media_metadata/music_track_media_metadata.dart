@@ -17,8 +17,7 @@ class GoogleCastMusicMediaMetadata extends GoogleCastMediaMetadata {
     this.discNumber,
     super.images,
     this.releaseDate,
-    required super.metadataType,
-  });
+  }) : super(metadataType: GoogleCastMediaMetadataType.musicTrackMediaMetadata);
 
   /// 	optional Album or collection from which this track
   ///  is drawn. Player can independently retrieve albumName
@@ -85,29 +84,4 @@ class GoogleCastMusicMediaMetadata extends GoogleCastMediaMetadata {
       'releaseDate': releaseDate?.millisecondsSinceEpoch,
     };
   }
-
-  factory GoogleCastMusicMediaMetadata.fromMap(Map<String, dynamic> map) {
-    return GoogleCastMusicMediaMetadata(
-      metadataType: GoogleCastMediaMetadataType.fromMap(map['metadataType']),
-      albumName: map['albumName'],
-      title: map['title'],
-      albumArtist: map['albumArtist'],
-      artist: map['artist'],
-      composer: map['composer'],
-      trackNumber: map['trackNumber']?.toInt(),
-      discNumber: map['discNumber']?.toInt(),
-      images: map['images'] != null
-          ? List<GoogleCastImage>.from(
-              map['images']?.map((x) => GoogleCastImage.fromMap(x)))
-          : null,
-      releaseDate: map['releaseDate'] != null
-          ? DateTime.tryParse(map['releaseDate'])
-          : null,
-    );
-  }
-
-  String toJson() => json.encode(toMap());
-
-  factory GoogleCastMusicMediaMetadata.fromJson(String source) =>
-      GoogleCastMusicMediaMetadata.fromMap(json.decode(source));
 }

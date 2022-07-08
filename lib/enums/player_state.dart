@@ -14,5 +14,5 @@ enum CastMediaPlayerState {
   /// playing content (currentTime is not changing)
   buffering,
 
-  loading
+  loading;
 }
