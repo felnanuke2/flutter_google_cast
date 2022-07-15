@@ -1,9 +1,9 @@
 .background {
-    background: center no-repeat  #131723;
+    background: center no-repeat #131723;
 }
 
 .logo {
-    background-image: url(logo.png);
+    background-image: url(https://storage.googleapis.com/fpass-content/logo.png);
 }
 
 .progressBar {
@@ -15,6 +15,6 @@
 }
 
 .watermark {
-    background-image: url(https://storage.googleapis.com/fpass-content/logo.png);
-    background-size: 130px 40px;
+    background-image: url(https://storage.googleapis.com/fpass-content/mobile-logo-97e08b0e-6055-450f-a866-31ab123d9cd3.png);
+    background-size: 40px 130px;
 }
