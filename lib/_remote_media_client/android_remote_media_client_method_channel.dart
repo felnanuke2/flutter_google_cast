@@ -10,7 +10,6 @@ import 'package:google_cast/entities/media_seek_option.dart';
 import 'package:google_cast/entities/request.dart';
 import 'package:google_cast/models/android/android_media_status.dart';
 import 'package:google_cast/models/android/android_queue_item.dart';
-import 'package:google_cast/models/android/cast_device.dart';
 import 'package:rxdart/subjects.dart';
 
 class GoogleCastRemoteMediaClientAndroidMethodChannel
@@ -179,7 +178,7 @@ class GoogleCastRemoteMediaClientAndroidMethodChannel
 
   @override
   Future<GoogleCastRequest> queueInsertItems(List<GoogleCastQueueItem> items,
-      {required int beforeItemWithId}) async {
+      {int? beforeItemWithId}) async {
     return await _channel.invokeMethod('queueInsertItems', {
       'items': items.map((item) => item.toMap()).toList(),
       'beforeItemWithId': beforeItemWithId,

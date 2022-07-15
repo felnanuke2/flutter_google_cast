@@ -1,5 +1,3 @@
-library google_cast;
-
 export '_discovery_manager/_discovery_manager.dart';
 export '_google_cast_context/_google_cast_context.dart';
 export '_remote_media_client/_remote_media_client.dart';

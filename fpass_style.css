@@ -1,0 +1,20 @@
+.background {
+    background: center no-repeat  #131723;
+}
+
+.logo {
+    background-image: url(logo.png);
+}
+
+.progressBar {
+    background-color: #B43DE7;
+}
+
+.splash {
+    background: #131723
+}
+
+.watermark {
+    background-image: url(https://storage.googleapis.com/fpass-content/logo.png);
+    background-size: 130px 40px;
+}

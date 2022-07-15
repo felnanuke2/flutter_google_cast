@@ -72,7 +72,7 @@ class GoogleCastMediaInformation {
   ///ID. If contentUrl is provided, it will be used
   ///as media URL, otherwise the contentId will
   ///be used as the media URL.
-  final String? contentUrl;
+  final Uri? contentUrl;
 
   /// Optional media entity, commonly a Google Assistant deep link.
 
@@ -142,7 +142,7 @@ class GoogleCastMediaInformation {
       'duration': duration?.inSeconds,
       'customData': customData,
       'breaks': breaks?.map((x) => x.toMap()).toList(),
-      'contentURL': contentUrl,
+      'contentURL': contentUrl?.toString(),
       'entity': entity,
       'hlsSegmentFormat': hlsSegmentFormat?.name,
       'hlsVideoSegmentFormat': hlsVideoSegmentFormat?.name,

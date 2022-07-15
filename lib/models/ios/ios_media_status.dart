@@ -1,6 +1,7 @@
 import 'package:google_cast/entities/cast_media_status.dart';
 import 'package:google_cast/enums/idle_reason.dart';
 import 'package:google_cast/enums/player_state.dart';
+import 'package:google_cast/lib.dart';
 import 'package:google_cast/models/android/extensions/repeat_mode.dart';
 import 'package:google_cast/models/ios/ios_media_information.dart';
 
@@ -36,7 +37,7 @@ class GoogleCastIOSMediaStatus extends GoggleCastMediaStatus {
 
       volume: map['volume'] ?? 0,
       isMuted: map['isMuted'] ?? true,
-      repeatMode: GoogleCastRepeatModeAndroid.fromMap(map['repeatMode']),
+      repeatMode: GoogleCastMediaRepeatMode.values[(map['repeatMode'])],
       currentItemId: map['currentItemId']?.toInt(),
       activeTrackIds: List<int>.from(map['activeTrackIds'] ?? []),
       // adBreakStatus: map['adBreakStatus'] != null

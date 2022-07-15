@@ -118,11 +118,13 @@ public class FGCSessionManagerMethodChannel : UIResponder, FlutterPlugin, GCKSes
     
     
     public func sessionManager(_ sessionManager: GCKSessionManager, willStart session: GCKCastSession) {
+        onSessionChanged(session)
         
     }
     
     
     public func sessionManager(_ sessionManager: GCKSessionManager, didFailToStart session: GCKCastSession, withError error: Error) {
+        onSessionChanged(session)
         
     }
     
@@ -135,6 +137,7 @@ public class FGCSessionManagerMethodChannel : UIResponder, FlutterPlugin, GCKSes
     }
     
     public func sessionManager(_ sessionManager: GCKSessionManager, willEnd session: GCKCastSession) {
+        onSessionChanged(nil)
         
     }
     
@@ -148,11 +151,11 @@ public class FGCSessionManagerMethodChannel : UIResponder, FlutterPlugin, GCKSes
     }
     
     public func sessionManager(_ sessionManager: GCKSessionManager, didSuspend session: GCKSession, with reason: GCKConnectionSuspendReason) {
-        onSessionChanged(session)
+        onSessionChanged(nil)
     }
     
     public func sessionManager(_ sessionManager: GCKSessionManager, didSuspend session: GCKCastSession, with reason: GCKConnectionSuspendReason) {
-        
+        onSessionChanged(nil)
     }
     
     public func sessionManager(_ sessionManager: GCKSessionManager, willResumeSession session: GCKSession) {
@@ -165,11 +168,11 @@ public class FGCSessionManagerMethodChannel : UIResponder, FlutterPlugin, GCKSes
     }
     
     public func sessionManager(_ sessionManager: GCKSessionManager, didResumeCastSession session: GCKCastSession) {
-        
+        onSessionChanged(session)
     }
     
     public func sessionManager(_ sessionManager: GCKSessionManager, willResumeCastSession session: GCKCastSession) {
-        
+        onSessionChanged(session)
     }
     
     public func sessionManager(_ sessionManager: GCKSessionManager, session: GCKSession, didUpdate device: GCKDevice) {

@@ -8,23 +8,57 @@
 import Foundation
 import GoogleCast
 
+
+
 extension GCKMediaMetadata {
-    func toMap() -> Dictionary<String,Any> {
-        var dict = Dictionary<String,Any>()
-        
-//        for key in self.allKeys(){
-//            let value = self.value(forKey: key)
-//            dict[key] = value
-//        }
-  
-//        let images = self.images() as! [GCKImage]
-//     dict["images"] =  images.map{
-//            image in
-//            image.toMap()
-//        }
-        
-      
-        
+    func toMap() -> Dictionary<String,Any?> {
+        var dict = Dictionary<String,Any?>()
+        dict["type"] = self.metadataType.rawValue
+        dict["images"] =  (self.images() as! [GCKImage]).map{
+            image in
+            image.toMap()
+            
+        }
+        let creationDate = self.date(forKey: kGCKMetadataKeyCreationDate)
+        let releaseDate = self.date(forKey: kGCKMetadataKeyReleaseDate)
+        let broadCastDate = self.date(forKey: kGCKMetadataKeyBroadcastDate)
+        let title = self.string(forKey: kGCKMetadataKeyTitle)
+        let subtitle = self.string(forKey: kGCKMetadataKeySubtitle)
+        let artist = self.string(forKey: kGCKMetadataKeyArtist)
+        let albumArtist = self.string(forKey: kGCKMetadataKeyAlbumArtist)
+        let albumTitle = self.string(forKey: kGCKMetadataKeyAlbumTitle)
+        let albumComposer = self.string(forKey: kGCKMetadataKeyComposer)
+        let albumDiscNumber = self.integer(forKey: kGCKMetadataKeyDiscNumber)
+        let albumTrackNumber = self.integer(forKey: kGCKMetadataKeyTrackNumber)
+        let seasonNumber = self.integer(forKey: kGCKMetadataKeySeasonNumber)
+        let episodeNumber = self.integer(forKey: kGCKMetadataKeyEpisodeNumber)
+        let serieTitle = self.string(forKey: kGCKMetadataKeySeriesTitle)
+        let studio = self.string(forKey: kGCKMetadataKeyStudio)
+        let width = self.string(forKey: kGCKMetadataKeyWidth)
+        let height = self.string(forKey: kGCKMetadataKeyHeight)
+        let locationName = self.string(forKey: kGCKMetadataKeyLocationName)
+        let locationLatitude = self.double(forKey: kGCKMetadataKeyLocationLatitude)
+        let locationLongitude = self.double(forKey: kGCKMetadataKeyLocationLongitude)
+        dict["creationDate"] = creationDate?.timeIntervalSince1970
+        dict["releaseDate"] = releaseDate?.timeIntervalSince1970
+        dict["broadcastDate"] = broadCastDate?.timeIntervalSince1970
+        dict["title"] = title
+        dict["subtitle"] = subtitle
+        dict["artist"] = artist
+        dict["albumArtist"] = albumArtist
+        dict["albumTitle"] = albumTitle
+        dict["composer"] = albumComposer
+        dict["discNumber"] = albumDiscNumber
+        dict["trackNumber"] = albumTrackNumber
+        dict["seasonNumber"] = seasonNumber
+        dict["episodeNumber"] = episodeNumber
+        dict["serieTitle"] = serieTitle
+        dict["studio"] = studio
+        dict["width"] = width
+        dict["height"] = height
+        dict["locationName"] = locationName
+        dict["locationLatitude"] = locationLatitude
+        dict["locationLongitude"] = locationLongitude
         return dict
         
     }

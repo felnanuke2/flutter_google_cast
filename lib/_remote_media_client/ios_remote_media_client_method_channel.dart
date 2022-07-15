@@ -1,16 +1,13 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:google_cast/_remote_media_client/remote_media_client_platform.dart';
 import 'package:google_cast/entities/cast_media_status.dart';
 import 'package:google_cast/entities/load_options.dart';
 import 'package:google_cast/entities/media_seek_option.dart';
 import 'package:google_cast/entities/queue_item.dart';
-import 'package:google_cast/entities/request.dart';
 import 'package:google_cast/entities/media_information.dart';
 import 'package:google_cast/models/ios/ios_cast_queue_item.dart';
 import 'package:google_cast/models/ios/ios_media_information.dart';
 import 'package:google_cast/models/ios/ios_media_status.dart';
-import 'package:google_cast/models/ios/ios_request.dart';
 import 'package:rxdart/rxdart.dart';
 
 class GoogleCastRemoteMediaClientIOSMethodChannel
@@ -72,7 +69,7 @@ class GoogleCastRemoteMediaClientIOSMethodChannel
   }
 
   @override
-  Future<GoogleCastRequest?> loadMedia(
+  Future<void> loadMedia(
     GoogleCastMediaInformation mediaInfo, {
     bool autoPlay = true,
     Duration playPosition = Duration.zero,
@@ -82,7 +79,7 @@ class GoogleCastRemoteMediaClientIOSMethodChannel
     String? credentialsType,
   }) async {
     mediaInfo as GoogleCastMediaInformationIOS;
-    final result = await _channel.invokeMethod(
+    _channel.invokeMethod(
         'loadMedia',
         mediaInfo.toMap()
           ..addAll(
@@ -95,68 +92,51 @@ class GoogleCastRemoteMediaClientIOSMethodChannel
               'credentialsType': credentialsType,
             }..removeWhere((key, value) => value == null),
           ));
-    if (result == null) {
-      if (kDebugMode) print('load media failed. current session is null');
-      return null;
-    }
-    return GoogleCastIosRequest.fromMap(Map<String, dynamic>.from(result));
   }
 
   @override
-  Future<GoogleCastRequest> pause() async {
-    final result = await _channel.invokeMethod('pause');
-    return GoogleCastIosRequest.fromMap(Map<String, dynamic>.from(result));
+  Future<void> pause() async {
+    await _channel.invokeMethod('pause');
   }
 
   @override
-  Future<GoogleCastRequest> play() async {
-    final result = await _channel.invokeMethod('play');
-    return GoogleCastIosRequest.fromMap(Map<String, dynamic>.from(result));
+  Future<void> play() async {
+    await _channel.invokeMethod('play');
   }
 
   @override
-  Future<GoogleCastRequest> setActiveTrackIDs(List<int> activeTrackIDs) async {
-    final result = await _channel.invokeMethod(
-        'setActiveTrackIDs', activeTrackIDs.toList());
-    return GoogleCastIosRequest.fromMap(Map<String, dynamic>.from(result));
+  Future<void> setActiveTrackIDs(List<int> activeTrackIDs) async {
+    await _channel.invokeMethod('setActiveTrackIDs', activeTrackIDs.toList());
   }
 
   @override
-  Future<GoogleCastRequest> setPlaybackRate(double rate) async {
-    final result = await _channel.invokeMethod('setPlaybackRate', rate);
-    return GoogleCastIosRequest.fromMap(Map<String, dynamic>.from(result));
+  Future<void> setPlaybackRate(double rate) async {
+    await _channel.invokeMethod('setPlaybackRate', rate);
   }
 
   @override
-  Future<GoogleCastRequest> setTextTrackStyle(
-      TextTrackStyle textTrackStyle) async {
-    final result = await _channel.invokeMethod(
-        'setTextTrackStyle', textTrackStyle.toMap());
-    return GoogleCastIosRequest.fromMap(Map<String, dynamic>.from(result));
+  Future<void> setTextTrackStyle(TextTrackStyle textTrackStyle) async {
+    await _channel.invokeMethod('setTextTrackStyle', textTrackStyle.toMap());
   }
 
   @override
-  Future<GoogleCastRequest> stop() async {
-    final result = await _channel.invokeMethod('stop');
-    return GoogleCastIosRequest.fromMap(Map<String, dynamic>.from(result));
+  Future<void> stop() async {
+    await _channel.invokeMethod('stop');
   }
 
   @override
-  Future<GoogleCastRequest> seek(GoogleCastMediaSeekOption option) async {
-    final result = await _channel.invokeMethod('seek', option.toMap());
-    return GoogleCastIosRequest.fromMap(Map<String, dynamic>.from(result));
+  Future<void> seek(GoogleCastMediaSeekOption option) async {
+    await _channel.invokeMethod('seek', option.toMap());
   }
 
   @override
-  Future<GoogleCastRequest> queueNextItem() async {
-    final result = await _channel.invokeMethod('queueNextItem');
-    return GoogleCastIosRequest.fromMap(Map<String, dynamic>.from(result));
+  Future<void> queueNextItem() async {
+    await _channel.invokeMethod('queueNextItem');
   }
 
   @override
-  Future<GoogleCastRequest> queuePrevItem() async {
-    final result = await _channel.invokeMethod('queuePrevItem');
-    return GoogleCastIosRequest.fromMap(Map<String, dynamic>.from(result));
+  Future<void> queuePrevItem() async {
+    _channel.invokeMethod('queuePrevItem');
   }
 
 // MARK: - MethodCallHandler
@@ -186,63 +166,59 @@ class GoogleCastRemoteMediaClientIOSMethodChannel
   }
 
   @override
-  Future<GoogleCastRequest?> queueLoadItems(
+  Future<void> queueLoadItems(
     List<GoogleCastQueueItem> queueItems, {
     GoogleCastQueueLoadOptions? options,
   }) async {
-    final result = await _channel.invokeMethod(
+    _channel.invokeMethod(
       'queueLoadItems',
       {
         'items': queueItems.map((item) => item.toMap()).toList(),
         if (options != null) 'options': options.toMap(),
       },
     );
-    if (result == null) return null;
-    return GoogleCastIosRequest.fromMap(Map<String, dynamic>.from(result));
   }
 
   @override
-  Future<GoogleCastRequest> queueInsertItems(List<GoogleCastQueueItem> items,
-      {required int beforeItemWithId}) async {
-    assert(beforeItemWithId >= 0, 'beforeItemWithId must be greater than 0');
-    final result = await _channel.invokeMethod('queueInsertItems', {
+  Future<void> queueInsertItems(List<GoogleCastQueueItem> items,
+      {int? beforeItemWithId}) async {
+    _channel.invokeMethod('queueInsertItems', {
       'items': items.map((item) => item.toMap()).toList(),
       'beforeItemWithId': beforeItemWithId,
     });
-    return GoogleCastIosRequest.fromMap(Map<String, dynamic>.from(result));
   }
 
   @override
-  Future<GoogleCastRequest> queueInsertItemAndPlay(
+  Future<void> queueInsertItemAndPlay(
     GoogleCastQueueItem item, {
     required int beforeItemWithId,
   }) async {
     assert(beforeItemWithId >= 0, 'beforeItemWithId must be greater than 0');
-    final result = await _channel.invokeMethod('queueInsertItemAndPlay', {
+    _channel.invokeMethod('queueInsertItemAndPlay', {
       'item': item.toMap(),
       'beforeItemWithId': beforeItemWithId,
     });
-    return GoogleCastIosRequest.fromMap(Map<String, dynamic>.from(result));
+    return;
   }
 
   @override
-  Future<GoogleCastRequest> queueJumpToItemWithId(int itemId) {
-    // TODO: implement queueJumpToItemWithId
-    throw UnimplementedError();
+  Future<void> queueJumpToItemWithId(int itemId) async {
+    _channel.invokeMethod('queueJumpToItemWithId', itemId);
   }
 
   @override
-  Future<GoogleCastRequest> queueRemoveItemsWithIds(List<int> itemIds) {
-    // TODO: implement queueRemoveItemsWithIds
-    throw UnimplementedError();
+  Future<void> queueRemoveItemsWithIds(List<int> itemIds) async {
+    _channel.invokeMethod('queueRemoveItemsWithIds', itemIds);
   }
 
   _updateQueueItems(arguments) {
+    print('start queue update');
     final items = List.from(arguments ?? []);
     final queueItems = items
         .map((item) =>
             GoogleCastQueueItemIOS.fromMap(Map<String, dynamic>.from(item)))
         .toList();
     _queueItemsStreamController.add(queueItems);
+    print('end queue update');
   }
 }

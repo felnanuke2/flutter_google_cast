@@ -3,7 +3,6 @@ import 'package:google_cast/entities/load_options.dart';
 import 'package:google_cast/entities/media_information.dart';
 import 'package:google_cast/entities/media_seek_option.dart';
 import 'package:google_cast/entities/queue_item.dart';
-import 'package:google_cast/entities/request.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
 abstract class GoogleCastRemoteMediaClientPlatformInterface
@@ -24,7 +23,7 @@ abstract class GoogleCastRemoteMediaClientPlatformInterface
 
   bool get queueHasPreviousItem;
 
-  Future<GoogleCastRequest?> loadMedia(
+  Future<void> loadMedia(
     GoogleCastMediaInformation mediaInfo, {
     bool autoPlay = true,
     Duration playPosition = Duration.zero,
@@ -34,41 +33,41 @@ abstract class GoogleCastRemoteMediaClientPlatformInterface
     String? credentialsType,
   });
 
-  Future<GoogleCastRequest?> queueLoadItems(
+  Future<void> queueLoadItems(
     List<GoogleCastQueueItem> queueItems, {
     GoogleCastQueueLoadOptions? options,
   });
 
-  Future<GoogleCastRequest> setPlaybackRate(double rate);
+  Future<void> setPlaybackRate(double rate);
 
-  Future<GoogleCastRequest> setActiveTrackIDs(List<int> activeTrackIDs);
+  Future<void> setActiveTrackIDs(List<int> activeTrackIDs);
 
-  Future<GoogleCastRequest> setTextTrackStyle(TextTrackStyle textTrackStyle);
+  Future<void> setTextTrackStyle(TextTrackStyle textTrackStyle);
 
-  Future<GoogleCastRequest> pause();
+  Future<void> pause();
 
-  Future<GoogleCastRequest> play();
+  Future<void> play();
 
-  Future<GoogleCastRequest> stop();
+  Future<void> stop();
 
-  Future<GoogleCastRequest> queueNextItem();
+  Future<void> queueNextItem();
 
-  Future<GoogleCastRequest> queuePrevItem();
+  Future<void> queuePrevItem();
 
-  Future<GoogleCastRequest> seek(GoogleCastMediaSeekOption option);
+  Future<void> seek(GoogleCastMediaSeekOption option);
 
-  Future<GoogleCastRequest> queueInsertItems(
+  Future<void> queueInsertItems(
     List<GoogleCastQueueItem> items, {
-    required int beforeItemWithId,
+    int? beforeItemWithId,
   });
-  Future<GoogleCastRequest> queueInsertItemAndPlay(
+  Future<void> queueInsertItemAndPlay(
     GoogleCastQueueItem item, {
     required int beforeItemWithId,
   });
 
-  Future<GoogleCastRequest> queueRemoveItemsWithIds(
+  Future<void> queueRemoveItemsWithIds(
     List<int> itemIds,
   );
 
-  Future<GoogleCastRequest> queueJumpToItemWithId(int itemId);
+  Future<void> queueJumpToItemWithId(int itemId);
 }

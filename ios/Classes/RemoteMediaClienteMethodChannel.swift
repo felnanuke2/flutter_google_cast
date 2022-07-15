@@ -94,11 +94,19 @@ class RemoteMediaClienteMethodChannel :UIResponder, FlutterPlugin, GCKRemoteMedi
         case "queueInsertItemAndPlay":
             queueInsertItemAndPlay(call.arguments as! Dictionary<String, Any>, result:result)
             break
+        case "queueJumpToItemWithId":
+            queueJumpToItemWithId(call.arguments as! UInt, result: result)
+            break
         default:
             break
         }
         
         
+    }
+    
+    func queueJumpToItemWithId(_ id: UInt, result: FlutterResult){
+        currentRemoteMediaCliente?.queueJumpToItem(withID: id)
+        result(true)
     }
     
     
@@ -112,12 +120,12 @@ class RemoteMediaClienteMethodChannel :UIResponder, FlutterPlugin, GCKRemoteMedi
     
     private func queueInsertItems(_ arguments: Dictionary<String,Any>, result : FlutterResult) {
         let itemsDict = arguments["items"] as! [Dictionary<String,Any>]
-        let beforItemWithId = arguments["beforeItemWithId"] as! UInt
+        let beforItemWithId = arguments["beforeItemWithId"] as? UInt
         let items = itemsDict.map{
             dict in
             GCKMediaQueueItem.fromMap(dict)
         }
-        let request =  currentRemoteMediaCliente?.queueInsert(items, beforeItemWithID: beforItemWithId)
+        let request =  currentRemoteMediaCliente?.queueInsert(items,beforeItemWithID: beforItemWithId ?? kGCKMediaQueueInvalidItemID )
         result(request?.toMap())
     }
     
@@ -266,7 +274,11 @@ class RemoteMediaClienteMethodChannel :UIResponder, FlutterPlugin, GCKRemoteMedi
     }
     
     func remoteMediaClient(_ client: GCKRemoteMediaClient, didInsertQueueItemsWithIDs queueItemIDs: [NSNumber], beforeItemWithID beforeItemID: UInt) {
-        guard let index = queueOrder.firstIndex(of: NSNumber(value: beforeItemID)) else { return }
+        guard let index = queueOrder.firstIndex(of: NSNumber(value: beforeItemID)) else {
+            queueOrder.append(contentsOf: queueItemIDs)
+            client.queueFetchItems(forIDs: queueItemIDs)
+            return
+        }
         queueOrder.insert(contentsOf: queueItemIDs, at: index)
         client.queueFetchItems(forIDs: queueItemIDs)
         

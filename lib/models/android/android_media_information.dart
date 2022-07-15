@@ -39,7 +39,7 @@ class GoogleCastMediaInformationAndroid extends GoogleCastMediaInformation {
       streamType: GoogleCastAndroidStreamType.fromMap(map['streamType']),
       contentType: map['contentType'] ?? '',
       metadata: map['metadata'] != null
-          ? getCastMediaMetadata(Map.from(map['metadata']))
+          ? _getCastMediaMetadata(Map.from(map['metadata']))
           : null,
       duration: map['duration'] != null
           ? Duration(seconds: map['duration'].round())
@@ -78,7 +78,7 @@ class GoogleCastMediaInformationAndroid extends GoogleCastMediaInformation {
   }
 }
 
-GoogleCastMediaMetadata? getCastMediaMetadata(Map<String, dynamic> map) {
+GoogleCastMediaMetadata? _getCastMediaMetadata(Map<String, dynamic> map) {
   final type = map['metadataType'] as int;
   GoogleCastMediaMetadata? metadata;
   switch (type) {

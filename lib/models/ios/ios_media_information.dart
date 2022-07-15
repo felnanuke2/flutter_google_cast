@@ -1,6 +1,9 @@
-import 'package:google_cast/entities/media_information.dart';
-
-import '../../entities/media_metadata/cast_media_metadata.dart';
+import 'package:google_cast/lib.dart';
+import 'package:google_cast/models/ios/metadata/generic.dart';
+import 'package:google_cast/models/ios/metadata/metadata.dart';
+import 'package:google_cast/models/ios/metadata/movie.dart';
+import 'package:google_cast/models/ios/metadata/music.dart';
+import 'package:google_cast/models/ios/metadata/tv_show.dart';
 
 class GoogleCastMediaInformationIOS extends GoogleCastMediaInformation {
   GoogleCastMediaInformationIOS({
@@ -31,11 +34,11 @@ class GoogleCastMediaInformationIOS extends GoogleCastMediaInformation {
           ? List<CastBreakClips>.from(
               map['breakClips']?.map((x) => CastBreakClips.fromMap(x)))
           : null,
-      contentId: map['contentId'] ?? '',
+      contentId: map['contentID'] ?? '',
       streamType: CastMediaStreamType.values[map['streamType']],
       contentType: map['contentType'] ?? '',
       metadata: map['metadata'] != null
-          ? getCastMediaMetadata(Map.from(map['metadata']))
+          ? _getCastMediaMetadata(Map.from(map['metadata']))
           : null,
       duration: map['duration'] != null
           ? Duration(seconds: map['duration'].round())
@@ -45,7 +48,7 @@ class GoogleCastMediaInformationIOS extends GoogleCastMediaInformation {
           ? List<CastBreak>.from(
               map['breaks']?.map((x) => CastBreak.fromMap(x)))
           : null,
-      contentUrl: map['contentUrl'],
+      contentUrl: Uri.tryParse(map['contentURL'] ?? ''),
       entity: map['entity'],
       hlsSegmentFormat: map['hlsSegmentFormat'] != null
           ? CastHlsSegmentFormat.fromMap(map['hlsSegmentFormat'])
@@ -74,6 +77,19 @@ class GoogleCastMediaInformationIOS extends GoogleCastMediaInformation {
   }
 }
 
-GoogleCastMediaMetadata? getCastMediaMetadata(Map<String, dynamic> map) {
-  return null;
+GoogleCastMediaMetadata? _getCastMediaMetadata(Map<String, dynamic> map) {
+  final type = GoogleCastMediaMetadataType.values[map['type']];
+  if (type == GoogleCastMediaMetadataType.genericMediaMetadata) {
+    return GoogleCastGenericMediaMetadataIOS.fromMap(map);
+  } else if (type == GoogleCastMediaMetadataType.movieMediaMetadata) {
+    return GoogleCastMovieMediaMetadataIOS.fromMap(map);
+  } else if (type == GoogleCastMediaMetadataType.tvShowMediaMetadata) {
+    return GoogleCastTvShowMediaMetadataIOS.fromMap(map);
+  } else if (type == GoogleCastMediaMetadataType.musicTrackMediaMetadata) {
+    return GoogleCastMusicMediaMetadataIOS.fromMap(map);
+  } else if (type == GoogleCastMediaMetadataType.photoMediaMetadata) {
+    return GooglCastPhotoMediaMetadataIOS.fromMap(map);
+  } else {
+    return null;
+  }
 }

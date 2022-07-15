@@ -10,21 +10,13 @@ import GoogleCast
 
 
 extension GCKImage {
-    func toMap() -> Dictionary<String, Any> {
-        
-        var dict = Dictionary<String, Any>()
-        
+    func toMap() -> Dictionary<String, Any?> {
+
+        var dict = Dictionary<String, Any?>()
         dict["height"] =  self.height
         dict["width"] = self.width
         dict["url"] =  self.url.absoluteString
-        
-        
-        
         return dict
-        
-        
-        
-        
     }
     
 }

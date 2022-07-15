@@ -1,8 +1,6 @@
 import 'package:flutter/services.dart';
-import 'package:google_cast/entities/cast_session.dart';
-import 'package:google_cast/entities/cast_device.dart';
-import 'package:google_cast/enums/connection_satate.dart';
 import 'package:google_cast/lib.dart';
+import 'package:google_cast/models/ios/ios_cast_device.dart';
 import 'package:rxdart/subjects.dart';
 
 import '../models/ios/ios_cast_sessions.dart';
