@@ -212,13 +212,23 @@ class GoogleCastRemoteMediaClientIOSMethodChannel
   }
 
   _updateQueueItems(arguments) {
-    print('start queue update');
     final items = List.from(arguments ?? []);
     final queueItems = items
         .map((item) =>
             GoogleCastQueueItemIOS.fromMap(Map<String, dynamic>.from(item)))
         .toList();
     _queueItemsStreamController.add(queueItems);
-    print('end queue update');
+  }
+
+  @override
+  Future<void> queueReorderItems(
+      {required List<int> itemsIds, required int? beforeItemWithId}) async {
+    _channel.invokeMethod(
+      'queueReorderItems',
+      {
+        'itemsIds': itemsIds,
+        'beforeItemWithId': beforeItemWithId,
+      },
+    );
   }
 }

@@ -1,10 +1,6 @@
 import 'package:flutter/services.dart';
 import 'package:google_cast/lib.dart';
-import 'package:google_cast/models/ios/ios_cast_device.dart';
 import 'package:rxdart/subjects.dart';
-
-import '../models/ios/ios_cast_sessions.dart';
-import 'cast_session_manager_platform.dart';
 
 class GoogleCastSessionManagerIOSMethodChannel
     implements GoogleCastSessionManagerPlatformInterface {
@@ -93,5 +89,10 @@ class GoogleCastSessionManagerIOSMethodChannel
       print(e);
       print(s);
     }
+  }
+
+  @override
+  void setDeviceVolume(double value) {
+    _channel.invokeMethod('setDeviceVolume', value);
   }
 }

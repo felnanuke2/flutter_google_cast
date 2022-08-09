@@ -92,4 +92,9 @@ class GoogleCastSessionManagerAndroidMethodChannel
     final session = GoogleCastSessionAndroid.fromMap(map);
     _currentSessionStreamController.add(session);
   }
+
+  @override
+  void setDeviceVolume(double value) {
+    _channel.invokeMethod('setStreamVolume', value);
+  }
 }

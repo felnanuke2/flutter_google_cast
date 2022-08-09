@@ -102,4 +102,6 @@ abstract class GoogleCastSessionManagerPlatformInterface
       // nullable GCKSessionOptions *	sessionOptions
       // forDeviceCategory: 		(NSString *)  	category
       );
+
+  void setDeviceVolume(double value);
 }

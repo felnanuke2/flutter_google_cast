@@ -33,13 +33,13 @@ class GoogleCastDiscoveryManagerMethodChannelAndroid
 
   @override
   Future<void> startDiscovery() async {
-    if (kDebugMode) print('startDiscovery() only works on android');
+    _channel.invokeMethod('startDiscovery');
     return;
   }
 
   @override
   Future<void> stopDiscovery() async {
-    if (kDebugMode) print('stopDiscovery() only works on android');
+    _channel.invokeMethod('stopDiscovery');
     return;
   }
 

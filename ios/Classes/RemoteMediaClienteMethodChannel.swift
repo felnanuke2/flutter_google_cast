@@ -97,11 +97,22 @@ class RemoteMediaClienteMethodChannel :UIResponder, FlutterPlugin, GCKRemoteMedi
         case "queueJumpToItemWithId":
             queueJumpToItemWithId(call.arguments as! UInt, result: result)
             break
+        case "queueReorderItems":
+            queueReorderItems(call.arguments as! Dictionary<String,Any?>, result: result)
+            break;
+       
         default:
             break
         }
         
         
+    }
+    
+    
+    func queueReorderItems(_ arguments : Dictionary<String,Any?>, result: FlutterResult){
+        let itemIds = arguments["itemsIds"] as! [NSNumber]
+        let beforeItemIds = arguments["beforeItemWithId"] as! UInt
+        currentRemoteMediaCliente?.queueReorderItems(withIDs: itemIds, insertBeforeItemWithID: beforeItemIds)
     }
     
     func queueJumpToItemWithId(_ id: UInt, result: FlutterResult){
@@ -232,17 +243,13 @@ class RemoteMediaClienteMethodChannel :UIResponder, FlutterPlugin, GCKRemoteMedi
     
 
     func remoteMediaClient(_ client: GCKRemoteMediaClient, didUpdate mediaStatus: GCKMediaStatus?) {
-        self.positionTimer?.invalidate()
-        self.positionTimer = nil
-        self.positionTimer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true){_ in
-            self.channel?.invokeMethod("onUpdatePlayerPosition", arguments: Int(client.approximateStreamPosition()))
-        }
+        startListenPlayerPosition()
         channel?.invokeMethod("onUpdateMediaStatus", arguments: mediaStatus?.toMap())
+        if client.mediaStatus?.idleReason == .finished {
+         onSessionEnd()
+        }
     }
     
-    func remoteMediaClient(_ client: GCKRemoteMediaClient, didUpdate mediaMetadata: GCKMediaMetadata?) {
-      
-    }
     
     func remoteMediaClient(_ client: GCKRemoteMediaClient, didReceive queueItems: [GCKMediaQueueItem]) {
         for queuItem in queueItems {
@@ -252,8 +259,9 @@ class RemoteMediaClienteMethodChannel :UIResponder, FlutterPlugin, GCKRemoteMedi
       
     }
     func remoteMediaClient(_ client: GCKRemoteMediaClient, didStartMediaSessionWithID sessionID: Int) {
-        
+        startListenPlayerPosition()
     }
+    
     
     func remoteMediaClient(_ client: GCKRemoteMediaClient, didRemoveQueueItemsWithIDs queueItemIDs: [NSNumber]) {
         
@@ -289,11 +297,27 @@ class RemoteMediaClienteMethodChannel :UIResponder, FlutterPlugin, GCKRemoteMedi
         client.queueFetchItems(forIDs: queueItemIDs)
     }
     
+    
     private func updateQueueItems() {
+        
         channel?.invokeMethod("updateQueueItems", arguments: orderedQueueItems.map{
             queueItem in
             queueItem.toMap()
         })
+    }
+    
+    public func onSessionEnd(){
+        queueItems.removeAll()
+        queueOrder.removeAll()
+        updateQueueItems()
+    }
+    
+    private func startListenPlayerPosition(){
+        self.positionTimer?.invalidate()
+        self.positionTimer = nil
+        self.positionTimer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true){_ in
+            self.channel?.invokeMethod("onUpdatePlayerPosition", arguments: Int(self.currentRemoteMediaCliente?.approximateStreamPosition() ?? 0))
+        }
     }
    
 }

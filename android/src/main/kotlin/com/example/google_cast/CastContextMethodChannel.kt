@@ -66,11 +66,6 @@ class CastContextMethodChannel : FlutterPlugin, MethodChannel.MethodCallHandler 
         optionsBuilder.setEnableReconnectionService(true)
         GoogleCastOptionsProvider.options = optionsBuilder.build()
         CastContext.getSharedInstance(appContext)
-        val selector = MediaRouteSelector.Builder()
-            .addControlCategories(listOf(MediaControlIntent.CATEGORY_REMOTE_PLAYBACK))
-            .build()
-        MediaRouter.getInstance(appContext)
-            .addCallback(selector, discoveryManager.routerCallBack, CALLBACK_FLAG_REQUEST_DISCOVERY)
         castContext?.sessionManager?.addSessionManagerListener(sessionManagerMethodChannel)
         return true
     }

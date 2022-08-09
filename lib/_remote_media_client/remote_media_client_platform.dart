@@ -70,4 +70,9 @@ abstract class GoogleCastRemoteMediaClientPlatformInterface
   );
 
   Future<void> queueJumpToItemWithId(int itemId);
+
+  Future<void> queueReorderItems({
+    required List<int> itemsIds,
+    required int? beforeItemWithId,
+  });
 }

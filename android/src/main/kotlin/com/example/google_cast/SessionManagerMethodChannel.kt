@@ -36,6 +36,8 @@ class SessionManagerMethodChannel(discoveryManager: DiscoveryManagerMethodChanne
             "startSessionWithDeviceId" -> startSession(call.arguments, result)
             "endSessionAndStopCasting"-> sessionManager?.endCurrentSession(true)
             "endSession"-> sessionManager?.endCurrentSession(false)
+            "setStreamVolume" -> sessionManager?.currentCastSession?.volume = call.arguments as Double
+
         }
     }
 
@@ -49,7 +51,6 @@ class SessionManagerMethodChannel(discoveryManager: DiscoveryManagerMethodChanne
 
     //SessionManagerLister
     override fun onSessionEnded(session: Session, p1: Int) {
-
         onSessionChanged()
     }
 
@@ -63,6 +64,7 @@ class SessionManagerMethodChannel(discoveryManager: DiscoveryManagerMethodChanne
     }
 
     override fun onSessionResumed(p0: Session, p1: Boolean) {
+        remoteMediaClientMethodChannel.startListen()
         onSessionChanged()
     }
 
@@ -89,7 +91,7 @@ class SessionManagerMethodChannel(discoveryManager: DiscoveryManagerMethodChanne
 
 
     private fun onSessionChanged() {
-        val session = sessionManager?.currentSession as CastSession?
+        val session = sessionManager?.currentCastSession
         val map = session?.toMap()
         channel.invokeMethod("onSessionChanged", map)
     }

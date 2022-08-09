@@ -235,4 +235,13 @@ class GoogleCastRemoteMediaClientAndroidMethodChannel
     final playerPosition = Duration(milliseconds: arguments["progress"] ?? 0);
     _playerPositionStreamController.add(playerPosition);
   }
+
+  @override
+  Future<void> queueReorderItems(
+      {required List<int> itemsIds, required int? beforeItemWithId}) {
+    return _channel.invokeMethod('queueReorderItems', {
+      'itemsIds': itemsIds,
+      'beforeItemWithId': beforeItemWithId,
+    });
+  }
 }

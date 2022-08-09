@@ -69,14 +69,14 @@ public class FGCSessionManagerMethodChannel : UIResponder, FlutterPlugin, GCKSes
         case "endSessionAndStopCasting":
             endSessionAndStopCasting(result)
             break
-            
-   
+        case "setDeviceVolume":
+            setDeviceVolume(call.arguments as! NSNumber)
+            break
             
         default:
             result(FlutterError(code: "1", message: "No Method Handler", details: nil))
             break
         }
-        
         
         
     }
@@ -134,15 +134,16 @@ public class FGCSessionManagerMethodChannel : UIResponder, FlutterPlugin, GCKSes
     
     public func sessionManager(_ sessionManager: GCKSessionManager, didEnd session: GCKSession, withError error: Error?) {
         onSessionChanged(session)
+        RemoteMediaClienteMethodChannel.instance.onSessionEnd()
     }
     
     public func sessionManager(_ sessionManager: GCKSessionManager, willEnd session: GCKCastSession) {
-        onSessionChanged(nil)
-        
+        onSessionChanged(session)
     }
     
     public func sessionManager(_ sessionManager: GCKSessionManager, didEnd session: GCKCastSession, withError error: Error?) {
         onSessionChanged(nil)
+        RemoteMediaClienteMethodChannel.instance.onSessionEnd()
         
     }
     
@@ -151,11 +152,11 @@ public class FGCSessionManagerMethodChannel : UIResponder, FlutterPlugin, GCKSes
     }
     
     public func sessionManager(_ sessionManager: GCKSessionManager, didSuspend session: GCKSession, with reason: GCKConnectionSuspendReason) {
-        onSessionChanged(nil)
+            onSessionChanged(nil)
     }
     
     public func sessionManager(_ sessionManager: GCKSessionManager, didSuspend session: GCKCastSession, with reason: GCKConnectionSuspendReason) {
-        onSessionChanged(nil)
+            onSessionChanged(nil)
     }
     
     public func sessionManager(_ sessionManager: GCKSessionManager, willResumeSession session: GCKSession) {
@@ -193,18 +194,15 @@ public class FGCSessionManagerMethodChannel : UIResponder, FlutterPlugin, GCKSes
     public func sessionManager(_ sessionManager: GCKSessionManager, session: GCKSession, didReceiveDeviceStatus statusText: String?) {
         onSessionChanged(session)
     }
-    
-    public func sessionManager(_ sessionManager: GCKSessionManager, castSession session: GCKCastSession, didReceiveDeviceStatus statusText: String?) {
-        
-    }
-    
-    
-    public func sessionManager(_ sessionManager: GCKSessionManager, didUpdateDefaultSessionOptionsForDeviceCategory category: String) {
-        
-    }
-    
+
     
     private func onSessionChanged(_ session : GCKSession?){
         channel?.invokeMethod("onCurrentSessionChanged", arguments: session?.toDict())
+      
     }
+    
+    func setDeviceVolume(_ volume : NSNumber){
+        sessionManager.currentCastSession?.setDeviceVolume(Float(truncating: volume))
+    }
+    
 }

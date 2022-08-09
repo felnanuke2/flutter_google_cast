@@ -1,5 +1,6 @@
 package com.example.google_cast
 
+import android.media.session.MediaSession
 import com.example.google_cast.extensions.*
 import com.google.android.gms.cast.framework.CastContext
 import com.google.android.gms.cast.framework.media.RemoteMediaClient
@@ -39,6 +40,7 @@ class RemoteMediaClientMethodChannel : FlutterPlugin, MethodChannel.MethodCallHa
             "queuePrevItem" -> queuePrevItem()
             "queueJumpToItemWithId" -> queueJumpToItemWithId(call.arguments)
             "queueRemoveItemsWithIds" -> queueRemoveItemsWithIds(call.arguments)
+            "queueReorderItems" -> queueReorderItems(call.arguments)
             "seek" -> seek(call.arguments)
             "setActiveTrackIds" -> setActiveTrackIds(call.arguments)
             "setPlaybackRate" -> setPlaybackRate(call.arguments)
@@ -72,7 +74,12 @@ class RemoteMediaClientMethodChannel : FlutterPlugin, MethodChannel.MethodCallHa
         val options = GoogleCastSeekOptionsBuilder.fromMap(arguments)
         currentRemoteMediaClient?.seek(options)
     }
-
+    private fun queueReorderItems(arguments: Any?) {
+        arguments as Map<String,Any?>
+        val itemIds = arguments["itemsIds"] as IntArray
+        val beforeItemWithId = (arguments["beforeItemWithId"] as Int?)?: MediaSession.QueueItem.UNKNOWN_ID
+        currentRemoteMediaClient?.queueReorderItems(itemIds,beforeItemWithId, JSONObject())
+    }
     private fun queueRemoveItemsWithIds(arguments: Any?) {
         arguments as IntArray
         currentRemoteMediaClient?.queueRemoveItems(arguments, JSONObject())
@@ -104,7 +111,7 @@ class RemoteMediaClientMethodChannel : FlutterPlugin, MethodChannel.MethodCallHa
     private fun queueInsertItems(arguments: Map<String, Any?>) {
         val items =
             GoogleCastQueueItemBuilder.listFromMap(arguments["items"] as List<Map<String, Any?>>)
-        val beforeItemWithId = arguments["beforeItemWithId"] as Int
+        val beforeItemWithId = (arguments["beforeItemWithId"] as Int?) ?: MediaSession.QueueItem.UNKNOWN_ID
         var jsonObject = JSONObject()
         currentRemoteMediaClient?.queueInsertItems(
             items.toTypedArray(),

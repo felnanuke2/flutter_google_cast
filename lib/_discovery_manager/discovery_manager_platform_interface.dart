@@ -16,11 +16,13 @@ abstract class GoogleCastDiscoveryManagerPlatformInterface
   Stream<List<GoogleCastDevice>> get devicesStream;
 
   /// Starts the discovery process.
-  /// this only affect IOS apps
+  /// strongly recommended to call this method when the application is show cast devices dialog
+  /// because the battery consumption is high when the discovery process is running.
   Future<void> startDiscovery();
 
   ///Stops the discovery process.
-  ///this only affect IOS apps
+  /// strongly recommended to call this method when the application close the show cast devices dialog
+  /// for reduce battery consumption.
   Future<void> stopDiscovery();
 
   ///Tests whether discovery is currently active for the given device category.

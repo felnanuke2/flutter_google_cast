@@ -49,7 +49,7 @@ class GoogleCastMediaInformationAndroid extends GoogleCastMediaInformation {
           ? List<CastBreak>.from(
               map['breaks']?.map((x) => CastBreak.fromMap(x)))
           : null,
-      contentUrl: map['contentUrl'],
+      contentUrl: Uri.tryParse(map['contentUrl'] ?? ''),
       entity: map['entity'],
       hlsSegmentFormat: map['hlsSegmentFormat'] != null
           ? CastHlsSegmentFormat.fromMap(map['hlsSegmentFormat'])

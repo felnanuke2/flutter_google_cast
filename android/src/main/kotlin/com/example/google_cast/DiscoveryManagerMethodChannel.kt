@@ -1,6 +1,8 @@
 package com.example.google_cast
 
 import android.content.Context
+import androidx.mediarouter.media.MediaControlIntent
+import androidx.mediarouter.media.MediaRouteSelector
 import androidx.mediarouter.media.MediaRouter
 import com.google.android.gms.cast.CastDevice
 import com.google.gson.Gson
@@ -11,7 +13,7 @@ import io.flutter.plugin.common.MethodChannel
 class DiscoveryManagerMethodChannel : FlutterPlugin, MethodChannel.MethodCallHandler {
 
     lateinit var channel: MethodChannel
-    val routerCallBack: MediaRouter.Callback = DiscoveryRouterCallback()
+    private  val routerCallBack: MediaRouter.Callback = DiscoveryRouterCallback()
     val router: MediaRouter?
         get() = MediaRouter.getInstance(context)
     private lateinit var context: Context
@@ -29,8 +31,28 @@ class DiscoveryManagerMethodChannel : FlutterPlugin, MethodChannel.MethodCallHan
     }
 
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
-
+        when(call.method){
+            "startDiscovery"-> startDiscovery()
+            "stopDiscovery"-> router?.removeCallback(routerCallBack)
+        }
     }
+
+    private fun startDiscovery(){
+        router?.removeCallback(routerCallBack)
+        val selector = MediaRouteSelector.Builder()
+            .addControlCategories(listOf(MediaControlIntent.CATEGORY_REMOTE_PLAYBACK))
+            .build()
+        router?.addCallback(selector, routerCallBack,
+                MediaRouter.CALLBACK_FLAG_PERFORM_ACTIVE_SCAN
+            )
+    }
+
+
+
+
+
+
+
 
     inner class DiscoveryRouterCallback : MediaRouter.Callback() {
 
@@ -112,7 +134,6 @@ class DiscoveryManagerMethodChannel : FlutterPlugin, MethodChannel.MethodCallHan
 
     fun selectRoute(id: String) {
         val routes = router?.routes
-
         val selectedRoute = routes?.find {
             val device = CastDevice.getFromBundle(it.extras)
             device?.deviceId == id
