@@ -50,30 +50,4 @@ class GoogleCastQueueItem {
       'startTime': startTime?.inSeconds,
     }..removeWhere((key, value) => value == null);
   }
-
-  // factory GoogleCastQueueItem.fromMap(Map<String, dynamic> map) {
-  //   return GoogleCastQueueItem(
-  //     activeTrackIds: map['activeTrackIds'] != null
-  //         ? List<int>.from(map['activeTrackIds'])
-  //         : null,
-  //     autoPlay: map['autoplay'] ?? false,
-  //     customData: map['customData'] != null
-  //         ? Map<String, dynamic>.from(map['customData'])
-  //         : null,
-  //     itemId: map['itemId']?.toInt(),
-  //     mediaInformation: null,
-  //     // media: map['media'] != null
-  //     //     ? GoogleCastMediaInformation.fromMap(map['media'])
-  //     //     : null,
-  //     playbackDuration: map['playbackDuration'] != null
-  //         ? Duration(seconds: (map['playbackDuration'])?.toInt() ?? 0)
-  //         : null,
-  //     preLoadTime: map['preloadTime'] != null
-  //         ? Duration(seconds: map['preloadTime']?.toInt() ?? 0)
-  //         : null,
-  //     startTime: map['startTime'] != null
-  //         ? Duration(seconds: map['startTime']?.toInt() ?? 0)
-  //         : null,
-  //   );
-  // }
 }

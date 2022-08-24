@@ -1,6 +1,4 @@
 import 'dart:convert';
-
-import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:google_cast/_discovery_manager/discovery_manager_platform_interface.dart';
 import 'package:google_cast/entities/cast_device.dart';

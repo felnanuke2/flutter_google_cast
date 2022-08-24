@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:google_cast/lib.dart';
 import 'dart:async';
 
+import 'package:google_cast/widgets/mini_controller.dart';
+
 void main() {
   runApp(const MyApp());
 }
@@ -41,137 +43,73 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: Scaffold(
-          floatingActionButton: Container(
-            margin: const EdgeInsets.only(bottom: 40),
-            child: StreamBuilder(
-                stream: GoogleCastSessionManager.instance.currentSessionStream,
-                builder: (context, snapshot) {
-                  final isConnected =
-                      GoogleCastSessionManager.instance.connectionState ==
-                          GoogleCastConnectState.ConnectionStateConnected;
-                  return Visibility(
-                    visible: isConnected,
-                    child: FloatingActionButton(
-                      onPressed: _insertQueueItemAndPlay,
-                      child: const Icon(Icons.add),
-                    ),
-                  );
-                }),
-          ),
-          appBar: AppBar(
-            title: const Text('Plugin example app'),
-            actions: [
-              StreamBuilder<GoogleCastSession?>(
-                  stream:
-                      GoogleCastSessionManager.instance.currentSessionStream,
-                  builder: (context, snapshot) {
-                    final bool isConnected =
-                        GoogleCastSessionManager.instance.connectionState ==
-                            GoogleCastConnectState.ConnectionStateConnected;
-                    return IconButton(
-                        onPressed: GoogleCastSessionManager
-                            .instance.endSessionAndStopCasting,
-                        icon: Icon(
-                            isConnected ? Icons.cast_connected : Icons.cast));
-                  })
-            ],
-          ),
-          body: StreamBuilder<List<GoogleCastDevice>>(
-            stream: GoogleCastDiscoveryManager.instance.devicesStream,
-            builder: (context, snapshot) {
-              final devices = snapshot.data ?? [];
-              return Column(
-                children: [
-                  Expanded(
-                    child: ListView(
-                      children: [
-                        ...devices.map((device) {
-                          return ListTile(
-                            title: Text(device.friendlyName),
-                            subtitle: Text(device.modelName ?? ''),
-                            onTap: () => _loadQueue(device),
-                          );
-                        })
-                      ],
-                    ),
-                  ),
-                  _buildBottom()
-                ],
-              );
-            },
-          )),
-    );
-  }
-
-  StreamBuilder<GoggleCastMediaStatus?> _buildBottom() {
-    return StreamBuilder<GoggleCastMediaStatus?>(
-        stream: GoogleCastRemoteMediaClient.instance.mediaStatusStream,
-        builder: (context, snapshot) {
-          if (snapshot.data == null) return Container();
-          final mediaDuration =
-              snapshot.data?.mediaInformation?.duration ?? Duration.zero;
-
-          return Card(
-            child: Row(
-              children: [
-                if (_getImage(GoogleCastRemoteMediaClient
-                        .instance.mediaStatus?.mediaInformation?.metadata) !=
-                    null)
-                  Image.network(
-                    _getImage(GoogleCastRemoteMediaClient
-                        .instance.mediaStatus?.mediaInformation?.metadata)!,
-                    width: 60,
-                    height: 60,
-                  ),
-                Expanded(
-                  child: StreamBuilder<Duration>(
-                      stream: GoogleCastRemoteMediaClient
-                          .instance.playerPositionStream,
+      home: Stack(
+        children: [
+          Scaffold(
+              floatingActionButton: Container(
+                margin: const EdgeInsets.only(bottom: 40),
+                child: StreamBuilder(
+                    stream:
+                        GoogleCastSessionManager.instance.currentSessionStream,
+                    builder: (context, snapshot) {
+                      final isConnected =
+                          GoogleCastSessionManager.instance.connectionState ==
+                              GoogleCastConnectState.ConnectionStateConnected;
+                      return Visibility(
+                        visible: isConnected,
+                        child: FloatingActionButton(
+                          onPressed: _insertQueueItemAndPlay,
+                          child: const Icon(Icons.add),
+                        ),
+                      );
+                    }),
+              ),
+              appBar: AppBar(
+                title: const Text('Plugin example app'),
+                actions: [
+                  StreamBuilder<GoogleCastSession?>(
+                      stream: GoogleCastSessionManager
+                          .instance.currentSessionStream,
                       builder: (context, snapshot) {
-                        final progress = snapshot.data ?? Duration.zero;
-                        var percent = progress.inMilliseconds /
-                            mediaDuration.inMilliseconds;
-                        if (percent.toString() == 'NaN') {
-                          percent = 0;
-                        }
-                        if (percent > 1 || percent < 0) {
-                          percent = 0;
-                        }
-                        return Slider(
-                          value: percent,
-                          onChanged: _changeCurrentTime,
-                        );
-                      }),
-                ),
-                IconButton(
-                  onPressed: _togglePLayPause,
-                  icon: Icon(
-                    GoogleCastRemoteMediaClient
-                                .instance.mediaStatus?.playerState ==
-                            CastMediaPlayerState.playing
-                        ? Icons.pause
-                        : Icons.play_arrow,
-                  ),
-                ),
-                IconButton(
-                  onPressed:
-                      !GoogleCastRemoteMediaClient.instance.queueHasPreviousItem
-                          ? null
-                          : _previous,
-                  icon: const Icon(Icons.skip_previous),
-                ),
-                IconButton(
-                  onPressed:
-                      !GoogleCastRemoteMediaClient.instance.queueHasNextItem
-                          ? null
-                          : _next,
-                  icon: const Icon(Icons.skip_next),
-                ),
-              ],
-            ),
-          );
-        });
+                        final bool isConnected =
+                            GoogleCastSessionManager.instance.connectionState ==
+                                GoogleCastConnectState.ConnectionStateConnected;
+                        return IconButton(
+                            onPressed: GoogleCastSessionManager
+                                .instance.endSessionAndStopCasting,
+                            icon: Icon(isConnected
+                                ? Icons.cast_connected
+                                : Icons.cast));
+                      })
+                ],
+              ),
+              body: StreamBuilder<List<GoogleCastDevice>>(
+                stream: GoogleCastDiscoveryManager.instance.devicesStream,
+                builder: (context, snapshot) {
+                  final devices = snapshot.data ?? [];
+                  return Column(
+                    children: [
+                      Expanded(
+                        child: ListView(
+                          children: [
+                            ...devices.map((device) {
+                              return ListTile(
+                                title: Text(device.friendlyName),
+                                subtitle: Text(device.modelName ?? ''),
+                                onTap: () => _loadQueue(device),
+                              );
+                            })
+                          ],
+                        ),
+                      ),
+                    ],
+                  );
+                },
+              )),
+          const GoogleCastMiniController(),
+        ],
+      ),
+    );
   }
 
   void _changeCurrentTime(double value) {
@@ -202,8 +140,7 @@ class _MyAppState extends State<MyApp> {
         contentId: '',
         streamType: CastMediaStreamType.BUFFERED,
         contentUrl: Uri.parse(
-                'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4')
-            .toString(),
+            'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4'),
         contentType: 'video/mp4',
         metadata: GoogleCastTvShowMediaMetadata(
           episode: 1,
@@ -250,8 +187,7 @@ class _MyAppState extends State<MyApp> {
             contentId: '0',
             streamType: CastMediaStreamType.BUFFERED,
             contentUrl: Uri.parse(
-                    'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4')
-                .toString(),
+                'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4'),
             contentType: 'video/mp4',
             metadata: GoogleCastMovieMediaMetadata(
               title: 'The first Blender Open Movie from 2006',
@@ -289,8 +225,7 @@ class _MyAppState extends State<MyApp> {
             contentId: '1',
             streamType: CastMediaStreamType.BUFFERED,
             contentUrl: Uri.parse(
-                    'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4')
-                .toString(),
+                'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4'),
             contentType: 'video/mp4',
             metadata: GoogleCastMovieMediaMetadata(
               title: 'Big Buck Bunny',
@@ -332,8 +267,7 @@ class _MyAppState extends State<MyApp> {
             contentId: '3',
             streamType: CastMediaStreamType.BUFFERED,
             contentUrl: Uri.parse(
-                    'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4')
-                .toString(),
+                'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4'),
             contentType: 'video/mp4',
             metadata: GoogleCastMovieMediaMetadata(
               title: 'For Bigger Blazes',
@@ -365,8 +299,7 @@ class _MyAppState extends State<MyApp> {
           contentId: '3',
           streamType: CastMediaStreamType.BUFFERED,
           contentUrl: Uri.parse(
-                  'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4')
-              .toString(),
+              'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4'),
           contentType: 'video/mp4',
           metadata: GoogleCastMovieMediaMetadata(
             title: 'For Bigger Blazes',
