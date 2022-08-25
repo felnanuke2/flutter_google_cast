@@ -15,33 +15,42 @@ class _GoogleCastMiniControllerState extends State<GoogleCastMiniController> {
   bool isExpanded = false;
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<GoggleCastMediaStatus?>(
-      stream: GoogleCastRemoteMediaClient.instance.mediaStatusStream,
-      builder: ((context, snapshot) {
-        final mediaStatus = snapshot.data;
-        if (mediaStatus == null) return const SizedBox.shrink();
+    return StreamBuilder<GoogleCastSession?>(
+        stream: GoogleCastSessionManager.instance.currentSessionStream,
+        builder: (context, snapshot) {
+          return StreamBuilder<GoggleCastMediaStatus?>(
+            stream: GoogleCastRemoteMediaClient.instance.mediaStatusStream,
+            builder: ((context, snapshot) {
+              final mediaStatus = snapshot.data;
+              final hasConnectedSession =
+                  GoogleCastSessionManager.instance.hasConnectedSession;
 
-        return Align(
-          alignment: Alignment.bottomCenter,
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 300),
-            height: isExpanded ? size.height : 84,
-            child: Material(
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  if (constraints.maxHeight > 84) {
-                    return ExpandedGoogleCastPlayerController(
-                      toggleExpand: _toggleExpand,
-                    );
-                  }
-                  return _miniPlayerController(mediaStatus);
-                },
-              ),
-            ),
-          ),
-        );
-      }),
-    );
+              if (!hasConnectedSession) return const SizedBox.shrink();
+
+              if (mediaStatus == null) return const SizedBox.shrink();
+
+              return Align(
+                alignment: Alignment.bottomCenter,
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 300),
+                  height: isExpanded ? size.height : 84,
+                  child: Material(
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        if (constraints.maxHeight > 84) {
+                          return ExpandedGoogleCastPlayerController(
+                            toggleExpand: _toggleExpand,
+                          );
+                        }
+                        return _miniPlayerController(mediaStatus);
+                      },
+                    ),
+                  ),
+                ),
+              );
+            }),
+          );
+        });
   }
 
   InkWell _miniPlayerController(GoggleCastMediaStatus mediaStatus) {
@@ -74,7 +83,8 @@ class _GoogleCastMiniControllerState extends State<GoogleCastMiniController> {
                   ),
                 ),
                 IconButton(
-                  onPressed: _togglePlayAndPause,
+                  onPressed: () =>
+                      _togglePlayAndPause.call(mediaStatus.playerState),
                   icon: _getIconFromPlayerState(mediaStatus.playerState),
                   iconSize: 48,
                 )
@@ -134,7 +144,17 @@ class _GoogleCastMiniControllerState extends State<GoogleCastMiniController> {
     );
   }
 
-  void _togglePlayAndPause() {}
+  void _togglePlayAndPause(CastMediaPlayerState playerState) {
+    switch (playerState) {
+      case CastMediaPlayerState.playing:
+        GoogleCastRemoteMediaClient.instance.pause();
+        break;
+      case CastMediaPlayerState.paused:
+        GoogleCastRemoteMediaClient.instance.play();
+        break;
+      default:
+    }
+  }
 
   Widget _getIconFromPlayerState(CastMediaPlayerState playerState) {
     IconData iconData;
@@ -171,7 +191,6 @@ class _GoogleCastMiniControllerState extends State<GoogleCastMiniController> {
     final mediaDuration = mediaStatus.mediaInformation?.duration;
     if (mediaDuration == null || mediaDuration.inSeconds == 0) return null;
     final percentage = currentDuration.inSeconds / mediaDuration.inSeconds;
-    print(percentage);
     return percentage;
   }
 

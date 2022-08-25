@@ -32,3 +32,29 @@ extension GoogleCastMediaMetadataExtensions on GoogleCastMediaMetadata {
     return title;
   }
 }
+
+extension DurationExtension on Duration {
+  String get formatted {
+    var seconds = inSeconds;
+    final days = seconds ~/ Duration.secondsPerDay;
+    seconds -= days * Duration.secondsPerDay;
+    final hours = seconds ~/ Duration.secondsPerHour;
+    seconds -= hours * Duration.secondsPerHour;
+    final minutes = seconds ~/ Duration.secondsPerMinute;
+    seconds -= minutes * Duration.secondsPerMinute;
+
+    final List<String> tokens = [];
+    if (days != 0) {
+      tokens.add('${days}d');
+    }
+    if (tokens.isNotEmpty || hours != 0) {
+      tokens.add('${hours}');
+    }
+
+    tokens.add('${minutes}'.padLeft(2, '0'));
+
+    tokens.add('${seconds}'.padLeft(2, '0'));
+
+    return tokens.join(':');
+  }
+}
