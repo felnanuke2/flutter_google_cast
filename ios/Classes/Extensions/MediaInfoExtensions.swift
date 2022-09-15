@@ -20,6 +20,8 @@ extension GCKMediaInformation{
         builder.contentID  = contentID
         builder.streamType = streamType
         builder.contentURL = contentUrl
+        builder.customData = arguments["customData"]
+      
         
     
         if let tracksDict = arguments["tracks"] as? [Dictionary<String, Any>] {

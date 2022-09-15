@@ -6,3 +6,5 @@ export 'common/common.dart';
 export 'entities/entities.dart';
 export 'enums/enums.dart';
 export 'models/models.dart';
+export './utils/extensions.dart';
+export './utils/functions.dart';

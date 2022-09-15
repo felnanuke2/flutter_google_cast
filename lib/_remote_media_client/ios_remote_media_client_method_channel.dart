@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:google_cast/_remote_media_client/remote_media_client_platform.dart';
 import 'package:google_cast/entities/cast_media_status.dart';
@@ -6,7 +7,6 @@ import 'package:google_cast/entities/media_seek_option.dart';
 import 'package:google_cast/entities/queue_item.dart';
 import 'package:google_cast/entities/media_information.dart';
 import 'package:google_cast/models/ios/ios_cast_queue_item.dart';
-import 'package:google_cast/models/ios/ios_media_information.dart';
 import 'package:google_cast/models/ios/ios_media_status.dart';
 import 'package:rxdart/rxdart.dart';
 
@@ -17,6 +17,7 @@ class GoogleCastRemoteMediaClientIOSMethodChannel
   }
 
   final _channel = const MethodChannel('google_cast.remote_media_client');
+  bool _queueHasNextItem = false;
 
   final _mediaStatusStreamController = BehaviorSubject<GoggleCastMediaStatus?>()
     ..add(null);
@@ -49,15 +50,7 @@ class GoogleCastRemoteMediaClientIOSMethodChannel
       _queueItemsStreamController.stream;
 
   @override
-  bool get queueHasNextItem {
-    final index = queueItems
-        .map((e) => e.itemId)
-        .toList()
-        .lastIndexOf(mediaStatus?.currentItemId);
-
-    final lastIndex = queueItems.length - 1;
-    return (index) < lastIndex;
-  }
+  bool get queueHasNextItem => _queueHasNextItem;
 
   @override
   bool get queueHasPreviousItem {
@@ -78,7 +71,6 @@ class GoogleCastRemoteMediaClientIOSMethodChannel
     String? credentials,
     String? credentialsType,
   }) async {
-    mediaInfo as GoogleCastMediaInformationIOS;
     _channel.invokeMethod(
         'loadMedia',
         mediaInfo.toMap()
@@ -161,6 +153,7 @@ class GoogleCastRemoteMediaClientIOSMethodChannel
     if (arguments != null) {
       arguments = Map<String, dynamic>.from(arguments);
       final mediaStatus = GoogleCastIOSMediaStatus.fromMap(arguments);
+      _queueHasNextItem = arguments["queueHasNextItem"];
       _mediaStatusStreamController.add(mediaStatus);
     }
   }

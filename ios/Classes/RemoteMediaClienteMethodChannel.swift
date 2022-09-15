@@ -8,7 +8,7 @@
 import Foundation
 import GoogleCast
 
-class RemoteMediaClienteMethodChannel :UIResponder, FlutterPlugin, GCKRemoteMediaClientListener, GCKMediaQueueDelegate {
+class RemoteMediaClienteMethodChannel :UIResponder, FlutterPlugin, GCKRemoteMediaClientListener{
     private override init() {
         
     }
@@ -193,6 +193,7 @@ class RemoteMediaClienteMethodChannel :UIResponder, FlutterPlugin, GCKRemoteMedi
     }
     
     private func pause(_ result : FlutterResult){
+        
         let request =  currentRemoteMediaCliente?.pause()
         result(  request?.toMap() )
         
@@ -244,7 +245,9 @@ class RemoteMediaClienteMethodChannel :UIResponder, FlutterPlugin, GCKRemoteMedi
 
     func remoteMediaClient(_ client: GCKRemoteMediaClient, didUpdate mediaStatus: GCKMediaStatus?) {
         startListenPlayerPosition()
-        channel?.invokeMethod("onUpdateMediaStatus", arguments: mediaStatus?.toMap())
+     let data = mediaStatus?.toMap()
+       
+        channel?.invokeMethod("onUpdateMediaStatus", arguments:data)
         if client.mediaStatus?.idleReason == .finished {
          onSessionEnd()
         }
@@ -261,6 +264,8 @@ class RemoteMediaClienteMethodChannel :UIResponder, FlutterPlugin, GCKRemoteMedi
     func remoteMediaClient(_ client: GCKRemoteMediaClient, didStartMediaSessionWithID sessionID: Int) {
         startListenPlayerPosition()
     }
+    
+    
     
     
     func remoteMediaClient(_ client: GCKRemoteMediaClient, didRemoveQueueItemsWithIDs queueItemIDs: [NSNumber]) {
@@ -298,6 +303,10 @@ class RemoteMediaClienteMethodChannel :UIResponder, FlutterPlugin, GCKRemoteMedi
     }
     
     
+ 
+  
+    
+    
     private func updateQueueItems() {
         
         channel?.invokeMethod("updateQueueItems", arguments: orderedQueueItems.map{
@@ -312,11 +321,19 @@ class RemoteMediaClienteMethodChannel :UIResponder, FlutterPlugin, GCKRemoteMedi
         updateQueueItems()
     }
     
+    
+    public func resumeSession(){
+        currentRemoteMediaCliente?.queueFetchItemIDs();
+    }
+    
     private func startListenPlayerPosition(){
         self.positionTimer?.invalidate()
         self.positionTimer = nil
+        
         self.positionTimer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true){_ in
             self.channel?.invokeMethod("onUpdatePlayerPosition", arguments: Int(self.currentRemoteMediaCliente?.approximateStreamPosition() ?? 0))
+
+            
         }
     }
    

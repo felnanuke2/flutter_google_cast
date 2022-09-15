@@ -2,6 +2,9 @@ package com.example.google_cast.extensions
 
 import com.google.android.gms.cast.MediaInfo
 import com.google.android.gms.cast.MediaMetadata
+import com.google.gson.JsonElement
+import com.google.gson.JsonObject
+import org.json.JSONObject
 
 
 class GoogleCastMediaInfo {
@@ -25,6 +28,12 @@ class GoogleCastMediaInfo {
 
             if (metaData != null)
                 builder.setMetadata(metaData)
+            var customData = map["customData"] as Map<String, Any?>?
+
+            if (customData != null) {
+                builder.setCustomData(JSONObject(customData))
+            }
+            
             return builder.build()
         }
     }

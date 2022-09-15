@@ -166,6 +166,7 @@ public class FGCSessionManagerMethodChannel : UIResponder, FlutterPlugin, GCKSes
     public func sessionManager(_ sessionManager: GCKSessionManager, didResumeSession session: GCKSession) {
         onSessionChanged(session)
         RemoteMediaClienteMethodChannel.instance.startListen()
+        RemoteMediaClienteMethodChannel.instance.resumeSession();
     }
     
     public func sessionManager(_ sessionManager: GCKSessionManager, didResumeCastSession session: GCKCastSession) {

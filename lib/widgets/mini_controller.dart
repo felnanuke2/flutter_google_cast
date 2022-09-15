@@ -179,19 +179,11 @@ class _GoogleCastMiniControllerState extends State<GoogleCastMiniController> {
 
   Widget _buildProgressIndicator(GoggleCastMediaStatus mediaStatus) {
     return StreamBuilder<Duration?>(
-        stream: GoogleCastRemoteMediaClient.instance.playerPositionStream,
-        builder: (_, snapshot) => LinearProgressIndicator(
-              value: _getPlayerPercentage(mediaStatus, snapshot.data),
-            ));
-  }
-
-  double? _getPlayerPercentage(
-      GoggleCastMediaStatus mediaStatus, Duration? currentDuration) {
-    if (currentDuration == null || currentDuration.inSeconds == 0) return null;
-    final mediaDuration = mediaStatus.mediaInformation?.duration;
-    if (mediaDuration == null || mediaDuration.inSeconds == 0) return null;
-    final percentage = currentDuration.inSeconds / mediaDuration.inSeconds;
-    return percentage;
+      stream: GoogleCastRemoteMediaClient.instance.playerPositionStream,
+      builder: (_, snapshot) => LinearProgressIndicator(
+        value: getPlayerPercentage(mediaStatus, snapshot.data),
+      ),
+    );
   }
 
   void _toggleExpand() {
