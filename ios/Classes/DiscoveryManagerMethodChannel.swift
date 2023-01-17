@@ -58,23 +58,15 @@ class FGCDiscoveryManagerMethodChannel : UIResponder, GCKDiscoveryManagerListene
     
     public func didUpdateDeviceList() {
         
-        channel!.invokeMethod("onDevicesChanged" , arguments:
-                                devices.map{
-            deviceMap -> Dictionary<String , Any> in
-            let device = deviceMap.value
-            var dict =  device.toDict()
-            dict["index"] = deviceMap.key
+        channel!.invokeMethod("onDevicesChanged" , arguments: devices.sorted{
+            a,b in
+            return a.key > b.key
+        }.map{
+            device in
+            var dict =  device.value.toDict()
+            dict["index"] = device.key
             return dict
-        }.sorted{
-            a, b in
-            let aindex = a["index"] as! Int
-            let bIndex = b["index"] as! Int
-            return  aindex > bIndex
         })
-        
-        
-        
-        
     }
     
 }

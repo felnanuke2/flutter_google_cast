@@ -77,8 +77,11 @@ extension GCKMediaMetadata {
         
         if let images = mutableDict["images"] as? [Dictionary<String, Any>] {
             for image in images {
-                
-                metadata.addImage(GCKImage.init(url: URL.init(string: image["url"] as! String)!, width: image["width"] as? Int ?? 0 , height: image["height"] as? Int ?? 0 ))
+
+            guard let url = URL.init(string: image["url"] as? String ?? "" ) else {
+                    continue
+                }    
+                metadata.addImage(GCKImage.init(url: url, width: image["width"] as? Int ?? 0 , height: image["height"] as? Int ?? 0 ))
                 
             }
         }
