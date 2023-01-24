@@ -1,7 +1,7 @@
-package com.example.google_cast
+package com.felnanuke.google_cast
 
 import android.media.session.MediaSession
-import com.example.google_cast.extensions.*
+import com.felnanuke.google_cast.extensions.*
 import com.google.android.gms.cast.framework.CastContext
 import com.google.android.gms.cast.framework.media.RemoteMediaClient
 import com.google.gson.Gson

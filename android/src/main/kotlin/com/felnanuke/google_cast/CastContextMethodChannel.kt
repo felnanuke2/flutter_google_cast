@@ -1,4 +1,4 @@
-package com.example.google_cast
+package com.felnanuke.google_cast
 
 import android.content.Context
 import android.os.Build

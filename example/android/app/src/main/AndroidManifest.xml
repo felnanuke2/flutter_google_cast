@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.google_cast_example">
+    package="com.felnanuke.google_cast_example">
    <application
         android:label="google_cast_example"
         android:name="${applicationName}"

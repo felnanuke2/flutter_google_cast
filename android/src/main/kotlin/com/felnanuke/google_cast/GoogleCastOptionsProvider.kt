@@ -1,6 +1,6 @@
 
 import android.content.Context
-import com.example.google_cast.R
+import com.felnanuke.google_cast.R
 import com.google.android.gms.cast.framework.CastOptions
 import com.google.android.gms.cast.framework.OptionsProvider
 import com.google.android.gms.cast.framework.SessionProvider

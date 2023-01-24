@@ -1,4 +1,4 @@
-package com.example.google_cast.extensions
+package com.felnanuke.google_cast.extensions
 
 import com.google.android.gms.cast.MediaInfo
 import com.google.android.gms.cast.MediaMetadata

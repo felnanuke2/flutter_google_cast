@@ -5,4 +5,4 @@ flutter pub run pigeon \
   --objc_source_out ios/Classes/google_cast_context.m \
   --experimental_swift_out ios/Classes/GoogleCastContext.swift \
   --java_out android/src/main/java/com/example/google_cast.java \
-  --java_package "com.example.google_cast"
+  --java_package "com.felnanuke.google_cast"

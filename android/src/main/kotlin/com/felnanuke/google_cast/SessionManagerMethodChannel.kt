@@ -1,7 +1,7 @@
-package com.example.google_cast
+package com.felnanuke.google_cast
 
-import com.example.google_cast.extensions.toJson
-import com.example.google_cast.extensions.toMap
+import com.felnanuke.google_cast.extensions.toJson
+import com.felnanuke.google_cast.extensions.toMap
 import com.google.android.gms.cast.framework.*
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.plugin.common.MethodCall

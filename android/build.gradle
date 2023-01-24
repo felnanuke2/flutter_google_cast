@@ -1,4 +1,4 @@
-group 'com.example.google_cast'
+group 'com.felnanuke.google_cast'
 version '1.0-SNAPSHOT'
 
 buildscript {
