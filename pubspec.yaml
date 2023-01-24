@@ -29,7 +29,7 @@ flutter:
   plugin:
     platforms:
       android:
-        package: com.example.google_cast
+        package: com.felnanuke.google_cast
         pluginClass: GoogleCastPlugin
       ios:
         pluginClass: GoogleCastPlugin
