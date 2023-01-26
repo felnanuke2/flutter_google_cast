@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:google_cast/entities/cast_options.dart';
 
@@ -11,13 +10,15 @@ class GoogleCastContextAndroidMethodChannel
   @override
   Future<bool> setSharedInstanceWithOptions(
       GoogleCastOptions castOptions) async {
-    final result =
-        await _channel.invokeMethod('setSharedInstance', castOptions.toMap());
-    if (result && kDebugMode) {
-      // ignore: avoid_print
-      print('setSharedInstanceWithOptions initialized');
+    try {
+      final result =
+          await _channel.invokeMethod('setSharedInstance', castOptions.toMap());
+      print('setSharedInstanceWithOptions initialized with $result');
+      return result == true;
+    } catch (e, s) {
+      print(e);
+      print(s);
+      rethrow;
     }
-
-    return result;
   }
 }

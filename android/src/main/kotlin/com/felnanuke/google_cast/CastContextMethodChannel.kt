@@ -1,23 +1,29 @@
 package com.felnanuke.google_cast
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Build
-import android.provider.CalendarContract
-import androidx.annotation.RequiresApi
-import androidx.mediarouter.app.MediaRouteButton
-import androidx.mediarouter.media.MediaControlIntent
+import android.util.Log
+import android.widget.MediaController
+import androidx.activity.ComponentActivity
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.mediarouter.app.MediaRouteControllerDialog
+import androidx.mediarouter.media.MediaRouter
 import com.google.android.gms.cast.framework.CastContext
 import com.google.android.gms.cast.framework.CastOptions
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
-import androidx.mediarouter.media.MediaRouteSelector
-import androidx.mediarouter.media.MediaRouter
-import androidx.mediarouter.media.MediaRouter.CALLBACK_FLAG_REQUEST_DISCOVERY
-import androidx.mediarouter.media.MediaRouter.CALLBACK_FLAG_UNFILTERED_EVENTS
+import io.flutter.embedding.engine.plugins.activity.ActivityAware
+import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
 import com.google.android.gms.cast.LaunchOptions
 import com.google.android.gms.cast.framework.CastButtonFactory
+import com.google.android.gms.cast.framework.CastStateListener
+import java.util.concurrent.Executors
+import kotlin.system.exitProcess
 
+private const val TAG = "CastContext"
 
 class CastContextMethodChannel : FlutterPlugin, MethodChannel.MethodCallHandler {
 
@@ -25,21 +31,19 @@ class CastContextMethodChannel : FlutterPlugin, MethodChannel.MethodCallHandler 
     private lateinit var appContext: Context
     private val discoveryManager = DiscoveryManagerMethodChannel()
     private lateinit var sessionManagerMethodChannel: SessionManagerMethodChannel
-
-    private val castContext: CastContext?
-        get() {
-            return CastContext.getSharedInstance()
-        }
+    private lateinit var nearbyWifiDevicesPermissionLauncher: ActivityResultLauncher<String>
 
 
     //FlutterPlugin
     override fun onAttachedToEngine(binding: FlutterPlugin.FlutterPluginBinding) {
+
         appContext = binding.applicationContext
         channel = MethodChannel(binding.binaryMessenger, "com.felnanuke.google_cast.context")
         channel.setMethodCallHandler(this)
         discoveryManager.onAttachedToEngine(binding)
         sessionManagerMethodChannel = SessionManagerMethodChannel(discoveryManager)
         sessionManagerMethodChannel.onAttachedToEngine(binding)
+
     }
 
     override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
@@ -50,23 +54,56 @@ class CastContextMethodChannel : FlutterPlugin, MethodChannel.MethodCallHandler 
     // MethodCallHandler
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
         when (call.method) {
-            "setSharedInstance" -> result.success(setSharedInstance(call.arguments))
+            "setSharedInstance" -> setSharedInstance(call.arguments, result)
             else -> result.notImplemented()
         }
     }
 
+    private fun setupActivityResult(activity: ComponentActivity) {
+        nearbyWifiDevicesPermissionLauncher =
+            activity.registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
+                if (isGranted) {
 
-    private fun setSharedInstance(arguments: Any?): Boolean {
-        val map = arguments as HashMap<String, Any>
-        var optionsBuilder = CastOptions.Builder()
+                }
+            }
+        exitProcess(1)
+    }
+
+
+    @SuppressLint("LongLogTag")
+    private fun setSharedInstance(arguments: Any?, result: MethodChannel.Result) {
+        val map = arguments as HashMap<*, *>
+        val optionsBuilder = CastOptions.Builder()
         optionsBuilder.setReceiverApplicationId(map["appId"] as String)
         val launcherOptions = LaunchOptions.Builder().setAndroidReceiverCompatible(true).build()
         optionsBuilder.setLaunchOptions(launcherOptions)
         optionsBuilder.setResumeSavedSession(true)
         optionsBuilder.setEnableReconnectionService(true)
         GoogleCastOptionsProvider.options = optionsBuilder.build()
-        CastContext.getSharedInstance(appContext)
-        castContext?.sessionManager?.addSessionManagerListener(sessionManagerMethodChannel)
-        return true
+
+
+        CastContext.getSharedInstance(appContext, Executors.newSingleThreadExecutor())
+            .addOnSuccessListener {
+                Log.w(TAG, "CastContextMethodChannel: setSharedInstance: success")
+                result.success(true)
+                it.addCastStateListener {
+
+                    Log.w(TAG, "CastContextMethodChannel: setSharedInstance: state changed $it")
+                    Log.w(TAG, "CastContextMethodChannel: devices ${MediaRouter.getInstance(appContext).routes.count()}")
+                }
+            }.addOnFailureListener {
+                result.error("error", it.message, null)
+            }.addOnCanceledListener {
+                Log.w(TAG, "CastContextMethodChannel: setSharedInstance: canceled")
+            }.addOnCompleteListener { task ->
+                task.result.sessionManager.addSessionManagerListener(sessionManagerMethodChannel)
+                task.result.setReceiverApplicationId(map["appId"] as String)
+
+                Log.w(TAG, "CastContextMethodChannel: setSharedInstance: complete")
+            }
+
+
+
     }
+
 }
