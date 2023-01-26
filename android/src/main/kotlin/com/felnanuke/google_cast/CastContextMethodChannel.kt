@@ -8,6 +8,7 @@ import android.widget.MediaController
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.mediarouter.app.MediaRouteButton
 import androidx.mediarouter.app.MediaRouteControllerDialog
 import androidx.mediarouter.media.MediaRouter
 import com.google.android.gms.cast.framework.CastContext
@@ -32,6 +33,15 @@ class CastContextMethodChannel : FlutterPlugin, MethodChannel.MethodCallHandler 
     private val discoveryManager = DiscoveryManagerMethodChannel()
     private lateinit var sessionManagerMethodChannel: SessionManagerMethodChannel
     private lateinit var nearbyWifiDevicesPermissionLauncher: ActivityResultLauncher<String>
+    private val stateListener = CastStateListener {
+        Log.w(TAG, "CastContextMethodChannel: setSharedInstance: state changed $it")
+        Log.w(
+            TAG,
+            "CastContextMethodChannel: devices ${MediaRouter.getInstance(appContext).routes.map { it.name }}"
+        )
+        channel.invokeMethod("onCastStateChanged", it)
+        discoveryManager.routerCallBack.getCastDevicesMap()
+    }
 
 
     //FlutterPlugin
@@ -82,15 +92,12 @@ class CastContextMethodChannel : FlutterPlugin, MethodChannel.MethodCallHandler 
         GoogleCastOptionsProvider.options = optionsBuilder.build()
 
 
+
         CastContext.getSharedInstance(appContext, Executors.newSingleThreadExecutor())
             .addOnSuccessListener {
                 Log.w(TAG, "CastContextMethodChannel: setSharedInstance: success")
                 result.success(true)
-                it.addCastStateListener {
-
-                    Log.w(TAG, "CastContextMethodChannel: setSharedInstance: state changed $it")
-                    Log.w(TAG, "CastContextMethodChannel: devices ${MediaRouter.getInstance(appContext).routes.count()}")
-                }
+                it.addCastStateListener(stateListener)
             }.addOnFailureListener {
                 result.error("error", it.message, null)
             }.addOnCanceledListener {
@@ -100,8 +107,8 @@ class CastContextMethodChannel : FlutterPlugin, MethodChannel.MethodCallHandler 
                 task.result.setReceiverApplicationId(map["appId"] as String)
 
                 Log.w(TAG, "CastContextMethodChannel: setSharedInstance: complete")
-            }
 
+            }
 
 
     }

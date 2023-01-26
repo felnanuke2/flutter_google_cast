@@ -1,16 +1,22 @@
 package com.felnanuke.google_cast
 
 import android.content.Context
+import android.util.Log
+import androidx.mediarouter.app.MediaRouteButton
+import androidx.mediarouter.app.MediaRouteDialogFactory
 import androidx.mediarouter.media.MediaControlIntent
 import androidx.mediarouter.media.MediaRouteSelector
 import androidx.mediarouter.media.MediaRouter
+import com.felnanuke.google_cast.extensions.toMap
 import com.google.android.gms.cast.CastDevice
 import com.google.android.gms.cast.CastMediaControlIntent
+import com.google.android.gms.cast.framework.CastButtonFactory
 import com.google.android.gms.cast.framework.CastContext
 import com.google.gson.Gson
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
+import java.util.*
 import kotlin.system.exitProcess
 
 private const val TAG = "DiscoveryManager"
@@ -18,7 +24,7 @@ private const val TAG = "DiscoveryManager"
 class DiscoveryManagerMethodChannel : FlutterPlugin, MethodChannel.MethodCallHandler {
 
     lateinit var channel: MethodChannel
-    private val routerCallBack: DiscoveryRouterCallback = DiscoveryRouterCallback()
+    val routerCallBack: DiscoveryRouterCallback = DiscoveryRouterCallback()
     val router: MediaRouter
         get() = MediaRouter.getInstance(context)
     private lateinit var context: Context
@@ -38,59 +44,57 @@ class DiscoveryManagerMethodChannel : FlutterPlugin, MethodChannel.MethodCallHan
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
         when (call.method) {
             "startDiscovery" -> startDiscovery()
-            "stopDiscovery" -> router.removeCallback(routerCallBack)
+            "stopDiscovery" -> stopDiscovery()
         }
     }
 
-    private fun startDiscovery() {
+    private fun stopDiscovery() {
 
         router.removeCallback(routerCallBack)
+    }
+
+    private fun startDiscovery() {
+        router.removeCallback(routerCallBack)
         val selector = MediaRouteSelector.Builder()
-            .addControlCategories(listOf(CastMediaControlIntent.categoryForCast("ED7DABE1"))).build()
+            .addControlCategories(listOf(CastMediaControlIntent.categoryForRemotePlayback()))
+            .build()
         router.addCallback(
-            selector, routerCallBack, MediaRouter.CALLBACK_FLAG_PERFORM_ACTIVE_SCAN
+            selector, routerCallBack, MediaRouter.CALLBACK_FLAG_UNFILTERED_EVENTS
         )
+
         routerCallBack.getCastDevicesMap()
     }
 
-
     inner class DiscoveryRouterCallback : MediaRouter.Callback() {
-
 
         override fun onRouteUnselected(
             router: MediaRouter, route: MediaRouter.RouteInfo, reason: Int
         ) {
             super.onRouteUnselected(router, route, reason)
 
-            print("routes ${router?.routes?.size}")
+            print("routes ${router.routes.size}")
         }
 
         override fun onRouteAdded(router: MediaRouter, route: MediaRouter.RouteInfo) {
             super.onRouteAdded(router, route)
-            if (router != null) getCastDevicesMap()
+            getCastDevicesMap()
         }
 
         override fun onRouteRemoved(router: MediaRouter, route: MediaRouter.RouteInfo) {
             super.onRouteRemoved(router, route)
-            if (router != null) getCastDevicesMap()
+            getCastDevicesMap()
         }
 
         override fun onRouteChanged(router: MediaRouter, route: MediaRouter.RouteInfo) {
             super.onRouteChanged(router, route)
-            if (router != null) getCastDevicesMap()
+            getCastDevicesMap()
         }
 
         override fun onRouteVolumeChanged(router: MediaRouter, route: MediaRouter.RouteInfo) {
             super.onRouteVolumeChanged(router, route)
-            if (router != null) getCastDevicesMap()
+            getCastDevicesMap()
         }
 
-        override fun onRoutePresentationDisplayChanged(
-            router: MediaRouter, route: MediaRouter.RouteInfo
-        ) {
-            super.onRoutePresentationDisplayChanged(router, route)
-
-        }
 
         override fun onProviderAdded(router: MediaRouter, provider: MediaRouter.ProviderInfo) {
             super.onProviderAdded(router, provider)
@@ -107,15 +111,18 @@ class DiscoveryManagerMethodChannel : FlutterPlugin, MethodChannel.MethodCallHan
             print("routes ${router.routes.size}")
         }
 
-        private fun getCastDevice(routeInfo: MediaRouter.RouteInfo): CastDevice? {
+        private fun getCastDevice(routeInfo: MediaRouter.RouteInfo): Map<*, *>? {
+            val device = CastDevice.getFromBundle(routeInfo.extras)
+            return device?.let {
+                device.toMap()
+            }
 
-            return CastDevice.getFromBundle(routeInfo.extras)
+
         }
 
-         fun getCastDevicesMap() {
-            if (router == null) return
-            var devices = mutableListOf<CastDevice>()
-            for (route in router!!.routes) {
+        fun getCastDevicesMap() {
+            val devices = mutableListOf<kotlin.collections.Map<*, *>>()
+            for (route in router.routes) {
                 val device = getCastDevice(route)
                 if (device != null) {
                     devices.add(device)
@@ -123,6 +130,7 @@ class DiscoveryManagerMethodChannel : FlutterPlugin, MethodChannel.MethodCallHan
             }
             val json = Gson().toJson(devices)
             this@DiscoveryManagerMethodChannel.channel.invokeMethod("onDevicesChanged", json)
+            Log.w(TAG, "onDevicesChanged $json")
         }
     }
 

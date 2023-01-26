@@ -1,12 +1,11 @@
 package com.felnanuke.google_cast
 
-import com.felnanuke.google_cast.extensions.toJson
 import com.felnanuke.google_cast.extensions.toMap
 import com.google.android.gms.cast.framework.*
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
-
+private const val TAG = "SessionManager"
 class SessionManagerMethodChannel(discoveryManager: DiscoveryManagerMethodChannel) : FlutterPlugin,
     MethodChannel.MethodCallHandler, SessionManagerListener<Session> {
 

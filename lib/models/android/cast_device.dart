@@ -22,14 +22,14 @@ class GoogleCastAndroidDevice extends GoogleCastDevice {
 
   factory GoogleCastAndroidDevice.fromMap(Map<String, dynamic> map) {
     return GoogleCastAndroidDevice(
-      deviceID: map['zzb'],
-      friendlyName: map['zzd'],
-      modelName: map['zze'],
-      deviceVersion: map['zzf'],
+      deviceID: map['id'],
+      friendlyName: map['name'],
+      modelName: map['model_name'],
+      deviceVersion: map['device_version'],
       category: '',
-      isOnLocalNetwork: !map['zzq'],
+      isOnLocalNetwork: map['is_on_local_network'],
       statusText: null,
-      uniqueID: map['zzb'],
+      uniqueID: map['id'],
     );
   }
 }

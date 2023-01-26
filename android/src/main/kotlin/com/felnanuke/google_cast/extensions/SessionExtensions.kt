@@ -5,14 +5,14 @@ import com.google.android.gms.cast.framework.CastSession
 import com.google.gson.Gson
 
 fun CastSession.toMap(): Map<String, Any?> {
-    var map = mutableMapOf<String, Any?>()
-    map["device"] = this.castDevice?.toJson()
+    val map = mutableMapOf<String, Any?>()
+    map["device"] = this.castDevice?.toMap()
     map["sessionID"] = this.sessionId
-    map["connectionState"] =  this.connectState()
+    map["connectionState"] = this.connectState()
     map["isMute"] = this.isMute
-    map["statusMessage"] =  this.applicationStatus
-    map["volume"] =  this.volume
-    return  map
+    map["statusMessage"] = this.applicationStatus
+    map["volume"] = this.volume
+    return map
 }
 
 fun CastSession.connectState(): Int {
@@ -25,6 +25,3 @@ fun CastSession.connectState(): Int {
     }
 }
 
-fun CastDevice.toJson(): String? {
-return  Gson().toJson(this)
-}

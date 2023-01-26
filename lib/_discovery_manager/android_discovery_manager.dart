@@ -42,6 +42,7 @@ class GoogleCastDiscoveryManagerMethodChannelAndroid
   }
 
   Future _onMethodCallHandler(MethodCall call) async {
+    print('method is ${call.method}');
     switch (call.method) {
       case 'onDevicesChanged':
         return _onDevicesChanged(call.arguments);
@@ -51,10 +52,18 @@ class GoogleCastDiscoveryManagerMethodChannelAndroid
   }
 
   _onDevicesChanged(arguments) {
-    arguments as String;
-    final list = jsonDecode(arguments);
-    final listMap = List.from(list);
-    final devices = GoogleCastAndroidDevices.fromMap(listMap);
-    _devicesStreamController.add(devices);
+    try {
+      arguments as String;
+      final list = jsonDecode(arguments);
+      final listMap = List.from(list);
+      final devices =
+          GoogleCastAndroidDevices.fromMap(listMap).toSet().toList();
+      _devicesStreamController.add(devices);
+    } catch (e, s) {
+      print(e);
+      print(s);
+      rethrow;
+    }
+    print('On Devices Changed Success');
   }
 }

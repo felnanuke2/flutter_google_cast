@@ -75,6 +75,8 @@ class GoogleCastSessionManagerAndroidMethodChannel
   }
 
   Future _onMethodCallHandler(MethodCall call) async {
+    print('receive ${call.method}');
+
     switch (call.method) {
       case "onSessionChanged":
         _onSessionChanged(call.arguments);
@@ -84,13 +86,19 @@ class GoogleCastSessionManagerAndroidMethodChannel
   }
 
   void _onSessionChanged(arguments) {
-    if (arguments == null) {
-      _currentSessionStreamController.add(null);
-      return;
+    try {
+      if (arguments == null) {
+        _currentSessionStreamController.add(null);
+        return;
+      }
+      final map = Map<String, dynamic>.from(arguments);
+      final session = GoogleCastSessionAndroid.fromMap(map);
+      _currentSessionStreamController.add(session);
+    } catch (e, s) {
+      print(e);
+      print(s);
     }
-    final map = Map<String, dynamic>.from(arguments);
-    final session = GoogleCastSessionAndroid.fromMap(map);
-    _currentSessionStreamController.add(session);
+    print('onSessionChangedSuccess');
   }
 
   @override

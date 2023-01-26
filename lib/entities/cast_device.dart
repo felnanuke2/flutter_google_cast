@@ -18,4 +18,23 @@ class GoogleCastDevice {
     required this.category,
     required this.uniqueID,
   });
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+
+    return other is GoogleCastDevice && other.deviceID == deviceID;
+  }
+
+  @override
+  int get hashCode {
+    return deviceID.hashCode ^
+        friendlyName.hashCode ^
+        modelName.hashCode ^
+        statusText.hashCode ^
+        deviceVersion.hashCode ^
+        isOnLocalNetwork.hashCode ^
+        category.hashCode ^
+        uniqueID.hashCode;
+  }
 }
