@@ -33,15 +33,7 @@ class CastContextMethodChannel : FlutterPlugin, MethodChannel.MethodCallHandler 
     private val discoveryManager = DiscoveryManagerMethodChannel()
     private lateinit var sessionManagerMethodChannel: SessionManagerMethodChannel
     private lateinit var nearbyWifiDevicesPermissionLauncher: ActivityResultLauncher<String>
-    private val stateListener = CastStateListener {
-        Log.w(TAG, "CastContextMethodChannel: setSharedInstance: state changed $it")
-        Log.w(
-            TAG,
-            "CastContextMethodChannel: devices ${MediaRouter.getInstance(appContext).routes.map { it.name }}"
-        )
-        channel.invokeMethod("onCastStateChanged", it)
-        discoveryManager.routerCallBack.getCastDevicesMap()
-    }
+    private val executor = Executors.newSingleThreadExecutor()
 
 
     //FlutterPlugin
@@ -80,7 +72,6 @@ class CastContextMethodChannel : FlutterPlugin, MethodChannel.MethodCallHandler 
     }
 
 
-    @SuppressLint("LongLogTag")
     private fun setSharedInstance(arguments: Any?, result: MethodChannel.Result) {
         val map = arguments as HashMap<*, *>
         val optionsBuilder = CastOptions.Builder()
@@ -90,26 +81,7 @@ class CastContextMethodChannel : FlutterPlugin, MethodChannel.MethodCallHandler 
         optionsBuilder.setResumeSavedSession(true)
         optionsBuilder.setEnableReconnectionService(true)
         GoogleCastOptionsProvider.options = optionsBuilder.build()
-
-
-
-        CastContext.getSharedInstance(appContext, Executors.newSingleThreadExecutor())
-            .addOnSuccessListener {
-                Log.w(TAG, "CastContextMethodChannel: setSharedInstance: success")
-                result.success(true)
-                it.addCastStateListener(stateListener)
-            }.addOnFailureListener {
-                result.error("error", it.message, null)
-            }.addOnCanceledListener {
-                Log.w(TAG, "CastContextMethodChannel: setSharedInstance: canceled")
-            }.addOnCompleteListener { task ->
-                task.result.sessionManager.addSessionManagerListener(sessionManagerMethodChannel)
-                task.result.setReceiverApplicationId(map["appId"] as String)
-
-                Log.w(TAG, "CastContextMethodChannel: setSharedInstance: complete")
-
-            }
-
+        CastContext.getSharedInstance(appContext).sessionManager.addSessionManagerListener(sessionManagerMethodChannel)
 
     }
 

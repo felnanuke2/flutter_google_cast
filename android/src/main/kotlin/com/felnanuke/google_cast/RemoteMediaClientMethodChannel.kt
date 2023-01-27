@@ -61,7 +61,7 @@ class RemoteMediaClientMethodChannel : FlutterPlugin, MethodChannel.MethodCallHa
     }
 
     private fun setActiveTrackIds(arguments: Any?) {
-        arguments as IntArray
+        arguments as ArrayList<Int>
         val longArray = arguments.map {
             it.toLong()
         }

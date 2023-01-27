@@ -59,7 +59,7 @@ class DiscoveryManagerMethodChannel : FlutterPlugin, MethodChannel.MethodCallHan
             .addControlCategories(listOf(CastMediaControlIntent.categoryForRemotePlayback()))
             .build()
         router.addCallback(
-            selector, routerCallBack, MediaRouter.CALLBACK_FLAG_UNFILTERED_EVENTS
+            selector, routerCallBack, MediaRouter.CALLBACK_FLAG_REQUEST_DISCOVERY
         )
 
         routerCallBack.getCastDevicesMap()
