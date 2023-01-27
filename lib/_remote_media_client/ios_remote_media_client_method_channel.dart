@@ -151,10 +151,16 @@ class GoogleCastRemoteMediaClientIOSMethodChannel
 
   _onUpdateMediaStatus(arguments) {
     if (arguments != null) {
-      arguments = Map<String, dynamic>.from(arguments);
-      final mediaStatus = GoogleCastIOSMediaStatus.fromMap(arguments);
-      _queueHasNextItem = arguments["queueHasNextItem"];
-      _mediaStatusStreamController.add(mediaStatus);
+      try {
+        arguments = Map<String, dynamic>.from(arguments);
+        final mediaStatus = GoogleCastIOSMediaStatus.fromMap(arguments);
+        _queueHasNextItem = arguments["queueHasNextItem"];
+        _mediaStatusStreamController.add(mediaStatus);
+        print('ios Media status successfully serialized to dart');
+      } catch (e, s) {
+        print(s);
+        print(s);
+      }
     }
   }
 

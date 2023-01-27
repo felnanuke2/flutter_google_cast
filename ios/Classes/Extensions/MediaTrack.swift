@@ -48,4 +48,17 @@ extension GCKMediaTrack {
         
         return mediaTrack!
     }
+    
+    func toMap() -> Dictionary<String, Any>{
+        var dict  = Dictionary<String, Any>()
+        dict["id"] = self.identifier
+        dict["content_type"] = self.contentType
+        dict["type"] = self.type.rawValue
+        dict["language_code"] = self.languageCode
+        dict["name"] = self.name
+        dict["subtype"] = self.textSubtype.rawValue
+        dict["content_id"] = self.contentIdentifier
+        dict["custom_data"] = self.customData
+        return dict
+    }
 }

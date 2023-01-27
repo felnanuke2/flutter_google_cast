@@ -1,4 +1,5 @@
 import 'package:google_cast/lib.dart';
+import 'package:google_cast/models/ios/ios_media_track.dart';
 import 'package:google_cast/models/ios/metadata/generic.dart';
 import 'package:google_cast/models/ios/metadata/metadata.dart';
 import 'package:google_cast/models/ios/metadata/movie.dart';
@@ -64,7 +65,10 @@ class GoogleCastMediaInformationIOS extends GoogleCastMediaInformation {
           : null,
       tracks: map['tracks'] != null
           ? List<GoogleCastMediaTrack>.from(
-              map['tracks']?.map((x) => GoogleCastMediaTrack.fromMap(x)))
+              map['tracks']?.map(
+                (x) => IosMediaTrack.fromMap(x),
+              ),
+            )
           : null,
       userActionStates: map['userActionStates'] != null
           ? List<UserActionState>.from(
