@@ -1,6 +1,6 @@
 import 'package:flutter/services.dart';
-import 'package:google_cast/entities/cast_device.dart';
-import 'package:google_cast/models/ios/ios_cast_device.dart';
+import 'package:flutter_chrome_cast/entities/cast_device.dart';
+import 'package:flutter_chrome_cast/models/ios/ios_cast_device.dart';
 import 'package:rxdart/subjects.dart';
 import 'discovery_manager_platform_interface.dart';
 

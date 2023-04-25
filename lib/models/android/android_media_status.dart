@@ -1,10 +1,10 @@
 import 'dart:convert';
 
-import 'package:google_cast/lib.dart';
-import 'package:google_cast/models/android/android_media_information.dart';
-import 'package:google_cast/models/android/extensions/cast_media_player_state.dart';
-import 'package:google_cast/models/android/extensions/idle_reason.dart';
-import 'package:google_cast/models/android/extensions/repeat_mode.dart';
+import 'package:flutter_chrome_cast/lib.dart';
+import 'package:flutter_chrome_cast/models/android/android_media_information.dart';
+import 'package:flutter_chrome_cast/models/android/extensions/cast_media_player_state.dart';
+import 'package:flutter_chrome_cast/models/android/extensions/idle_reason.dart';
+import 'package:flutter_chrome_cast/models/android/extensions/repeat_mode.dart';
 
 class GoogleCastAndroidMediaStatus extends GoggleCastMediaStatus {
   GoogleCastAndroidMediaStatus({

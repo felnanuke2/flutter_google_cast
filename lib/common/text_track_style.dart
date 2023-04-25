@@ -3,8 +3,8 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import 'package:google_cast/common/text_track_font_style.dart';
-import 'package:google_cast/common/text_track_window_type.dart';
+import 'package:flutter_chrome_cast/common/text_track_font_style.dart';
+import 'package:flutter_chrome_cast/common/text_track_window_type.dart';
 
 import 'font_generic_family.dart';
 

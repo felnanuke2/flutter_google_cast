@@ -1,8 +1,8 @@
-import 'package:google_cast/entities/cast_media_status.dart';
-import 'package:google_cast/entities/load_options.dart';
-import 'package:google_cast/entities/media_information.dart';
-import 'package:google_cast/entities/media_seek_option.dart';
-import 'package:google_cast/entities/queue_item.dart';
+import 'package:flutter_chrome_cast/entities/cast_media_status.dart';
+import 'package:flutter_chrome_cast/entities/load_options.dart';
+import 'package:flutter_chrome_cast/entities/media_information.dart';
+import 'package:flutter_chrome_cast/entities/media_seek_option.dart';
+import 'package:flutter_chrome_cast/entities/queue_item.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
 abstract class GoogleCastRemoteMediaClientPlatformInterface

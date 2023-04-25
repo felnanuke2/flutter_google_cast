@@ -1,9 +1,9 @@
-import 'package:google_cast/common/live_seekable_range.dart';
-import 'package:google_cast/common/queue_data.dart';
-import 'package:google_cast/enums/repeat_mode.dart';
-import 'package:google_cast/entities/media_information.dart';
-import 'package:google_cast/enums/idle_reason.dart';
-import 'package:google_cast/enums/player_state.dart';
+import 'package:flutter_chrome_cast/common/live_seekable_range.dart';
+import 'package:flutter_chrome_cast/common/queue_data.dart';
+import 'package:flutter_chrome_cast/enums/repeat_mode.dart';
+import 'package:flutter_chrome_cast/entities/media_information.dart';
+import 'package:flutter_chrome_cast/enums/idle_reason.dart';
+import 'package:flutter_chrome_cast/enums/player_state.dart';
 import 'break_status.dart';
 
 class GoggleCastMediaStatus {

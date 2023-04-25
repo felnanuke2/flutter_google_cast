@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:google_cast/_session_manager/cast_session_manager.dart';
+import 'package:flutter_chrome_cast/_session_manager/cast_session_manager.dart';
 
 class GoogleCastVolume extends StatefulWidget {
   const GoogleCastVolume({

@@ -1,6 +1,6 @@
-import 'package:google_cast/common/image.dart';
-import 'package:google_cast/entities/media_metadata/music_track_media_metadata.dart';
-import 'package:google_cast/models/android/extensions/date_time.dart';
+import 'package:flutter_chrome_cast/common/image.dart';
+import 'package:flutter_chrome_cast/entities/media_metadata/music_track_media_metadata.dart';
+import 'package:flutter_chrome_cast/models/android/extensions/date_time.dart';
 
 class GoogleCastMusicMediaMetadataAndroid extends GoogleCastMusicMediaMetadata {
   GoogleCastMusicMediaMetadataAndroid({

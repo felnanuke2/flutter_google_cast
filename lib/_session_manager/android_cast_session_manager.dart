@@ -1,9 +1,9 @@
 import 'package:flutter/services.dart';
-import 'package:google_cast/enums/connection_satate.dart';
-import 'package:google_cast/entities/cast_session.dart';
-import 'package:google_cast/entities/cast_device.dart';
-import 'package:google_cast/models/android/cast_device.dart';
-import 'package:google_cast/models/android/cast_session.dart';
+import 'package:flutter_chrome_cast/enums/connection_satate.dart';
+import 'package:flutter_chrome_cast/entities/cast_session.dart';
+import 'package:flutter_chrome_cast/entities/cast_device.dart';
+import 'package:flutter_chrome_cast/models/android/cast_device.dart';
+import 'package:flutter_chrome_cast/models/android/cast_session.dart';
 import 'package:rxdart/subjects.dart';
 
 import 'cast_session_manager_platform.dart';

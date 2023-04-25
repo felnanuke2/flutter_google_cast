@@ -1,5 +1,5 @@
-import 'package:google_cast/entities/cast_device.dart';
-import 'package:google_cast/enums/connection_satate.dart';
+import 'package:flutter_chrome_cast/entities/cast_device.dart';
+import 'package:flutter_chrome_cast/enums/connection_satate.dart';
 
 abstract class GoogleCastSession {
   final GoogleCastDevice? device;

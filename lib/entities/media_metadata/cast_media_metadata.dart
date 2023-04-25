@@ -1,5 +1,5 @@
-import 'package:google_cast/common/image.dart';
-import 'package:google_cast/enums/media_metadata_type.dart';
+import 'package:flutter_chrome_cast/common/image.dart';
+import 'package:flutter_chrome_cast/enums/media_metadata_type.dart';
 
 class GoogleCastMediaMetadata {
   final GoogleCastMediaMetadataType metadataType;

@@ -1,5 +1,5 @@
 import 'package:flutter/services.dart';
-import 'package:google_cast/lib.dart';
+import 'package:flutter_chrome_cast/lib.dart';
 import 'package:rxdart/subjects.dart';
 
 class GoogleCastSessionManagerIOSMethodChannel

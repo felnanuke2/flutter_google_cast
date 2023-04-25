@@ -1,7 +1,7 @@
 import 'dart:convert';
 
-import 'package:google_cast/common/hls_segment_format.dart';
-import 'package:google_cast/common/vast_ads_request.dart';
+import 'package:flutter_chrome_cast/common/hls_segment_format.dart';
+import 'package:flutter_chrome_cast/common/vast_ads_request.dart';
 
 ///Represents a break clip (e.g. a clip of an ad during an ad break)
 

@@ -1,5 +1,5 @@
-name: google_cast
-description: A new Flutter plugin project.
+name: flutter_chrome_cast
+description: this is a flutter plugin for google cast
 version: 0.0.3
 homepage:
 

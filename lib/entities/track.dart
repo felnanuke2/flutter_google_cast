@@ -1,10 +1,10 @@
 import 'dart:convert';
 
-import 'package:google_cast/common/rfc5646_language.dart';
-import 'package:google_cast/enums/text_track_type.dart';
-import 'package:google_cast/enums/track_type.dart';
-import 'package:google_cast/models/android/extensions/text_track_type.dart';
-import 'package:google_cast/models/android/extensions/track_type.dart';
+import 'package:flutter_chrome_cast/common/rfc5646_language.dart';
+import 'package:flutter_chrome_cast/enums/text_track_type.dart';
+import 'package:flutter_chrome_cast/enums/track_type.dart';
+import 'package:flutter_chrome_cast/models/android/extensions/text_track_type.dart';
+import 'package:flutter_chrome_cast/models/android/extensions/track_type.dart';
 
 ///Describes track metadata information.
 class GoogleCastMediaTrack {

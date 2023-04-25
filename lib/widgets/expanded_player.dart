@@ -1,8 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-import 'package:google_cast/lib.dart';
-import 'package:google_cast/widgets/cast_volume.dart';
+import 'package:flutter_chrome_cast/lib.dart';
+import 'package:flutter_chrome_cast/widgets/cast_volume.dart';
 
 import '../utils/extensions.dart';
 

@@ -1,5 +1,5 @@
-import 'package:google_cast/entities/discovery_criteria.dart';
-import 'package:google_cast/entities/cast_options.dart';
+import 'package:flutter_chrome_cast/entities/discovery_criteria.dart';
+import 'package:flutter_chrome_cast/entities/cast_options.dart';
 
 class IOSGoogleCastOptions extends GoogleCastOptions {
   final GoogleCastDiscoveryCriteriaInitialize _discoveryCriteria;

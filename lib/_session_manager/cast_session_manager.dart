@@ -1,7 +1,7 @@
 import 'dart:io';
 
-import 'package:google_cast/_session_manager/android_cast_session_manager.dart';
-import 'package:google_cast/_session_manager/ios_cast_session_manager.dart';
+import 'package:flutter_chrome_cast/_session_manager/android_cast_session_manager.dart';
+import 'package:flutter_chrome_cast/_session_manager/ios_cast_session_manager.dart';
 
 import 'cast_session_manager_platform.dart';
 

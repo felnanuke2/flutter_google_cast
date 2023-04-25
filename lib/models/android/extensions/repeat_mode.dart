@@ -1,4 +1,4 @@
-import 'package:google_cast/lib.dart';
+import 'package:flutter_chrome_cast/lib.dart';
 
 extension GoogleCastRepeatModeAndroid on GoogleCastMediaRepeatMode {
   static GoogleCastMediaRepeatMode fromMap(String value) {

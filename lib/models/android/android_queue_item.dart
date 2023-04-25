@@ -1,5 +1,5 @@
-import 'package:google_cast/lib.dart';
-import 'package:google_cast/models/android/android_media_information.dart';
+import 'package:flutter_chrome_cast/lib.dart';
+import 'package:flutter_chrome_cast/models/android/android_media_information.dart';
 
 class GoogleCastAndroidQueueItem extends GoogleCastQueueItem {
   GoogleCastAndroidQueueItem({

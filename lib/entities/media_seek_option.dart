@@ -1,4 +1,4 @@
-import 'package:google_cast/enums/media_resume_state.dart';
+import 'package:flutter_chrome_cast/enums/media_resume_state.dart';
 
 ///Enum defining the media control channel resume state.
 class GoogleCastMediaSeekOption {

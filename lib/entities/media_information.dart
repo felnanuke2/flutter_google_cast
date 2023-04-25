@@ -1,24 +1,24 @@
-import 'package:google_cast/common/break.dart';
-import 'package:google_cast/common/break_clips.dart';
-import 'package:google_cast/common/hls_segment_format.dart';
-import 'package:google_cast/common/hls_video_segment_format.dart';
-import 'package:google_cast/common/text_track_style.dart';
-import 'package:google_cast/entities/track.dart';
-import 'package:google_cast/common/user_action_state.dart';
-import 'package:google_cast/common/vast_ads_request.dart';
-import 'package:google_cast/enums/stream_type.dart';
+import 'package:flutter_chrome_cast/common/break.dart';
+import 'package:flutter_chrome_cast/common/break_clips.dart';
+import 'package:flutter_chrome_cast/common/hls_segment_format.dart';
+import 'package:flutter_chrome_cast/common/hls_video_segment_format.dart';
+import 'package:flutter_chrome_cast/common/text_track_style.dart';
+import 'package:flutter_chrome_cast/entities/track.dart';
+import 'package:flutter_chrome_cast/common/user_action_state.dart';
+import 'package:flutter_chrome_cast/common/vast_ads_request.dart';
+import 'package:flutter_chrome_cast/enums/stream_type.dart';
 
 import 'media_metadata/cast_media_metadata.dart';
 
-export 'package:google_cast/common/break.dart';
-export 'package:google_cast/common/break_clips.dart';
-export 'package:google_cast/common/hls_segment_format.dart';
-export 'package:google_cast/common/hls_video_segment_format.dart';
-export 'package:google_cast/common/text_track_style.dart';
-export 'package:google_cast/entities/track.dart';
-export 'package:google_cast/common/user_action_state.dart';
-export 'package:google_cast/common/vast_ads_request.dart';
-export 'package:google_cast/enums/stream_type.dart';
+export 'package:flutter_chrome_cast/common/break.dart';
+export 'package:flutter_chrome_cast/common/break_clips.dart';
+export 'package:flutter_chrome_cast/common/hls_segment_format.dart';
+export 'package:flutter_chrome_cast/common/hls_video_segment_format.dart';
+export 'package:flutter_chrome_cast/common/text_track_style.dart';
+export 'package:flutter_chrome_cast/entities/track.dart';
+export 'package:flutter_chrome_cast/common/user_action_state.dart';
+export 'package:flutter_chrome_cast/common/vast_ads_request.dart';
+export 'package:flutter_chrome_cast/enums/stream_type.dart';
 
 class GoogleCastMediaInformation {
   ///Alternate entity to be used to load the media in Android TV app.

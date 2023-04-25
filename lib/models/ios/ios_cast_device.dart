@@ -1,4 +1,4 @@
-import 'package:google_cast/entities/cast_device.dart';
+import 'package:flutter_chrome_cast/entities/cast_device.dart';
 
 class GoogleCastIosDevice extends GoogleCastDevice {
   GoogleCastIosDevice({

@@ -1,5 +1,5 @@
 import 'package:flutter/services.dart';
-import 'package:google_cast/entities/cast_options.dart';
+import 'package:flutter_chrome_cast/entities/cast_options.dart';
 import 'google_cast_context_plataform_interface.dart';
 
 class FlutterIOSGoogleCastContextMethodChannel

@@ -7,7 +7,7 @@ add ```google_cast``` as a dependency in your pubspec.yaml file.
 ## Usage
 ### Import the library
 ```dart
-import 'package:google_cast/lib.dart';
+import 'package:flutter_chrome_cast/lib.dart';
 ```
 
 ### Initialize the library

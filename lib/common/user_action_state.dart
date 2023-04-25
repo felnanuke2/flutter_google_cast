@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:google_cast/common/user_action.dart';
+import 'package:flutter_chrome_cast/common/user_action.dart';
 
 class UserActionState {
   ///User actions.

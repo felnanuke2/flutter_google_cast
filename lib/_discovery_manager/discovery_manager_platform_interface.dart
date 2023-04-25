@@ -1,4 +1,4 @@
-import 'package:google_cast/entities/cast_device.dart';
+import 'package:flutter_chrome_cast/entities/cast_device.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
 /// <p>A class that manages the device discovery process. </p>

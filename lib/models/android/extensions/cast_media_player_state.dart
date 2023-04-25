@@ -1,4 +1,4 @@
-import 'package:google_cast/enums/player_state.dart';
+import 'package:flutter_chrome_cast/enums/player_state.dart';
 
 extension CastMediaPlayerStateAndroid on CastMediaPlayerState {
   static CastMediaPlayerState fromMap(String value) {

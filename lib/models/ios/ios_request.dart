@@ -1,4 +1,4 @@
-import 'package:google_cast/entities/request.dart';
+import 'package:flutter_chrome_cast/entities/request.dart';
 
 class GoogleCastIosRequest extends GoogleCastRequest {
   GoogleCastIosRequest({

@@ -18,7 +18,7 @@ dependencies:
   flutter:
     sdk: flutter
 
-  google_cast:
+  flutter_chrome_cast:
     # When depending on this package from a real application you should use:
     #   google_cast: ^x.y.z
     # See https://dart.dev/tools/pub/dependencies#version-constraints

@@ -1,15 +1,15 @@
 import 'dart:convert';
 
 import 'package:flutter/services.dart';
-import 'package:google_cast/_remote_media_client/remote_media_client_platform.dart';
-import 'package:google_cast/entities/cast_media_status.dart';
-import 'package:google_cast/entities/load_options.dart';
-import 'package:google_cast/entities/media_information.dart';
-import 'package:google_cast/entities/queue_item.dart';
-import 'package:google_cast/entities/media_seek_option.dart';
-import 'package:google_cast/entities/request.dart';
-import 'package:google_cast/models/android/android_media_status.dart';
-import 'package:google_cast/models/android/android_queue_item.dart';
+import 'package:flutter_chrome_cast/_remote_media_client/remote_media_client_platform.dart';
+import 'package:flutter_chrome_cast/entities/cast_media_status.dart';
+import 'package:flutter_chrome_cast/entities/load_options.dart';
+import 'package:flutter_chrome_cast/entities/media_information.dart';
+import 'package:flutter_chrome_cast/entities/queue_item.dart';
+import 'package:flutter_chrome_cast/entities/media_seek_option.dart';
+import 'package:flutter_chrome_cast/entities/request.dart';
+import 'package:flutter_chrome_cast/models/android/android_media_status.dart';
+import 'package:flutter_chrome_cast/models/android/android_queue_item.dart';
 import 'package:rxdart/subjects.dart';
 
 class GoogleCastRemoteMediaClientAndroidMethodChannel

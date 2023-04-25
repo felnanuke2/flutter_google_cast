@@ -1,6 +1,6 @@
-import 'package:google_cast/common/image.dart';
-import 'package:google_cast/entities/media_metadata/movie_media_metadata.dart';
-import 'package:google_cast/models/android/extensions/date_time.dart';
+import 'package:flutter_chrome_cast/common/image.dart';
+import 'package:flutter_chrome_cast/entities/media_metadata/movie_media_metadata.dart';
+import 'package:flutter_chrome_cast/models/android/extensions/date_time.dart';
 
 class GoogleCastMovieMediaMetadataAndroid extends GoogleCastMovieMediaMetadata {
   GoogleCastMovieMediaMetadataAndroid({
