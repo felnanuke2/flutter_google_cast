@@ -42,7 +42,7 @@ class GoogleCastMediaInformationIOS extends GoogleCastMediaInformation {
           ? _getCastMediaMetadata(Map.from(map['metadata']))
           : null,
       duration: map['duration'] != null
-          ? Duration(seconds: map['duration'].round())
+          ? Duration(seconds: map['duration']?.round() ?? 0)
           : null,
       customData: Map<String, dynamic>.from(map['customData'] ?? {}),
       breaks: map['breaks'] != null
