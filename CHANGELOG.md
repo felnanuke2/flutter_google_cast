@@ -14,3 +14,6 @@ add repository to pubspec.yaml
 
 ## 0.0.6
 generate dart doc with dartdoc
+
+## 0.0.7
+update package name in podpec
