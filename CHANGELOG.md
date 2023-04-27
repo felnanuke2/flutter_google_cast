@@ -17,3 +17,6 @@ generate dart doc with dartdoc
 
 ## 0.0.7
 update package name in podpec
+
+## 0.0.8
+fix GoogleCastPlugin.m file
