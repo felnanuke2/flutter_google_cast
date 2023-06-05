@@ -1,9 +1,7 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_chrome_cast/lib.dart';
 import 'dart:async';
-
 import 'package:flutter_chrome_cast/widgets/mini_controller.dart';
 
 void main() {
