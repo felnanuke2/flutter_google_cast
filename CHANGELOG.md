@@ -20,3 +20,12 @@ update package name in podpec
 
 ## 0.0.8
 fix GoogleCastPlugin.m file
+
+## 0.0.9
+fix /android/app/src/main/AndroidManifest.xml and add
+```xml
+<meta-data
+           android:name=
+               "com.google.android.gms.cast.framework.OPTIONS_PROVIDER_CLASS_NAME"
+           android:value="com.felnanuke.google_cast.GoogleCastOptionsProvider" />
+```
