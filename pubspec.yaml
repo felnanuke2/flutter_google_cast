@@ -1,6 +1,6 @@
 name: flutter_chrome_cast
 description: this is a flutter plugin for google cast
-version: 0.0.10
+version: 0.0.11
 repository: https://github.com/felnanuke2/flutter_google_cast
 license: BSD-3-Clause
 
@@ -12,7 +12,7 @@ dependencies:
   flutter:
     sdk: flutter
   get: ^4.6.5
-  permission_handler: ^10.0.0
+  permission_handler: ^11.3.1
   plugin_platform_interface: ^2.0.2
   rxdart: ^0.27.4
 
