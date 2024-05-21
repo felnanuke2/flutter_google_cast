@@ -125,7 +125,7 @@ class _GoogleCastMiniControllerState extends State<GoogleCastMiniController> {
         tag: 'com.felnanuke.google_cast.controller.title',
         child: Text(
           title,
-          style: theme.textTheme.headline6,
+          style: theme.textTheme.titleLarge,
           maxLines: 1,
         ),
       ),
@@ -138,7 +138,7 @@ class _GoogleCastMiniControllerState extends State<GoogleCastMiniController> {
       child: Text(
         'Casting to $deviceName',
         maxLines: 1,
-        style: theme.textTheme.caption,
+        style: theme.textTheme.bodySmall,
         overflow: TextOverflow.ellipsis,
       ),
     );
