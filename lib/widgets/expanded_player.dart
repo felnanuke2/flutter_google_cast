@@ -86,7 +86,7 @@ class _ExpandedGoogleCastPlayerControllerState
                         margin: const EdgeInsets.only(bottom: 16),
                         child: Text(
                           'Casting to $deviceName',
-                          style: theme.textTheme.subtitle2?.copyWith(
+                          style: theme.textTheme.titleSmall?.copyWith(
                             color: Colors.white,
                           ),
                         ),
@@ -110,7 +110,8 @@ class _ExpandedGoogleCastPlayerControllerState
                                               .formatted
                                           : GoogleCastRemoteMediaClient.instance
                                               .playerPosition.formatted,
-                                      style: theme.textTheme.caption?.copyWith(
+                                      style:
+                                          theme.textTheme.bodySmall?.copyWith(
                                         color: Colors.white,
                                       ),
                                     ),
@@ -121,7 +122,7 @@ class _ExpandedGoogleCastPlayerControllerState
                               width: 48,
                               child: Text(
                                 '${mediaStatus.mediaInformation?.duration?.formatted}',
-                                style: theme.textTheme.caption?.copyWith(
+                                style: theme.textTheme.bodySmall?.copyWith(
                                   color: Colors.white,
                                 ),
                               ),
