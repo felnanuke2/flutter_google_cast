@@ -29,3 +29,6 @@ fix /android/app/src/main/AndroidManifest.xml and add
                "com.google.android.gms.cast.framework.OPTIONS_PROVIDER_CLASS_NAME"
            android:value="com.felnanuke.google_cast.GoogleCastOptionsProvider" />
 ```
+
+## 0.0.10
+- Now supports Flutter 3.22.0, thanks to contributions from fmsidoe.

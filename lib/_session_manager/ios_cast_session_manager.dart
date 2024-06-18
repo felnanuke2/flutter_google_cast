@@ -33,8 +33,6 @@ class GoogleCastSessionManagerIOSMethodChannel
       currentSession?.connectionState ??
       GoogleCastConnectState.ConnectionStateDisconnected;
 
-  @override
-  // TODO: implement currentCastSession
   GoogleCastSession? get currentCastSession => throw UnimplementedError();
 
   @override

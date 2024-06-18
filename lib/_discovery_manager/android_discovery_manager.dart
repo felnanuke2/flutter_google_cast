@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_chrome_cast/_discovery_manager/discovery_manager_platform_interface.dart';
 import 'package:flutter_chrome_cast/entities/cast_device.dart';
@@ -42,7 +43,6 @@ class GoogleCastDiscoveryManagerMethodChannelAndroid
   }
 
   Future _onMethodCallHandler(MethodCall call) async {
-    print('method is ${call.method}');
     switch (call.method) {
       case 'onDevicesChanged':
         return _onDevicesChanged(call.arguments);
@@ -59,11 +59,8 @@ class GoogleCastDiscoveryManagerMethodChannelAndroid
       final devices =
           GoogleCastAndroidDevices.fromMap(listMap).toSet().toList();
       _devicesStreamController.add(devices);
-    } catch (e, s) {
-      print(e);
-      print(s);
+    } catch (e) {
       rethrow;
     }
-    print('On Devices Changed Success');
   }
 }

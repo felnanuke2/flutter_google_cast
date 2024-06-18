@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_chrome_cast/lib.dart';
 import 'package:flutter_chrome_cast/widgets/expanded_player.dart';
-import '../utils/extensions.dart' show GoogleCastMediaMetadataExtensions;
 
 class GoogleCastMiniController extends StatefulWidget {
   const GoogleCastMiniController({Key? key}) : super(key: key);

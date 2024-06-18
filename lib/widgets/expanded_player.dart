@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_chrome_cast/lib.dart';
 import 'package:flutter_chrome_cast/widgets/cast_volume.dart';
 
-import '../utils/extensions.dart';
 
 class ExpandedGoogleCastPlayerController extends StatefulWidget {
   final void Function()? toggleExpand;
@@ -30,7 +29,7 @@ class _ExpandedGoogleCastPlayerControllerState
           final mediaStatus = GoogleCastRemoteMediaClient.instance.mediaStatus;
           final deviceName = GoogleCastSessionManager
               .instance.currentSession?.device?.friendlyName;
-          if (mediaStatus == null) return SizedBox.shrink();
+          if (mediaStatus == null) return const SizedBox.shrink();
           return Scaffold(
             extendBodyBehindAppBar: true,
             appBar: AppBar(
@@ -46,7 +45,7 @@ class _ExpandedGoogleCastPlayerControllerState
                 ),
               ),
               actions: [
-                IconButton(onPressed: _onCastPressed, icon: Icon(Icons.cast))
+                IconButton(onPressed: _onCastPressed, icon: const Icon(Icons.cast))
               ],
             ),
             body: Stack(
@@ -278,5 +277,4 @@ class _ExpandedGoogleCastPlayerControllerState
     return durationToSeek;
   }
 
-  void _onChangeVolume(double value) {}
 }

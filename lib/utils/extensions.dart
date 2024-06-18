@@ -48,12 +48,12 @@ extension DurationExtension on Duration {
       tokens.add('${days}d');
     }
     if (tokens.isNotEmpty || hours != 0) {
-      tokens.add('${hours}');
+      tokens.add('$hours');
     }
 
-    tokens.add('${minutes}'.padLeft(2, '0'));
+    tokens.add('$minutes'.padLeft(2, '0'));
 
-    tokens.add('${seconds}'.padLeft(2, '0'));
+    tokens.add('$seconds'.padLeft(2, '0'));
 
     return tokens.join(':');
   }

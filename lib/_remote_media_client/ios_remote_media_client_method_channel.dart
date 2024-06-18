@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_chrome_cast/_remote_media_client/remote_media_client_platform.dart';
 import 'package:flutter_chrome_cast/entities/cast_media_status.dart';
