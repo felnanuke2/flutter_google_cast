@@ -158,9 +158,9 @@ Future<void> initPlatformState() async {
 ```dart
 //the discovery is even run in background when app is in foreground consuming low power
 // if you want a hard discover like when you open a devices dialog/modal is recommended to use
-GoogleCast.instance.startDiscovery();
+GoogleCastDiscoveryManager.instance.startDiscovery();
 /// don`t forget to stop discovery when you don`t need it anymore
-GoogleCast.instance.stopDiscovery();
+GoogleCastDiscoveryManager.instance.stopDiscovery();
 ```
 
 ### listen to devices found
