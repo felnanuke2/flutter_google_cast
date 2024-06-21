@@ -138,7 +138,6 @@ import 'package:flutter_chrome_cast/lib.dart';
 
 ### Initialize the library
 ```dart
-GoogleCast.instance.initialize();
 Future<void> initPlatformState() async {
     const appId = GoogleCastDiscoveryCriteria.kDefaultApplicationId;
     GoogleCastOptions? options;
