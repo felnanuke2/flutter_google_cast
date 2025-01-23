@@ -80,16 +80,23 @@ add the following to your ```Info.plist``` file
 ## android setup
 add the following to your ```AndroidManifest.xml``` file
 ```xml
+<uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
  <meta-data
            android:name=
                "com.google.android.gms.cast.framework.OPTIONS_PROVIDER_CLASS_NAME"
            android:value="GoogleCastOptionsProvider" />
+
+  <service
+  android:name="com.google.android.gms.cast.framework.media.MediaNotificationService"
+  android:exported="false"
+  android:foregroundServiceType="mediaPlayback" />
 ```
 ### full android example
 ```xml
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.felnanuke.google_cast_example">
-   <application
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
+    <application
         android:label="google_cast_example"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
@@ -106,12 +113,12 @@ add the following to your ```AndroidManifest.xml``` file
                  while the Flutter UI initializes. After that, this theme continues
                  to determine the Window background behind the Flutter UI. -->
             <meta-data
-              android:name="io.flutter.embedding.android.NormalTheme"
-              android:resource="@style/NormalTheme"
-              />
+                android:name="io.flutter.embedding.android.NormalTheme"
+                android:resource="@style/NormalTheme"
+            />
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="android.intent.category.LAUNCHER"/>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
         <!-- Don't delete the meta-data below.
@@ -119,10 +126,14 @@ add the following to your ```AndroidManifest.xml``` file
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
-       <meta-data
-           android:name=
-               "com.google.android.gms.cast.framework.OPTIONS_PROVIDER_CLASS_NAME"
-           android:value="GoogleCastOptionsProvider" />
+        <meta-data
+            android:name="com.google.android.gms.cast.framework.OPTIONS_PROVIDER_CLASS_NAME"
+            android:value="com.felnanuke.google_cast.GoogleCastOptionsProvider" />
+
+        <service
+            android:name="com.google.android.gms.cast.framework.media.MediaNotificationService"
+            android:exported="false"
+            android:foregroundServiceType="mediaPlayback" />
 
     </application>
 </manifest>

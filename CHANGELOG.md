@@ -32,3 +32,7 @@ fix /android/app/src/main/AndroidManifest.xml and add
 
 ## 0.0.10
 - Now supports Flutter 3.22.0, thanks to contributions from fmsidoe.
+
+## 0.0.11
+- fix issue on that crash app when session is disconnected
+- add to doc and example new properties required to work on android api 34+
