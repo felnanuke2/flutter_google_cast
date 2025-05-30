@@ -36,3 +36,9 @@ fix /android/app/src/main/AndroidManifest.xml and add
 ## 0.0.11
 - fix issue on that crash app when session is disconnected
 - add to doc and example new properties required to work on android api 34+
+
+## 1.0.0
+- Update plugin to support Flutter v3.24.3.
+- Bump version and update dependency versions in pubspec.yaml.
+- Update SDK constraints in both main and example pubspec files for compatibility with latest Flutter.
+- Add conditional namespace configuration in android/build.gradle for compatibility with the latest Gradle and Android Studio.
