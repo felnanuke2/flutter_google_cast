@@ -26,6 +26,10 @@ apply plugin: 'kotlin-android'
 
 
 android {
+    if (project.android.hasProperty("namespace")) {
+        namespace = "com.felnanuke.google_cast"
+    }
+
     compileSdkVersion 33
 
     compileOptions {
