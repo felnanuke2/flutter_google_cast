@@ -32,3 +32,9 @@ fix /android/app/src/main/AndroidManifest.xml and add
 
 ## 0.0.10
 - Now supports Flutter 3.22.0, thanks to contributions from fmsidoe.
+
+## 1.0.0
+- Update Dart SDK constraint to ">=2.17.1 <4.0.0".
+- Update dependencies: get, permission_handler, plugin_platform_interface, rxdart, flutter_lints, pigeon.
+- Ensure compatibility with latest Flutter and Gradle versions.
+- General maintenance and stability improvements.
