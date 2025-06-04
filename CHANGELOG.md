@@ -42,3 +42,7 @@ fix /android/app/src/main/AndroidManifest.xml and add
 - Bump version and update dependency versions in pubspec.yaml.
 - Update SDK constraints in both main and example pubspec files for compatibility with latest Flutter.
 - Add conditional namespace configuration in android/build.gradle for compatibility with the latest Gradle and Android Studio.
+
+## 1.0.1
+- Update README example to use fully qualified provider class name for Android manifest integration
+- Clarify the android:value meta-data entry with complete package path to prevent ambiguity when registering the options provider
