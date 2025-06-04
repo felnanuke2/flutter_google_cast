@@ -84,7 +84,7 @@ add the following to your ```AndroidManifest.xml``` file
  <meta-data
            android:name=
                "com.google.android.gms.cast.framework.OPTIONS_PROVIDER_CLASS_NAME"
-           android:value="GoogleCastOptionsProvider" />
+           android:value="com.felnanuke.google_cast.GoogleCastOptionsProvider" />
 
   <service
   android:name="com.google.android.gms.cast.framework.media.MediaNotificationService"
