@@ -1,3 +1,8 @@
+## 1.0.2
+- Improved README.md with better documentation and examples
+- Enhanced setup instructions and usage guidelines
+- Updated documentation formatting and clarity
+
 ## 0.0.1
 
 * TODO: Describe initial release.
