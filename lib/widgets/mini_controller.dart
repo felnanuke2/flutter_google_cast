@@ -121,13 +121,13 @@ class _GoogleCastMiniControllerState extends State<GoogleCastMiniController> {
         borderRadius: borderRadius,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.15),
+            color: Colors.black.withValues(alpha: 0.15),
             blurRadius: 20,
             offset: const Offset(0, 8),
             spreadRadius: 0,
           ),
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 6,
             offset: const Offset(0, 2),
             spreadRadius: 0,
@@ -173,7 +173,7 @@ class _GoogleCastMiniControllerState extends State<GoogleCastMiniController> {
                       Container(
                         decoration: BoxDecoration(
                           color: (theme?.iconColor ?? Colors.grey[800])
-                              ?.withOpacity(0.1),
+                              ?.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(24),
                         ),
                         child: IconButton(
@@ -221,7 +221,7 @@ class _GoogleCastMiniControllerState extends State<GoogleCastMiniController> {
           boxShadow: theme?.imageShadow ??
               [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.2),
+                  color: Colors.black.withValues(alpha: 0.2),
                   blurRadius: 8,
                   offset: const Offset(0, 2),
                 ),
@@ -279,7 +279,7 @@ class _GoogleCastMiniControllerState extends State<GoogleCastMiniController> {
         boxShadow: theme?.imageShadow ??
             [
               BoxShadow(
-                color: Colors.black.withOpacity(0.2),
+                color: Colors.black.withValues(alpha: 0.2),
                 blurRadius: 8,
                 offset: const Offset(0, 2),
               ),
@@ -374,21 +374,6 @@ class _GoogleCastMiniControllerState extends State<GoogleCastMiniController> {
         fontSize: 11,
         fontWeight: FontWeight.w300, // Slightly lighter weight for subtitle
       ),
-    );
-  }
-
-  Widget _buildDeviceName(String? friendlyName) {
-    final deviceName = friendlyName ?? '';
-    final theme = widget.theme;
-
-    return _buildScrollingText(
-      text: 'Casting to $deviceName',
-      style: theme?.deviceTextStyle ??
-          TextStyle(
-            fontSize: 12,
-            color: Colors.grey[600],
-            fontWeight: FontWeight.w400,
-          ),
     );
   }
 

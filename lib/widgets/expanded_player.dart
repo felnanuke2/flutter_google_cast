@@ -276,10 +276,10 @@ class _ExpandedGoogleCastPlayerControllerState
                     backgroundColor: Colors.transparent,
                     leading: Container(
                       decoration: BoxDecoration(
-                        color: Colors.black.withOpacity(0.7),
+                        color: Colors.black.withValues(alpha: 0.7),
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(
-                          color: Colors.white.withOpacity(0.2),
+                          color: Colors.white.withValues(alpha: 0.2),
                           width: 1,
                         ),
                       ),
@@ -303,10 +303,10 @@ class _ExpandedGoogleCastPlayerControllerState
                     actions: [
                       Container(
                         decoration: BoxDecoration(
-                          color: Colors.black.withOpacity(0.7),
+                          color: Colors.black.withValues(alpha: 0.7),
                           borderRadius: BorderRadius.circular(16),
                           border: Border.all(
-                            color: Colors.white.withOpacity(0.2),
+                            color: Colors.white.withValues(alpha: 0.2),
                             width: 1,
                           ),
                         ),
@@ -336,7 +336,7 @@ class _ExpandedGoogleCastPlayerControllerState
                       BackdropFilter(
                         filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
                         child: Container(
-                          color: Colors.black.withOpacity(0.3),
+                          color: Colors.black.withValues(alpha: 0.3),
                         ),
                       ),
                       // Drag handle indicator
@@ -351,20 +351,20 @@ class _ExpandedGoogleCastPlayerControllerState
                             height: _isDragging ? 5 : 4,
                             decoration: BoxDecoration(
                               color: _isDragging
-                                  ? Colors.white.withOpacity(0.9)
-                                  : Colors.white.withOpacity(0.5),
+                                  ? Colors.white.withValues(alpha: 0.9)
+                                  : Colors.white.withValues(alpha: 0.5),
                               borderRadius: BorderRadius.circular(3),
                               boxShadow: _isDragging
                                   ? [
                                       BoxShadow(
-                                        color: Colors.white.withOpacity(0.4),
+                                        color: Colors.white.withValues(alpha: 0.4),
                                         blurRadius: 12,
                                         spreadRadius: 2,
                                       ),
                                     ]
                                   : [
                                       BoxShadow(
-                                        color: Colors.black.withOpacity(0.3),
+                                        color: Colors.black.withValues(alpha: 0.3),
                                         blurRadius: 4,
                                         offset: const Offset(0, 1),
                                       ),
@@ -384,7 +384,7 @@ class _ExpandedGoogleCastPlayerControllerState
                                   colors: [
                                     const Color(0xFF232526),
                                     const Color(0xFF414345),
-                                    Colors.black.withOpacity(0.7),
+                                    Colors.black.withValues(alpha: 0.7),
                                   ]),
                         ),
                       ),
@@ -407,7 +407,7 @@ class _ExpandedGoogleCastPlayerControllerState
                                   boxShadow: theme?.imageShadow ??
                                       [
                                         BoxShadow(
-                                          color: Colors.black.withOpacity(0.4),
+                                          color: Colors.black.withValues(alpha: 0.4),
                                           blurRadius: 20,
                                           offset: const Offset(0, 8),
                                         ),
@@ -453,11 +453,11 @@ class _ExpandedGoogleCastPlayerControllerState
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 16, vertical: 8),
                             decoration: BoxDecoration(
-                              color: Colors.black.withOpacity(0.4),
+                              color: Colors.black.withValues(alpha: 0.4),
                               borderRadius: BorderRadius.circular(16),
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.black.withOpacity(0.2),
+                                  color: Colors.black.withValues(alpha: 0.2),
                                   blurRadius: 8,
                                   offset: const Offset(0, 2),
                                 ),
@@ -543,11 +543,11 @@ class _ExpandedGoogleCastPlayerControllerState
                               padding: const EdgeInsets.symmetric(
                                   horizontal: 16, vertical: 12),
                               decoration: BoxDecoration(
-                                color: Colors.black.withOpacity(0.4),
+                                color: Colors.black.withValues(alpha: 0.4),
                                 borderRadius: BorderRadius.circular(32),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.black.withOpacity(0.15),
+                                    color: Colors.black.withValues(alpha: 0.15),
                                     blurRadius: 12,
                                     offset: const Offset(0, 4),
                                   ),
@@ -685,10 +685,10 @@ class _ExpandedGoogleCastPlayerControllerState
                 activeTrackColor:
                     theme?.iconColor ?? Theme.of(context).colorScheme.primary,
                 inactiveTrackColor:
-                    theme?.iconColor?.withOpacity(0.3) ?? Colors.white30,
+                    theme?.iconColor?.withValues(alpha: 0.3) ?? Colors.white30,
                 thumbColor: theme?.iconColor ?? Colors.white,
                 overlayColor:
-                    (theme?.iconColor ?? Colors.white).withOpacity(0.2),
+                    (theme?.iconColor ?? Colors.white).withValues(alpha: 0.2),
               ),
               child: Slider(
                 value: _isSliding

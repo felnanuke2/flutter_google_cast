@@ -62,7 +62,7 @@ class CustomizableTextsExample extends StatelessWidget {
   static const _englishTexts = ExpandedGoogleCastPlayerTexts();
 
   // Spanish localization
-  static final _spanishTexts = ExpandedGoogleCastPlayerTexts(
+  static const _spanishTexts = ExpandedGoogleCastPlayerTexts(
     unknownTitle: 'Título desconocido',
     castingToDevice: _spanishCastingToDevice,
     noCaptionsAvailable: 'Sin subtítulos disponibles',
@@ -74,7 +74,7 @@ class CustomizableTextsExample extends StatelessWidget {
   static String _spanishTrackFallback(int trackId) => 'Pista $trackId';
 
   // French localization
-  static final _frenchTexts = ExpandedGoogleCastPlayerTexts(
+  static const _frenchTexts = ExpandedGoogleCastPlayerTexts(
     unknownTitle: 'Titre inconnu',
     castingToDevice: _frenchCastingToDevice,
     noCaptionsAvailable: 'Aucun sous-titre disponible',
@@ -86,7 +86,7 @@ class CustomizableTextsExample extends StatelessWidget {
   static String _frenchTrackFallback(int trackId) => 'Piste $trackId';
 
   // Custom branding example
-  static final _customBrandingTexts = ExpandedGoogleCastPlayerTexts(
+  static const _customBrandingTexts = ExpandedGoogleCastPlayerTexts(
     unknownTitle: 'No media selected',
     castingToDevice: _customCastingToDevice,
     noCaptionsAvailable: 'No subtitles found',

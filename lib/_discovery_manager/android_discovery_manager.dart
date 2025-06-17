@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_chrome_cast/_discovery_manager/discovery_manager_platform_interface.dart';
 import 'package:flutter_chrome_cast/entities/cast_device.dart';
@@ -71,13 +72,19 @@ class GoogleCastDiscoveryManagerMethodChannelAndroid
         final key = '${device.friendlyName}_${device.modelName}';
         if (!uniqueDevices.containsKey(key)) {
           uniqueDevices[key] = device;
-          print('Added unique device with key: $key');
+          if (kDebugMode) {
+            print('Added unique device with key: $key');
+          }
         } else {
-          print('Skipped duplicate device with key: $key');
+          if (kDebugMode) {
+            print('Skipped duplicate device with key: $key');
+          }
         }
       }
       
-      print('Final device count after deduplication: ${uniqueDevices.length}');
+      if (kDebugMode) {
+        print('Final device count after deduplication: ${uniqueDevices.length}');
+      }
       _devicesStreamController.add(uniqueDevices.values.toList());
     } catch (e) {
       rethrow;

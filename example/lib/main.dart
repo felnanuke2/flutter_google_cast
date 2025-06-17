@@ -114,8 +114,8 @@ class _MyAppState extends State<MyApp> {
                               padding: const EdgeInsets.all(12.0),
                               decoration: BoxDecoration(
                                 color: _isDiscoveryActive 
-                                    ? Colors.green.withOpacity(0.1)
-                                    : Colors.grey.withOpacity(0.1),
+                                    ? Colors.green.withValues(alpha: 0.1)
+                                    : Colors.grey.withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(8.0),
                                 border: Border.all(
                                   color: _isDiscoveryActive 
@@ -295,7 +295,7 @@ class _MyAppState extends State<MyApp> {
               imageBorderRadius: BorderRadius.circular(12),
               imageShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.2),
+                  color: Colors.black.withValues(alpha: 0.2),
                   blurRadius: 8,
                   offset: const Offset(0, 2),
                 ),
