@@ -2,7 +2,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_chrome_cast/lib.dart';
 import 'dart:async';
-import 'package:flutter_chrome_cast/widgets/mini_controller.dart';
 
 void main() {
   runApp(const MyApp());
@@ -16,6 +15,9 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+  final _scaffoldKey = GlobalKey<ScaffoldState>();
+  bool _isDiscoveryActive = false;
+  
   @override
   void initState() {
     super.initState();
@@ -36,6 +38,20 @@ class _MyAppState extends State<MyApp> {
       );
     }
     GoogleCastContext.instance.setSharedInstanceWithOptions(options!);
+    
+    // Check initial discovery state for iOS
+    if (Platform.isIOS) {
+      try {
+        final isActive = await GoogleCastDiscoveryManager.instance
+            .isDiscoveryActiveForDeviceCategory(appId);
+        setState(() {
+          _isDiscoveryActive = isActive;
+        });
+      } catch (e) {
+        // Handle error silently or log it
+        print('Error checking discovery state: $e');
+      }
+    }
   }
 
   @override
@@ -44,6 +60,7 @@ class _MyAppState extends State<MyApp> {
       home: Stack(
         children: [
           Scaffold(
+            key: _scaffoldKey,
               floatingActionButton: Container(
                 margin: const EdgeInsets.only(bottom: 40),
                 child: StreamBuilder(
@@ -52,7 +69,7 @@ class _MyAppState extends State<MyApp> {
                     builder: (context, snapshot) {
                       final isConnected =
                           GoogleCastSessionManager.instance.connectionState ==
-                              GoogleCastConnectState.ConnectionStateConnected;
+                              GoogleCastConnectState.connected;
                       return Visibility(
                         visible: isConnected,
                         child: FloatingActionButton(
@@ -71,7 +88,7 @@ class _MyAppState extends State<MyApp> {
                       builder: (context, snapshot) {
                         final bool isConnected =
                             GoogleCastSessionManager.instance.connectionState ==
-                                GoogleCastConnectState.ConnectionStateConnected;
+                                GoogleCastConnectState.connected;
                         return IconButton(
                             onPressed: GoogleCastSessionManager
                                 .instance.endSessionAndStopCasting,
@@ -87,14 +104,170 @@ class _MyAppState extends State<MyApp> {
                   final devices = snapshot.data ?? [];
                   return Column(
                     children: [
+                      // Discovery Control Section
+                      Container(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          children: [
+                            // Discovery Status Indicator
+                            Container(
+                              padding: const EdgeInsets.all(12.0),
+                              decoration: BoxDecoration(
+                                color: _isDiscoveryActive 
+                                    ? Colors.green.withOpacity(0.1)
+                                    : Colors.grey.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(8.0),
+                                border: Border.all(
+                                  color: _isDiscoveryActive 
+                                      ? Colors.green 
+                                      : Colors.grey,
+                                  width: 2.0,
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Container(
+                                    width: 12.0,
+                                    height: 12.0,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: _isDiscoveryActive 
+                                          ? Colors.green 
+                                          : Colors.grey,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8.0),
+                                  Expanded(
+                                    child: Text(
+                                      _isDiscoveryActive 
+                                          ? devices.isEmpty
+                                              ? 'Discovery Active - Searching for devices...'
+                                              : 'Discovery Active - Found ${devices.length} device${devices.length == 1 ? '' : 's'}'
+                                          : 'Discovery Stopped',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        color: _isDiscoveryActive 
+                                            ? Colors.green.shade700
+                                            : Colors.grey.shade700,
+                                      ),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ),
+                                  if (_isDiscoveryActive) ...[
+                                    const SizedBox(width: 8.0),
+                                    SizedBox(
+                                      width: 16.0,
+                                      height: 16.0,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2.0,
+                                        valueColor: AlwaysStoppedAnimation<Color>(
+                                          Colors.green.shade700,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: 16.0),
+                            // Discovery Control Buttons
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                ElevatedButton(
+                                  onPressed: _isDiscoveryActive ? null : _startDiscovery,
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: _isDiscoveryActive ? Colors.grey : Colors.green,
+                                    foregroundColor: Colors.white,
+                                  ),
+                                  child: const Text('Start Discovery'),
+                                ),
+                                ElevatedButton(
+                                  onPressed: !_isDiscoveryActive ? null : _stopDiscovery,
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: !_isDiscoveryActive ? Colors.grey : Colors.red,
+                                    foregroundColor: Colors.white,
+                                  ),
+                                  child: const Text('Stop Discovery'),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                      const Divider(),
+                      // Device List Section
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                        child: Text(
+                          'Available Cast Devices (${devices.length})',
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
                       Expanded(
                         child: ListView(
                           children: [
                             ...devices.map((device) {
-                              return ListTile(
-                                title: Text(device.friendlyName),
-                                subtitle: Text(device.modelName ?? ''),
-                                onTap: () => _loadQueue(device),
+                              return StreamBuilder<GoogleCastSession?>(
+                                stream: GoogleCastSessionManager.instance.currentSessionStream,
+                                builder: (context, sessionSnapshot) {
+                                  final currentSession = sessionSnapshot.data;
+                                  final isConnectedToThisDevice = currentSession?.device?.deviceID == device.deviceID;
+                                  
+                                  return Card(
+                                    margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                    elevation: isConnectedToThisDevice ? 4 : 1,
+                                    color: isConnectedToThisDevice ? Colors.blue.shade50 : null,
+                                    child: ListTile(
+                                      title: Text(
+                                        device.friendlyName,
+                                        style: TextStyle(
+                                          fontWeight: isConnectedToThisDevice ? FontWeight.bold : FontWeight.normal,
+                                        ),
+                                      ),
+                                      subtitle: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(device.modelName ?? ''),
+                                          if (isConnectedToThisDevice)
+                                            Text(
+                                              'Connected',
+                                              style: TextStyle(
+                                                color: Colors.green.shade600,
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                            ),
+                                        ],
+                                      ),
+                                      leading: Icon(
+                                        isConnectedToThisDevice ? Icons.cast_connected : Icons.cast,
+                                        color: isConnectedToThisDevice ? Colors.blue : null,
+                                      ),
+                                      trailing: isConnectedToThisDevice 
+                                        ? Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              IconButton(
+                                                icon: const Icon(Icons.play_arrow),
+                                                onPressed: () => _loadAndPlayMedia(),
+                                                tooltip: 'Play Media',
+                                                color: Colors.green,
+                                              ),
+                                              IconButton(
+                                                icon: const Icon(Icons.stop),
+                                                onPressed: () => _disconnectFromDevice(),
+                                                tooltip: 'Disconnect',
+                                                color: Colors.red,
+                                              ),
+                                            ],
+                                          )
+                                        : const Icon(Icons.chevron_right),
+                                      onTap: isConnectedToThisDevice ? null : () => _connectToDevice(device),
+                                    ),
+                                  );
+                                },
                               );
                             })
                           ],
@@ -104,86 +277,86 @@ class _MyAppState extends State<MyApp> {
                   );
                 },
               )),
-          const GoogleCastMiniController(),
-        ],
-      ),
-    );
-  }
-
-  void _changeCurrentTime(double value) {
-    final seconds = GoogleCastRemoteMediaClient
-            .instance.mediaStatus?.mediaInformation?.duration?.inSeconds ??
-        0;
-    final position = (value * seconds).floor();
-    GoogleCastRemoteMediaClient.instance
-        .seek(GoogleCastMediaSeekOption(position: Duration(seconds: position)));
-  }
-
-  void _togglePLayPause() {
-    final isPlaying =
-        GoogleCastRemoteMediaClient.instance.mediaStatus?.playerState ==
-            CastMediaPlayerState.playing;
-    if (isPlaying) {
-      GoogleCastRemoteMediaClient.instance.pause();
-    } else {
-      GoogleCastRemoteMediaClient.instance.play();
-    }
-  }
-
-  void _loadMedia(GoogleCastDevice device) async {
-    await GoogleCastSessionManager.instance.startSessionWithDevice(device);
-
-    GoogleCastRemoteMediaClient.instance.loadMedia(
-      GoogleCastMediaInformationIOS(
-        contentId: '',
-        streamType: CastMediaStreamType.BUFFERED,
-        contentUrl: Uri.parse(
-            'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4'),
-        contentType: 'video/mp4',
-        metadata: GoogleCastTvShowMediaMetadata(
-          episode: 1,
-          season: 2,
-          seriesTitle: 'Big Buck Bunny',
-          originalAirDate: DateTime.now(),
-          images: [
-            GoogleCastImage(
-              url: Uri.parse(
-                  'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/images/BigBuckBunny.jpg'),
-              height: 480,
-              width: 854,
+          GoogleCastMiniController(
+            theme: ExpandedGoogleCastPlayerTheme(
+              backgroundColor: Colors.white,
+              titleTextStyle: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: Colors.black87,
+              ),
+              deviceTextStyle: TextStyle(
+                fontSize: 12,
+                color: Colors.grey[600],
+                fontWeight: FontWeight.w400,
+              ),
+              iconColor: Colors.blue,
+              iconSize: 28,
+              imageBorderRadius: BorderRadius.circular(12),
+              imageShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.2),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
             ),
-          ],
-        ),
-        tracks: [
-          GoogleCastMediaTrack(
-            trackId: 0,
-            type: TrackType.TEXT,
-            trackContentId: Uri.parse(
-                    'https://raw.githubusercontent.com/felnanuke2/flutter_cast/master/example/assets/VEED-subtitles_Blender_Foundation_-_Elephants_Dream_1024.vtt')
-                .toString(),
-            trackContentType: 'text/vtt',
-            name: 'English',
-            language: RFC5646_LANGUAGE.PORTUGUESE_BRAZIL,
-            subtype: TextTrackType.SUBTITLES,
+            margin: const EdgeInsets.all(16),
+            borderRadius: BorderRadius.circular(16),
+            showDeviceName: true,
           ),
         ],
       ),
-      autoPlay: true,
-      playPosition: const Duration(seconds: 0),
-      playbackRate: 2,
-      activeTrackIds: [0],
     );
   }
 
-  _loadQueue(GoogleCastDevice device) async {
-    await GoogleCastSessionManager.instance.startSessionWithDevice(device);
-    await GoogleCastRemoteMediaClient.instance.queueLoadItems(
+  void _connectToDevice(GoogleCastDevice device) async {
+    try {
+      await GoogleCastSessionManager.instance.startSessionWithDevice(device);
+      ScaffoldMessenger.of(_scaffoldKey.currentContext!).showSnackBar(
+        SnackBar(
+          content: Text('Connected to ${device.friendlyName}'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(_scaffoldKey.currentContext!).showSnackBar(
+        SnackBar(
+          content: Text('Failed to connect to ${device.friendlyName}'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  void _disconnectFromDevice() async {
+    try {
+      await GoogleCastSessionManager.instance.endSessionAndStopCasting();
+      ScaffoldMessenger.of(_scaffoldKey.currentContext!).showSnackBar(
+        const SnackBar(
+          content: Text('Disconnected from Cast device'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(_scaffoldKey.currentContext!).showSnackBar(
+        const SnackBar(
+          content: Text('Failed to disconnect'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  void _loadAndPlayMedia() async {
+    try {
+      await GoogleCastRemoteMediaClient.instance.queueLoadItems(
       [
         GoogleCastQueueItem(
           activeTrackIds: [0],
           mediaInformation: GoogleCastMediaInformationIOS(
             contentId: '0',
-            streamType: CastMediaStreamType.BUFFERED,
+            streamType: CastMediaStreamType.buffered,
             contentUrl: Uri.parse(
                 'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4'),
             contentType: 'video/mp4',
@@ -196,7 +369,7 @@ class _MyAppState extends State<MyApp> {
               images: [
                 GoogleCastImage(
                   url: Uri.parse(
-                      'https://i.ytimg.com/vi_webp/gWw23EYM9VM/maxresdefault.webp'),
+                      'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/images/BigBuckBunny.jpg'),
                   height: 480,
                   width: 854,
                 ),
@@ -205,14 +378,14 @@ class _MyAppState extends State<MyApp> {
             tracks: [
               GoogleCastMediaTrack(
                 trackId: 0,
-                type: TrackType.TEXT,
+                type: TrackType.text,
                 trackContentId: Uri.parse(
                         'https://raw.githubusercontent.com/felnanuke2/flutter_cast/master/example/assets/VEED-subtitles_Blender_Foundation_-_Elephants_Dream_1024.vtt')
                     .toString(),
                 trackContentType: 'text/vtt',
                 name: 'English',
-                language: RFC5646_LANGUAGE.PORTUGUESE_BRAZIL,
-                subtype: TextTrackType.SUBTITLES,
+                language: Rfc5646Language.portugueseBrazil,
+                subtype: TextTrackType.subtitles,
               ),
             ],
           ),
@@ -221,7 +394,7 @@ class _MyAppState extends State<MyApp> {
           preLoadTime: const Duration(seconds: 15),
           mediaInformation: GoogleCastMediaInformationIOS(
             contentId: '1',
-            streamType: CastMediaStreamType.BUFFERED,
+            streamType: CastMediaStreamType.buffered,
             contentUrl: Uri.parse(
                 'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4'),
             contentType: 'video/mp4',
@@ -246,47 +419,20 @@ class _MyAppState extends State<MyApp> {
         playPosition: const Duration(seconds: 30),
       ),
     );
-  }
-
-  void _previous() {
-    GoogleCastRemoteMediaClient.instance.queuePrevItem();
-  }
-
-  void _next() {
-    GoogleCastRemoteMediaClient.instance.queueNextItem();
-  }
-
-  void _insertQueueItem() {
-    GoogleCastRemoteMediaClient.instance.queueInsertItems(
-      [
-        GoogleCastQueueItem(
-          preLoadTime: const Duration(seconds: 15),
-          mediaInformation: GoogleCastMediaInformationIOS(
-            contentId: '3',
-            streamType: CastMediaStreamType.BUFFERED,
-            contentUrl: Uri.parse(
-                'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4'),
-            contentType: 'video/mp4',
-            metadata: GoogleCastMovieMediaMetadata(
-              title: 'For Bigger Blazes',
-              subtitle:
-                  'Song : Raja Raja Kareja Mein Samaja\nAlbum : Raja Kareja Mein Samaja\nArtist : Radhe Shyam Rasia\nSinger : Radhe Shyam Rasia\nMusic Director : Sohan Lal, Dinesh Kumar\nLyricist : Vinay Bihari, Shailesh Sagar, Parmeshwar Premi\nMusic Label : T-Series',
-              releaseDate: DateTime(2011),
-              studio: 'T-Series Regional',
-              images: [
-                GoogleCastImage(
-                  url: Uri.parse(
-                      'https://i.ytimg.com/vi/Dr9C2oswZfA/maxresdefault.jpg'),
-                  height: 480,
-                  width: 854,
-                ),
-              ],
-            ),
-          ),
-        )
-      ],
-      beforeItemWithId: 2,
-    );
+      ScaffoldMessenger.of(_scaffoldKey.currentContext!).showSnackBar(
+        const SnackBar(
+          content: Text('Media loaded and playing'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(_scaffoldKey.currentContext!).showSnackBar(
+        const SnackBar(
+          content: Text('Failed to load media'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   void _insertQueueItemAndPlay() {
@@ -295,7 +441,7 @@ class _MyAppState extends State<MyApp> {
         preLoadTime: const Duration(seconds: 15),
         mediaInformation: GoogleCastMediaInformationIOS(
           contentId: '3',
-          streamType: CastMediaStreamType.BUFFERED,
+          streamType: CastMediaStreamType.buffered,
           contentUrl: Uri.parse(
               'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4'),
           contentType: 'video/mp4',
@@ -320,13 +466,29 @@ class _MyAppState extends State<MyApp> {
     );
   }
 
-  String? _getImage(GoogleCastMediaMetadata? metadata) {
-    if (metadata == null) {
-      return null;
-    }
-    if (metadata.images?.isEmpty ?? true) {
-      return null;
-    }
-    return metadata.images!.first.url.toString();
+  void _startDiscovery() {
+    setState(() {
+      _isDiscoveryActive = true;
+    });
+    GoogleCastDiscoveryManager.instance.startDiscovery();
+    ScaffoldMessenger.of(_scaffoldKey.currentContext!).showSnackBar(
+      const SnackBar(
+        content: Text('Discovery started - searching for Cast devices...'),
+        backgroundColor: Colors.green,
+      ),
+    );
+  }
+
+  void _stopDiscovery() {
+    setState(() {
+      _isDiscoveryActive = false;
+    });
+    GoogleCastDiscoveryManager.instance.stopDiscovery();
+    ScaffoldMessenger.of(_scaffoldKey.currentContext!).showSnackBar(
+      const SnackBar(
+        content: Text('Discovery stopped'),
+        backgroundColor: Colors.red,
+      ),
+    );
   }
 }

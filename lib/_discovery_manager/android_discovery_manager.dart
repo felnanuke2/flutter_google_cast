@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_chrome_cast/_discovery_manager/discovery_manager_platform_interface.dart';
 import 'package:flutter_chrome_cast/entities/cast_device.dart';
@@ -51,14 +50,33 @@ class GoogleCastDiscoveryManagerMethodChannelAndroid
     }
   }
 
-  _onDevicesChanged(arguments) {
+  void _onDevicesChanged(dynamic arguments) {
     try {
       arguments as String;
       final list = jsonDecode(arguments);
       final listMap = List.from(list);
       final devices =
-          GoogleCastAndroidDevices.fromMap(listMap).toSet().toList();
-      _devicesStreamController.add(devices);
+          GoogleCastAndroidDevices.fromMap(listMap);
+      
+      print('Received ${devices.length} devices from native');
+      for (final device in devices) {
+        print('Device: ${device.deviceID} - ${device.friendlyName} (${device.modelName})');
+      }
+      
+      // Enhanced deduplication: remove devices with same name and model
+      final Map<String, GoogleCastDevice> uniqueDevices = {};
+      for (final device in devices) {
+        final key = '${device.friendlyName}_${device.modelName}';
+        if (!uniqueDevices.containsKey(key)) {
+          uniqueDevices[key] = device;
+          print('Added unique device with key: $key');
+        } else {
+          print('Skipped duplicate device with key: $key');
+        }
+      }
+      
+      print('Final device count after deduplication: ${uniqueDevices.length}');
+      _devicesStreamController.add(uniqueDevices.values.toList());
     } catch (e) {
       rethrow;
     }

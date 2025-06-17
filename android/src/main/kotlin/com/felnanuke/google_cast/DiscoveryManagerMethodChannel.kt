@@ -122,10 +122,30 @@ class DiscoveryManagerMethodChannel : FlutterPlugin, MethodChannel.MethodCallHan
 
         fun getCastDevicesMap() {
             val devices = mutableListOf<kotlin.collections.Map<*, *>>()
+            val seenDeviceIds = mutableSetOf<String>()
+            val seenDeviceSignatures = mutableSetOf<String>()
+            
             for (route in router.routes) {
                 val device = getCastDevice(route)
                 if (device != null) {
-                    devices.add(device)
+                    val deviceId = device["id"] as? String
+                    val deviceName = device["name"] as? String
+                    val deviceModel = device["model_name"] as? String
+                    val deviceSignature = "${deviceName}_${deviceModel}"
+                    
+                    Log.d(TAG, "Found route with device ID: $deviceId, name: $deviceName, model: $deviceModel")
+                    
+                    // Skip devices we've already seen by ID or by name+model combination
+                    if (deviceId != null && 
+                        !seenDeviceIds.contains(deviceId) && 
+                        !seenDeviceSignatures.contains(deviceSignature)) {
+                        seenDeviceIds.add(deviceId)
+                        seenDeviceSignatures.add(deviceSignature)
+                        devices.add(device)
+                        Log.d(TAG, "Added unique device: $deviceId ($deviceSignature)")
+                    } else {
+                        Log.w(TAG, "Skipping duplicate device - ID: $deviceId, signature: $deviceSignature")
+                    }
                 }
             }
             val json = Gson().toJson(devices)

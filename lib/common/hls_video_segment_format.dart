@@ -1,11 +1,23 @@
 enum HlsVideoSegmentFormat {
-  MPEG2_TS,
-
-  FMP4,
-  NONE;
+  mpeg2Ts,
+  fmp4,
+  none;
 
   factory HlsVideoSegmentFormat.fromMap(String value) {
-    return values.firstWhere((element) => element.name == value,
-        orElse: () => NONE);
+    // Try matching by name (lowerCamelCase)
+    for (final v in values) {
+      if (v.name == value) return v;
+    }
+    // Fallback: match legacy UPPER_SNAKE_CASE
+    switch (value) {
+      case 'MPEG2_TS':
+        return HlsVideoSegmentFormat.mpeg2Ts;
+      case 'FMP4':
+        return HlsVideoSegmentFormat.fmp4;
+      case 'NONE':
+        return HlsVideoSegmentFormat.none;
+      default:
+        return HlsVideoSegmentFormat.none;
+    }
   }
 }

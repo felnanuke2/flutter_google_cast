@@ -1,6 +1,6 @@
 enum TrackType {
-  UNKNOWN,
-  TEXT,
-  AUDIO,
-  VIDEO,
+  unknown,
+  text,
+  audio,
+  video,
 }

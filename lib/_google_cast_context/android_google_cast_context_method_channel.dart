@@ -13,11 +13,8 @@ class GoogleCastContextAndroidMethodChannel
     try {
       final result =
           await _channel.invokeMethod('setSharedInstance', castOptions.toMap());
-      print('setSharedInstanceWithOptions initialized with $result');
       return result == true;
-    } catch (e, s) {
-      print(e);
-      print(s);
+    } catch (e) {
       rethrow;
     }
   }

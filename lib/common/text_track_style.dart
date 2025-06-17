@@ -131,7 +131,7 @@ class TextTrackStyle {
 
 extension HColor on Color {
   String get hexColor {
-    return '#${this.value.toRadixString(16).padLeft(8, '0')}';
+    return '#${toARGB32().toRadixString(16).padLeft(8, '0')}';
   }
 
   static Color fromHex(String hexString) {

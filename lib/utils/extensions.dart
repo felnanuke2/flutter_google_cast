@@ -31,11 +31,54 @@ extension GoogleCastMediaMetadataExtensions on GoogleCastMediaMetadata {
     }
     return title;
   }
+
+  String? get extractedSubtitle {
+    final type = metadataType;
+    String? subtitle;
+    final metadata = this;
+
+    switch (type) {
+      case GoogleCastMediaMetadataType.tvShowMediaMetadata:
+        metadata as GoogleCastTvShowMediaMetadata;
+        // For TV shows, create subtitle from season and episode info
+        if (metadata.season != null && metadata.episode != null) {
+          subtitle = 'S${metadata.season}E${metadata.episode}';
+        } else if (metadata.season != null) {
+          subtitle = 'Season ${metadata.season}';
+        } else if (metadata.episode != null) {
+          subtitle = 'Episode ${metadata.episode}';
+        }
+        break;
+      case GoogleCastMediaMetadataType.genericMediaMetadata:
+        metadata as GoogleCastGenericMediaMetadata;
+        subtitle = metadata.subtitle;
+        break;
+      case GoogleCastMediaMetadataType.movieMediaMetadata:
+        metadata as GoogleCastMovieMediaMetadata;
+        subtitle = metadata.subtitle;
+        break;
+      case GoogleCastMediaMetadataType.musicTrackMediaMetadata:
+        metadata as GoogleCastMusicMediaMetadata;
+        // For music, use album name or artist as subtitle
+        subtitle = metadata.albumName ?? metadata.artist;
+        break;
+      case GoogleCastMediaMetadataType.photoMediaMetadata:
+        metadata as GoogleCastPhotoMediaMetadata;
+        subtitle = metadata.artist;
+        break;
+      default:
+    }
+    //replace line breaks with spaces
+    if (subtitle != null) {
+      subtitle = subtitle.replaceAll('\n', ' ').replaceAll('\r', ' ');
+    }
+    return subtitle;
+  }
 }
 
 extension DurationExtension on Duration {
   String get formatted {
-    var seconds = inSeconds;
+    int seconds = inSeconds;
     final days = seconds ~/ Duration.secondsPerDay;
     seconds -= days * Duration.secondsPerDay;
     final hours = seconds ~/ Duration.secondsPerHour;

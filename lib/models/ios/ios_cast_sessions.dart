@@ -1,5 +1,5 @@
 import 'package:flutter_chrome_cast/entities/cast_session.dart';
-import 'package:flutter_chrome_cast/enums/connection_satate.dart';
+import 'package:flutter_chrome_cast/enums/connection_state.dart';
 import 'package:flutter_chrome_cast/models/ios/ios_cast_device.dart';
 
 class IOSGoogleCastSessions extends GoogleCastSession {

@@ -8,3 +8,7 @@ export 'enums/enums.dart';
 export 'models/models.dart';
 export './utils/extensions.dart';
 export './utils/functions.dart';
+export './widgets/cast_volume.dart';
+export './widgets/expanded_player.dart';
+export './widgets/mini_controller.dart';
+export './widgets/scrolling_text.dart';

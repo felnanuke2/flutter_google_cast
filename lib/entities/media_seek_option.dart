@@ -10,7 +10,7 @@ class GoogleCastMediaSeekOption {
   GoogleCastMediaSeekOption({
     required this.position,
     this.relative = false,
-    this.resumeState = GoogleCastMediaResumeState.GCKMediaResumeStatePlay,
+    this.resumeState = GoogleCastMediaResumeState.play,
     this.seekToInfinity = false,
   });
 

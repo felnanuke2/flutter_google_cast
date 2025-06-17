@@ -1,5 +1,4 @@
 import 'package:flutter_chrome_cast/lib.dart';
-import 'package:flutter_chrome_cast/models/android/extensions/date_time.dart';
 
 class GoogleCastTvShowMediaMetadataAndroid
     extends GoogleCastTvShowMediaMetadata {
