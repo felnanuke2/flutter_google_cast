@@ -58,9 +58,11 @@ class GoogleCastDiscoveryManagerMethodChannelAndroid
       final devices =
           GoogleCastAndroidDevices.fromMap(listMap);
       
-      print('Received ${devices.length} devices from native');
-      for (final device in devices) {
-        print('Device: ${device.deviceID} - ${device.friendlyName} (${device.modelName})');
+      if (kDebugMode) {
+        print('Received ${devices.length} devices from native');
+        for (final device in devices) {
+          print('Device: ${device.deviceID} - ${device.friendlyName} (${device.modelName})');
+        }
       }
       
       // Enhanced deduplication: remove devices with same name and model
