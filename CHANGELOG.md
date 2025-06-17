@@ -1,3 +1,12 @@
+## 1.0.4
+### Bug Fixes
+- **Code Quality**: Fixed Dart formatting issues across the entire codebase
+- **Static Analysis**: Resolved formatting warnings to improve pub.dev package score
+- **Formatted Files**: Applied Dart formatter to 115 files ensuring compliance with Dart style guidelines
+  - Fixed formatting in `android_discovery_manager.dart`
+  - Fixed formatting in `ios_cast_session_manager.dart`
+  - Applied consistent formatting across all library files
+
 ## 1.0.3
 ### Breaking Changes
 - **Enum Naming Convention Update**: All enums have been updated from UPPER_SNAKE_CASE to lowerCamelCase for better Dart conventions

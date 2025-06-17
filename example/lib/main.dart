@@ -17,7 +17,7 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   bool _isDiscoveryActive = false;
-  
+
   @override
   void initState() {
     super.initState();
@@ -38,7 +38,7 @@ class _MyAppState extends State<MyApp> {
       );
     }
     GoogleCastContext.instance.setSharedInstanceWithOptions(options!);
-    
+
     // Check initial discovery state for iOS
     if (Platform.isIOS) {
       try {
@@ -60,7 +60,7 @@ class _MyAppState extends State<MyApp> {
       home: Stack(
         children: [
           Scaffold(
-            key: _scaffoldKey,
+              key: _scaffoldKey,
               floatingActionButton: Container(
                 margin: const EdgeInsets.only(bottom: 40),
                 child: StreamBuilder(
@@ -113,13 +113,13 @@ class _MyAppState extends State<MyApp> {
                             Container(
                               padding: const EdgeInsets.all(12.0),
                               decoration: BoxDecoration(
-                                color: _isDiscoveryActive 
+                                color: _isDiscoveryActive
                                     ? Colors.green.withValues(alpha: 0.1)
                                     : Colors.grey.withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(8.0),
                                 border: Border.all(
-                                  color: _isDiscoveryActive 
-                                      ? Colors.green 
+                                  color: _isDiscoveryActive
+                                      ? Colors.green
                                       : Colors.grey,
                                   width: 2.0,
                                 ),
@@ -132,22 +132,22 @@ class _MyAppState extends State<MyApp> {
                                     height: 12.0,
                                     decoration: BoxDecoration(
                                       shape: BoxShape.circle,
-                                      color: _isDiscoveryActive 
-                                          ? Colors.green 
+                                      color: _isDiscoveryActive
+                                          ? Colors.green
                                           : Colors.grey,
                                     ),
                                   ),
                                   const SizedBox(width: 8.0),
                                   Expanded(
                                     child: Text(
-                                      _isDiscoveryActive 
+                                      _isDiscoveryActive
                                           ? devices.isEmpty
                                               ? 'Discovery Active - Searching for devices...'
                                               : 'Discovery Active - Found ${devices.length} device${devices.length == 1 ? '' : 's'}'
                                           : 'Discovery Stopped',
                                       style: TextStyle(
                                         fontWeight: FontWeight.bold,
-                                        color: _isDiscoveryActive 
+                                        color: _isDiscoveryActive
                                             ? Colors.green.shade700
                                             : Colors.grey.shade700,
                                       ),
@@ -161,7 +161,8 @@ class _MyAppState extends State<MyApp> {
                                       height: 16.0,
                                       child: CircularProgressIndicator(
                                         strokeWidth: 2.0,
-                                        valueColor: AlwaysStoppedAnimation<Color>(
+                                        valueColor:
+                                            AlwaysStoppedAnimation<Color>(
                                           Colors.green.shade700,
                                         ),
                                       ),
@@ -176,17 +177,25 @@ class _MyAppState extends State<MyApp> {
                               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                               children: [
                                 ElevatedButton(
-                                  onPressed: _isDiscoveryActive ? null : _startDiscovery,
+                                  onPressed: _isDiscoveryActive
+                                      ? null
+                                      : _startDiscovery,
                                   style: ElevatedButton.styleFrom(
-                                    backgroundColor: _isDiscoveryActive ? Colors.grey : Colors.green,
+                                    backgroundColor: _isDiscoveryActive
+                                        ? Colors.grey
+                                        : Colors.green,
                                     foregroundColor: Colors.white,
                                   ),
                                   child: const Text('Start Discovery'),
                                 ),
                                 ElevatedButton(
-                                  onPressed: !_isDiscoveryActive ? null : _stopDiscovery,
+                                  onPressed: !_isDiscoveryActive
+                                      ? null
+                                      : _stopDiscovery,
                                   style: ElevatedButton.styleFrom(
-                                    backgroundColor: !_isDiscoveryActive ? Colors.grey : Colors.red,
+                                    backgroundColor: !_isDiscoveryActive
+                                        ? Colors.grey
+                                        : Colors.red,
                                     foregroundColor: Colors.white,
                                   ),
                                   child: const Text('Stop Discovery'),
@@ -211,24 +220,33 @@ class _MyAppState extends State<MyApp> {
                           children: [
                             ...devices.map((device) {
                               return StreamBuilder<GoogleCastSession?>(
-                                stream: GoogleCastSessionManager.instance.currentSessionStream,
+                                stream: GoogleCastSessionManager
+                                    .instance.currentSessionStream,
                                 builder: (context, sessionSnapshot) {
                                   final currentSession = sessionSnapshot.data;
-                                  final isConnectedToThisDevice = currentSession?.device?.deviceID == device.deviceID;
-                                  
+                                  final isConnectedToThisDevice =
+                                      currentSession?.device?.deviceID ==
+                                          device.deviceID;
+
                                   return Card(
-                                    margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                    margin: const EdgeInsets.symmetric(
+                                        horizontal: 8, vertical: 4),
                                     elevation: isConnectedToThisDevice ? 4 : 1,
-                                    color: isConnectedToThisDevice ? Colors.blue.shade50 : null,
+                                    color: isConnectedToThisDevice
+                                        ? Colors.blue.shade50
+                                        : null,
                                     child: ListTile(
                                       title: Text(
                                         device.friendlyName,
                                         style: TextStyle(
-                                          fontWeight: isConnectedToThisDevice ? FontWeight.bold : FontWeight.normal,
+                                          fontWeight: isConnectedToThisDevice
+                                              ? FontWeight.bold
+                                              : FontWeight.normal,
                                         ),
                                       ),
                                       subtitle: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         children: [
                                           Text(device.modelName ?? ''),
                                           if (isConnectedToThisDevice)
@@ -242,29 +260,38 @@ class _MyAppState extends State<MyApp> {
                                         ],
                                       ),
                                       leading: Icon(
-                                        isConnectedToThisDevice ? Icons.cast_connected : Icons.cast,
-                                        color: isConnectedToThisDevice ? Colors.blue : null,
+                                        isConnectedToThisDevice
+                                            ? Icons.cast_connected
+                                            : Icons.cast,
+                                        color: isConnectedToThisDevice
+                                            ? Colors.blue
+                                            : null,
                                       ),
-                                      trailing: isConnectedToThisDevice 
-                                        ? Row(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              IconButton(
-                                                icon: const Icon(Icons.play_arrow),
-                                                onPressed: () => _loadAndPlayMedia(),
-                                                tooltip: 'Play Media',
-                                                color: Colors.green,
-                                              ),
-                                              IconButton(
-                                                icon: const Icon(Icons.stop),
-                                                onPressed: () => _disconnectFromDevice(),
-                                                tooltip: 'Disconnect',
-                                                color: Colors.red,
-                                              ),
-                                            ],
-                                          )
-                                        : const Icon(Icons.chevron_right),
-                                      onTap: isConnectedToThisDevice ? null : () => _connectToDevice(device),
+                                      trailing: isConnectedToThisDevice
+                                          ? Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                IconButton(
+                                                  icon: const Icon(
+                                                      Icons.play_arrow),
+                                                  onPressed: () =>
+                                                      _loadAndPlayMedia(),
+                                                  tooltip: 'Play Media',
+                                                  color: Colors.green,
+                                                ),
+                                                IconButton(
+                                                  icon: const Icon(Icons.stop),
+                                                  onPressed: () =>
+                                                      _disconnectFromDevice(),
+                                                  tooltip: 'Disconnect',
+                                                  color: Colors.red,
+                                                ),
+                                              ],
+                                            )
+                                          : const Icon(Icons.chevron_right),
+                                      onTap: isConnectedToThisDevice
+                                          ? null
+                                          : () => _connectToDevice(device),
                                     ),
                                   );
                                 },
@@ -351,74 +378,74 @@ class _MyAppState extends State<MyApp> {
   void _loadAndPlayMedia() async {
     try {
       await GoogleCastRemoteMediaClient.instance.queueLoadItems(
-      [
-        GoogleCastQueueItem(
-          activeTrackIds: [0],
-          mediaInformation: GoogleCastMediaInformationIOS(
-            contentId: '0',
-            streamType: CastMediaStreamType.buffered,
-            contentUrl: Uri.parse(
-                'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4'),
-            contentType: 'video/mp4',
-            metadata: GoogleCastMovieMediaMetadata(
-              title: 'The first Blender Open Movie from 2006',
-              studio: 'Blender Inc',
-              releaseDate: DateTime(2011),
-              subtitle:
-                  'Song : Raja Raja Kareja Mein Samaja\nAlbum : Raja Kareja Mein Samaja\nArtist : Radhe Shyam Rasia\nSinger : Radhe Shyam Rasia\nMusic Director : Sohan Lal, Dinesh Kumar\nLyricist : Vinay Bihari, Shailesh Sagar, Parmeshwar Premi\nMusic Label : T-Series',
-              images: [
-                GoogleCastImage(
-                  url: Uri.parse(
-                      'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/images/BigBuckBunny.jpg'),
-                  height: 480,
-                  width: 854,
-                ),
-              ],
-            ),
-            tracks: [
-              GoogleCastMediaTrack(
-                trackId: 0,
-                type: TrackType.text,
-                trackContentId: Uri.parse(
-                        'https://raw.githubusercontent.com/felnanuke2/flutter_cast/master/example/assets/VEED-subtitles_Blender_Foundation_-_Elephants_Dream_1024.vtt')
-                    .toString(),
-                trackContentType: 'text/vtt',
-                name: 'English',
-                language: Rfc5646Language.portugueseBrazil,
-                subtype: TextTrackType.subtitles,
+        [
+          GoogleCastQueueItem(
+            activeTrackIds: [0],
+            mediaInformation: GoogleCastMediaInformationIOS(
+              contentId: '0',
+              streamType: CastMediaStreamType.buffered,
+              contentUrl: Uri.parse(
+                  'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4'),
+              contentType: 'video/mp4',
+              metadata: GoogleCastMovieMediaMetadata(
+                title: 'The first Blender Open Movie from 2006',
+                studio: 'Blender Inc',
+                releaseDate: DateTime(2011),
+                subtitle:
+                    'Song : Raja Raja Kareja Mein Samaja\nAlbum : Raja Kareja Mein Samaja\nArtist : Radhe Shyam Rasia\nSinger : Radhe Shyam Rasia\nMusic Director : Sohan Lal, Dinesh Kumar\nLyricist : Vinay Bihari, Shailesh Sagar, Parmeshwar Premi\nMusic Label : T-Series',
+                images: [
+                  GoogleCastImage(
+                    url: Uri.parse(
+                        'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/images/BigBuckBunny.jpg'),
+                    height: 480,
+                    width: 854,
+                  ),
+                ],
               ),
-            ],
-          ),
-        ),
-        GoogleCastQueueItem(
-          preLoadTime: const Duration(seconds: 15),
-          mediaInformation: GoogleCastMediaInformationIOS(
-            contentId: '1',
-            streamType: CastMediaStreamType.buffered,
-            contentUrl: Uri.parse(
-                'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4'),
-            contentType: 'video/mp4',
-            metadata: GoogleCastMovieMediaMetadata(
-              title: 'Big Buck Bunny',
-              releaseDate: DateTime(2011),
-              studio: 'Vlc Media Player',
-              images: [
-                GoogleCastImage(
-                  url: Uri.parse(
-                      'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/images/BigBuckBunny.jpg'),
-                  height: 480,
-                  width: 854,
+              tracks: [
+                GoogleCastMediaTrack(
+                  trackId: 0,
+                  type: TrackType.text,
+                  trackContentId: Uri.parse(
+                          'https://raw.githubusercontent.com/felnanuke2/flutter_cast/master/example/assets/VEED-subtitles_Blender_Foundation_-_Elephants_Dream_1024.vtt')
+                      .toString(),
+                  trackContentType: 'text/vtt',
+                  name: 'English',
+                  language: Rfc5646Language.portugueseBrazil,
+                  subtype: TextTrackType.subtitles,
                 ),
               ],
             ),
           ),
+          GoogleCastQueueItem(
+            preLoadTime: const Duration(seconds: 15),
+            mediaInformation: GoogleCastMediaInformationIOS(
+              contentId: '1',
+              streamType: CastMediaStreamType.buffered,
+              contentUrl: Uri.parse(
+                  'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4'),
+              contentType: 'video/mp4',
+              metadata: GoogleCastMovieMediaMetadata(
+                title: 'Big Buck Bunny',
+                releaseDate: DateTime(2011),
+                studio: 'Vlc Media Player',
+                images: [
+                  GoogleCastImage(
+                    url: Uri.parse(
+                        'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/images/BigBuckBunny.jpg'),
+                    height: 480,
+                    width: 854,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+        options: GoogleCastQueueLoadOptions(
+          startIndex: 0,
+          playPosition: const Duration(seconds: 30),
         ),
-      ],
-      options: GoogleCastQueueLoadOptions(
-        startIndex: 0,
-        playPosition: const Duration(seconds: 30),
-      ),
-    );
+      );
       ScaffoldMessenger.of(_scaffoldKey.currentContext!).showSnackBar(
         const SnackBar(
           content: Text('Media loaded and playing'),

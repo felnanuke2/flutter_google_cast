@@ -56,16 +56,16 @@ class GoogleCastDiscoveryManagerMethodChannelAndroid
       arguments as String;
       final list = jsonDecode(arguments);
       final listMap = List.from(list);
-      final devices =
-          GoogleCastAndroidDevices.fromMap(listMap);
-      
+      final devices = GoogleCastAndroidDevices.fromMap(listMap);
+
       if (kDebugMode) {
         print('Received ${devices.length} devices from native');
         for (final device in devices) {
-          print('Device: ${device.deviceID} - ${device.friendlyName} (${device.modelName})');
+          print(
+              'Device: ${device.deviceID} - ${device.friendlyName} (${device.modelName})');
         }
       }
-      
+
       // Enhanced deduplication: remove devices with same name and model
       final Map<String, GoogleCastDevice> uniqueDevices = {};
       for (final device in devices) {
@@ -81,9 +81,10 @@ class GoogleCastDiscoveryManagerMethodChannelAndroid
           }
         }
       }
-      
+
       if (kDebugMode) {
-        print('Final device count after deduplication: ${uniqueDevices.length}');
+        print(
+            'Final device count after deduplication: ${uniqueDevices.length}');
       }
       _devicesStreamController.add(uniqueDevices.values.toList());
     } catch (e) {

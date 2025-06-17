@@ -21,21 +21,21 @@ class CustomizableTextsExample extends StatelessWidget {
               child: const Text('Show Player (English)'),
             ),
             const SizedBox(height: 16),
-            
+
             // Example 2: Spanish
             ElevatedButton(
               onPressed: () => _showPlayer(context, _spanishTexts),
               child: const Text('Show Player (Spanish)'),
             ),
             const SizedBox(height: 16),
-            
+
             // Example 3: French
             ElevatedButton(
               onPressed: () => _showPlayer(context, _frenchTexts),
               child: const Text('Show Player (French)'),
             ),
             const SizedBox(height: 16),
-            
+
             // Example 4: Custom branding
             ElevatedButton(
               onPressed: () => _showPlayer(context, _customBrandingTexts),
@@ -70,7 +70,8 @@ class CustomizableTextsExample extends StatelessWidget {
     trackFallback: _spanishTrackFallback,
   );
 
-  static String _spanishCastingToDevice(String deviceName) => 'Transmitiendo a $deviceName';
+  static String _spanishCastingToDevice(String deviceName) =>
+      'Transmitiendo a $deviceName';
   static String _spanishTrackFallback(int trackId) => 'Pista $trackId';
 
   // French localization
@@ -82,7 +83,8 @@ class CustomizableTextsExample extends StatelessWidget {
     trackFallback: _frenchTrackFallback,
   );
 
-  static String _frenchCastingToDevice(String deviceName) => 'Diffusion vers $deviceName';
+  static String _frenchCastingToDevice(String deviceName) =>
+      'Diffusion vers $deviceName';
   static String _frenchTrackFallback(int trackId) => 'Piste $trackId';
 
   // Custom branding example
@@ -94,6 +96,7 @@ class CustomizableTextsExample extends StatelessWidget {
     trackFallback: _customTrackFallback,
   );
 
-  static String _customCastingToDevice(String deviceName) => 'Streaming to your $deviceName';
+  static String _customCastingToDevice(String deviceName) =>
+      'Streaming to your $deviceName';
   static String _customTrackFallback(int trackId) => 'Subtitle option $trackId';
 }

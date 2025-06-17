@@ -357,14 +357,16 @@ class _ExpandedGoogleCastPlayerControllerState
                               boxShadow: _isDragging
                                   ? [
                                       BoxShadow(
-                                        color: Colors.white.withValues(alpha: 0.4),
+                                        color:
+                                            Colors.white.withValues(alpha: 0.4),
                                         blurRadius: 12,
                                         spreadRadius: 2,
                                       ),
                                     ]
                                   : [
                                       BoxShadow(
-                                        color: Colors.black.withValues(alpha: 0.3),
+                                        color:
+                                            Colors.black.withValues(alpha: 0.3),
                                         blurRadius: 4,
                                         offset: const Offset(0, 1),
                                       ),
@@ -407,7 +409,8 @@ class _ExpandedGoogleCastPlayerControllerState
                                   boxShadow: theme?.imageShadow ??
                                       [
                                         BoxShadow(
-                                          color: Colors.black.withValues(alpha: 0.4),
+                                          color: Colors.black
+                                              .withValues(alpha: 0.4),
                                           blurRadius: 20,
                                           offset: const Offset(0, 8),
                                         ),
@@ -525,7 +528,9 @@ class _ExpandedGoogleCastPlayerControllerState
                                   SizedBox(
                                     width: 48,
                                     child: Text(
-                                      mediaStatus.mediaInformation?.duration?.formatted ?? '-',
+                                      mediaStatus.mediaInformation?.duration
+                                              ?.formatted ??
+                                          '-',
                                       style: theme?.timeTextStyle ??
                                           Theme.of(context)
                                               .textTheme

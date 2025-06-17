@@ -41,7 +41,7 @@ class _ScrollingTextState extends State<ScrollingText>
       duration: widget.scrollDuration,
       vsync: this,
     );
-    
+
     _scrollAnimation = Tween<double>(
       begin: 0.0,
       end: 1.0,
@@ -58,7 +58,7 @@ class _ScrollingTextState extends State<ScrollingText>
   @override
   void didUpdateWidget(ScrollingText oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.text != widget.text || 
+    if (oldWidget.text != widget.text ||
         oldWidget.style != widget.style ||
         oldWidget.scrollDuration != widget.scrollDuration) {
       // Reset and recalculate when text or style changes
@@ -71,18 +71,18 @@ class _ScrollingTextState extends State<ScrollingText>
 
   void _checkIfScrollingNeeded() {
     if (!mounted) return;
-    
+
     // Use a post-frame callback to ensure the widget is fully built
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      
+
       final RenderBox? renderBox = context.findRenderObject() as RenderBox?;
       if (renderBox != null && renderBox.hasSize) {
         final newContainerWidth = renderBox.size.width;
-        
+
         // Don't proceed if container width is invalid
         if (newContainerWidth <= 0) return;
-        
+
         final TextPainter textPainter = TextPainter(
           text: TextSpan(text: widget.text, style: widget.style),
           textDirection: TextDirection.ltr,
@@ -90,20 +90,19 @@ class _ScrollingTextState extends State<ScrollingText>
         );
         textPainter.layout();
         final newTextWidth = textPainter.size.width;
-        
+
         final shouldScroll = newTextWidth > newContainerWidth;
-        
+
         // Only update if something actually changed
-        if (shouldScroll != _needsScrolling || 
-            newTextWidth != _textWidth || 
+        if (shouldScroll != _needsScrolling ||
+            newTextWidth != _textWidth ||
             newContainerWidth != _containerWidth) {
-          
           setState(() {
             _needsScrolling = shouldScroll;
             _textWidth = newTextWidth;
             _containerWidth = newContainerWidth;
           });
-          
+
           if (_needsScrolling) {
             _startScrolling();
           } else {
@@ -116,26 +115,26 @@ class _ScrollingTextState extends State<ScrollingText>
 
   void _startScrolling() async {
     if (!mounted || !_needsScrolling) return;
-    
+
     // Initial pause to let user read the beginning
     await Future.delayed(widget.pauseDuration);
     if (!mounted || !_needsScrolling) return;
-    
+
     // Scroll to show the rest of the text
     await _scrollController.forward();
     if (!mounted || !_needsScrolling) return;
-    
+
     // Pause at the end to let user read the end
     await Future.delayed(widget.pauseDuration);
     if (!mounted || !_needsScrolling) return;
-    
+
     // Reset and repeat
     _scrollController.reset();
-    
+
     // Small delay before starting again
     await Future.delayed(const Duration(milliseconds: 500));
     if (!mounted || !_needsScrolling) return;
-    
+
     _startScrolling(); // Repeat the cycle
   }
 
@@ -150,7 +149,8 @@ class _ScrollingTextState extends State<ScrollingText>
     return LayoutBuilder(
       builder: (context, constraints) {
         // Handle case where constraints are not available yet or invalid
-        if (constraints.maxWidth <= 0 || constraints.maxWidth == double.infinity) {
+        if (constraints.maxWidth <= 0 ||
+            constraints.maxWidth == double.infinity) {
           return Text(
             widget.text,
             style: widget.style,
@@ -185,7 +185,7 @@ class _ScrollingTextState extends State<ScrollingText>
               // We want to scroll from showing the beginning to showing the end
               final scrollDistance = _textWidth - constraints.maxWidth;
               final offset = _scrollAnimation.value * scrollDistance;
-              
+
               return Transform.translate(
                 offset: Offset(-offset, 0),
                 child: SizedBox(

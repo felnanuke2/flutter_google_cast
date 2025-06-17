@@ -9,7 +9,7 @@ class GoogleCastVolume extends StatefulWidget {
   final Color? sliderActiveColor;
   final Color? sliderInactiveColor;
   final Color? sliderThumbColor;
-  
+
   const GoogleCastVolume({
     super.key,
     this.iconColor,
