@@ -17,7 +17,7 @@ class IosMediaTrack extends GoogleCastMediaTrack {
       trackContentType: json['content_type'],
       trackId: json['id'],
       type: TrackType.values[json['type']],
-      language: RFC5646_LANGUAGE.fromMap(json['language_code']),
+      language: Rfc5646Language.fromMap(json['language_code']),
       name: json['name'],
       subtype: json['subtype'] != null
           ? TextTrackType.values[json['subtype']]

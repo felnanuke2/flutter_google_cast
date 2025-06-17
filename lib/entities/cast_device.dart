@@ -28,13 +28,6 @@ class GoogleCastDevice {
 
   @override
   int get hashCode {
-    return deviceID.hashCode ^
-        friendlyName.hashCode ^
-        modelName.hashCode ^
-        statusText.hashCode ^
-        deviceVersion.hashCode ^
-        isOnLocalNetwork.hashCode ^
-        category.hashCode ^
-        uniqueID.hashCode;
+    return deviceID.hashCode;
   }
 }

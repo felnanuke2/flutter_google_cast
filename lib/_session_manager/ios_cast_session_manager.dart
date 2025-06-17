@@ -31,7 +31,7 @@ class GoogleCastSessionManagerIOSMethodChannel
   @override
   GoogleCastConnectState get connectionState =>
       currentSession?.connectionState ??
-      GoogleCastConnectState.ConnectionStateDisconnected;
+      GoogleCastConnectState.disconnected;
 
   GoogleCastSession? get currentCastSession => throw UnimplementedError();
 
@@ -51,7 +51,7 @@ class GoogleCastSessionManagerIOSMethodChannel
 
   @override
   bool get hasConnectedSession =>
-      connectionState == GoogleCastConnectState.ConnectionStateConnected;
+      connectionState == GoogleCastConnectState.connected;
 
   @override
   Future<void> setDefaultSessionOptions() {
@@ -78,14 +78,13 @@ class GoogleCastSessionManagerIOSMethodChannel
     }
   }
 
-  void _onCurrentSessionChanged(arguments) async {
+  void _onCurrentSessionChanged(dynamic arguments) async {
     try {
       final session = IOSGoogleCastSessions.fromMap(
           arguments == null ? null : Map<String, dynamic>.from(arguments));
       _currentSessionStreamController.add(session);
-    } catch (e, s) {
-      print(e);
-      print(s);
+    } catch (e) {
+      rethrow;
     }
   }
 

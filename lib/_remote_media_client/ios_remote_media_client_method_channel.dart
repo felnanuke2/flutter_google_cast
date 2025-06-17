@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/services.dart';
 import 'package:flutter_chrome_cast/_remote_media_client/remote_media_client_platform.dart';
 import 'package:flutter_chrome_cast/entities/cast_media_status.dart';
@@ -148,17 +150,15 @@ class GoogleCastRemoteMediaClientIOSMethodChannel
     _playerPositionStreamController.add(duration);
   }
 
-  _onUpdateMediaStatus(arguments) {
+  FutureOr<void> _onUpdateMediaStatus(dynamic arguments) {
     if (arguments != null) {
       try {
         arguments = Map<String, dynamic>.from(arguments);
         final mediaStatus = GoogleCastIOSMediaStatus.fromMap(arguments);
         _queueHasNextItem = arguments["queueHasNextItem"];
         _mediaStatusStreamController.add(mediaStatus);
-        print('ios Media status successfully serialized to dart');
-      } catch (e, s) {
-        print(s);
-        print(s);
+      } catch (e) {
+        rethrow;
       }
     }
   }
@@ -209,7 +209,7 @@ class GoogleCastRemoteMediaClientIOSMethodChannel
     _channel.invokeMethod('queueRemoveItemsWithIds', itemIds);
   }
 
-  _updateQueueItems(arguments) {
+  FutureOr<void> _updateQueueItems(dynamic arguments) async {
     final items = List.from(arguments ?? []);
     final queueItems = items
         .map((item) =>

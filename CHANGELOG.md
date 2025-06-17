@@ -1,3 +1,70 @@
+## 1.0.3
+### Breaking Changes
+- **Enum Naming Convention Update**: All enums have been updated from UPPER_SNAKE_CASE to lowerCamelCase for better Dart conventions
+  - `GoogleCastConnectState.ConnectionStateConnected` → `GoogleCastConnectState.connected`
+  - `CastMediaStreamType.BUFFERED` → `CastMediaStreamType.buffered`
+  - `TrackType.TEXT` → `TrackType.text`
+  - `TextTrackType.SUBTITLES` → `TextTrackType.subtitles`
+  - `RFC5646_LANGUAGE` → `Rfc5646Language`
+  - And many more enum updates across the codebase
+
+### Android Build System Modernization
+- **Gradle Update**: Updated from 7.x to 8.4 for better compatibility
+- **Android Gradle Plugin**: Updated from 7.x to 8.3.0
+- **Kotlin**: Updated from 1.6.10 to 1.9.10
+- **Java Compatibility**: Updated to Java 11
+- **Android SDK**: Updated compile SDK to 35, target SDK to 34
+- **Dependencies**: Updated Google Cast Framework (21.0.1 → 21.5.0), AndroidX libraries, and other Android dependencies
+
+### Enhanced UI/UX
+- **Completely Redesigned Mini Controller**: 
+  - Modern Material Design with floating card style
+  - Marquee text scrolling for long titles and subtitles
+  - Better visual hierarchy and improved touch targets
+  - Theme-aware styling with customizable colors and typography
+- **Enhanced Expanded Player**:
+  - Drag-to-dismiss gesture support with smooth animations
+  - Better media image handling with fallbacks
+  - Improved controls layout with backdrop blur effects
+  - Caption/subtitle track selection
+  - Seek forward/backward 30 seconds functionality
+  - Volume control integration
+- **Theme Support**: Added comprehensive theming with `ExpandedGoogleCastPlayerTheme`
+- **Internationalization**: Added `ExpandedGoogleCastPlayerTexts` for customizable text content
+
+### Bug Fixes
+- **Device Discovery**: Fixed duplicate device detection in Android discovery manager
+- **Error Handling**: Improved error handling and removed debug print statements
+- **Import Issues**: Fixed missing imports and dependency issues
+- **Memory Leaks**: Better disposal of animation controllers and stream subscriptions
+- **UI Stability**: Fixed various layout and rendering issues
+
+### New Features
+- **Marquee Text Support**: Added `marquee` package dependency for scrolling text
+- **Customizable Texts**: Complete internationalization support with example
+- **Advanced Theming**: Comprehensive theme customization options
+- **Better Examples**: Added `customizable_texts_example.dart` and documentation
+- **Enhanced Documentation**: Added `CUSTOMIZABLE_TEXTS.md` with usage examples
+
+### Developer Experience
+- **Improved Code Quality**: Better type safety, null safety compliance
+- **Documentation**: Enhanced inline documentation and examples
+- **File Organization**: Better separation of concerns and cleaner imports
+
+### Migration Guide
+If you're upgrading from previous versions, you'll need to update enum usage:
+```dart
+// Before
+GoogleCastConnectState.ConnectionStateConnected
+CastMediaStreamType.BUFFERED
+TrackType.TEXT
+
+// After  
+GoogleCastConnectState.connected
+CastMediaStreamType.buffered
+TrackType.text
+```
+
 ## 1.0.2
 - Improved README.md with better documentation and examples
 - Enhanced setup instructions and usage guidelines

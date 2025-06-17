@@ -1,10 +1,4 @@
 import 'package:flutter_chrome_cast/lib.dart';
-import 'package:flutter_chrome_cast/models/android/metadata/generic.dart';
-import 'package:flutter_chrome_cast/models/android/metadata/movie.dart';
-import 'package:flutter_chrome_cast/models/android/metadata/music.dart';
-import 'package:flutter_chrome_cast/models/android/metadata/photo.dart';
-import 'package:flutter_chrome_cast/models/android/metadata/tv_show.dart';
-import 'extensions/stream_type.dart';
 
 class GoogleCastMediaInformationAndroid extends GoogleCastMediaInformation {
   GoogleCastMediaInformationAndroid({

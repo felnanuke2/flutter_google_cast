@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_chrome_cast/entities/cast_device.dart';
 import 'package:flutter_chrome_cast/models/ios/ios_cast_device.dart';
@@ -53,8 +54,9 @@ class GoogleCastDiscoveryManagerMethodChannelIOS
         _onDevicesChanged(call.arguments);
         break;
       default:
-        // ignore: avoid_print
-        print('No Handler for method ${call.method}');
+        if (kDebugMode) {
+          print('No Handler for method ${call.method}');
+        }
     }
   }
 }

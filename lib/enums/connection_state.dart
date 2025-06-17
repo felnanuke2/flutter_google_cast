@@ -1,13 +1,13 @@
 enum GoogleCastConnectState {
   ///Disconnected from the device or application.
-  ConnectionStateDisconnected,
+  disconnected,
 
   ///Connecting to the device or application.
-  ConnectionStateConnecting,
+  connecting,
 
   ///Connected to the device or application.
-  ConnectionStateConnected,
+  connected,
 
   ///Disconnecting from the device.
-  ConnectionStateDisconnecting,
+  disconnecting,
 }

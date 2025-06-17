@@ -197,10 +197,10 @@ class GoogleCastRemoteMediaClientAndroidMethodChannel
     }
   }
 
-  Future _onMediaStatusChanged(arguments) async {
+  Future<void> _onMediaStatusChanged(dynamic arguments) async {
     if (arguments == null) {
       _mediaStatusStreamController.add(null);
-      return null;
+      return;
     }
     final mediaStatus = GoogleCastAndroidMediaStatus.fromMap(
       Map<String, dynamic>.from(jsonDecode(arguments)),
@@ -209,10 +209,10 @@ class GoogleCastRemoteMediaClientAndroidMethodChannel
     _mediaStatusStreamController.add(mediaStatus);
   }
 
-  Future _onQueueStatusChanged(arguments) async {
+  Future<void> _onQueueStatusChanged(dynamic arguments) async {
     if (arguments == null) {
       _queueItemsStreamController.add([]);
-      return null;
+      return;
     }
 
     final map = List.from(arguments);
@@ -225,10 +225,10 @@ class GoogleCastRemoteMediaClientAndroidMethodChannel
     _queueItemsStreamController.add(queueItems);
   }
 
-  Future _onPlayerPositionChanged(arguments) async {
+  Future<void> _onPlayerPositionChanged(dynamic arguments) async {
     if (arguments == null) {
       _playerPositionStreamController.add(Duration.zero);
-      return null;
+      return;
     }
     arguments = Map<String, dynamic>.from(arguments);
 

@@ -9,7 +9,7 @@ class GoogleCastQueueLoadOptions {
   GoogleCastQueueLoadOptions({
     this.startIndex = 0,
     this.playPosition = Duration.zero,
-    this.repeatMode = GoogleCastMediaRepeatMode.OFF,
+    this.repeatMode = GoogleCastMediaRepeatMode.off,
     this.customData,
   });
 

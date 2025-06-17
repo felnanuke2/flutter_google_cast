@@ -1,4 +1,4 @@
-export 'connection_satate.dart';
+export 'connection_state.dart';
 export 'idle_reason.dart';
 export 'media_metadata_type.dart';
 export 'media_resume_state.dart';

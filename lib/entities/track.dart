@@ -12,7 +12,7 @@ class GoogleCastMediaTrack {
   final Map<String, dynamic>? customData;
 
   ///Language tag as per RFC 5646. Mandatory when the subtype is SUBTITLES.
-  final RFC5646_LANGUAGE? language;
+  final Rfc5646Language? language;
 
   /// A descriptive, human-readable name for the track.
   ///  For example, “Spanish”. This can be used by the sender
@@ -79,7 +79,7 @@ class GoogleCastMediaTrack {
     return GoogleCastMediaTrack(
       customData: Map<String, dynamic>.from(map['customData'] ?? {}),
       language: map['language'] != null
-          ? RFC5646_LANGUAGE.fromMap(map['language'])
+          ? Rfc5646Language.fromMap(map['language'])
           : null,
       name: map['name'],
       subtype: map['subtype'] != null

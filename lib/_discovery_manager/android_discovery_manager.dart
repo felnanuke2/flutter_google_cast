@@ -51,14 +51,41 @@ class GoogleCastDiscoveryManagerMethodChannelAndroid
     }
   }
 
-  _onDevicesChanged(arguments) {
+  void _onDevicesChanged(dynamic arguments) {
     try {
       arguments as String;
       final list = jsonDecode(arguments);
       final listMap = List.from(list);
       final devices =
-          GoogleCastAndroidDevices.fromMap(listMap).toSet().toList();
-      _devicesStreamController.add(devices);
+          GoogleCastAndroidDevices.fromMap(listMap);
+      
+      if (kDebugMode) {
+        print('Received ${devices.length} devices from native');
+        for (final device in devices) {
+          print('Device: ${device.deviceID} - ${device.friendlyName} (${device.modelName})');
+        }
+      }
+      
+      // Enhanced deduplication: remove devices with same name and model
+      final Map<String, GoogleCastDevice> uniqueDevices = {};
+      for (final device in devices) {
+        final key = '${device.friendlyName}_${device.modelName}';
+        if (!uniqueDevices.containsKey(key)) {
+          uniqueDevices[key] = device;
+          if (kDebugMode) {
+            print('Added unique device with key: $key');
+          }
+        } else {
+          if (kDebugMode) {
+            print('Skipped duplicate device with key: $key');
+          }
+        }
+      }
+      
+      if (kDebugMode) {
+        print('Final device count after deduplication: ${uniqueDevices.length}');
+      }
+      _devicesStreamController.add(uniqueDevices.values.toList());
     } catch (e) {
       rethrow;
     }
