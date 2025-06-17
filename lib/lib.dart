@@ -1,14 +1,19 @@
-export '_discovery_manager/_discovery_manager.dart';
-export '_google_cast_context/_google_cast_context.dart';
-export '_remote_media_client/_remote_media_client.dart';
-export '_session_manager/_session_manager.dart';
-export 'common/common.dart';
-export 'entities/entities.dart';
-export 'enums/enums.dart';
-export 'models/models.dart';
-export './utils/extensions.dart';
-export './utils/functions.dart';
-export './widgets/cast_volume.dart';
-export './widgets/expanded_player.dart';
-export './widgets/mini_controller.dart';
-export './widgets/scrolling_text.dart';
+/// @deprecated Use 'package:flutter_chrome_cast/flutter_chrome_cast.dart' instead
+///
+/// This file exports everything for backward compatibility but is deprecated.
+/// For better performance and cleaner imports, use the new modular imports:
+///
+/// ```dart
+/// // Main import (all functionality)
+/// import 'package:flutter_chrome_cast/flutter_chrome_cast.dart';
+///
+/// // Or selective imports
+/// import 'package:flutter_chrome_cast/cast_context.dart';
+/// import 'package:flutter_chrome_cast/discovery.dart';
+/// import 'package:flutter_chrome_cast/session.dart';
+/// import 'package:flutter_chrome_cast/media.dart';
+/// import 'package:flutter_chrome_cast/widgets.dart';
+/// ```
+library flutter_chrome_cast_legacy;
+
+export 'flutter_chrome_cast.dart';

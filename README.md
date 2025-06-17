@@ -29,6 +29,50 @@ Then run:
 flutter pub get
 ```
 
+## Import Strategy
+
+This package provides flexible import options to optimize your app's performance:
+
+### 🎯 Modular Imports (Recommended)
+
+Instead of importing everything, you can now import only what you need:
+
+| Import | What it includes | When to use |
+|--------|------------------|-------------|
+| `flutter_chrome_cast.dart` | Everything | Getting started, prototyping |
+| `cast_context.dart` | Google Cast initialization | Always needed |
+| `discovery.dart` | Device discovery | When you need to find devices |
+| `session.dart` | Session management | When managing cast sessions |
+| `media.dart` | Media control | When controlling media playback |
+| `widgets.dart` | UI components | When using built-in cast widgets |
+| `entities.dart` | Data models | When working with cast data |
+| `enums.dart` | Constants & enums | When you need specific constants |
+
+### 📊 Benefits
+
+- **Smaller bundle size**: Only include what you use
+- **Faster compilation**: Less code to analyze and compile  
+- **Cleaner namespace**: Avoid importing unused classes
+- **Better IDE support**: More precise auto-completion
+
+### 🔄 Migration Guide
+
+**Before (v1.0.4 and earlier):**
+```dart
+import 'package:flutter_chrome_cast/lib.dart';
+```
+
+**After (v1.1.0+):**
+```dart
+// Option 1: Everything (same functionality)
+import 'package:flutter_chrome_cast/flutter_chrome_cast.dart';
+
+// Option 2: Only what you need (recommended)
+import 'package:flutter_chrome_cast/cast_context.dart';
+import 'package:flutter_chrome_cast/media.dart';
+import 'package:flutter_chrome_cast/widgets.dart';
+```
+
 ## Platform Setup
 
 ### iOS Configuration
@@ -185,12 +229,44 @@ Add the following to your `android/app/src/main/AndroidManifest.xml` file inside
 
 ### 1. Import the Library
 
+You have several options for importing the Flutter Chrome Cast library:
+
+#### Option A: Complete Import (Recommended for getting started)
 ```dart
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter_chrome_cast/lib.dart';
-import 'package:flutter_chrome_cast/widgets/mini_controller.dart';
+import 'package:flutter_chrome_cast/flutter_chrome_cast.dart';
 ```
+
+#### Option B: Selective Imports (Recommended for production)
+For better performance and cleaner code, import only what you need:
+
+```dart
+import 'dart:io';
+import 'package:flutter/material.dart';
+
+// Core functionality
+import 'package:flutter_chrome_cast/cast_context.dart';  // Google Cast initialization
+import 'package:flutter_chrome_cast/discovery.dart';    // Device discovery
+import 'package:flutter_chrome_cast/session.dart';      // Session management
+import 'package:flutter_chrome_cast/media.dart';        // Media control
+
+// UI widgets (if needed)
+import 'package:flutter_chrome_cast/widgets.dart';      // Cast UI widgets
+
+// Data models (if needed)
+import 'package:flutter_chrome_cast/entities.dart';     // Cast entities
+import 'package:flutter_chrome_cast/enums.dart';        // Enums and constants
+```
+
+#### Option C: Legacy Import (Deprecated)
+```dart
+import 'dart:io';
+import 'package:flutter/material.dart';
+import 'package:flutter_chrome_cast/lib.dart';  // ⚠️ Deprecated - use option A or B
+```
+
+> **💡 Pro Tip**: Use selective imports (Option B) in production apps to reduce bundle size and improve compile times. You only import the functionality you actually use.
 
 ### 2. Initialize the Google Cast Context
 
@@ -542,8 +618,7 @@ Here's a complete working example based on the provided main.dart:
 ```dart
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter_chrome_cast/lib.dart';
-import 'package:flutter_chrome_cast/widgets/mini_controller.dart';
+import 'package:flutter_chrome_cast/flutter_chrome_cast.dart';  // Updated import
 
 void main() {
   runApp(const MyApp());

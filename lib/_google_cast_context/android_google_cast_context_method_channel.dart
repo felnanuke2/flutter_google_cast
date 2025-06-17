@@ -1,7 +1,7 @@
 import 'package:flutter/services.dart';
 import 'package:flutter_chrome_cast/entities/cast_options.dart';
 
-import 'google_cast_context_plataform_interface.dart';
+import 'google_cast_context_platform_interface.dart';
 
 class GoogleCastContextAndroidMethodChannel
     implements GoogleCastContextPlatformInterface {

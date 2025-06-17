@@ -2,121 +2,8 @@ import 'dart:ui';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:marquee/marquee.dart';
-import 'package:flutter_chrome_cast/lib.dart';
-
-/// Text configuration for customizing text labels in the ExpandedGoogleCastPlayerController widget.
-///
-/// This class allows you to customize all text content displayed in the expanded player,
-/// making it easy to support internationalization or custom branding.
-///
-/// Example usage:
-/// ```dart
-/// ExpandedGoogleCastPlayerController(
-///   texts: ExpandedGoogleCastPlayerTexts(
-///     nowPlaying: 'Reproduciendo ahora',
-///     unknownTitle: 'Título desconocido',
-///     castingToDevice: (deviceName) => 'Transmitiendo a $deviceName',
-///     noCaptionsAvailable: 'Sin subtítulos disponibles',
-///     captionsOff: 'Desactivar',
-///     trackFallback: (trackId) => 'Pista $trackId',
-///   ),
-/// )
-/// ```
-class ExpandedGoogleCastPlayerTexts {
-  /// Text displayed when media title is unknown or empty
-  final String unknownTitle;
-
-  /// Text displayed in the app bar header
-  final String nowPlaying;
-
-  /// Function that returns text showing which device is being cast to.
-  /// The [deviceName] parameter contains the friendly name of the cast device.
-  final String Function(String deviceName) castingToDevice;
-
-  /// Text displayed when no caption tracks are available
-  final String noCaptionsAvailable;
-
-  /// Text displayed for the option to turn off captions
-  final String captionsOff;
-
-  /// Function that returns fallback text for caption track names.
-  /// The [trackId] parameter contains the numeric ID of the track.
-  final String Function(int trackId) trackFallback;
-
-  const ExpandedGoogleCastPlayerTexts({
-    this.unknownTitle = 'Unknown Title',
-    this.nowPlaying = 'Now Playing',
-    this.castingToDevice = _defaultCastingToDevice,
-    this.noCaptionsAvailable = 'No captions available',
-    this.captionsOff = 'Off',
-    this.trackFallback = _defaultTrackFallback,
-  });
-
-  static String _defaultCastingToDevice(String deviceName) =>
-      'Casting to $deviceName';
-  static String _defaultTrackFallback(int trackId) => 'Track $trackId';
-}
-
-/// Theme data for customizing the ExpandedGoogleCastPlayerController widget.
-class ExpandedGoogleCastPlayerTheme {
-  final Color? backgroundColor;
-  final Gradient? backgroundGradient;
-  final TextStyle? titleTextStyle;
-  final TextStyle? deviceTextStyle;
-  final TextStyle? timeTextStyle;
-  final Color? iconColor;
-  final Color? disabledIconColor;
-  final double? iconSize;
-  final Widget? backgroundWidget;
-  final BorderRadius? imageBorderRadius;
-  final List<BoxShadow>? imageShadow;
-  final double? imageMaxWidth;
-  final double? imageMaxHeight;
-  final BoxFit? imageFit;
-  final Widget? noImageFallback;
-
-  /// Background color for popup menus (like captions menu)
-  final Color? popupBackgroundColor;
-
-  /// Text color for popup menu items
-  final Color? popupTextColor;
-
-  /// Text style for popup menu items
-  final TextStyle? popupTextStyle;
-
-  /// Volume slider active color
-  final Color? volumeSliderActiveColor;
-
-  /// Volume slider inactive color
-  final Color? volumeSliderInactiveColor;
-
-  /// Volume slider thumb color
-  final Color? volumeSliderThumbColor;
-
-  const ExpandedGoogleCastPlayerTheme({
-    this.backgroundColor,
-    this.backgroundGradient,
-    this.titleTextStyle,
-    this.deviceTextStyle,
-    this.timeTextStyle,
-    this.iconColor,
-    this.disabledIconColor,
-    this.iconSize,
-    this.backgroundWidget,
-    this.imageBorderRadius,
-    this.imageShadow,
-    this.imageMaxWidth,
-    this.imageMaxHeight,
-    this.imageFit,
-    this.noImageFallback,
-    this.popupBackgroundColor,
-    this.popupTextColor,
-    this.popupTextStyle,
-    this.volumeSliderActiveColor,
-    this.volumeSliderInactiveColor,
-    this.volumeSliderThumbColor,
-  });
-}
+import 'package:flutter_chrome_cast/lib.dart' hide GoogleCastPlayerTexts;
+import 'package:flutter_chrome_cast/themes.dart';
 
 /// A full-screen cast player controller widget that displays media information,
 /// playback controls, and cast session details.
@@ -149,10 +36,10 @@ class ExpandedGoogleCastPlayerController extends StatefulWidget {
   final void Function()? toggleExpand;
 
   /// Theme configuration for customizing the visual appearance
-  final ExpandedGoogleCastPlayerTheme? theme;
+  final GoogleCastPlayerTheme? theme;
 
   /// Text configuration for customizing all displayed text content
-  final ExpandedGoogleCastPlayerTexts? texts;
+  final GoogleCastPlayerTexts? texts;
 
   const ExpandedGoogleCastPlayerController(
       {super.key, this.toggleExpand, this.theme, this.texts});
@@ -196,7 +83,7 @@ class _ExpandedGoogleCastPlayerControllerState
   @override
   Widget build(BuildContext context) {
     final theme = widget.theme;
-    final texts = widget.texts ?? const ExpandedGoogleCastPlayerTexts();
+    final texts = widget.texts ?? const GoogleCastPlayerTexts();
     return StreamBuilder<GoggleCastMediaStatus?>(
         stream: GoogleCastRemoteMediaClient.instance.mediaStatusStream,
         builder: (context, snapshot) {
@@ -676,8 +563,8 @@ class _ExpandedGoogleCastPlayerControllerState
         });
   }
 
-  Expanded _buildSlider(GoggleCastMediaStatus? mediaStatus,
-      ExpandedGoogleCastPlayerTheme? theme) {
+  Expanded _buildSlider(
+      GoggleCastMediaStatus? mediaStatus, GoogleCastPlayerTheme? theme) {
     return Expanded(
       child: StreamBuilder<Duration>(
           stream: GoogleCastRemoteMediaClient.instance.playerPositionStream,
@@ -920,8 +807,8 @@ class _ExpandedGoogleCastPlayerControllerState
   /// Build menu items for available text tracks
   List<PopupMenuEntry<int>> _buildCaptionMenuItems(
       GoggleCastMediaStatus? mediaStatus,
-      ExpandedGoogleCastPlayerTexts texts,
-      ExpandedGoogleCastPlayerTheme? theme) {
+      GoogleCastPlayerTexts texts,
+      GoogleCastPlayerTheme? theme) {
     final tracks = mediaStatus?.mediaInformation?.tracks;
     final activeTrackIds = mediaStatus?.activeTrackIds ?? [];
 
@@ -1059,8 +946,8 @@ class _ExpandedGoogleCastPlayerControllerState
   /// Build title and subtitle with marquee scrolling, displayed vertically
   Widget _buildTitleAndSubtitle(
       GoggleCastMediaStatus mediaStatus,
-      ExpandedGoogleCastPlayerTexts texts,
-      ExpandedGoogleCastPlayerTheme? theme,
+      GoogleCastPlayerTexts texts,
+      GoogleCastPlayerTheme? theme,
       BuildContext context) {
     final title = mediaStatus.mediaInformation?.metadata?.extractedTitle ??
         texts.unknownTitle;

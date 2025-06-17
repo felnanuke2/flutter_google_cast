@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_chrome_cast/lib.dart';
+import 'package:flutter_chrome_cast/lib.dart' hide GoogleCastPlayerTheme;
 import 'package:marquee/marquee.dart';
+
+import '../themes.dart';
 
 /// A floating mini controller widget for Google Cast media playback.
 ///
@@ -44,7 +46,7 @@ import 'package:marquee/marquee.dart';
 /// ```
 class GoogleCastMiniController extends StatefulWidget {
   /// Theme configuration for customizing the visual appearance
-  final ExpandedGoogleCastPlayerTheme? theme;
+  final GoogleCastPlayerTheme? theme;
 
   /// Custom margin for the mini controller
   final EdgeInsets? margin;
@@ -91,7 +93,7 @@ class _GoogleCastMiniControllerState extends State<GoogleCastMiniController> {
                 return ExpandedGoogleCastPlayerController(
                   toggleExpand: _toggleExpand,
                   theme: widget.theme ??
-                      ExpandedGoogleCastPlayerTheme(
+                      GoogleCastPlayerTheme(
                           titleTextStyle: TextStyle(color: Colors.white)),
                 );
               }

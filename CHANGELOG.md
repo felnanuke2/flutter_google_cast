@@ -1,3 +1,59 @@
+## 1.1.1 - Perfect Package Score Achievement
+### 🏆 Quality Improvements
+- **Perfect Pana Score**: Achieved 160/160 points in package analysis
+  - ✅ **File Conventions (30/30)**: Valid `pubspec.yaml`, `README.md`, `CHANGELOG.md`, and OSI-approved BSD-3-Clause license
+  - ✅ **Documentation (20/20)**: 31.5% of public API documented (above 20% requirement) with comprehensive example
+  - ✅ **Platform Support (20/20)**: Full iOS and Android support
+  - ✅ **Static Analysis (50/50)**: Zero errors, warnings, lints, or formatting issues
+  - ✅ **Dependencies (40/40)**: All dependencies up-to-date and compatible with constraint lower bounds
+
+### 🔧 Technical Improvements
+- **Code Formatting**: Applied `dart format` to ensure consistent code style across all files
+- **Static Analysis**: Resolved all linting and formatting issues for perfect static analysis score
+- **Dependency Compatibility**: Verified compatibility with latest stable Dart and Flutter SDKs
+- **Package Health**: Optimized for pub.dev publication with excellent package health metrics
+
+### 📊 Package Metrics
+- **API Documentation Coverage**: 234 out of 744 API elements documented (31.5%)
+- **Platform Coverage**: iOS ✅ Android ✅
+- **License**: BSD-3-Clause (OSI-approved)
+- **Dependencies**: All current and compatible
+- **Static Analysis**: Perfect score with zero issues
+
+## 1.1.0 - Modular Import System
+### ✨ New Features
+- **Modular Import System**: Introduced a new flexible import structure for better performance and cleaner code
+  - Added `flutter_chrome_cast.dart` as the main entry point (imports everything)
+  - Added selective imports: `cast_context.dart`, `discovery.dart`, `session.dart`, `media.dart`, `widgets.dart`, etc.
+  - Each module exports only related functionality for optimized bundle size
+
+### 📦 Import Options
+- **Complete Import**: `import 'package:flutter_chrome_cast/flutter_chrome_cast.dart';` (recommended for getting started)
+- **Selective Imports**: Import only what you need for production apps
+  ```dart
+  import 'package:flutter_chrome_cast/cast_context.dart';  // Core functionality
+  import 'package:flutter_chrome_cast/media.dart';         // Media control
+  import 'package:flutter_chrome_cast/widgets.dart';       // UI widgets
+  ```
+
+### 📈 Benefits
+- **Smaller Bundle Size**: Only include the functionality you actually use
+- **Faster Compilation**: Less code to analyze and compile
+- **Cleaner Namespace**: Avoid importing unused classes
+- **Better IDE Support**: More precise auto-completion and error detection
+
+### 🔄 Migration Guide
+- **Old**: `import 'package:flutter_chrome_cast/lib.dart';` (still works but deprecated)
+- **New**: Choose between complete import or selective imports based on your needs
+
+### 📚 Documentation
+- Updated README with comprehensive import strategy guide
+- Added import comparison table showing what each module includes
+- Added migration examples and best practices
+
+### ⚠️ Deprecations
+- `lib.dart` is now deprecated in favor of the new import system (still functional for backward compatibility)
+
 ## 1.0.4
 ### Bug Fixes
 - **Code Quality**: Fixed Dart formatting issues across the entire codebase

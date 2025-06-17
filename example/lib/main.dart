@@ -1,6 +1,19 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter_chrome_cast/lib.dart';
+// New modular import structure - import only what you need
+import 'package:flutter_chrome_cast/cast_context.dart';
+import 'package:flutter_chrome_cast/discovery.dart';
+import 'package:flutter_chrome_cast/session.dart';
+import 'package:flutter_chrome_cast/media.dart';
+import 'package:flutter_chrome_cast/themes.dart';
+import 'package:flutter_chrome_cast/widgets.dart';
+import 'package:flutter_chrome_cast/entities.dart';
+import 'package:flutter_chrome_cast/enums.dart';
+import 'package:flutter_chrome_cast/models.dart';
+import 'package:flutter_chrome_cast/common.dart';
+// For ExpandedGoogleCastPlayerController and customizable texts
+// Alternative: import everything at once
+// import 'package:flutter_chrome_cast/flutter_chrome_cast.dart';
 import 'dart:async';
 
 void main() {
@@ -206,6 +219,88 @@ class _MyAppState extends State<MyApp> {
                         ),
                       ),
                       const Divider(),
+
+                      // Examples Section
+                      Container(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Player Examples',
+                              style: Theme.of(context).textTheme.titleMedium,
+                            ),
+                            const SizedBox(height: 12),
+                            Wrap(
+                              spacing: 8,
+                              runSpacing: 8,
+                              children: [
+                                // Customizable Texts Examples
+                                ElevatedButton(
+                                  onPressed: () => _showPlayerWithTexts(
+                                      context, _englishTexts, 'English'),
+                                  style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.blue),
+                                  child: const Text('English Player',
+                                      style: TextStyle(color: Colors.white)),
+                                ),
+                                ElevatedButton(
+                                  onPressed: () => _showPlayerWithTexts(
+                                      context, _spanishTexts, 'Spanish'),
+                                  style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.orange),
+                                  child: const Text('Spanish Player',
+                                      style: TextStyle(color: Colors.white)),
+                                ),
+                                ElevatedButton(
+                                  onPressed: () => _showPlayerWithTexts(
+                                      context, _frenchTexts, 'French'),
+                                  style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.purple),
+                                  child: const Text('French Player',
+                                      style: TextStyle(color: Colors.white)),
+                                ),
+                                ElevatedButton(
+                                  onPressed: () => _showPlayerWithTexts(context,
+                                      _customBrandingTexts, 'Custom Branding'),
+                                  style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.green),
+                                  child: const Text('Custom Player',
+                                      style: TextStyle(color: Colors.white)),
+                                ),
+
+                                // Theme Examples
+                                ElevatedButton(
+                                  onPressed: () => _showPlayerWithTheme(
+                                      context, _darkTheme, 'Dark Theme'),
+                                  style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.black87),
+                                  child: const Text('Dark Theme',
+                                      style: TextStyle(color: Colors.white)),
+                                ),
+                                ElevatedButton(
+                                  onPressed: () => _showPlayerWithTheme(context,
+                                      _colorfulTheme, 'Colorful Theme'),
+                                  style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.pink),
+                                  child: const Text('Colorful Theme',
+                                      style: TextStyle(color: Colors.white)),
+                                ),
+                                ElevatedButton(
+                                  onPressed: () => _showPlayerWithTheme(context,
+                                      _minimalistTheme, 'Minimal Theme'),
+                                  style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.grey[300]),
+                                  child: const Text('Minimal Theme',
+                                      style: TextStyle(color: Colors.black)),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                      const Divider(),
+
                       // Device List Section
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -305,7 +400,7 @@ class _MyAppState extends State<MyApp> {
                 },
               )),
           GoogleCastMiniController(
-            theme: ExpandedGoogleCastPlayerTheme(
+            theme: GoogleCastPlayerTheme(
               backgroundColor: Colors.white,
               titleTextStyle: const TextStyle(
                 fontSize: 16,
@@ -381,7 +476,7 @@ class _MyAppState extends State<MyApp> {
         [
           GoogleCastQueueItem(
             activeTrackIds: [0],
-            mediaInformation: GoogleCastMediaInformationIOS(
+            mediaInformation: GoogleCastMediaInformation(
               contentId: '0',
               streamType: CastMediaStreamType.buffered,
               contentUrl: Uri.parse(
@@ -419,7 +514,7 @@ class _MyAppState extends State<MyApp> {
           ),
           GoogleCastQueueItem(
             preLoadTime: const Duration(seconds: 15),
-            mediaInformation: GoogleCastMediaInformationIOS(
+            mediaInformation: GoogleCastMediaInformation(
               contentId: '1',
               streamType: CastMediaStreamType.buffered,
               contentUrl: Uri.parse(
@@ -466,7 +561,7 @@ class _MyAppState extends State<MyApp> {
     GoogleCastRemoteMediaClient.instance.queueInsertItemAndPlay(
       GoogleCastQueueItem(
         preLoadTime: const Duration(seconds: 15),
-        mediaInformation: GoogleCastMediaInformationIOS(
+        mediaInformation: GoogleCastMediaInformation(
           contentId: '3',
           streamType: CastMediaStreamType.buffered,
           contentUrl: Uri.parse(
@@ -515,6 +610,161 @@ class _MyAppState extends State<MyApp> {
       const SnackBar(
         content: Text('Discovery stopped'),
         backgroundColor: Colors.red,
+      ),
+    );
+  }
+
+  // === CUSTOMIZABLE TEXTS EXAMPLES ===
+
+  // Default English texts
+  static const _englishTexts = GoogleCastPlayerTexts();
+
+  // Spanish localization
+  static const _spanishTexts = GoogleCastPlayerTexts(
+    unknownTitle: 'Título desconocido',
+    castingToDevice: _spanishCastingToDevice,
+    noCaptionsAvailable: 'Sin subtítulos disponibles',
+    captionsOff: 'Desactivar',
+    trackFallback: _spanishTrackFallback,
+  );
+
+  static String _spanishCastingToDevice(String deviceName) =>
+      'Transmitiendo a $deviceName';
+  static String _spanishTrackFallback(int trackId) => 'Pista $trackId';
+
+  // French localization
+  static const _frenchTexts = GoogleCastPlayerTexts(
+    unknownTitle: 'Titre inconnu',
+    castingToDevice: _frenchCastingToDevice,
+    noCaptionsAvailable: 'Aucun sous-titre disponible',
+    captionsOff: 'Désactivé',
+    trackFallback: _frenchTrackFallback,
+  );
+
+  static String _frenchCastingToDevice(String deviceName) =>
+      'Diffusion vers $deviceName';
+  static String _frenchTrackFallback(int trackId) => 'Piste $trackId';
+
+  // Custom branding example
+  static const _customBrandingTexts = GoogleCastPlayerTexts(
+    unknownTitle: 'No media selected',
+    castingToDevice: _customCastingToDevice,
+    noCaptionsAvailable: 'No subtitles found',
+    captionsOff: 'Hide subtitles',
+    trackFallback: _customTrackFallback,
+  );
+
+  static String _customCastingToDevice(String deviceName) =>
+      'Streaming to your $deviceName';
+  static String _customTrackFallback(int trackId) => 'Subtitle option $trackId';
+
+  // === THEME EXAMPLES ===
+
+  // Dark theme
+  static final _darkTheme = GoogleCastPlayerTheme(
+    backgroundColor: Colors.black,
+    titleTextStyle: const TextStyle(
+      fontSize: 18,
+      fontWeight: FontWeight.bold,
+      color: Colors.white,
+    ),
+    deviceTextStyle: TextStyle(
+      fontSize: 14,
+      color: Colors.grey[400],
+      fontWeight: FontWeight.w400,
+    ),
+    iconColor: Colors.white,
+    iconSize: 32,
+    imageBorderRadius: BorderRadius.circular(8),
+    imageShadow: [
+      BoxShadow(
+        color: Colors.white.withValues(alpha: 0.2),
+        blurRadius: 6,
+        offset: const Offset(0, 2),
+      ),
+    ],
+  );
+
+  // Colorful theme
+  static final _colorfulTheme = GoogleCastPlayerTheme(
+    backgroundColor: Colors.pink[50],
+    titleTextStyle: const TextStyle(
+      fontSize: 20,
+      fontWeight: FontWeight.w800,
+      color: Colors.purple,
+    ),
+    deviceTextStyle: const TextStyle(
+      fontSize: 12,
+      color: Colors.orange,
+      fontWeight: FontWeight.w600,
+    ),
+    iconColor: Colors.pink,
+    iconSize: 36,
+    imageBorderRadius: BorderRadius.circular(20),
+    imageShadow: [
+      BoxShadow(
+        color: Colors.pink.withValues(alpha: 0.3),
+        blurRadius: 10,
+        offset: const Offset(0, 4),
+      ),
+    ],
+  );
+
+  // Minimalist theme
+  static final _minimalistTheme = GoogleCastPlayerTheme(
+    backgroundColor: Colors.grey[100],
+    titleTextStyle: const TextStyle(
+      fontSize: 16,
+      fontWeight: FontWeight.w400,
+      color: Colors.black54,
+    ),
+    deviceTextStyle: const TextStyle(
+      fontSize: 12,
+      color: Colors.black38,
+      fontWeight: FontWeight.w300,
+    ),
+    iconColor: Colors.black45,
+    iconSize: 24,
+    imageBorderRadius: BorderRadius.circular(4),
+    imageShadow: [],
+  );
+
+  // === EXAMPLE HELPER METHODS ===
+
+  void _showPlayerWithTexts(
+      BuildContext context, GoogleCastPlayerTexts texts, String title) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => Scaffold(
+          appBar: AppBar(
+            title: Text('$title Player'),
+            backgroundColor: Colors.blue,
+            foregroundColor: Colors.white,
+          ),
+          body: ExpandedGoogleCastPlayerController(
+            texts: texts,
+            toggleExpand: () => Navigator.of(context).pop(),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showPlayerWithTheme(
+      BuildContext context, GoogleCastPlayerTheme theme, String title) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => Scaffold(
+          appBar: AppBar(
+            title: Text(title),
+            backgroundColor: theme.backgroundColor,
+            foregroundColor: theme.titleTextStyle?.color ?? Colors.black,
+          ),
+          body: ExpandedGoogleCastPlayerController(
+            theme: theme,
+            toggleExpand: () => Navigator.of(context).pop(),
+          ),
+        ),
       ),
     );
   }
