@@ -49,7 +49,7 @@ class _MyAppState extends State<MyApp> {
         });
       } catch (e) {
         // Handle error silently or log it
-        print('Error checking discovery state: $e');
+        debugPrint('Error checking discovery state: $e');
       }
     }
   }
