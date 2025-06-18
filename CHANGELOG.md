@@ -1,3 +1,15 @@
+## 1.2.0 - API Documentation & Quality Release
+### 📚 Documentation & API Improvements
+- **Extensive API Documentation**: Added or improved doc comments for nearly all public classes, methods, enums, and fields across the codebase.
+- **Public API Coverage**: Significantly increased public API documentation coverage for better IDE support and pub.dev health.
+- **README & Example Updates**: Improved usage examples, customization guides, and documentation for easier integration.
+- **Linter Rule**: Enabled `public_member_api_docs` lint to enforce documentation for all public members.
+- **No Breaking Changes**: This is a safe update with no breaking API changes.
+
+### 🛠️ Internal & Quality
+- Improved code comments and structure for maintainability.
+- All previous features and fixes from 1.1.1 included.
+
 ## 1.1.1 - Perfect Package Score Achievement
 ### 🏆 Quality Improvements
 - **Perfect Pana Score**: Achieved 160/160 points in package analysis

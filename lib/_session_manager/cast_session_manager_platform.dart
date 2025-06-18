@@ -12,6 +12,7 @@ import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
 abstract class GoogleCastSessionManagerPlatformInterface
     extends PlatformInterface {
+  /// Creates a new [GoogleCastSessionManagerPlatformInterface].
   GoogleCastSessionManagerPlatformInterface({required super.token});
 
   /// Tests if a session is currently being managed by this session manager, and it is currently connected.
@@ -19,11 +20,10 @@ abstract class GoogleCastSessionManagerPlatformInterface
   /// This will be YES if the session state is ConnectionStateConnected.
   bool get hasConnectedSession;
 
-  /// 	readnonatomicstrong
-
   /// The current session, if any.
   GoogleCastSession? get currentSession;
 
+  /// Stream of current session changes.
   Stream<GoogleCastSession?> get currentSessionStream;
 
   /// 	readnonatomicassign
@@ -97,7 +97,15 @@ abstract class GoogleCastSessionManagerPlatformInterface
 
   Future<bool> endSessionAndStopCasting();
 
-  ///iosOnly
+  /// Sets the default session options for devices in a specific category (iOS only).
+  ///
+  /// This method is only available on iOS platforms and works with GCKSessionOptions.
+  /// Use this to configure default session behavior for specific device categories.
+  /// 
+  /// Implementation note:
+  /// For native iOS, this maps to:
+  /// - sessionOptions: nullable GCKSessionOptions
+  /// - forDeviceCategory: (NSString *) category
   Future<void> setDefaultSessionOptions(
       // nullable GCKSessionOptions *	sessionOptions
       // forDeviceCategory: 		(NSString *)  	category

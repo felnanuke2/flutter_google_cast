@@ -6,8 +6,15 @@ import 'package:flutter_chrome_cast/entities/cast_device.dart';
 import 'package:flutter_chrome_cast/models/android/cast_device.dart';
 import 'package:rxdart/subjects.dart';
 
+/// Android-specific implementation of the Google Cast discovery manager.
+/// 
+/// This class handles the discovery of Google Cast devices on Android platform
+/// using method channels to communicate with the native Android implementation.
 class GoogleCastDiscoveryManagerMethodChannelAndroid
     implements GoogleCastDiscoveryManagerPlatformInterface {
+  /// Creates a new instance of the Android discovery manager.
+  /// 
+  /// Sets up the method call handler to receive updates from the native side.
   GoogleCastDiscoveryManagerMethodChannelAndroid() {
     _channel.setMethodCallHandler(_onMethodCallHandler);
   }

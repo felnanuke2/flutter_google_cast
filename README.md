@@ -458,6 +458,19 @@ Future<void> _loadMediaQueue(GoogleCastDevice device) async {
               ),
             ],
           ),
+          tracks: [
+            GoogleCastMediaTrack(
+              trackId: 0,
+              type: TrackType.TEXT,
+              trackContentId: Uri.parse(
+                'https://raw.githubusercontent.com/felnanuke2/flutter_cast/master/example/assets/VEED-subtitles_Blender_Foundation_-_Elephants_Dream_1024.vtt'
+              ).toString(),
+              trackContentType: 'text/vtt',
+              name: 'English',
+              language: RFC5646_LANGUAGE.ENGLISH_UNITED_STATES,
+              subtype: TextTrackType.SUBTITLES,
+            ),
+          ],
         ),
       ),
       GoogleCastQueueItem(
@@ -611,330 +624,76 @@ Widget build(BuildContext context) {
 }
 ```
 
-## Complete Example
+## Customization: Themes & Texts
 
-Here's a complete working example based on the provided main.dart:
+You can customize the look and feel of the player and localize its texts using the `GoogleCastPlayerTheme` and `GoogleCastPlayerTexts` classes.
+
+### Customizing the Player Theme
 
 ```dart
-import 'dart:io';
-import 'package:flutter/material.dart';
-import 'package:flutter_chrome_cast/flutter_chrome_cast.dart';  // Updated import
+final darkTheme = GoogleCastPlayerTheme(
+  backgroundColor: Colors.black,
+  titleTextStyle: const TextStyle(
+    fontSize: 18,
+    fontWeight: FontWeight.bold,
+    color: Colors.white,
+  ),
+  deviceTextStyle: TextStyle(
+    fontSize: 14,
+    color: Colors.grey[400],
+    fontWeight: FontWeight.w400,
+  ),
+  iconColor: Colors.white,
+  iconSize: 32,
+  imageBorderRadius: BorderRadius.circular(8),
+  imageShadow: [
+    BoxShadow(
+      color: Colors.white.withOpacity(0.2),
+      blurRadius: 6,
+      offset: const Offset(0, 2),
+    ),
+  ],
+);
 
-void main() {
-  runApp(const MyApp());
-}
-
-class MyApp extends StatefulWidget {
-  const MyApp({Key? key}) : super(key: key);
-
-  @override
-  State<MyApp> createState() => _MyAppState();
-}
-
-class _MyAppState extends State<MyApp> {
-  @override
-  void initState() {
-    super.initState();
-    initPlatformState();
-  }
-
-  Future<void> initPlatformState() async {
-    const appId = GoogleCastDiscoveryCriteria.kDefaultApplicationId;
-    GoogleCastOptions? options;
-    
-    if (Platform.isIOS) {
-      options = IOSGoogleCastOptions(
-        GoogleCastDiscoveryCriteriaInitialize.initWithApplicationID(appId),
-      );
-    } else if (Platform.isAndroid) {
-      options = GoogleCastOptionsAndroid(
-        appId: appId,
-      );
-    }
-    
-    GoogleCastContext.instance.setSharedInstanceWithOptions(options!);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Google Cast Demo',
-      home: Stack(
-        children: [
-          Scaffold(
-            appBar: AppBar(
-              title: const Text('Google Cast Example'),
-              actions: [
-                // Cast button
-                StreamBuilder<GoogleCastSession?>(
-                  stream: GoogleCastSessionManager.instance.currentSessionStream,
-                  builder: (context, snapshot) {
-                    final isConnected = GoogleCastSessionManager.instance.connectionState == 
-                        GoogleCastConnectState.ConnectionStateConnected;
-                    
-                    return IconButton(
-                      onPressed: isConnected 
-                          ? GoogleCastSessionManager.instance.endSessionAndStopCasting
-                          : null,
-                      icon: Icon(
-                        isConnected ? Icons.cast_connected : Icons.cast,
-                        color: isConnected ? Colors.blue : Colors.grey,
-                      ),
-                    );
-                  },
-                ),
-              ],
-            ),
-            body: Column(
-              children: [
-                // Media status section
-                _buildMediaStatusSection(),
-                
-                // Device list section
-                Expanded(
-                  child: _buildDeviceListSection(),
-                ),
-              ],
-            ),
-            floatingActionButton: StreamBuilder(
-              stream: GoogleCastSessionManager.instance.currentSessionStream,
-              builder: (context, snapshot) {
-                final isConnected = GoogleCastSessionManager.instance.connectionState == 
-                    GoogleCastConnectState.ConnectionStateConnected;
-                
-                return Visibility(
-                  visible: isConnected,
-                  child: FloatingActionButton(
-                    onPressed: _insertQueueItemAndPlay,
-                    child: const Icon(Icons.add),
-                  ),
-                );
-              },
-            ),
-          ),
-          // Mini controller
-          const GoogleCastMiniController(),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildMediaStatusSection() {
-    return StreamBuilder<GoggleCastMediaStatus?>(
-      stream: GoogleCastRemoteMediaClient.instance.mediaStatusStream,
-      builder: (context, snapshot) {
-        final mediaStatus = snapshot.data;
-        
-        if (mediaStatus == null) {
-          return const Card(
-            margin: EdgeInsets.all(8),
-            child: Padding(
-              padding: EdgeInsets.all(16),
-              child: Text('No media loaded'),
-            ),
-          );
-        }
-        
-        final isPlaying = mediaStatus.playerState == CastMediaPlayerState.playing;
-        final title = mediaStatus.mediaInformation?.metadata?.title ?? 'Unknown';
-        
-        return Card(
-          margin: const EdgeInsets.all(8),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Now Playing: $title', style: Theme.of(context).textTheme.titleMedium),
-                const SizedBox(height: 8),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    IconButton(
-                      onPressed: _skipToPrevious,
-                      icon: const Icon(Icons.skip_previous),
-                    ),
-                    IconButton(
-                      onPressed: _togglePlayPause,
-                      icon: Icon(isPlaying ? Icons.pause : Icons.play_arrow),
-                    ),
-                    IconButton(
-                      onPressed: _skipToNext,
-                      icon: const Icon(Icons.skip_next),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildDeviceListSection() {
-    return StreamBuilder<List<GoogleCastDevice>>(
-      stream: GoogleCastDiscoveryManager.instance.devicesStream,
-      builder: (context, snapshot) {
-        final devices = snapshot.data ?? [];
-        
-        if (devices.isEmpty) {
-          return const Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.cast, size: 64, color: Colors.grey),
-                SizedBox(height: 16),
-                Text('No Cast devices found'),
-                Text('Make sure your device and Cast receiver are on the same network'),
-              ],
-            ),
-          );
-        }
-        
-        return ListView.builder(
-          itemCount: devices.length,
-          itemBuilder: (context, index) {
-            final device = devices[index];
-            return ListTile(
-              leading: const Icon(Icons.cast),
-              title: Text(device.friendlyName),
-              subtitle: Text(device.modelName ?? 'Unknown model'),
-              onTap: () => _loadMediaQueue(device),
-            );
-          },
-        );
-      },
-    );
-  }
-
-  void _togglePlayPause() {
-    final isPlaying = GoogleCastRemoteMediaClient.instance.mediaStatus?.playerState == 
-        CastMediaPlayerState.playing;
-    
-    if (isPlaying) {
-      GoogleCastRemoteMediaClient.instance.pause();
-    } else {
-      GoogleCastRemoteMediaClient.instance.play();
-    }
-  }
-
-  void _skipToPrevious() {
-    GoogleCastRemoteMediaClient.instance.queuePrevItem();
-  }
-
-  void _skipToNext() {
-    GoogleCastRemoteMediaClient.instance.queueNextItem();
-  }
-
-  Future<void> _loadMediaQueue(GoogleCastDevice device) async {
-    await GoogleCastSessionManager.instance.startSessionWithDevice(device);
-    
-    await GoogleCastRemoteMediaClient.instance.queueLoadItems(
-      [
-        GoogleCastQueueItem(
-          activeTrackIds: [0],
-          mediaInformation: GoogleCastMediaInformationIOS(
-            contentId: 'elephants_dream',
-            streamType: CastMediaStreamType.BUFFERED,
-            contentUrl: Uri.parse(
-              'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4'
-            ),
-            contentType: 'video/mp4',
-            metadata: GoogleCastMovieMediaMetadata(
-              title: 'Elephants Dream',
-              studio: 'Blender Foundation',
-              releaseDate: DateTime(2006),
-              images: [
-                GoogleCastImage(
-                  url: Uri.parse(
-                    'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/images/ElephantsDream.jpg'
-                  ),
-                  height: 480,
-                  width: 854,
-                ),
-              ],
-            ),
-            tracks: [
-              GoogleCastMediaTrack(
-                trackId: 0,
-                type: TrackType.TEXT,
-                trackContentId: Uri.parse(
-                  'https://raw.githubusercontent.com/felnanuke2/flutter_cast/master/example/assets/VEED-subtitles_Blender_Foundation_-_Elephants_Dream_1024.vtt'
-                ).toString(),
-                trackContentType: 'text/vtt',
-                name: 'English',
-                language: RFC5646_LANGUAGE.ENGLISH_UNITED_STATES,
-                subtype: TextTrackType.SUBTITLES,
-              ),
-            ],
-          ),
-        ),
-        GoogleCastQueueItem(
-          preLoadTime: const Duration(seconds: 15),
-          mediaInformation: GoogleCastMediaInformationIOS(
-            contentId: 'big_buck_bunny',
-            streamType: CastMediaStreamType.BUFFERED,
-            contentUrl: Uri.parse(
-              'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4'
-            ),
-            contentType: 'video/mp4',
-            metadata: GoogleCastMovieMediaMetadata(
-              title: 'Big Buck Bunny',
-              studio: 'Blender Foundation',
-              releaseDate: DateTime(2008),
-              images: [
-                GoogleCastImage(
-                  url: Uri.parse(
-                    'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/images/BigBuckBunny.jpg'
-                  ),
-                  height: 480,
-                  width: 854,
-                ),
-              ],
-            ),
-          ),
-        ),
-      ],
-      options: GoogleCastQueueLoadOptions(
-        startIndex: 0,
-        playPosition: const Duration(seconds: 0),
-      ),
-    );
-  }
-
-  void _insertQueueItemAndPlay() {
-    GoogleCastRemoteMediaClient.instance.queueInsertItemAndPlay(
-      GoogleCastQueueItem(
-        preLoadTime: const Duration(seconds: 15),
-        mediaInformation: GoogleCastMediaInformationIOS(
-          contentId: 'for_bigger_blazes',
-          streamType: CastMediaStreamType.BUFFERED,
-          contentUrl: Uri.parse(
-            'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4'
-          ),
-          contentType: 'video/mp4',
-          metadata: GoogleCastMovieMediaMetadata(
-            title: 'For Bigger Blazes',
-            studio: 'Google',
-            releaseDate: DateTime(2015),
-            images: [
-              GoogleCastImage(
-                url: Uri.parse(
-                  'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/images/ForBiggerBlazes.jpg'
-                ),
-                height: 480,
-                width: 854,
-              ),
-            ],
-          ),
-        ),
-      ),
-      beforeItemWithId: 2,
-    );
-  }
-}
+// Use with the player widget:
+ExpandedGoogleCastPlayerController(
+  theme: darkTheme,
+)
 ```
+
+### Customizing Player Texts (Localization)
+
+```dart
+const spanishTexts = GoogleCastPlayerTexts(
+  unknownTitle: 'Título desconocido',
+  castingToDevice: (deviceName) => 'Transmitiendo a $deviceName',
+  noCaptionsAvailable: 'Sin subtítulos disponibles',
+  captionsOff: 'Desactivar',
+  trackFallback: (trackId) => 'Pista $trackId',
+);
+
+// Use with the player widget:
+ExpandedGoogleCastPlayerController(
+  texts: spanishTexts,
+)
+```
+
+You can combine both theme and texts for full customization:
+
+```dart
+ExpandedGoogleCastPlayerController(
+  theme: darkTheme,
+  texts: spanishTexts,
+)
+```
+
+For more advanced examples, see the example app in [`example/lib/main.dart`](example/lib/main.dart).
+
+## Complete Example
+
+A full working example is available in [`example/lib/main.dart`](example/lib/main.dart) in this repository.
+
+The usage snippets above cover the most common integration patterns. For advanced usage, custom UI, and more, see the example app source code.
 
 ## API Reference
 

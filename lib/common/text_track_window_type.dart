@@ -1,7 +1,10 @@
 ///Possible text track window types.
 enum TextTrackWindowType {
+  /// No window background.
   none,
+  /// Normal rectangular window.
   normal,
+  /// Window with rounded corners.
   roundedCorners;
 
   factory TextTrackWindowType.fromMap(String value) {

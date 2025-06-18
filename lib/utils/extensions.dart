@@ -1,6 +1,8 @@
 import 'package:flutter_chrome_cast/lib.dart';
 
+/// Extensions for [GoogleCastMediaMetadata] to provide additional functionality.
 extension GoogleCastMediaMetadataExtensions on GoogleCastMediaMetadata {
+  /// Extracts the title from the metadata based on the metadata type.
   String? get extractedTitle {
     final type = metadataType;
     String? title;
@@ -32,6 +34,7 @@ extension GoogleCastMediaMetadataExtensions on GoogleCastMediaMetadata {
     return title;
   }
 
+  /// Extracts the subtitle from the metadata based on the metadata type.
   String? get extractedSubtitle {
     final type = metadataType;
     String? subtitle;
@@ -76,7 +79,9 @@ extension GoogleCastMediaMetadataExtensions on GoogleCastMediaMetadata {
   }
 }
 
+/// Extensions for [Duration] to provide formatting functionality.
 extension DurationExtension on Duration {
+  /// Formats the duration as a readable string.
   String get formatted {
     int seconds = inSeconds;
     final days = seconds ~/ Duration.secondsPerDay;

@@ -46,8 +46,6 @@ class CastBreakClips {
   ///Title of a break clip. Sender might display this on its screen, if provided.
   final String? title;
 
-  ///Title of a break clip. Sender might display this on its screen, if provided.
-
   ///VAST ad request configuration. Used if contentId or contentUrl is not provided.
   final VastAdsRequest vastAdsRequest;
 
@@ -57,6 +55,21 @@ class CastBreakClips {
   /// current break clip is not shippable.
 
   final Duration? whenSkippable;
+
+  /// Creates a new [CastBreakClips] instance.
+  ///
+  /// [clickThroughUrl] - URL of the page that the sender will display when clicked.
+  /// [contentId] - The content ID of the break media.
+  /// [contentType] - The content MIME type.
+  /// [contentUrl] - Optional break media URL.
+  /// [customData] - Application-specific break clip data.
+  /// [duration] - Duration of a break clip in seconds.
+  /// [hlsSegmentFormat] - The format of the HLS media segment.
+  /// [id] - Unique ID of break clip, required.
+  /// [posterUrl] - URL of content that the sender will display.
+  /// [title] - Title of a break clip.
+  /// [vastAdsRequest] - VAST ad request configuration, required.
+  /// [whenSkippable] - The time in seconds when this break clip becomes skippable.
   CastBreakClips({
     this.clickThroughUrl,
     this.contentId,
@@ -89,6 +102,9 @@ class CastBreakClips {
     };
   }
 
+  /// Creates a [CastBreakClips] instance from a map.
+  ///
+  /// [map] - The map to create the instance from.
   factory CastBreakClips.fromMap(Map<String, dynamic> map) {
     return CastBreakClips(
       clickThroughUrl: map['clickThroughUrl'],
@@ -112,8 +128,14 @@ class CastBreakClips {
     );
   }
 
+  /// Converts the [CastBreakClips] to a JSON string.
+  ///
+  /// Returns a JSON string representation of this object.
   String toJson() => json.encode(toMap());
 
+  /// Creates a [CastBreakClips] from a JSON string.
+  ///
+  /// [source] - The JSON string to create the instance from.
   factory CastBreakClips.fromJson(String source) =>
       CastBreakClips.fromMap(json.decode(source));
 }

@@ -37,6 +37,7 @@ class GoogleCastPlayerTexts {
   /// The [trackId] parameter contains the numeric ID of the track.
   final String Function(int trackId) trackFallback;
 
+  /// Creates a new [GoogleCastPlayerTexts].
   const GoogleCastPlayerTexts({
     this.unknownTitle = 'Unknown Title',
     this.nowPlaying = 'Now Playing',

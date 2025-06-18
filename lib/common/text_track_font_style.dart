@@ -1,8 +1,12 @@
 ///Possible text track font style.
 enum TextTrackFontStyle {
+  /// Normal font style.
   normal,
+  /// Bold font style.
   bold,
+  /// Bold italic font style.
   boldItalic,
+  /// Italic font style.
   italic;
 
   factory TextTrackFontStyle.fromMap(String value) {

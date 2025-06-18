@@ -12,8 +12,10 @@ import 'package:flutter_chrome_cast/models/android/android_media_status.dart';
 import 'package:flutter_chrome_cast/models/android/android_queue_item.dart';
 import 'package:rxdart/subjects.dart';
 
+/// Android-specific implementation of Google Cast remote media client functionality.
 class GoogleCastRemoteMediaClientAndroidMethodChannel
     implements GoogleCastRemoteMediaClientPlatformInterface {
+  /// Creates a new Android remote media client method channel.
   GoogleCastRemoteMediaClientAndroidMethodChannel() {
     _channel.setMethodCallHandler(_onMethodCallHandler);
   }

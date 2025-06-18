@@ -1,8 +1,14 @@
+/// Enum representing text track edge types for styling captions.
 enum TextTrackEdgeType {
+  /// No edge effect.
   none,
+  /// Outline edge effect.
   outline,
+  /// Drop shadow edge effect.
   dropShadow,
+  /// Raised edge effect.
   raised,
+  /// Depressed edge effect.
   depressed;
 
   factory TextTrackEdgeType.fromMap(String value) {

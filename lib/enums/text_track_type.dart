@@ -1,4 +1,6 @@
+/// Enum representing different types of text tracks for Google Cast.
 enum TextTrackType {
+  /// Unknown text track type.
   unknown,
 
   ///Transcription or translation of the dialogue,

@@ -1,69 +1,139 @@
+/// Enum representing RFC 5646 language codes.
+/// 
+/// This enum contains language codes following the RFC 5646 standard
+/// for identifying languages and language variants.
 enum Rfc5646Language {
+  /// Afrikaans language.
   afrikaans('af'),
+  /// Afrikaans as spoken in South Africa.
   afrikaansSouthAfrica('af-ZA'),
+  /// Arabic language.
   arabic('ar'),
+  /// Arabic as spoken in United Arab Emirates.
   arabicUae('ar-AE'),
+  /// Arabic as spoken in Bahrain.
   arabicBahrain('ar-BH'),
+  /// Arabic as spoken in Algeria.
   arabicAlgeria('ar-DZ'),
+  /// Arabic as spoken in Egypt.
   arabicEgypt('ar-EG'),
+  /// Arabic as spoken in Iraq.
   arabicIraq('ar-IQ'),
+  /// Arabic as spoken in Jordan.
   arabicJordan('ar-JO'),
+  /// Arabic as spoken in Kuwait.
   arabicKuwait('ar-KW'),
+  /// Arabic as spoken in Lebanon.
   arabicLebanon('ar-LB'),
+  /// Arabic as spoken in Libya.
   arabicLibya('ar-LY'),
+  /// Arabic as spoken in Morocco.
   arabicMorocco('ar-MA'),
+  /// Arabic as spoken in Oman.
   arabicOman('ar-OM'),
+  /// Arabic as spoken in Qatar.
   arabicQatar('ar-QA'),
+  /// Arabic as spoken in Saudi Arabia.
   arabicSaudiArabia('ar-SA'),
+  /// Arabic as spoken in Syria.
   arabicSyria('ar-SY'),
+  /// Arabic as spoken in Tunisia.
   arabicTunisia('ar-TN'),
+  /// Arabic as spoken in Yemen.
   arabicYemen('ar-YE'),
+  /// Azeri Latin script.
   azeriLatin('az'),
+  /// Azeri Latin script as used in Azerbaijan.
   azeriLatinAzerbaijan('az-AZ'),
+  /// Azeri Cyrillic script as used in Azerbaijan.
   azeriCyrillicAzerbaijan('az-Cyrl-AZ'),
+  /// Belarusian language.
   belarusian('be'),
+  /// Belarusian as spoken in Belarus.
   belarusianBelarus('be-BY'),
+  /// Bulgarian language.
   bulgarian('bg'),
+  /// Bulgarian as spoken in Bulgaria.
   bulgarianBulgaria('bg-BG'),
+  /// Bosnian as spoken in Bosnia and Herzegovina.
   bosnianBosniaAndHerzegovina('bs-BA'),
+  /// Catalan language.
   catalan('ca'),
+  /// Catalan as spoken in Spain.
   catalanSpain('ca-ES'),
+  /// Czech language.
   czech('cs'),
+  /// Czech as spoken in Czech Republic.
   czechCzechRepublic('cs-CZ'),
+  /// Welsh language.
   welsh('cy'),
+  /// Welsh as spoken in United Kingdom.
   welshUnitedKingdom('cy-GB'),
+  /// Danish language.
   danish('da'),
+  /// Danish as spoken in Denmark.
   danishDenmark('da-DK'),
+  /// German language.
   german('de'),
+  /// German as spoken in Austria.
   germanAustria('de-AT'),
+  /// German as spoken in Switzerland.
   germanSwitzerland('de-CH'),
+  /// German as spoken in Germany.
   germanGermany('de-DE'),
+  /// German as spoken in Liechtenstein.
   germanLiechtenstein('de-LI'),
+  /// German as spoken in Luxembourg.
   germanLuxembourg('de-LU'),
+  /// Divehi language.
   divehi('dv'),
+  /// Divehi as spoken in Maldives.
   divehiMaldives('dv-MV'),
+  /// Greek language.
   greek('el'),
+  /// Greek as spoken in Greece.
   greekGreece('el-GR'),
+  /// English language.
   english('en'),
+  /// English as spoken in Australia.
   englishAustralia('en-AU'),
+  /// English as spoken in Belize.
   englishBelize('en-BZ'),
+  /// English as spoken in Canada.
   englishCanada('en-CA'),
+  /// English as spoken in Caribbean.
   englishCaribbean('en-CB'),
+  /// English as spoken in United Kingdom.
   englishUnitedKingdom('en-GB'),
+  /// English as spoken in Ireland.
   englishIreland('en-IE'),
+  /// English as spoken in Jamaica.
   englishJamaica('en-JM'),
+  /// English as spoken in New Zealand.
   englishNewZealand('en-NZ'),
+  /// English as spoken in Republic of the Philippines.
   englishRepublicOfThePhilippines('en-PH'),
+  /// English as spoken in Trinidad and Tobago.
   englishTrinidadAndTobago('en-TT'),
+  /// English as spoken in United States.
   englishUnitedStates('en-US'),
+  /// English as spoken in South Africa.
   englishSouthAfrica('en-ZA'),
+  /// English as spoken in Zimbabwe.
   englishZimbabwe('en-ZW'),
+  /// Esperanto language.
   esperanto('eo'),
+  /// Spanish language.
   spanish('es'),
+  /// Spanish as spoken in Argentina.
   spanishArgentina('es-AR'),
+  /// Spanish as spoken in Bolivia.
   spanishBolivia('es-BO'),
+  /// Spanish as spoken in USA.
   spanishEua('es-US'),
+  /// Spanish as spoken in Chile.
   spanishChile('es-CL'),
+  /// Spanish as spoken in Colombia.
   spanishColombia('es-CO'),
   spanishCostaRica('es-CR'),
   spanishDominicanRepublic('es-DO'),
@@ -233,13 +303,23 @@ enum Rfc5646Language {
   zulu('zu'),
   zuluSouthAfrica('zu-ZA');
 
+  /// The string value representing the language code.
   final String value;
+  
+  /// Creates a [Rfc5646Language] with the given [value].
   const Rfc5646Language(this.value);
+  
   @override
   String toString() {
     return value;
   }
 
+  /// Creates a [Rfc5646Language] from a string value.
+  /// 
+  /// [value] - The string representation of the language code.
+  /// 
+  /// Returns the corresponding [Rfc5646Language] enum value.
+  /// Throws a [StateError] if no matching language code is found.
   factory Rfc5646Language.fromMap(String value) {
     return values.firstWhere((element) => element.toString() == value);
   }

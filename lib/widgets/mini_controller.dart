@@ -57,6 +57,7 @@ class GoogleCastMiniController extends StatefulWidget {
   /// Whether to show the device name
   final bool showDeviceName;
 
+  /// Creates a new [GoogleCastMiniController].
   const GoogleCastMiniController({
     super.key,
     this.theme,

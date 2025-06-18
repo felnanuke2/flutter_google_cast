@@ -1,3 +1,4 @@
+/// Enum representing different media resume states for Google Cast.
 enum GoogleCastMediaResumeState {
   ///A resume state indicating that the player state should be left unchanged.
   unchanged,

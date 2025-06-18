@@ -8,8 +8,10 @@ import 'package:rxdart/subjects.dart';
 
 import 'cast_session_manager_platform.dart';
 
+/// Android-specific implementation of Google Cast session manager functionality.
 class GoogleCastSessionManagerAndroidMethodChannel
     implements GoogleCastSessionManagerPlatformInterface {
+  /// Creates a new Android session manager method channel.
   GoogleCastSessionManagerAndroidMethodChannel() {
     _channel.setMethodCallHandler(_onMethodCallHandler);
   }

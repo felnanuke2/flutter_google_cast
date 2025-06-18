@@ -30,6 +30,8 @@ class CastBreak {
   ///Location of the break inside the main video. -1 represents the end of the main video in seconds.
 
   final int position;
+  
+  /// Creates a new [CastBreak] instance.
   CastBreak({
     required this.breakClipIds,
     this.duration,
@@ -39,6 +41,7 @@ class CastBreak {
     required this.position,
   });
 
+  /// Converts this break to a map representation.
   Map<String, dynamic> toMap() {
     return {
       'breakClipIds': breakClipIds,
@@ -50,6 +53,7 @@ class CastBreak {
     };
   }
 
+  /// Creates a [CastBreak] from a map representation.
   factory CastBreak.fromMap(Map<String, dynamic> map) {
     return CastBreak(
       breakClipIds: List<String>.from(map['breakClipIds']),
@@ -63,8 +67,10 @@ class CastBreak {
     );
   }
 
+  /// Converts this break to a JSON string.
   String toJson() => json.encode(toMap());
 
+  /// Creates a [CastBreak] from a JSON string.
   factory CastBreak.fromJson(String source) =>
       CastBreak.fromMap(json.decode(source));
 }

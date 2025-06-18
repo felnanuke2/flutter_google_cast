@@ -59,6 +59,8 @@ class TextTrackStyle {
   /// See http://goo.gl/M3ea0X. In WebVTT is called a region.
 
   final TextTrackWindowType? windowType;
+  
+  /// Creates a new [TextTrackStyle].
   TextTrackStyle({
     this.backgroundColor,
     this.customData,
@@ -74,6 +76,7 @@ class TextTrackStyle {
     this.windowType,
   });
 
+  /// Converts this text track style to a map representation.
   Map<String, dynamic> toMap() {
     return {
       'backgroundColor': backgroundColor?.hexColor,
@@ -91,6 +94,7 @@ class TextTrackStyle {
     };
   }
 
+  /// Creates a [TextTrackStyle] from a map representation.
   factory TextTrackStyle.fromMap(Map<String, dynamic> map) {
     return TextTrackStyle(
       backgroundColor: map['backgroundColor'] != null
@@ -123,17 +127,22 @@ class TextTrackStyle {
     );
   }
 
+  /// Converts this text track style to a JSON string.
   String toJson() => json.encode(toMap());
 
+  /// Creates a [TextTrackStyle] from a JSON string.
   factory TextTrackStyle.fromJson(String source) =>
       TextTrackStyle.fromMap(json.decode(source));
 }
 
+/// Extension on [Color] to provide hex color functionality.
 extension HColor on Color {
+  /// Gets the hex color string representation.
   String get hexColor {
     return '#${toARGB32().toRadixString(16).padLeft(8, '0')}';
   }
 
+  /// Creates a [Color] from a hex string.
   static Color fromHex(String hexString) {
     final buffer = StringBuffer();
     if (hexString.length == 6 || hexString.length == 7) buffer.write('ff');

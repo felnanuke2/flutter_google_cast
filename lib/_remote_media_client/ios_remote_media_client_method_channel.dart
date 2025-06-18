@@ -11,8 +11,10 @@ import 'package:flutter_chrome_cast/models/ios/ios_cast_queue_item.dart';
 import 'package:flutter_chrome_cast/models/ios/ios_media_status.dart';
 import 'package:rxdart/rxdart.dart';
 
+/// iOS-specific implementation of Google Cast remote media client functionality.
 class GoogleCastRemoteMediaClientIOSMethodChannel
     implements GoogleCastRemoteMediaClientPlatformInterface {
+  /// Creates a new iOS remote media client method channel.
   GoogleCastRemoteMediaClientIOSMethodChannel() {
     _channel.setMethodCallHandler(_methodCallHandler);
   }
