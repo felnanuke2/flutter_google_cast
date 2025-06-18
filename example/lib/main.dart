@@ -736,11 +736,6 @@ class _MyAppState extends State<MyApp> {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => Scaffold(
-          appBar: AppBar(
-            title: Text('$title Player'),
-            backgroundColor: Colors.blue,
-            foregroundColor: Colors.white,
-          ),
           body: ExpandedGoogleCastPlayerController(
             texts: texts,
             toggleExpand: () => Navigator.of(context).pop(),
@@ -755,11 +750,6 @@ class _MyAppState extends State<MyApp> {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => Scaffold(
-          appBar: AppBar(
-            title: Text(title),
-            backgroundColor: theme.backgroundColor,
-            foregroundColor: theme.titleTextStyle?.color ?? Colors.black,
-          ),
           body: ExpandedGoogleCastPlayerController(
             theme: theme,
             toggleExpand: () => Navigator.of(context).pop(),
