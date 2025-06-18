@@ -1,16 +1,50 @@
-# google_cast_example
+# Flutter Google Cast Example
 
-Demonstrates how to use the google_cast plugin.
+This example demonstrates how to use the `flutter_chrome_cast` plugin to discover, connect to, and cast media to Google Cast devices (Chromecast, Nest Hub, etc.) from a Flutter app.
 
-## Getting Started
+## How to Run
 
-This project is a starting point for a Flutter application.
+1. Ensure you have a Chromecast or Google Cast-enabled device on your network.
+2. In this directory, run:
+   
+   ```bash
+   flutter pub get
+   flutter run
+   ```
 
-A few resources to get you started if this is your first Flutter project:
+## Features Demonstrated
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+- Device discovery and connection
+- Listing available Cast devices
+- Connecting/disconnecting from devices
+- Casting video with metadata and subtitles
+- Media queue management (add, play, insert items)
+- Customizable player themes and texts (English, Spanish, French, custom branding)
+- Mini controller widget integration
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Example Usage
+
+Below is a minimal snippet to start device discovery and connect to a device:
+
+```dart
+// Start device discovery
+GoogleCastDiscoveryManager.instance.startDiscovery();
+
+// Listen for available devices
+StreamBuilder<List<GoogleCastDevice>>(
+  stream: GoogleCastDiscoveryManager.instance.devicesStream,
+  builder: (context, snapshot) {
+    final devices = snapshot.data ?? [];
+    // ... display devices and connect
+  },
+);
+
+// Connect to a device
+await GoogleCastSessionManager.instance.startSessionWithDevice(device);
+```
+
+For a full-featured example, see `lib/main.dart` in this folder.
+
+## More Information
+
+See the main [README](../README.md) for full documentation, advanced usage, and troubleshooting.
