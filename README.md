@@ -4,9 +4,9 @@
 
 ## Demo Video
 
-[![Demo Video](https://raw.githubusercontent.com/felnanuke2/flutter_google_cast/refs/heads/master/Screenshot_20250618_130514.jpg)](https://raw.githubusercontent.com/felnanuke2/flutter_google_cast/refs/heads/master/Screen_Recording_20250618_125333.mp4)
-
-<!-- The video is stored in the repository and can be downloaded or viewed via the link above. -->
+<video src="https://raw.githubusercontent.com/felnanuke2/flutter_google_cast/refs/heads/master/Screen_Recording_20250618_125333.mp4" controls width="600" poster="https://raw.githubusercontent.com/felnanuke2/flutter_google_cast/refs/heads/master/Screenshot_20250618_130514.jpg">
+  Your browser does not support the video tag.
+</video>
 
 ## Features
 
