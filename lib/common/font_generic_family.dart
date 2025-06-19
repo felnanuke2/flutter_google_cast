@@ -1,20 +1,26 @@
 /// Represents generic font families for text tracks in Google Cast.
-/// 
+///
 /// These values correspond to the CSS generic font families that can be
 /// used for styling text tracks (captions/subtitles) in Cast media.
 enum TextTrackFontGenericFamily {
   /// Sans-serif fonts (e.g., Arial, Helvetica).
   sansSerif,
+
   /// Monospaced sans-serif fonts (e.g., Courier New).
   monospacedSansSerif,
+
   /// Serif fonts (e.g., Times New Roman, Georgia).
   serif,
+
   /// Monospaced serif fonts.
   monospacedSerif,
+
   /// Casual or informal fonts.
   casual,
+
   /// Cursive or script fonts.
   cursive,
+
   /// Small capitals variant fonts.
   smallCapitals;
 

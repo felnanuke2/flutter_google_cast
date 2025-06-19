@@ -4,7 +4,7 @@ import 'package:flutter_chrome_cast/lib.dart';
 class GoogleCastOptionsAndroid extends GoogleCastOptions {
   /// The Cast application ID.
   final String appId;
-  
+
   /// Creates a new [GoogleCastOptionsAndroid].
   GoogleCastOptionsAndroid({
     required this.appId,

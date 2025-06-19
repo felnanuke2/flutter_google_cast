@@ -1,6 +1,16 @@
 import 'package:flutter_chrome_cast/entities/cast_device.dart';
 
+/// Represents a Google Cast device specific to iOS platforms.
+///
+/// This class extends [GoogleCastDevice] to include iOS-specific properties
+/// and construction from a map structure typically returned by iOS platform channels.
 class GoogleCastIosDevice extends GoogleCastDevice {
+  /// Optional index of the device in the iOS discovery list.
+  final int? index;
+
+  /// Creates a new [GoogleCastIosDevice] instance.
+  ///
+  /// All parameters except [index] are required and are passed to the base [GoogleCastDevice].
   GoogleCastIosDevice({
     required super.deviceID,
     required super.friendlyName,
@@ -12,8 +22,8 @@ class GoogleCastIosDevice extends GoogleCastDevice {
     required super.uniqueID,
     required this.index,
   });
-  final int? index;
 
+  /// Creates a [GoogleCastIosDevice] from a map, typically from platform channel data.
   factory GoogleCastIosDevice.fromMap(Map<String, dynamic> map) {
     return GoogleCastIosDevice(
       deviceID: map['deviceID'] as String,

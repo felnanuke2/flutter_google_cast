@@ -6,13 +6,13 @@ import 'package:rxdart/subjects.dart';
 import 'discovery_manager_platform_interface.dart';
 
 /// iOS-specific implementation of the Google Cast discovery manager.
-/// 
+///
 /// This class handles the discovery of Google Cast devices on iOS platform
 /// using method channels to communicate with the native iOS implementation.
 class GoogleCastDiscoveryManagerMethodChannelIOS
     implements GoogleCastDiscoveryManagerPlatformInterface {
   /// Creates a new instance of the iOS discovery manager.
-  /// 
+  ///
   /// Sets up the method call handler to receive updates from the native side.
   GoogleCastDiscoveryManagerMethodChannelIOS() {
     _channel.setMethodCallHandler(_handleMethodCall);

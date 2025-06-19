@@ -101,7 +101,7 @@ abstract class GoogleCastSessionManagerPlatformInterface
   ///
   /// This method is only available on iOS platforms and works with GCKSessionOptions.
   /// Use this to configure default session behavior for specific device categories.
-  /// 
+  ///
   /// Implementation note:
   /// For native iOS, this maps to:
   /// - sessionOptions: nullable GCKSessionOptions

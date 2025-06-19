@@ -30,7 +30,7 @@ class CastBreak {
   ///Location of the break inside the main video. -1 represents the end of the main video in seconds.
 
   final int position;
-  
+
   /// Creates a new [CastBreak] instance.
   CastBreak({
     required this.breakClipIds,

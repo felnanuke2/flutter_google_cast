@@ -6,7 +6,7 @@ import 'android_remote_media_client_method_channel.dart';
 import 'ios_remote_media_client_method_channel.dart';
 
 /// Main entry point for Google Cast remote media client functionality.
-/// 
+///
 /// This class provides a platform-agnostic interface for controlling media
 /// playback on Google Cast devices. It automatically selects the appropriate
 /// platform-specific implementation based on the current operating system.
@@ -20,7 +20,7 @@ class GoogleCastRemoteMediaClient {
           : GoogleCastRemoteMediaClientIOSMethodChannel();
 
   /// Gets the singleton instance of the remote media client.
-  /// 
+  ///
   /// Returns the appropriate platform-specific implementation
   /// (Android or iOS) based on the current platform.
   static GoogleCastRemoteMediaClientPlatformInterface get instance => _instance;

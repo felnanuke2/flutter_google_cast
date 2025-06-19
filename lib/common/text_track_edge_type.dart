@@ -2,12 +2,16 @@
 enum TextTrackEdgeType {
   /// No edge effect.
   none,
+
   /// Outline edge effect.
   outline,
+
   /// Drop shadow edge effect.
   dropShadow,
+
   /// Raised edge effect.
   raised,
+
   /// Depressed edge effect.
   depressed;
 

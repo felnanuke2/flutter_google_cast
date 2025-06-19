@@ -59,7 +59,7 @@ class TextTrackStyle {
   /// See http://goo.gl/M3ea0X. In WebVTT is called a region.
 
   final TextTrackWindowType? windowType;
-  
+
   /// Creates a new [TextTrackStyle].
   TextTrackStyle({
     this.backgroundColor,

@@ -9,7 +9,7 @@ class UserActionState {
 
   /// The user action associated with this state.
   final UserAction? userAction;
-  
+
   /// Creates a new [UserActionState] instance.
   ///
   /// [customData] - Custom data associated with the user action.

@@ -1,5 +1,5 @@
 /// Represents the reason why media playback became idle.
-/// 
+///
 /// This enum defines the different reasons why a Cast media session
 /// might transition to an idle state, indicating why playback stopped.
 enum GoogleCastMediaIdleReason {

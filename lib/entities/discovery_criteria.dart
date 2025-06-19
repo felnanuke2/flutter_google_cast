@@ -30,7 +30,7 @@ abstract class GoogleCastDiscoveryCriteria {
 class GoogleCastDiscoveryCriteriaInitialize {
   /// The data map containing discovery configuration.
   final Map<String, dynamic> data;
-  
+
   /// Creates a new [GoogleCastDiscoveryCriteriaInitialize] with the given data.
   GoogleCastDiscoveryCriteriaInitialize._({
     required this.data,

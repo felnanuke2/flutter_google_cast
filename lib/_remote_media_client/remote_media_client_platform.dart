@@ -81,7 +81,7 @@ abstract class GoogleCastRemoteMediaClientPlatformInterface
     List<GoogleCastQueueItem> items, {
     int? beforeItemWithId,
   });
-  
+
   /// Inserts an item into the queue and plays it.
   Future<void> queueInsertItemAndPlay(
     GoogleCastQueueItem item, {
@@ -97,7 +97,7 @@ abstract class GoogleCastRemoteMediaClientPlatformInterface
   Future<void> queueJumpToItemWithId(int itemId);
 
   /// Reorders items in the queue.
-  /// 
+  ///
   /// [itemsIds] - List of IDs of the items to reorder.
   /// [beforeItemWithId] - The ID of the item before which the reordered items will be placed.
   ///                     If null, the items will be placed at the end of the queue.
