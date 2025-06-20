@@ -16,44 +16,7 @@ on:
     # - 'my_package_name-v[0-9]+.[0-9]+.[0-9]+'
 
 jobs:
-  check-and-tag:
-    runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref_type == 'branch'
-    permissions:
-      contents: write
-    outputs:
-      should_publish: ${{ steps.version_check.outputs.should_publish }}
-      version: ${{ steps.version_check.outputs.version }}
-    steps:
-    - uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
-    
-    - name: Check if version has changed and create tag
-      id: version_check
-      run: |
-        # Get current version from pubspec.yaml
-        CURRENT_VERSION=$(grep "^version:" pubspec.yaml | sed 's/version: //' | tr -d ' ')
-        echo "Current version: $CURRENT_VERSION"
-        
-        # Check if tag already exists
-        if git rev-parse "v$CURRENT_VERSION" >/dev/null 2>&1; then
-          echo "Tag v$CURRENT_VERSION already exists"
-          echo "should_publish=false" >> $GITHUB_OUTPUT
-        else
-          echo "Creating new tag v$CURRENT_VERSION"
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-          git tag -a "v$CURRENT_VERSION" -m "Release version $CURRENT_VERSION"
-          git push origin "v$CURRENT_VERSION"
-          echo "should_publish=true" >> $GITHUB_OUTPUT
-        fi
-        echo "version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
-
-  # Publish using the reusable workflow from dart-lang.
   publish:
-    needs: check-and-tag
-    if: needs.check-and-tag.outputs.should_publish == 'true' || (github.event_name == 'push' && github.ref_type == 'tag')
     permissions:
       id-token: write # Required for authentication using OIDC
     uses: dart-lang/setup-dart/.github/workflows/publish.yml@v1
