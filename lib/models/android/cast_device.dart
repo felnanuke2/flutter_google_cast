@@ -1,6 +1,8 @@
 import 'package:flutter_chrome_cast/lib.dart';
 
+/// Extension for creating a list of [GoogleCastAndroidDevice] from a map.
 extension GoogleCastAndroidDevices on GoogleCastAndroidDevice {
+  /// Creates a list of [GoogleCastAndroidDevice] from a list of maps.
   static List<GoogleCastAndroidDevice> fromMap(List maps) {
     final devices =
         maps.map((e) => GoogleCastAndroidDevice.fromMap(e)).toList();
@@ -8,7 +10,9 @@ extension GoogleCastAndroidDevices on GoogleCastAndroidDevice {
   }
 }
 
+/// Android-specific device representation.
 class GoogleCastAndroidDevice extends GoogleCastDevice {
+  /// Creates a new [GoogleCastAndroidDevice] instance.
   GoogleCastAndroidDevice({
     required super.deviceID,
     required super.friendlyName,
@@ -20,6 +24,7 @@ class GoogleCastAndroidDevice extends GoogleCastDevice {
     required super.uniqueID,
   });
 
+  /// Creates a [GoogleCastAndroidDevice] from a map.
   factory GoogleCastAndroidDevice.fromMap(Map<String, dynamic> map) {
     return GoogleCastAndroidDevice(
       deviceID: map['id'],

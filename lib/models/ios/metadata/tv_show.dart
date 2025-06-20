@@ -1,6 +1,8 @@
 import 'package:flutter_chrome_cast/lib.dart';
 
+/// iOS-specific implementation of TV show media metadata.
 class GoogleCastTvShowMediaMetadataIOS extends GoogleCastTvShowMediaMetadata {
+  /// Creates an iOS TV show media metadata instance.
   GoogleCastTvShowMediaMetadataIOS({
     super.episode,
     super.images,
@@ -9,6 +11,7 @@ class GoogleCastTvShowMediaMetadataIOS extends GoogleCastTvShowMediaMetadata {
     super.seriesTitle,
   });
 
+  /// Creates a TV show media metadata instance from a map.
   factory GoogleCastTvShowMediaMetadataIOS.fromMap(Map<String, dynamic> map) {
     return GoogleCastTvShowMediaMetadataIOS(
       seriesTitle: map['seriesTitle'],

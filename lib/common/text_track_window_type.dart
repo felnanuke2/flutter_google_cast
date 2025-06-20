@@ -2,8 +2,10 @@
 enum TextTrackWindowType {
   /// No window background.
   none,
+
   /// Normal rectangular window.
   normal,
+
   /// Window with rounded corners.
   roundedCorners;
 

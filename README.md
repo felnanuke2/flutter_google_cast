@@ -1,5 +1,9 @@
 # Flutter Google Cast
 
+[![Coverage Status](https://coveralls.io/repos/github/felnanuke2/flutter_google_cast/badge.svg?branch=master)](https://coveralls.io/github/felnanuke2/flutter_google_cast?branch=master)
+[![Codecov](https://codecov.io/gh/felnanuke2/flutter_google_cast/branch/master/graph/badge.svg)](https://codecov.io/gh/felnanuke2/flutter_google_cast)
+[![CI](https://github.com/felnanuke2/flutter_google_cast/workflows/Flutter%20CI%20with%20Test%20Enforcement/badge.svg)](https://github.com/felnanuke2/flutter_google_cast/actions)
+
 **FlutterGoogleCast** is a comprehensive Flutter plugin that provides seamless integration with the Google Cast SDK for both iOS and Android platforms. This plugin enables your Flutter application to discover, connect to, and control Chromecast devices and other Google Cast-enabled receivers.
 
 ## Demo Video
@@ -18,6 +22,7 @@
 - 📺 **Session Management**: Connect and disconnect from cast devices
 - 🔄 **Real-time Updates**: Stream-based APIs for real-time status updates
 - 📱 **Mini Controller**: Built-in mini controller widget for easy integration
+- 🛠️ **Robust Build System**: Optimized Android builds with automated troubleshooting tools
 
 ## Getting Started
 
@@ -756,6 +761,110 @@ A pre-built widget that provides basic media controls when casting.
 - **Video**: MP4, WebM, MOV
 - **Audio**: MP3, AAC, FLAC, WAV
 - **Streaming**: HLS (m3u8), DASH
+
+## 📚 Documentation
+
+### User Guides
+- **[Import Guide](IMPORT_GUIDE.md)** - Optimize your Flutter imports for better performance
+- **[Main README](README.md)** - This file - complete plugin usage and setup
+
+### Developer Documentation
+- **[Native Development Guide](NATIVE_GUIDE.md)** - Overview of native implementation architecture
+- **[iOS Native Guide](NATIVE_IOS_GUIDE.md)** - Swift implementation details, debugging, and contribution guide
+- **[Android Native Guide](NATIVE_ANDROID_GUIDE.md)** - Kotlin implementation details, debugging, and contribution guide
+
+### Quick Links
+- 🎯 **New to the plugin?** Start with this README and the [Import Guide](IMPORT_GUIDE.md)
+- 🔧 **Want to contribute to native code?** Check out the [Native Development Guide](NATIVE_GUIDE.md)
+- 🍎 **iOS development?** See the [iOS Native Guide](NATIVE_IOS_GUIDE.md)
+- 🤖 **Android development?** See the [Android Native Guide](NATIVE_ANDROID_GUIDE.md)
+- 💡 **Optimizing imports?** Use the [Import Guide](IMPORT_GUIDE.md)
+
+## Development & Testing
+
+### Running Tests
+
+This project maintains high test coverage to ensure reliability. Tests are automatically run on every PR to master.
+
+```bash
+# Run all tests
+flutter test
+
+# Run tests with coverage
+flutter test --coverage
+
+# Quick coverage report (opens in browser on macOS/Linux)
+./scripts/quick_coverage.sh
+```
+
+### Coverage Reports
+
+Coverage is automatically generated and reported on every PR. The project uses multiple coverage services:
+
+- **Coveralls**: Provides coverage badges and detailed reports
+- **Codecov**: Additional coverage analysis and GitHub integration
+- **GitHub Actions**: Generates coverage artifacts for every workflow run
+
+Coverage badges at the top of this README show the current coverage status. Detailed coverage reports are available:
+- As artifacts in GitHub Actions workflow runs
+- On [Coveralls](https://coveralls.io/github/felnanuke2/flutter_google_cast)
+- On [Codecov](https://codecov.io/gh/felnanuke2/flutter_google_cast)
+
+### Coverage Scripts
+
+The project includes several coverage scripts:
+
+- `scripts/run_coverage.sh` - Comprehensive coverage analysis with detailed reporting
+- `scripts/quick_coverage.sh` - Quick coverage check for development
+- `scripts/test_enforcement.sh` - Enforces test requirements
+
+## Troubleshooting
+
+### Android Build Issues
+
+If you encounter Android build issues, the plugin includes several solutions:
+
+#### Quick Fix Script
+
+Run the automated fix script:
+
+```bash
+./scripts/fix_android_build.sh
+```
+
+#### Common Issues
+
+1. **Java heap space errors during build**:
+   - The plugin now includes optimized Gradle settings
+   - Heap size is automatically increased to 3GB
+
+2. **Android x86 target deprecation warnings**:
+   - x86 targets are excluded by default
+   - Use: `flutter build apk --target-platform android-arm64,android-arm`
+
+3. **AndroidX migration conflicts**:
+   - Jetifier is optimized with blacklisted problematic dependencies
+   - AndroidX is enabled by default
+
+4. **Dependency resolution issues**:
+   ```bash
+   flutter clean
+   flutter pub get
+   cd android && ./gradlew clean
+   flutter build apk --target-platform android-arm64,android-arm
+   ```
+
+For detailed troubleshooting, see [ANDROID_BUILD_TROUBLESHOOTING.md](ANDROID_BUILD_TROUBLESHOOTING.md).
+
+### Dependency Updates
+
+Check for outdated dependencies:
+
+```bash
+flutter pub outdated
+```
+
+The CI automatically checks and reports outdated dependencies, but they won't fail the build if they're incompatible with current constraints.
 
 ## Contributing
 

@@ -27,19 +27,23 @@ class TextTrackStyle {
   /// "#RRGGBBAA". This value will be
   ///  ignored if edgeType is NONE.
 
+  /// Edge color for the text track.
   final Color? edgeColor;
 
+  /// Edge type for the text track.
   final TextTrackStyle? edgeType;
 
   /// If the font is not available in the receiver the fontGenericFamily will be used.
 
   final String? fontFamily;
 
+  /// Generic font family for the text track.
   final TextTrackFontGenericFamily? fontGenericFamily;
 
-  ///The font scaling factor for the text track (the default is 1.0).
+  /// The font scaling factor for the text track (the default is 1.0).
   final int? fontScale;
 
+  /// Font style for the text track.
   final TextTrackFontStyle? fontStyle;
 
   ///Foreground RGBA color, represented as "#RRGGBBAA".
@@ -59,7 +63,7 @@ class TextTrackStyle {
   /// See http://goo.gl/M3ea0X. In WebVTT is called a region.
 
   final TextTrackWindowType? windowType;
-  
+
   /// Creates a new [TextTrackStyle].
   TextTrackStyle({
     this.backgroundColor,

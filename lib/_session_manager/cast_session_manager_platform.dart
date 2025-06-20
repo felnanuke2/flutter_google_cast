@@ -101,15 +101,16 @@ abstract class GoogleCastSessionManagerPlatformInterface
   ///
   /// This method is only available on iOS platforms and works with GCKSessionOptions.
   /// Use this to configure default session behavior for specific device categories.
-  /// 
+  ///
   /// Implementation note:
   /// For native iOS, this maps to:
   /// - sessionOptions: nullable GCKSessionOptions
   /// - forDeviceCategory: (NSString *) category
   Future<void> setDefaultSessionOptions(
-      // nullable GCKSessionOptions *	sessionOptions
-      // forDeviceCategory: 		(NSString *)  	category
+      // nullable GCKSessionOptions *\tsessionOptions
+      // forDeviceCategory: \t\t(NSString *)  \tcategory
       );
 
+  /// Sets the device volume.
   void setDeviceVolume(double value);
 }

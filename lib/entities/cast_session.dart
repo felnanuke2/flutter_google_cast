@@ -5,14 +5,19 @@ import 'package:flutter_chrome_cast/enums/connection_state.dart';
 abstract class GoogleCastSession {
   /// The device associated with this session.
   final GoogleCastDevice? device;
+
   /// The unique session ID.
   final String? sessionID;
+
   /// The current connection state.
   final GoogleCastConnectState connectionState;
+
   /// Whether the current device is muted.
   final bool currentDeviceMuted;
+
   /// The current device volume level.
   final double currentDeviceVolume;
+
   /// The device status text.
   final String deviceStatusText;
 

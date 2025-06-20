@@ -1,5 +1,5 @@
 /// Represents the current state of the media player.
-/// 
+///
 /// This enum defines the different states that a Cast media player
 /// can be in during media playback and control operations.
 enum CastMediaPlayerState {
@@ -19,5 +19,6 @@ enum CastMediaPlayerState {
   /// This typically occurs when the player is loading or buffering content.
   buffering,
 
+  /// Player is loading media.
   loading;
 }

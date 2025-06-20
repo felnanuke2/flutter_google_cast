@@ -27,6 +27,7 @@ class GoogleCastQueueItem {
   /// Seconds from the beginning of the media to start playback.
   final Duration? startTime;
 
+  /// Creates a queue item instance.
   GoogleCastQueueItem({
     this.activeTrackIds,
     this.autoPlay = true,
@@ -38,6 +39,7 @@ class GoogleCastQueueItem {
     this.startTime,
   });
 
+  /// Converts the queue item to a map.
   Map<String, dynamic> toMap() {
     return {
       'activeTrackIds': activeTrackIds,

@@ -4,10 +4,13 @@ import 'package:flutter_chrome_cast/enums/repeat_mode.dart';
 class GoogleCastQueueLoadOptions {
   /// Starting index in the queue.
   final int startIndex;
+
   /// Position to start playback.
   final Duration playPosition;
+
   /// Repeat mode for the queue.
   final GoogleCastMediaRepeatMode repeatMode;
+
   /// Custom data to send with the request.
   final Map<String, dynamic>? customData;
 

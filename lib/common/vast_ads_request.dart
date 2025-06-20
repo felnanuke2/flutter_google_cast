@@ -13,7 +13,7 @@ class VastAdsRequest {
   /// URL for VAST file.
 
   final String? adTagUrl;
-  
+
   /// Creates a new [VastAdsRequest] instance.
   ///
   /// [adsResponse] - Specifies a VAST document to be used as the ads response.

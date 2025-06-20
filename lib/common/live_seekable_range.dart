@@ -31,7 +31,7 @@ class GoogleCastMediaLiveSeekableRange {
   ///  based on the last information reported
   ///  by the receiver.
   final Duration? start;
-  
+
   /// Creates a new [GoogleCastMediaLiveSeekableRange] instance.
   ///
   /// [end] - End of the seekable range in seconds.

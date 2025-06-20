@@ -41,6 +41,7 @@ class ExpandedGoogleCastPlayerController extends StatefulWidget {
   /// Text configuration for customizing all displayed text content
   final GoogleCastPlayerTexts? texts;
 
+  /// Creates an expanded Google Cast player controller.
   const ExpandedGoogleCastPlayerController(
       {super.key, this.toggleExpand, this.theme, this.texts});
 

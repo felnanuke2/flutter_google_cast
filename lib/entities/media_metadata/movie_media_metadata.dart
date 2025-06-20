@@ -4,6 +4,7 @@ import 'cast_media_metadata.dart';
 
 ///Describes a movie media artifact.
 class GoogleCastMovieMediaMetadata extends GoogleCastMediaMetadata {
+  /// Creates a movie media metadata instance.
   GoogleCastMovieMediaMetadata({
     this.title,
     this.subtitle,

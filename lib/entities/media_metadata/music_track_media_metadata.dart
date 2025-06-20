@@ -4,6 +4,7 @@ import 'cast_media_metadata.dart';
 
 ///Describes a music track media artifact.
 class GoogleCastMusicMediaMetadata extends GoogleCastMediaMetadata {
+  /// Creates a music track media metadata instance.
   GoogleCastMusicMediaMetadata({
     this.albumName,
     this.title,

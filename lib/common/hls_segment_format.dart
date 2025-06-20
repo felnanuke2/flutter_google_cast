@@ -1,22 +1,29 @@
 /// Format of an HLS audio segment.
-/// 
+///
 /// Represents the different audio codec formats that can be used
 /// in HLS (HTTP Live Streaming) segments for Google Cast media.
 enum CastHlsSegmentFormat {
   /// Advanced Audio Coding format.
   aac,
+
   /// Dolby Digital (AC-3) format.
   ac3,
+
   /// MPEG-1 Audio Layer III format.
   mp3,
+
   /// MPEG Transport Stream format.
   ts,
+
   /// Transport Stream with AAC audio.
   tsAac,
+
   /// Enhanced AC-3 (Dolby Digital Plus) format.
   eAc3,
+
   /// Fragmented MP4 format.
   fmp4,
+
   /// No specific format or unknown format.
   none;
 

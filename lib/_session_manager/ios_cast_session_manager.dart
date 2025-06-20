@@ -35,7 +35,7 @@ class GoogleCastSessionManagerIOSMethodChannel
       currentSession?.connectionState ?? GoogleCastConnectState.disconnected;
 
   /// Returns the current cast session if available.
-  /// 
+  ///
   /// This method is not implemented for iOS and will throw an [UnimplementedError].
   /// Use [currentSession] instead which is properly implemented for iOS.
   GoogleCastSession? get currentCastSession => throw UnimplementedError();

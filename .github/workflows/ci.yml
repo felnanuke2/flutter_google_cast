@@ -1,0 +1,91 @@
+name: Flutter CI with Test Enforcement
+
+on:
+  push:
+    branches: [ main, develop, master ]
+  pull_request:
+    branches: [ main, develop, master ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.32.4'
+        channel: 'stable'
+    
+    - name: Install dependencies
+      run: flutter pub get
+    
+    - name: Check for outdated dependencies
+      run: |
+        echo "Checking for outdated dependencies..."
+        flutter pub outdated || true
+        echo "Note: Some dependencies may have newer versions. Consider updating when compatible."
+    
+    - name: Verify formatting
+      run: dart format --output=none --set-exit-if-changed .
+    
+    - name: Analyze project source
+      run: flutter analyze
+    
+    - name: Check if tests exist
+      run: |
+        if [ ! -d "test" ]; then
+          echo "❌ Error: No test directory found!"
+          echo "Tests are required for this project."
+          exit 1
+        fi
+        
+        if [ -z "$(find test -name '*.dart' -type f)" ]; then
+          echo "❌ Error: No test files found in test directory!"
+          echo "At least one test file is required."
+          exit 1
+        fi
+        
+        echo "✅ Test directory and files found"
+    
+    - name: Run tests
+      run: flutter test
+
+  build:
+    needs: test
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.32.4'
+        channel: 'stable'
+    
+    - name: Install dependencies
+      run: flutter pub get
+    
+    - name: Check for outdated dependencies
+      run: |
+        echo "Checking for outdated dependencies..."
+        flutter pub outdated || true
+        echo "Note: Some dependencies may have newer versions. Consider updating when compatible."
+    
+    
+    - name: Build Android (ARM64 and ARM only)
+      run: |
+        cd example
+        # Build only for ARM architectures, excluding x86 as it's deprecated
+        flutter build apk --debug
+    
+    - name: Build iOS (if on macOS)
+      if: runner.os == 'macOS'
+      run: |
+        cd example
+        flutter build ios --no-codesign
+
+

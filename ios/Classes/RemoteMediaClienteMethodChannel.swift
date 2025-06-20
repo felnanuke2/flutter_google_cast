@@ -1,5 +1,5 @@
 //
-//  RemoteMediaClienteMethodChannel.swift
+//  RemoteMediaClientMethodChannel.swift
 //  google_cast
 //
 //  Created by LUIZ FELIPE ALVES LIMA on 27/06/22.
@@ -8,29 +8,70 @@
 import Foundation
 import GoogleCast
 
+/// Flutter method channel for Google Cast remote media client operations
+/// 
+/// This class manages all media-related operations for Google Cast sessions,
+/// including media loading, playback control, queue management, and status monitoring.
+/// It implements the Google Cast remote media client listener protocol to receive
+/// media state updates and communicates these back to Flutter.
+///
+/// Key features:
+/// - Media loading and queue management
+/// - Playback controls (play, pause, stop, seek)
+/// - Volume and track controls
+/// - Real-time media status updates to Flutter
+/// - Position tracking with automatic updates
+/// - Singleton pattern for consistent media state
+///
+/// The class maintains internal state for queue management and provides
+/// comprehensive media control capabilities to the Flutter application.
+///
+/// - Author: LUIZ FELIPE ALVES LIMA
+/// - Since: iOS 10.0+
 class RemoteMediaClienteMethodChannel :UIResponder, FlutterPlugin, GCKRemoteMediaClientListener{
+    
+    // MARK: - Singleton Implementation
+    
+    /// Private initializer to enforce singleton pattern
     private override init() {
         
     }
     
+    /// Shared singleton instance
     static private let _instance = RemoteMediaClienteMethodChannel()
+    
+    /// Public accessor for the singleton instance
+    /// - Returns: The shared RemoteMediaClienteMethodChannel instance
     static var instance : RemoteMediaClienteMethodChannel {
         _instance
     }
     
+    // MARK: - Properties
+    
+    /// Flutter method channel for remote media client communication
+    /// Used to send media events and handle method calls from Flutter
     var channel : FlutterMethodChannel?
     
+    /// Reference to the current Cast session's remote media client
+    /// - Returns: The media client for the current session, or nil if no session
     private var currentRemoteMediaCliente: GCKRemoteMediaClient? {
         GCKCastContext.sharedInstance().sessionManager.currentSession?.remoteMediaClient
-        
     }
     
+    /// Timer for tracking media position updates
+    /// Automatically sends position updates to Flutter during playback
     private  var positionTimer: Timer?
     
+    /// Array maintaining the order of queue items
+    /// Stores NSNumber IDs representing the queue item order
     private var queueOrder : [NSNumber] = []
     
+    /// Dictionary storing queue items by their ID
+    /// Maps queue item IDs to their corresponding GCKMediaQueueItem objects
     private var queueItems  : Dictionary<UInt, GCKMediaQueueItem> = [:]
     
+    /// Computed property returning queue items in proper order
+    /// - Returns: Array of queue items sorted according to queueOrder
     private var orderedQueueItems : Array<GCKMediaQueueItem> {
         var items : [GCKMediaQueueItem] = []
         
@@ -38,14 +79,20 @@ class RemoteMediaClienteMethodChannel :UIResponder, FlutterPlugin, GCKRemoteMedi
             if let value = queueItems[UInt(truncating: queueItemId)] {
                 items.append(value)
             }
-    
         }
         return items
     }
     
+    // MARK: - Flutter Plugin Registration
     
     
-    
+    /// Registers the remote media client method channel with Flutter
+    /// 
+    /// Sets up the Flutter method channel for media control communication.
+    /// The channel name is "google_cast.remote_media_client" and handles all
+    /// media-related method calls from Flutter.
+    ///
+    /// - Parameter registrar: The Flutter plugin registrar for method channel setup
     static func register(with registrar: FlutterPluginRegistrar) {
         
         let instance = RemoteMediaClienteMethodChannel.instance
@@ -53,12 +100,28 @@ class RemoteMediaClienteMethodChannel :UIResponder, FlutterPlugin, GCKRemoteMedi
         instance.channel = FlutterMethodChannel(name: "google_cast.remote_media_client", binaryMessenger: registrar.messenger())
         
         registrar.addMethodCallDelegate(instance, channel: instance.channel!)
-        
-        
     }
     
+    // MARK: - Flutter Method Call Handling
     
-    
+    /// Handles method calls from the Flutter side
+    /// 
+    /// Processes incoming method calls for media control operations.
+    /// Supports comprehensive media management including loading, playback control,
+    /// queue management, and track selection.
+    ///
+    /// Supported methods:
+    /// - `loadMedia`: Load a single media item
+    /// - `queueLoadItems`: Load multiple items into a queue
+    /// - `stop`: Stop media playback
+    /// - `play`: Start or resume playback
+    /// - `pause`: Pause playback
+    /// - `setActiveTrackIDs`: Select specific media tracks
+    /// - And many more media control operations...
+    ///
+    /// - Parameters:
+    ///   - call: The Flutter method call containing method name and arguments
+    ///   - result: Callback to return results or errors to Flutter
     func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
         switch call.method {
         case "loadMedia":

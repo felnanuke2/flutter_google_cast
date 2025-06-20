@@ -1,5 +1,5 @@
 /// Represents the connection state of a Google Cast session.
-/// 
+///
 /// This enum defines the possible states of a Cast connection,
 /// from disconnected to fully connected and ready for media control.
 enum GoogleCastConnectState {

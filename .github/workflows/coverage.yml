@@ -1,0 +1,103 @@
+name: Coverage Report
+
+on:
+  pull_request:
+    branches: [ master, main ]
+  push:
+    branches: [ master, main ]
+
+jobs:
+  coverage:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.32.4'
+        channel: 'stable'
+    
+    - name: Install dependencies
+      run: flutter pub get
+    
+    - name: Run tests with coverage
+      run: flutter test --coverage
+    
+    - name: Install lcov
+      run: sudo apt-get update && sudo apt-get install -y lcov
+    
+    - name: Process coverage data
+      run: |
+        # Remove generated files and test files
+        lcov --ignore-errors unused --remove coverage/lcov.info \
+          '**/*.g.dart' \
+          '**/*.freezed.dart' \
+          '**/*.gr.dart' \
+          '**/*.part.dart' \
+          '**/test/**' \
+          '**/test_driver/**' \
+          '**/integration_test/**' \
+          '**/main.dart' \
+          --output-file coverage/lcov_cleaned.info
+        
+        # Generate HTML coverage report
+        genhtml coverage/lcov_cleaned.info -o coverage/html
+        
+        # Calculate coverage percentage
+        coverage_percent=$(lcov --summary coverage/lcov_cleaned.info | grep -oP 'lines......: \K\d+\.\d+' | head -1)
+        echo "Coverage: $coverage_percent%"
+        echo "COVERAGE_PERCENT=$coverage_percent" >> $GITHUB_ENV
+        
+        # Create a coverage summary
+        echo "## Coverage Report" > coverage/summary.md
+        echo "" >> coverage/summary.md
+        echo "**Coverage:** $coverage_percent%" >> coverage/summary.md
+        echo "" >> coverage/summary.md
+        echo "Detailed coverage report is available in the artifacts." >> coverage/summary.md
+    
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v4
+      with:
+        file: ./coverage/lcov_cleaned.info
+        flags: unittests
+        name: codecov-umbrella
+        fail_ci_if_error: false
+        token: ${{ secrets.CODECOV_TOKEN }}
+    
+    - name: Upload coverage to Coveralls
+      uses: coverallsapp/github-action@v2
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        path-to-lcov: coverage/lcov_cleaned.info
+    
+    - name: Upload coverage HTML report
+      uses: actions/upload-artifact@v4
+      with:
+        name: coverage-report
+        path: coverage/html/
+        retention-days: 30
+    
+    - name: Comment PR with coverage
+      if: github.event_name == 'pull_request'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const fs = require('fs');
+          const coverage = process.env.COVERAGE_PERCENT;
+          
+          const comment = `## 📊 Coverage Report
+          
+          **Coverage:** ${coverage}%
+          
+          The detailed coverage report is available in the [workflow artifacts](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}).
+          
+          📈 Coverage badges will be updated automatically once this PR is merged.`;
+          
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: comment
+          });

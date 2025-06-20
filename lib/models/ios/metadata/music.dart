@@ -1,7 +1,9 @@
 import 'package:flutter_chrome_cast/common/image.dart';
 import 'package:flutter_chrome_cast/entities/media_metadata/music_track_media_metadata.dart';
 
+/// iOS-specific implementation of music media metadata.
 class GoogleCastMusicMediaMetadataIOS extends GoogleCastMusicMediaMetadata {
+  /// Creates an iOS music media metadata instance.
   GoogleCastMusicMediaMetadataIOS({
     super.albumArtist,
     super.albumName,
@@ -14,6 +16,7 @@ class GoogleCastMusicMediaMetadataIOS extends GoogleCastMusicMediaMetadata {
     super.trackNumber,
   });
 
+  /// Creates a music media metadata instance from a map.
   factory GoogleCastMusicMediaMetadataIOS.fromMap(Map<String, dynamic> map) {
     return GoogleCastMusicMediaMetadataIOS(
       albumName: map['albumTitle'],

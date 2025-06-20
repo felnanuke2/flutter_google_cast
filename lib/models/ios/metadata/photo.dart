@@ -1,6 +1,8 @@
 import 'package:flutter_chrome_cast/lib.dart';
 
+/// iOS-specific implementation of photo media metadata.
 class GooglCastPhotoMediaMetadataIOS extends GoogleCastPhotoMediaMetadata {
+  /// Creates an iOS photo media metadata instance.
   GooglCastPhotoMediaMetadataIOS({
     super.artist,
     super.creationDateTime,
@@ -12,6 +14,7 @@ class GooglCastPhotoMediaMetadataIOS extends GoogleCastPhotoMediaMetadata {
     super.width,
   });
 
+  /// Creates a photo media metadata instance from a map.
   factory GooglCastPhotoMediaMetadataIOS.fromMap(Map<String, dynamic> map) {
     return GooglCastPhotoMediaMetadataIOS(
       title: map['title'],

@@ -10,7 +10,7 @@ class CastMediaVolume {
   ///Optional whether the Cast device is muted,
   /// independent of the volume level.
   bool? muted;
-  
+
   /// Creates a new [CastMediaVolume] instance.
   ///
   /// [level] - The volume level between 0.0 and 1.0.

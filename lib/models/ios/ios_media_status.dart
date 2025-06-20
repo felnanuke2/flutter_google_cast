@@ -1,6 +1,13 @@
 import 'package:flutter_chrome_cast/lib.dart';
 
+/// Represents the media status for a Google Cast session on iOS.
+///
+/// This class extends [GoggleCastMediaStatus] and provides additional
+/// iOS-specific mapping and construction from platform channel data.
 class GoogleCastIOSMediaStatus extends GoggleCastMediaStatus {
+  /// Creates a new [GoogleCastIOSMediaStatus] instance.
+  ///
+  /// All parameters are forwarded to the base [GoggleCastMediaStatus].
   GoogleCastIOSMediaStatus({
     required super.mediaSessionID,
     required super.playerState,
@@ -17,6 +24,9 @@ class GoogleCastIOSMediaStatus extends GoggleCastMediaStatus {
     // super.queueData,
   });
 
+  /// Creates a [GoogleCastIOSMediaStatus] from a map received from the platform channel.
+  ///
+  /// The [map] parameter must contain the expected keys and value types as sent from iOS.
   factory GoogleCastIOSMediaStatus.fromMap(Map<String, dynamic> map) {
     return GoogleCastIOSMediaStatus(
       mediaSessionID: map['mediaSessionID']?.toInt() ?? 0,

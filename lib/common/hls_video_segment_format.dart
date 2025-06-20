@@ -2,8 +2,10 @@
 enum HlsVideoSegmentFormat {
   /// MPEG-2 Transport Stream format.
   mpeg2Ts,
+
   /// Fragmented MP4 format.
   fmp4,
+
   /// No specific format.
   none;
 

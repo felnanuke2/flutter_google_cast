@@ -3,25 +3,30 @@ import 'package:flutter_chrome_cast/_session_manager/cast_session_manager.dart';
 import 'package:get/get_rx/get_rx.dart';
 
 /// A widget that provides volume control for Google Cast devices.
-/// 
+///
 /// This widget displays a volume icon that, when tapped, shows a popup
 /// with a slider to control the volume of the currently connected Cast device.
 class GoogleCastVolume extends StatefulWidget {
   /// Color of the volume icon.
   final Color? iconColor;
+
   /// Size of the volume icon.
   final double? iconSize;
+
   /// Background color of the volume control popup.
   final Color? popupBackgroundColor;
+
   /// Color of the active portion of the volume slider.
   final Color? sliderActiveColor;
+
   /// Color of the inactive portion of the volume slider.
   final Color? sliderInactiveColor;
+
   /// Color of the volume slider thumb/handle.
   final Color? sliderThumbColor;
 
   /// Creates a Google Cast volume control widget.
-  /// 
+  ///
   /// All styling parameters are optional and will use default Material Design
   /// colors if not specified.
   const GoogleCastVolume({
