@@ -50,49 +50,8 @@ jobs:
         
         echo "✅ Test directory and files found"
     
-    - name: Run tests with coverage
-      run: flutter test --coverage
-    
-    - name: Process coverage
-      run: |
-        # Install lcov for processing coverage
-        sudo apt-get update
-        sudo apt-get install -y lcov
-        
-        # Process coverage data (remove generated files and test files)
-        lcov --ignore-errors unused --remove coverage/lcov.info \
-          '**/*.g.dart' \
-          '**/*.freezed.dart' \
-          '**/*.gr.dart' \
-          '**/*.part.dart' \
-          '**/test/**' \
-          '**/test_driver/**' \
-          '**/integration_test/**' \
-          '**/main.dart' \
-          --output-file coverage/lcov_cleaned.info
-        
-        # Generate HTML coverage report
-        genhtml coverage/lcov_cleaned.info -o coverage/html
-        
-        # Calculate coverage percentage
-        coverage_percent=$(lcov --summary coverage/lcov_cleaned.info | grep -oP 'lines......: \K\d+\.\d+' | head -1)
-        echo "Coverage: $coverage_percent%"
-        echo "COVERAGE_PERCENT=$coverage_percent" >> $GITHUB_ENV
-    
-    - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v4
-      with:
-        file: ./coverage/lcov_cleaned.info
-        flags: unittests
-        name: codecov-umbrella
-        fail_ci_if_error: false
-        token: ${{ secrets.CODECOV_TOKEN }}
-    
-    - name: Upload coverage reports to Coveralls
-      uses: coverallsapp/github-action@v2
-      with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-        path-to-lcov: coverage/lcov_cleaned.info
+    - name: Run tests
+      run: flutter test
 
   build:
     needs: test
