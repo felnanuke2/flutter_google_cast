@@ -1,3 +1,19 @@
+## 1.2.1 - Documentation & Testing Improvements
+### 📚 Documentation Enhancements
+- **Expanded API Documentation**: Added comprehensive documentation for public members across all Dart classes
+- **Improved Public API Coverage**: Enhanced doc comments for better IDE support and developer experience
+- **Coverage Badge**: Added test coverage badge to track and display code coverage metrics
+
+### 🧪 Testing Infrastructure
+- **Test Suite Initialization**: Started implementing comprehensive test coverage for the application
+- **Testing Foundation**: Established testing framework and initial test cases for core functionality
+- **Quality Assurance**: Improved code reliability through systematic testing approach
+
+### 🔧 Code Quality
+- **Documentation Standards**: Ensured all public class members have proper documentation
+- **Code Coverage Tracking**: Implemented coverage monitoring for better code quality insights
+- **Developer Experience**: Enhanced IDE support with better API documentation
+
 ## 1.2.0 - API Documentation & Quality Release
 ### 📚 Documentation & API Improvements
 - **Extensive API Documentation**: Added or improved doc comments for nearly all public classes, methods, enums, and fields across the codebase.

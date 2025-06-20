@@ -22,6 +22,7 @@
 - 📺 **Session Management**: Connect and disconnect from cast devices
 - 🔄 **Real-time Updates**: Stream-based APIs for real-time status updates
 - 📱 **Mini Controller**: Built-in mini controller widget for easy integration
+- 🛠️ **Robust Build System**: Optimized Android builds with automated troubleshooting tools
 
 ## Getting Started
 
@@ -816,6 +817,54 @@ The project includes several coverage scripts:
 - `scripts/run_coverage.sh` - Comprehensive coverage analysis with detailed reporting
 - `scripts/quick_coverage.sh` - Quick coverage check for development
 - `scripts/test_enforcement.sh` - Enforces test requirements
+
+## Troubleshooting
+
+### Android Build Issues
+
+If you encounter Android build issues, the plugin includes several solutions:
+
+#### Quick Fix Script
+
+Run the automated fix script:
+
+```bash
+./scripts/fix_android_build.sh
+```
+
+#### Common Issues
+
+1. **Java heap space errors during build**:
+   - The plugin now includes optimized Gradle settings
+   - Heap size is automatically increased to 3GB
+
+2. **Android x86 target deprecation warnings**:
+   - x86 targets are excluded by default
+   - Use: `flutter build apk --target-platform android-arm64,android-arm`
+
+3. **AndroidX migration conflicts**:
+   - Jetifier is optimized with blacklisted problematic dependencies
+   - AndroidX is enabled by default
+
+4. **Dependency resolution issues**:
+   ```bash
+   flutter clean
+   flutter pub get
+   cd android && ./gradlew clean
+   flutter build apk --target-platform android-arm64,android-arm
+   ```
+
+For detailed troubleshooting, see [ANDROID_BUILD_TROUBLESHOOTING.md](ANDROID_BUILD_TROUBLESHOOTING.md).
+
+### Dependency Updates
+
+Check for outdated dependencies:
+
+```bash
+flutter pub outdated
+```
+
+The CI automatically checks and reports outdated dependencies, but they won't fail the build if they're incompatible with current constraints.
 
 ## Contributing
 
