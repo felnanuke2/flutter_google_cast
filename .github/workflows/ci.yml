@@ -75,29 +75,12 @@ jobs:
         flutter pub outdated || true
         echo "Note: Some dependencies may have newer versions. Consider updating when compatible."
     
-    - name: Configure Gradle for CI
-      run: |
-        cd example/android
-        # Increase heap size and configure Gradle for CI
-        echo "org.gradle.jvmargs=-Xmx4096M -XX:MaxMetaspaceSize=1024m -XX:+HeapDumpOnOutOfMemoryError" >> gradle.properties
-        echo "org.gradle.daemon=false" >> gradle.properties
-        echo "org.gradle.configureondemand=true" >> gradle.properties
-        echo "org.gradle.parallel=true" >> gradle.properties
-        echo "org.gradle.caching=true" >> gradle.properties
-        # Optimize Jetifier
-        echo "android.jetifier.blacklist=bcprov-jdk15on" >> gradle.properties
-        cat gradle.properties
     
     - name: Build Android (ARM64 and ARM only)
       run: |
         cd example
         # Build only for ARM architectures, excluding x86 as it's deprecated
-        flutter build apk --debug --target-platform android-arm64,android-arm
-    
-    - name: Build Android AAR
-      run: |
-        # Build the plugin as AAR for distribution
-        flutter build aar --no-debug --no-profile
+        flutter build apk --debug
     
     - name: Build iOS (if on macOS)
       if: runner.os == 'macOS'
