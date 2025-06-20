@@ -19,4 +19,17 @@ class GoogleCastRequest {
     required this.requestID,
     this.error,
   });
+
+  /// Creates a [GoogleCastRequest] from a map, typically decoded from JSON.
+  ///
+  /// The [map] must contain the keys 'inProgress', 'isExternal', and 'requestID'.
+  /// The 'error' key is optional.
+  factory GoogleCastRequest.fromMap(Map<String, dynamic> map) {
+    return GoogleCastRequest(
+      inProgress: map['inProgress'] as bool? ?? false,
+      isExternal: map['isExternal'] as bool? ?? false,
+      requestID: map['requestID'] as int? ?? map['requestId'] as int? ?? 0,
+      error: map['error'] as String?,
+    );
+  }
 }

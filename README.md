@@ -1,5 +1,9 @@
 # Flutter Google Cast
 
+[![Coverage Status](https://coveralls.io/repos/github/felnanuke2/flutter_google_cast/badge.svg?branch=master)](https://coveralls.io/github/felnanuke2/flutter_google_cast?branch=master)
+[![Codecov](https://codecov.io/gh/felnanuke2/flutter_google_cast/branch/master/graph/badge.svg)](https://codecov.io/gh/felnanuke2/flutter_google_cast)
+[![CI](https://github.com/felnanuke2/flutter_google_cast/workflows/Flutter%20CI%20with%20Test%20Enforcement/badge.svg)](https://github.com/felnanuke2/flutter_google_cast/actions)
+
 **FlutterGoogleCast** is a comprehensive Flutter plugin that provides seamless integration with the Google Cast SDK for both iOS and Android platforms. This plugin enables your Flutter application to discover, connect to, and control Chromecast devices and other Google Cast-enabled receivers.
 
 ## Demo Video
@@ -774,6 +778,44 @@ A pre-built widget that provides basic media controls when casting.
 - 🍎 **iOS development?** See the [iOS Native Guide](NATIVE_IOS_GUIDE.md)
 - 🤖 **Android development?** See the [Android Native Guide](NATIVE_ANDROID_GUIDE.md)
 - 💡 **Optimizing imports?** Use the [Import Guide](IMPORT_GUIDE.md)
+
+## Development & Testing
+
+### Running Tests
+
+This project maintains high test coverage to ensure reliability. Tests are automatically run on every PR to master.
+
+```bash
+# Run all tests
+flutter test
+
+# Run tests with coverage
+flutter test --coverage
+
+# Quick coverage report (opens in browser on macOS/Linux)
+./scripts/quick_coverage.sh
+```
+
+### Coverage Reports
+
+Coverage is automatically generated and reported on every PR. The project uses multiple coverage services:
+
+- **Coveralls**: Provides coverage badges and detailed reports
+- **Codecov**: Additional coverage analysis and GitHub integration
+- **GitHub Actions**: Generates coverage artifacts for every workflow run
+
+Coverage badges at the top of this README show the current coverage status. Detailed coverage reports are available:
+- As artifacts in GitHub Actions workflow runs
+- On [Coveralls](https://coveralls.io/github/felnanuke2/flutter_google_cast)
+- On [Codecov](https://codecov.io/gh/felnanuke2/flutter_google_cast)
+
+### Coverage Scripts
+
+The project includes several coverage scripts:
+
+- `scripts/run_coverage.sh` - Comprehensive coverage analysis with detailed reporting
+- `scripts/quick_coverage.sh` - Quick coverage check for development
+- `scripts/test_enforcement.sh` - Enforces test requirements
 
 ## Contributing
 

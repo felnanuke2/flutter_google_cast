@@ -9,15 +9,17 @@ import 'package:flutter_chrome_cast/_discovery_manager/ios_discovery_manager.dar
 /// devices on the network. It automatically selects the appropriate platform-specific
 /// implementation based on the current operating system.
 class GoogleCastDiscoveryManager {
-  static final _instance = Platform.isAndroid
-      ? GoogleCastDiscoveryManagerMethodChannelAndroid()
-      : GoogleCastDiscoveryManagerMethodChannelIOS();
+  static GoogleCastDiscoveryManagerPlatformInterface? _instance;
 
   /// Gets the singleton instance of the discovery manager.
   ///
   /// Returns the appropriate platform-specific implementation
   /// (Android or iOS) based on the current platform.
-  static GoogleCastDiscoveryManagerPlatformInterface get instance => _instance;
+  static GoogleCastDiscoveryManagerPlatformInterface get instance {
+    return _instance ??= Platform.isAndroid
+        ? GoogleCastDiscoveryManagerMethodChannelAndroid()
+        : GoogleCastDiscoveryManagerMethodChannelIOS();
+  }
 
   /// Private constructor to enforce singleton pattern.
   GoogleCastDiscoveryManager._();

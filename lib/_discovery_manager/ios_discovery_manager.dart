@@ -47,6 +47,16 @@ class GoogleCastDiscoveryManagerMethodChannelIOS
     return _channel.invokeMethod('stopDiscovery');
   }
 
+  @visibleForTesting
+  void onDevicesChanged(List arguments) {
+    _onDevicesChanged(arguments);
+  }
+
+  @visibleForTesting
+  Future<void> handleMethodCall(MethodCall call) {
+    return _handleMethodCall(call);
+  }
+
   void _onDevicesChanged(List arguments) {
     final devices = List.from(arguments)
         .map((device) => GoogleCastIosDevice.fromMap(Map.from(device)))

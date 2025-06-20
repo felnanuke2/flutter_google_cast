@@ -13,9 +13,14 @@ class FlutterIOSGoogleCastContextMethodChannel
   @override
   Future<bool> setSharedInstanceWithOptions(
       GoogleCastOptions castOptions) async {
-    return await _methodChannel.invokeMethod(
-      'setSharedInstanceWithOptions',
-      castOptions.toMap(),
-    );
+    try {
+      final result = await _methodChannel.invokeMethod(
+        'setSharedInstanceWithOptions',
+        castOptions.toMap(),
+      );
+      return result == true;
+    } catch (e) {
+      rethrow;
+    }
   }
 }

@@ -1,0 +1,116 @@
+name: Flutter CI with Test Enforcement
+
+on:
+  push:
+    branches: [ main, develop, master ]
+  pull_request:
+    branches: [ main, develop, master ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.32.1'
+        channel: 'stable'
+    
+    - name: Install dependencies
+      run: flutter pub get
+    
+    - name: Verify formatting
+      run: dart format --output=none --set-exit-if-changed .
+    
+    - name: Analyze project source
+      run: flutter analyze
+    
+    - name: Check if tests exist
+      run: |
+        if [ ! -d "test" ]; then
+          echo "❌ Error: No test directory found!"
+          echo "Tests are required for this project."
+          exit 1
+        fi
+        
+        if [ -z "$(find test -name '*.dart' -type f)" ]; then
+          echo "❌ Error: No test files found in test directory!"
+          echo "At least one test file is required."
+          exit 1
+        fi
+        
+        echo "✅ Test directory and files found"
+    
+    - name: Run tests with coverage
+      run: flutter test --coverage
+    
+    - name: Process coverage
+      run: |
+        # Install lcov for processing coverage
+        sudo apt-get update
+        sudo apt-get install -y lcov
+        
+        # Process coverage data (remove generated files and test files)
+        lcov --ignore-errors unused --remove coverage/lcov.info \
+          '**/*.g.dart' \
+          '**/*.freezed.dart' \
+          '**/*.gr.dart' \
+          '**/*.part.dart' \
+          '**/test/**' \
+          '**/test_driver/**' \
+          '**/integration_test/**' \
+          '**/main.dart' \
+          --output-file coverage/lcov_cleaned.info
+        
+        # Generate HTML coverage report
+        genhtml coverage/lcov_cleaned.info -o coverage/html
+        
+        # Calculate coverage percentage
+        coverage_percent=$(lcov --summary coverage/lcov_cleaned.info | grep -oP 'lines......: \K\d+\.\d+' | head -1)
+        echo "Coverage: $coverage_percent%"
+        echo "COVERAGE_PERCENT=$coverage_percent" >> $GITHUB_ENV
+    
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v4
+      with:
+        file: ./coverage/lcov_cleaned.info
+        flags: unittests
+        name: codecov-umbrella
+        fail_ci_if_error: false
+        token: ${{ secrets.CODECOV_TOKEN }}
+    
+    - name: Upload coverage reports to Coveralls
+      uses: coverallsapp/github-action@v2
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        path-to-lcov: coverage/lcov_cleaned.info
+
+  build:
+    needs: test
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.32.1'
+        channel: 'stable'
+    
+    - name: Install dependencies
+      run: flutter pub get
+    
+    - name: Build Android
+      run: |
+        cd example
+        flutter build apk --debug
+    
+    - name: Build iOS (if on macOS)
+      if: runner.os == 'macOS'
+      run: |
+        cd example
+        flutter build ios --no-codesign
