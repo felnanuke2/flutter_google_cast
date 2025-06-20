@@ -757,6 +757,24 @@ A pre-built widget that provides basic media controls when casting.
 - **Audio**: MP3, AAC, FLAC, WAV
 - **Streaming**: HLS (m3u8), DASH
 
+## 📚 Documentation
+
+### User Guides
+- **[Import Guide](IMPORT_GUIDE.md)** - Optimize your Flutter imports for better performance
+- **[Main README](README.md)** - This file - complete plugin usage and setup
+
+### Developer Documentation
+- **[Native Development Guide](NATIVE_GUIDE.md)** - Overview of native implementation architecture
+- **[iOS Native Guide](NATIVE_IOS_GUIDE.md)** - Swift implementation details, debugging, and contribution guide
+- **[Android Native Guide](NATIVE_ANDROID_GUIDE.md)** - Kotlin implementation details, debugging, and contribution guide
+
+### Quick Links
+- 🎯 **New to the plugin?** Start with this README and the [Import Guide](IMPORT_GUIDE.md)
+- 🔧 **Want to contribute to native code?** Check out the [Native Development Guide](NATIVE_GUIDE.md)
+- 🍎 **iOS development?** See the [iOS Native Guide](NATIVE_IOS_GUIDE.md)
+- 🤖 **Android development?** See the [Android Native Guide](NATIVE_ANDROID_GUIDE.md)
+- 💡 **Optimizing imports?** Use the [Import Guide](IMPORT_GUIDE.md)
+
 ## Contributing
 
 Contributions are welcome! Please submit pull requests to our GitHub repository.
