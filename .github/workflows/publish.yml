@@ -2,8 +2,10 @@
 name: Publish to pub.dev
 
 on:
-  release:
-    types: [published]
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
 
 jobs:
   publish:
