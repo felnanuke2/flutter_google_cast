@@ -1,45 +1,28 @@
 import 'dart:convert';
 
-///Represents current status of break.
+/// Represents current status of a break, including IDs and timing information.
 class GoogleCastBrakeStatus {
-  ///ID of the current break clip.
+  /// ID of the current break clip.
   final String? breakClipId;
 
-  ///ID of the current break.
-
+  /// ID of the current break.
   final String? breakId;
 
-//Time in seconds elapsed after the current break clip starts.
-//This member is only updated sporadically,
-//so its value is often out of date. Use the
-//getEstimatedBreakClipTime method to get an estimate of
-//the real playback position based on the last
-//information reported by the receiver.
-
+  /// Time in seconds elapsed after the current break clip starts.
+  /// This member is only updated sporadically, so its value is often out of date.
+  /// Use the getEstimatedBreakClipTime method to get an estimate of the real playback position.
   final Duration? currentBreakClipTime;
 
-  ///Time in seconds elapsed after
-  ///the current break starts. This member
-  /// is only updated sporadically,
-  /// so its value is often out of date.
-  ///  Use the getEstimatedBreakTime
-  /// method to get an estimate of
-  /// the real playback position
-  /// based on the last information
-  ///  reported by the receiver.
-
+  /// Time in seconds elapsed after the current break starts.
+  /// This member is only updated sporadically, so its value is often out of date.
+  /// Use the getEstimatedBreakTime method to get an estimate of the real playback position.
   final Duration? currentBreakTime;
 
-  /// The time in seconds when this break
-  ///  clip becomes skippable. 5
-  /// means that the end user can
-  ///  skip this break clip after
-  ///  5 seconds. If this field is
-  ///  not defined, it means that
-  ///  the current break clip is
-  ///  not skippable.
-
+  /// The time in seconds when this break clip becomes skippable.
+  /// If not defined, the current break clip is not skippable.
   final Duration? whenSkippable;
+
+  /// Creates a new [GoogleCastBrakeStatus] instance.
   GoogleCastBrakeStatus({
     this.breakClipId,
     this.breakId,
@@ -48,6 +31,7 @@ class GoogleCastBrakeStatus {
     this.whenSkippable,
   });
 
+  /// Converts the object to a map for serialization.
   Map<String, dynamic> toMap() {
     return {
       'breakClipId': breakClipId,
@@ -58,6 +42,7 @@ class GoogleCastBrakeStatus {
     };
   }
 
+  /// Creates a [GoogleCastBrakeStatus] from a map.
   factory GoogleCastBrakeStatus.fromMap(Map<String, dynamic> map) {
     return GoogleCastBrakeStatus(
       breakClipId: map['breakClipId'],
@@ -74,8 +59,10 @@ class GoogleCastBrakeStatus {
     );
   }
 
+  /// Converts the object to a JSON string.
   String toJson() => json.encode(toMap());
 
+  /// Creates a [GoogleCastBrakeStatus] from a JSON string.
   factory GoogleCastBrakeStatus.fromJson(String source) =>
       GoogleCastBrakeStatus.fromMap(json.decode(source));
 }

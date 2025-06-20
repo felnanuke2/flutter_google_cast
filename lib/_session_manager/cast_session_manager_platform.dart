@@ -107,9 +107,10 @@ abstract class GoogleCastSessionManagerPlatformInterface
   /// - sessionOptions: nullable GCKSessionOptions
   /// - forDeviceCategory: (NSString *) category
   Future<void> setDefaultSessionOptions(
-      // nullable GCKSessionOptions *	sessionOptions
-      // forDeviceCategory: 		(NSString *)  	category
+      // nullable GCKSessionOptions *\tsessionOptions
+      // forDeviceCategory: \t\t(NSString *)  \tcategory
       );
 
+  /// Sets the device volume.
   void setDeviceVolume(double value);
 }

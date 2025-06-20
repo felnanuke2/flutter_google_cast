@@ -1,7 +1,9 @@
 import 'package:flutter_chrome_cast/lib.dart';
 
+/// Android-specific implementation of TV show media metadata.
 class GoogleCastTvShowMediaMetadataAndroid
     extends GoogleCastTvShowMediaMetadata {
+  /// Creates an Android TV show media metadata instance.
   GoogleCastTvShowMediaMetadataAndroid({
     super.episode,
     super.images,
@@ -10,6 +12,7 @@ class GoogleCastTvShowMediaMetadataAndroid
     super.seriesTitle,
   });
 
+  /// Creates a TV show media metadata instance from a map.
   factory GoogleCastTvShowMediaMetadataAndroid.fromMap(
       Map<String, dynamic> map) {
     return GoogleCastTvShowMediaMetadataAndroid(

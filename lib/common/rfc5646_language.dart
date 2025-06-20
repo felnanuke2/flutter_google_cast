@@ -200,172 +200,506 @@ enum Rfc5646Language {
 
   /// Spanish as spoken in Colombia.
   spanishColombia('es-CO'),
+
+  /// Spanish as spoken in Costa Rica.
   spanishCostaRica('es-CR'),
+
+  /// Spanish as spoken in the Dominican Republic.
   spanishDominicanRepublic('es-DO'),
+
+  /// Spanish as spoken in Ecuador.
   spanishEcuador('es-EC'),
+
+  /// Spanish as spoken in Spain.
   spanishSpain('es-ES'),
+
+  /// Spanish as spoken in Guatemala.
   spanishGuatemala('es-GT'),
+
+  /// Spanish as spoken in Honduras.
   spanishHonduras('es-HN'),
+
+  /// Spanish as spoken in Mexico.
   spanishMexico('es-MX'),
+
+  /// Spanish as spoken in Nicaragua.
   spanishNicaragua('es-NI'),
+
+  /// Spanish as spoken in Panama.
   spanishPanama('es-PA'),
+
+  /// Spanish as spoken in Peru.
   spanishPeru('es-PE'),
+
+  /// Spanish as spoken in Puerto Rico.
   spanishPuertoRico('es-PR'),
+
+  /// Spanish as spoken in Paraguay.
   spanishParaguay('es-PY'),
+
+  /// Spanish as spoken in El Salvador.
   spanishElSalvador('es-SV'),
+
+  /// Spanish as spoken in Uruguay.
   spanishUruguay('es-UY'),
+
+  /// Spanish as spoken in Venezuela.
   spanishVenezuela('es-VE'),
+
+  /// Estonian language.
   estonian('et'),
+
+  /// Estonian as spoken in Estonia.
   estonianEstonia('et-EE'),
+
+  /// Basque language.
   basque('eu'),
+
+  /// Basque as spoken in Spain.
   basqueSpain('eu-ES'),
+
+  /// Farsi language.
   farsi('fa'),
+
+  /// Farsi as spoken in Iran.
   farsiIran('fa-IR'),
+
+  /// Finnish language.
   finnish('fi'),
+
+  /// Finnish as spoken in Finland.
   finnishFinland('fi-FI'),
+
+  /// Faroese language.
   faroese('fo'),
+
+  /// Faroese as spoken in Faroe Islands.
   faroeseFaroeIslands('fo-FO'),
+
+  /// French language.
   french('fr'),
+
+  /// French as spoken in Belgium.
   frenchBelgium('fr-BE'),
+
+  /// French as spoken in Canada.
   frenchCanada('fr-CA'),
+
+  /// French as spoken in Switzerland.
   frenchSwitzerland('fr-CH'),
+
+  /// French as spoken in France.
   frenchFrance('fr-FR'),
+
+  /// French as spoken in Luxembourg.
   frenchLuxembourg('fr-LU'),
+
+  /// French as spoken in Monaco.
   frenchPrincipalityOfMonaco('fr-MC'),
+
+  /// Galician language.
   galician('gl'),
+
+  /// Galician as spoken in Spain.
   galicianSpain('gl-ES'),
+
+  /// Gujarati language.
   gujarati('gu'),
+
+  /// Gujarati as spoken in India.
   gujaratiIndia('gu-IN'),
+
+  /// Hebrew language.
   hebrew('he'),
+
+  /// Hebrew as spoken in Israel.
   hebrewIsrael('he-IL'),
+
+  /// Hindi language.
   hindi('hi'),
+
+  /// Hindi as spoken in India.
   hindiIndia('hi-IN'),
+
+  /// Croatian language.
   croatian('hr'),
+
+  /// Croatian as spoken in Bosnia and Herzegovina.
   croatianBosniaAndHerzegovina('hr-BA'),
+
+  /// Croatian as spoken in Croatia.
   croatianCroatia('hr-HR'),
+
+  /// Hungarian language.
   hungarian('hu'),
+
+  /// Hungarian as spoken in Hungary.
   hungarianHungary('hu-HU'),
+
+  /// Armenian language.
   armenian('hy'),
+
+  /// Armenian as spoken in Armenia.
   armenianArmenia('hy-AM'),
+
+  /// Indonesian language.
   indonesian('id'),
+
+  /// Indonesian as spoken in Indonesia.
   indonesianIndonesia('id-ID'),
+
+  /// Icelandic language.
   icelandic('is'),
+
+  /// Icelandic as spoken in Iceland.
   icelandicIceland('is-IS'),
+
+  /// Italian language.
   italian('it'),
+
+  /// Italian as spoken in Switzerland.
   italianSwitzerland('it-CH'),
+
+  /// Italian as spoken in Italy.
   italianItaly('it-IT'),
+
+  /// Japanese language.
   japanese('ja'),
+
+  /// Japanese as spoken in Japan.
   japaneseJapan('ja-JP'),
+
+  /// Georgian language.
   georgian('ka'),
+
+  /// Georgian as spoken in Georgia.
   georgianGeorgia('ka-GE'),
+
+  /// Kazakh language.
   kazakh('kk'),
+
+  /// Kazakh as spoken in Kazakhstan.
   kazakhKazakhstan('kk-KZ'),
+
+  /// Kannada language.
   kannada('kn'),
+
+  /// Kannada as spoken in India.
   kannadaIndia('kn-IN'),
+
+  /// Korean language.
   korean('ko'),
+
+  /// Korean as spoken in Korea.
   koreanKorea('ko-KR'),
+
+  /// Konkani language.
   konkani('kok'),
+
+  /// Konkani as spoken in India.
   konkaniIndia('kok-IN'),
+
+  /// Kyrgyz language.
   kyrgyz('ky'),
+
+  /// Kyrgyz as spoken in Kyrgyzstan.
   kyrgyzKyrgyzstan('ky-KG'),
+
+  /// Lithuanian language.
   lithuanian('lt'),
+
+  /// Lithuanian as spoken in Lithuania.
   lithuanianLithuania('lt-LT'),
+
+  /// Latvian language.
   latvian('lv'),
+
+  /// Latvian as spoken in Latvia.
   latvianLatvia('lv-LV'),
+
+  /// Maori language.
   maori('mi'),
+
+  /// Maori as spoken in New Zealand.
   maoriNewZealand('mi-NZ'),
+
+  /// Macedonian language.
   fyroMacedonian('mk'),
+
+  /// Macedonian as spoken in North Macedonia.
   fyroMacedonianFormerYugoslavRepublicOfMacedonia('mk-MK'),
+
+  /// Mongolian language.
   mongolian('mn'),
+
+  /// Mongolian as spoken in Mongolia.
   mongolianMongolia('mn-MN'),
+
+  /// Marathi language.
   marathi('mr'),
+
+  /// Marathi as spoken in India.
   marathiIndia('mr-IN'),
+
+  /// Malay language.
   malay('ms'),
+
+  /// Malay as spoken in Brunei Darussalam.
   malayBruneiDarussalam('ms-BN'),
+
+  /// Malay as spoken in Malaysia.
   malayMalaysia('ms-MY'),
+
+  /// Maltese language.
   maltese('mt'),
+
+  /// Maltese as spoken in Malta.
   malteseMalta('mt-MT'),
+
+  /// Norwegian Bokmål language.
   norwegianBokml('nb'),
+
+  /// Norwegian Bokmål as spoken in Norway.
   norwegianBokmlNorway('nb-NO'),
+
+  /// Dutch language.
   dutch('nl'),
+
+  /// Dutch as spoken in Belgium.
   dutchBelgium('nl-BE'),
+
+  /// Dutch as spoken in the Netherlands.
   dutchNetherlands('nl-NL'),
+
+  /// Norwegian Nynorsk as spoken in Norway.
   norwegianNynorskNorway('nn-NO'),
+
+  /// Northern Sotho language.
   northernSotho('ns'),
+
+  /// Northern Sotho as spoken in South Africa.
   northernSothoSouthAfrica('ns-ZA'),
+
+  /// Punjabi language.
   punjabi('pa'),
+
+  /// Punjabi as spoken in India.
   punjabiIndia('pa-IN'),
+
+  /// Polish language.
   polish('pl'),
+
+  /// Polish as spoken in Poland.
   polishPoland('pl-PL'),
+
+  /// Pashto language.
   pashto('ps'),
+
+  /// Pashto as spoken in Afghanistan.
   pashtoAfghanistan('ps-AR'),
+
+  /// Portuguese language.
   portuguese('pt'),
+
+  /// Portuguese as spoken in Brazil.
   portugueseBrazil('pt-BR'),
+
+  /// Portuguese as spoken in Portugal.
   portuguesePortugal('pt-PT'),
+
+  /// Quechua language.
   quechua('qu'),
+
+  /// Quechua as spoken in Bolivia.
   quechuaBolivia('qu-BO'),
+
+  /// Quechua as spoken in Ecuador.
   quechuaEcuador('qu-EC'),
+
+  /// Quechua as spoken in Peru.
   quechuaPeru('qu-PE'),
+
+  /// Romanian language.
   romanian('ro'),
+
+  /// Romanian as spoken in Romania.
   romanianRomania('ro-RO'),
+
+  /// Russian language.
   russian('ru'),
+
+  /// Russian as spoken in Russia.
   russianRussia('ru-RU'),
+
+  /// Sanskrit language.
   sanskrit('sa'),
+
+  /// Sanskrit as spoken in India.
   sanskritIndia('sa-IN'),
+
+  /// Sami language.
   sami('se'),
+
+  /// Sami as spoken in Finland.
   samiFinland('se-FI'),
+
+  /// Sami as spoken in Norway.
   samiNorway('se-NO'),
+
+  /// Sami as spoken in Sweden.
   samiSweden('se-SE'),
+
+  /// Slovak language.
   slovak('sk'),
+
+  /// Slovak as spoken in Slovakia.
   slovakSlovakia('sk-SK'),
+
+  /// Slovenian language.
   slovenian('sl'),
+
+  /// Slovenian as spoken in Slovenia.
   slovenianSlovenia('sl-SI'),
+
+  /// Albanian language.
   albanian('sq'),
+
+  /// Albanian as spoken in Albania.
   albanianAlbania('sq-AL'),
+
+  /// Serbian Latin script as spoken in Bosnia and Herzegovina.
   serbianLatinBosniaAndHerzegovina('sr-BA'),
+
+  /// Serbian Cyrillic script as spoken in Bosnia and Herzegovina.
   serbianCyrillicBosniaAndHerzegovina('sr-Cyrl-BA'),
+
+  /// Serbian Latin script as spoken in Serbia and Montenegro.
   serbianLatinSerbiaAndMontenegro('sr-SP'),
+
+  /// Serbian Cyrillic script as spoken in Serbia and Montenegro.
   serbianCyrillicSerbiaAndMontenegro('sr-Cyrl-SP'),
+
+  /// Swedish language.
   swedish('sv'),
+
+  /// Swedish as spoken in Finland.
   swedishFinland('sv-FI'),
+
+  /// Swedish as spoken in Sweden.
   swedishSweden('sv-SE'),
+
+  /// Swahili language.
   swahili('sw'),
+
+  /// Swahili as spoken in Kenya.
   swahiliKenya('sw-KE'),
+
+  /// Syriac language.
   syriac('syr'),
+
+  /// Syriac as spoken in Syria.
   syriacSyria('syr-SY'),
+
+  /// Tamil language.
   tamil('ta'),
+
+  /// Tamil as spoken in India.
   tamilIndia('ta-IN'),
+
+  /// Telugu language.
   telugu('te'),
+
+  /// Telugu as spoken in India.
   teluguIndia('te-IN'),
+
+  /// Thai language.
   thai('th'),
+
+  /// Thai as spoken in Thailand.
   thaiThailand('th-TH'),
+
+  /// Tagalog language.
   tagalog('tl'),
+
+  /// Tagalog as spoken in Philippines.
   tagalogPhilippines('tl-PH'),
+
+  /// Tswana language.
   tswana('tn'),
+
+  /// Tswana as spoken in South Africa.
   tswanaSouthAfrica('tn-ZA'),
+
+  /// Turkish language.
   turkish('tr'),
+
+  /// Turkish as spoken in Turkey.
   turkishTurkey('tr-TR'),
+
+  /// Tatar language.
   tatar('tt'),
+
+  /// Tatar as spoken in Russia.
   tatarRussia('tt-RU'),
+
+  /// Tsonga language.
   tsonga('ts'),
+
+  /// Ukrainian language.
   ukrainian('uk'),
+
+  /// Ukrainian as spoken in Ukraine.
   ukrainianUkraine('uk-UA'),
+
+  /// Urdu language.
   urdu('ur'),
+
+  /// Urdu as spoken in Islamic Republic Of Pakistan.
   urduIslamicRepublicOfPakistan('ur-PK'),
+
+  /// Uzbek Latin script.
   uzbekLatin('uz'),
+
+  /// Uzbek Latin script as spoken in Uzbekistan.
   uzbekLatinUzbekistan('uz-UZ'),
+
+  /// Uzbek Cyrillic script as spoken in Uzbekistan.
   uzbekCyrillicUzbekistan('uz-Cyrl-UZ'),
+
+  /// Vietnamese language.
   vietnamese('vi'),
+
+  /// Vietnamese as spoken in Viet Nam.
   vietnameseVietNam('vi-VN'),
+
+  /// Xhosa language.
   xhosa('xh'),
+
+  /// Xhosa as spoken in South Africa.
   xhosaSouthAfrica('xh-ZA'),
+
+  /// Chinese language.
   chinese('zh'),
+
+  /// Chinese as spoken in China.
   chineseS('zh-CN'),
+
+  /// Chinese as spoken in Hong Kong.
   chineseHongKong('zh-HK'),
+
+  /// Chinese as spoken in Macau.
   chineseMacau('zh-MO'),
+
+  /// Chinese as spoken in Singapore.
   chineseSingapore('zh-SG'),
+
+  /// Chinese as spoken in Taiwan.
   chineseT('zh-TW'),
+
+  /// Zulu language.
   zulu('zu'),
+
+  /// Zulu as spoken in South Africa.
   zuluSouthAfrica('zu-ZA');
 
   /// The string value representing the language code.

@@ -1,6 +1,8 @@
 import 'package:flutter_chrome_cast/lib.dart';
 
+/// Describes a photo media artifact.
 class GoogleCastPhotoMediaMetadata extends GoogleCastMediaMetadata {
+  /// Creates a photo media metadata instance.
   GoogleCastPhotoMediaMetadata({
     this.title,
     this.artist,

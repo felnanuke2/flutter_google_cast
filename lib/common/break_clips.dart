@@ -85,6 +85,7 @@ class CastBreakClips {
     this.whenSkippable,
   });
 
+  /// Converts the break clip object to a map for serialization.
   Map<String, dynamic> toMap() {
     return {
       'clickThroughUrl': clickThroughUrl,

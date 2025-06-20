@@ -4,6 +4,7 @@ import 'cast_media_metadata.dart';
 
 ///Describes a television show episode media artifact.
 class GoogleCastTvShowMediaMetadata extends GoogleCastMediaMetadata {
+  /// Creates a TV show media metadata instance.
   GoogleCastTvShowMediaMetadata({
     this.seriesTitle,
     this.season,

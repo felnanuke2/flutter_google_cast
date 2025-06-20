@@ -26,7 +26,7 @@ abstract class GoogleCastDiscoveryCriteria {
   Set<String>? get allSubtypes;
 }
 
-/// Configuration for initializing Google Cast discovery criteria.
+/// Provides initialization options for Google Cast discovery criteria.
 class GoogleCastDiscoveryCriteriaInitialize {
   /// The data map containing discovery configuration.
   final Map<String, dynamic> data;
@@ -36,7 +36,7 @@ class GoogleCastDiscoveryCriteriaInitialize {
     required this.data,
   });
 
-  /// Creates discovery criteria initialized with an application ID.
+  /// Initializes with an application ID.
   factory GoogleCastDiscoveryCriteriaInitialize.initWithApplicationID(
       String applicationID) {
     return GoogleCastDiscoveryCriteriaInitialize._(
@@ -47,6 +47,7 @@ class GoogleCastDiscoveryCriteriaInitialize {
     );
   }
 
+  /// Initializes with a set of namespaces.
   factory GoogleCastDiscoveryCriteriaInitialize.initWithNamespaces(
       Set<String> namespaces) {
     return GoogleCastDiscoveryCriteriaInitialize._(
@@ -57,5 +58,6 @@ class GoogleCastDiscoveryCriteriaInitialize {
     );
   }
 
+  /// Converts the object to a map for serialization.
   Map<String, dynamic> toMap() => data;
 }

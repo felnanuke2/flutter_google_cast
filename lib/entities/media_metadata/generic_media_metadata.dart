@@ -26,6 +26,7 @@ class GoogleCastGenericMediaMetadata extends GoogleCastMediaMetadata {
   ///  by the sender in the Load message
   final DateTime? releaseDate;
 
+  /// Creates a generic media metadata instance.
   GoogleCastGenericMediaMetadata({
     this.title,
     this.subtitle,

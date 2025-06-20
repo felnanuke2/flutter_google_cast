@@ -19,5 +19,6 @@ enum CastMediaPlayerState {
   /// This typically occurs when the player is loading or buffering content.
   buffering,
 
+  /// Player is loading media.
   loading;
 }

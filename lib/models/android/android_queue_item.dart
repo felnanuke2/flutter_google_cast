@@ -1,6 +1,8 @@
 import 'package:flutter_chrome_cast/lib.dart';
 
+/// Android-specific implementation of queue item.
 class GoogleCastAndroidQueueItem extends GoogleCastQueueItem {
+  /// Creates an Android queue item instance.
   GoogleCastAndroidQueueItem({
     required super.mediaInformation,
     super.activeTrackIds,
@@ -12,6 +14,7 @@ class GoogleCastAndroidQueueItem extends GoogleCastQueueItem {
     super.startTime,
   });
 
+  /// Creates a queue item instance from a map.
   factory GoogleCastAndroidQueueItem.fromMap(Map<String, dynamic> map) {
     return GoogleCastAndroidQueueItem(
       mediaInformation: GoogleCastMediaInformationAndroid.fromMap(

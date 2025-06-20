@@ -1,6 +1,8 @@
 import 'package:flutter_chrome_cast/lib.dart';
 
+/// Android-specific extension of [GoogleCastMediaInformation].
 class GoogleCastMediaInformationAndroid extends GoogleCastMediaInformation {
+  /// Creates a new [GoogleCastMediaInformationAndroid] instance.
   GoogleCastMediaInformationAndroid({
     required super.contentId,
     required super.streamType,
@@ -22,6 +24,7 @@ class GoogleCastMediaInformationAndroid extends GoogleCastMediaInformation {
     super.vmapAdsRequest,
   });
 
+  /// Creates a [GoogleCastMediaInformationAndroid] from a map.
   factory GoogleCastMediaInformationAndroid.fromMap(Map<String, dynamic> map) {
     return GoogleCastMediaInformationAndroid(
       atvEntity: map['atvEntity'],
