@@ -847,7 +847,7 @@ void main() {
         });
 
         final complexTextTrackStyle = TextTrackStyle(
-          backgroundColor: Colors.red.withOpacity(0.5),
+          backgroundColor: Colors.red.withValues(alpha: 0.5),
           foregroundColor: Colors.white,
           fontStyle: TextTrackFontStyle.boldItalic,
           windowType: TextTrackWindowType.roundedCorners,

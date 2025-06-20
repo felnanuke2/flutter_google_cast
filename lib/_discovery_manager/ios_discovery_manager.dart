@@ -47,11 +47,17 @@ class GoogleCastDiscoveryManagerMethodChannelIOS
     return _channel.invokeMethod('stopDiscovery');
   }
 
+  /// Handles device changes for testing purposes.
+  /// This method is visible for testing and allows simulating device changes
+  /// in unit tests by calling the internal [_onDevicesChanged] method.
   @visibleForTesting
   void onDevicesChanged(List arguments) {
     _onDevicesChanged(arguments);
   }
 
+  /// Handles method calls from the platform channel for testing purposes.
+  /// This method is visible for testing and allows simulating platform
+  /// method calls in unit tests.
   @visibleForTesting
   Future<void> handleMethodCall(MethodCall call) {
     return _handleMethodCall(call);

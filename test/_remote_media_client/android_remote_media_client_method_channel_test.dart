@@ -27,15 +27,6 @@ void main() {
     );
   }
 
-  // Helper function to create a test request map
-  Map<String, dynamic> createTestRequestMap([int? requestId]) {
-    return {
-      'requestID': requestId ?? 123,
-      'inProgress': false,
-      'isExternal': false,
-    };
-  }
-
   group('GoogleCastRemoteMediaClientAndroidMethodChannel', () {
     late GoogleCastRemoteMediaClientAndroidMethodChannel remoteMediaClient;
     late List<MethodCall> methodCalls;
