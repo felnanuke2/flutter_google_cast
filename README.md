@@ -6,6 +6,10 @@
 
 **FlutterGoogleCast** is a comprehensive Flutter plugin that provides seamless integration with the Google Cast SDK for both iOS and Android platforms. This plugin enables your Flutter application to discover, connect to, and control Chromecast devices and other Google Cast-enabled receivers.
 
+## Support the Project
+
+<a href='https://ko-fi.com/Y8Y61HCG2P' target='_blank'><img height='36' style='border:0px;height:36px;' src='https://storage.ko-fi.com/cdn/kofi5.png?v=6' border='0' alt='Buy Me a Coffee at ko-fi.com' /></a>
+
 ## Demo Video
 
 <video src="https://raw.githubusercontent.com/felnanuke2/flutter_google_cast/refs/heads/master/Screen_Recording_20250618_125333.mp4" controls width="600" poster="https://raw.githubusercontent.com/felnanuke2/flutter_google_cast/refs/heads/master/Screenshot_20250618_130514.jpg">
