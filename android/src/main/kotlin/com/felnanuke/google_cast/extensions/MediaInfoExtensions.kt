@@ -36,7 +36,6 @@ class GoogleCastMediaInfo {
             val builder = MediaInfo.Builder(contentId)
             if (contentUrl != null)
                 builder.setContentUrl(contentUrl)
-            if (contentType != null)
             if (streamType != null)
                 builder.setStreamType(when (streamType) {
                     "BUFFERED" -> MediaInfo.STREAM_TYPE_BUFFERED
@@ -44,6 +43,7 @@ class GoogleCastMediaInfo {
                     "NONE" -> MediaInfo.STREAM_TYPE_NONE
                     else -> MediaInfo.STREAM_TYPE_INVALID
                 })
+            if (contentType != null)
                 builder.setContentType(contentType)
             if (tracks.isNotEmpty())
                 builder.setMediaTracks(tracks)

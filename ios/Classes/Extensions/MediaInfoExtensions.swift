@@ -63,6 +63,8 @@ extension GCKMediaInformation{
         dict["contentURL"] = self.contentURL?.absoluteString
         dict["duration"] = self.streamDuration
         dict["metadata"] = self.metadata?.toMap()
+        dict["customData"] = self.customData
+
         if(self.mediaTracks != nil){
             dict["tracks"] = self.mediaTracks!.map{
                 track in
@@ -70,11 +72,7 @@ extension GCKMediaInformation{
                 
             }
         }
-        
-      
-        
-        
-        
+
         return dict
     }
     
