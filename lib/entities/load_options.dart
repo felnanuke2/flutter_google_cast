@@ -1,4 +1,5 @@
 import 'package:flutter_chrome_cast/enums/repeat_mode.dart';
+import 'package:flutter_chrome_cast/models/android/extensions/repeat_mode.dart';
 
 /// Configuration options for loading queue items in Google Cast.
 class GoogleCastQueueLoadOptions {
@@ -23,11 +24,11 @@ class GoogleCastQueueLoadOptions {
   });
 
   /// Converts these options to a map representation.
-  Map<String, dynamic> toMap() {
+  Map<String, dynamic> toMap({bool android = false}) {
     return {
       'startIndex': startIndex,
       'playPosition': playPosition.inSeconds,
-      'repeatMode': repeatMode.index,
+      'repeatMode': android ? repeatMode.androidValue : repeatMode.index,
       'customData': customData,
     };
   }

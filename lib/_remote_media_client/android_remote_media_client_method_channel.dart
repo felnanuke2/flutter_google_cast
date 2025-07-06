@@ -5,8 +5,8 @@ import 'package:flutter_chrome_cast/_remote_media_client/remote_media_client_pla
 import 'package:flutter_chrome_cast/entities/cast_media_status.dart';
 import 'package:flutter_chrome_cast/entities/load_options.dart';
 import 'package:flutter_chrome_cast/entities/media_information.dart';
-import 'package:flutter_chrome_cast/entities/queue_item.dart';
 import 'package:flutter_chrome_cast/entities/media_seek_option.dart';
+import 'package:flutter_chrome_cast/entities/queue_item.dart';
 import 'package:flutter_chrome_cast/entities/request.dart';
 import 'package:flutter_chrome_cast/models/android/android_media_status.dart';
 import 'package:flutter_chrome_cast/models/android/android_queue_item.dart';
@@ -20,12 +20,13 @@ class GoogleCastRemoteMediaClientAndroidMethodChannel
     _channel.setMethodCallHandler(_onMethodCallHandler);
   }
 
-  final _channel =
-      const MethodChannel('com.felnanuke.google_cast.remote_media_client');
+  final _channel = const MethodChannel(
+    'com.felnanuke.google_cast.remote_media_client',
+  );
 
   // Media Status
-  final _mediaStatusStreamController = BehaviorSubject<GoggleCastMediaStatus?>()
-    ..add(null);
+  final _mediaStatusStreamController =
+      BehaviorSubject<GoggleCastMediaStatus?>()..add(null);
 
   @override
   GoggleCastMediaStatus? get mediaStatus => _mediaStatusStreamController.value;
@@ -34,7 +35,7 @@ class GoogleCastRemoteMediaClientAndroidMethodChannel
   Stream<GoggleCastMediaStatus?> get mediaStatusStream =>
       _mediaStatusStreamController.stream;
 
-// QueueItems
+  // QueueItems
   final _queueItemsStreamController =
       BehaviorSubject<List<GoogleCastQueueItem>>()..add([]);
 
@@ -45,9 +46,9 @@ class GoogleCastRemoteMediaClientAndroidMethodChannel
   Stream<List<GoogleCastQueueItem>> get queueItemsStream =>
       _queueItemsStreamController.stream;
 
-// PlayerPosition
-  final _playerPositionStreamController = BehaviorSubject<Duration>()
-    ..add(Duration.zero);
+  // PlayerPosition
+  final _playerPositionStreamController =
+      BehaviorSubject<Duration>()..add(Duration.zero);
   @override
   Duration get playerPosition => _playerPositionStreamController.value;
 
@@ -79,18 +80,15 @@ class GoogleCastRemoteMediaClientAndroidMethodChannel
     String? credentials,
     String? credentialsType,
   }) async {
-    final result = await _channel.invokeMethod(
-      'loadMedia',
-      {
-        'mediaInfo': mediaInfo.toMap(),
-        'autoPlay': autoPlay,
-        'playPosition': playPosition.inSeconds,
-        'playbackRate': playbackRate,
-        'activeTrackIds': activeTrackIds,
-        'credentials': credentials,
-        'credentialsType': credentialsType
-      },
-    );
+    final result = await _channel.invokeMethod('loadMedia', {
+      'mediaInfo': mediaInfo.toMap(),
+      'autoPlay': autoPlay,
+      'playPosition': playPosition.inSeconds,
+      'playbackRate': playbackRate,
+      'activeTrackIds': activeTrackIds,
+      'credentials': credentials,
+      'credentialsType': credentialsType,
+    });
     return result != null
         ? GoogleCastRequest.fromMap(Map<String, dynamic>.from(result))
         : null;
@@ -115,7 +113,7 @@ class GoogleCastRemoteMediaClientAndroidMethodChannel
   }) async {
     final result = await _channel.invokeMethod('queueLoadItems', {
       'queueItems': queueItems.map((item) => item.toMap()).toList(),
-      'options': options?.toMap(),
+      'options': options?.toMap(android: true),
     });
     return result != null
         ? GoogleCastRequest.fromMap(Map<String, dynamic>.from(result))
@@ -136,10 +134,7 @@ class GoogleCastRemoteMediaClientAndroidMethodChannel
 
   @override
   Future<GoogleCastRequest> seek(GoogleCastMediaSeekOption option) async {
-    final result = await _channel.invokeMethod(
-      'seek',
-      option.toMap(),
-    );
+    final result = await _channel.invokeMethod('seek', option.toMap());
     return GoogleCastRequest.fromMap(Map<String, dynamic>.from(result));
   }
 
@@ -160,7 +155,8 @@ class GoogleCastRemoteMediaClientAndroidMethodChannel
 
   @override
   Future<GoogleCastRequest> setTextTrackStyle(
-      TextTrackStyle textTrackStyle) async {
+    TextTrackStyle textTrackStyle,
+  ) async {
     final result = await _channel.invokeMethod(
       'setTextTrackStyle',
       textTrackStyle.toMap(),
@@ -182,14 +178,18 @@ class GoogleCastRemoteMediaClientAndroidMethodChannel
 
   @override
   Future<GoogleCastRequest> queueRemoveItemsWithIds(List<int> itemIds) async {
-    final result =
-        await _channel.invokeMethod('queueRemoveItemsWithIds', itemIds);
+    final result = await _channel.invokeMethod(
+      'queueRemoveItemsWithIds',
+      itemIds,
+    );
     return GoogleCastRequest.fromMap(Map<String, dynamic>.from(result));
   }
 
   @override
-  Future<GoogleCastRequest> queueInsertItemAndPlay(GoogleCastQueueItem item,
-      {required int beforeItemWithId}) async {
+  Future<GoogleCastRequest> queueInsertItemAndPlay(
+    GoogleCastQueueItem item, {
+    required int beforeItemWithId,
+  }) async {
     final result = await _channel.invokeMethod('queueInsertItemAndPlay', {
       'item': item.toMap(),
       'beforeItemWithId': beforeItemWithId,
@@ -198,8 +198,10 @@ class GoogleCastRemoteMediaClientAndroidMethodChannel
   }
 
   @override
-  Future<GoogleCastRequest> queueInsertItems(List<GoogleCastQueueItem> items,
-      {int? beforeItemWithId}) async {
+  Future<GoogleCastRequest> queueInsertItems(
+    List<GoogleCastQueueItem> items, {
+    int? beforeItemWithId,
+  }) async {
     final result = await _channel.invokeMethod('queueInsertItems', {
       'items': items.map((item) => item.toMap()).toList(),
       'beforeItemWithId': beforeItemWithId,
@@ -239,11 +241,16 @@ class GoogleCastRemoteMediaClientAndroidMethodChannel
 
     final map = List.from(arguments);
 
-    final queueItems = map
-        .map((e) => GoogleCastAndroidQueueItem.fromMap(
-            Map<String, dynamic>.from(
-                Map<String, dynamic>.from(jsonDecode(e)))))
-        .toList();
+    final queueItems =
+        map
+            .map(
+              (e) => GoogleCastAndroidQueueItem.fromMap(
+                Map<String, dynamic>.from(
+                  Map<String, dynamic>.from(jsonDecode(e)),
+                ),
+              ),
+            )
+            .toList();
     _queueItemsStreamController.add(queueItems);
   }
 
@@ -259,8 +266,10 @@ class GoogleCastRemoteMediaClientAndroidMethodChannel
   }
 
   @override
-  Future<void> queueReorderItems(
-      {required List<int> itemsIds, required int? beforeItemWithId}) {
+  Future<void> queueReorderItems({
+    required List<int> itemsIds,
+    required int? beforeItemWithId,
+  }) {
     return _channel.invokeMethod('queueReorderItems', {
       'itemsIds': itemsIds,
       'beforeItemWithId': beforeItemWithId,
