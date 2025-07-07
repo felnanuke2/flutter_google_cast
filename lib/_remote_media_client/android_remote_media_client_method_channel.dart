@@ -25,8 +25,8 @@ class GoogleCastRemoteMediaClientAndroidMethodChannel
   );
 
   // Media Status
-  final _mediaStatusStreamController =
-      BehaviorSubject<GoggleCastMediaStatus?>()..add(null);
+  final _mediaStatusStreamController = BehaviorSubject<GoggleCastMediaStatus?>()
+    ..add(null);
 
   @override
   GoggleCastMediaStatus? get mediaStatus => _mediaStatusStreamController.value;
@@ -47,8 +47,8 @@ class GoogleCastRemoteMediaClientAndroidMethodChannel
       _queueItemsStreamController.stream;
 
   // PlayerPosition
-  final _playerPositionStreamController =
-      BehaviorSubject<Duration>()..add(Duration.zero);
+  final _playerPositionStreamController = BehaviorSubject<Duration>()
+    ..add(Duration.zero);
   @override
   Duration get playerPosition => _playerPositionStreamController.value;
 
@@ -241,16 +241,15 @@ class GoogleCastRemoteMediaClientAndroidMethodChannel
 
     final map = List.from(arguments);
 
-    final queueItems =
-        map
-            .map(
-              (e) => GoogleCastAndroidQueueItem.fromMap(
-                Map<String, dynamic>.from(
-                  Map<String, dynamic>.from(jsonDecode(e)),
-                ),
-              ),
-            )
-            .toList();
+    final queueItems = map
+        .map(
+          (e) => GoogleCastAndroidQueueItem.fromMap(
+            Map<String, dynamic>.from(
+              Map<String, dynamic>.from(jsonDecode(e)),
+            ),
+          ),
+        )
+        .toList();
     _queueItemsStreamController.add(queueItems);
   }
 
