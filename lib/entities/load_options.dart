@@ -1,5 +1,4 @@
 import 'package:flutter_chrome_cast/enums/repeat_mode.dart';
-import 'package:flutter_chrome_cast/models/android/extensions/repeat_mode.dart';
 
 /// Configuration options for loading queue items in Google Cast.
 class GoogleCastQueueLoadOptions {
@@ -28,7 +27,7 @@ class GoogleCastQueueLoadOptions {
     return {
       'startIndex': startIndex,
       'playPosition': playPosition.inSeconds,
-      'repeatMode': android ? repeatMode.androidValue : repeatMode.index,
+      'repeatMode': repeatMode.value,
       'customData': customData,
     };
   }
