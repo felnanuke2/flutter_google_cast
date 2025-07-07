@@ -27,6 +27,7 @@ class GoogleCastMediaInfo {
             val contentId = map["contentID"] as String
             val contentUrl = map["contentURL"] as String?
             val contentType = map["contentType"] as String?
+            val streamType = map["streamType"] as String?
             val tracks = GoogleCastMediaTrackBuilder.listFromMap(
                 map["tracks"] as List<Map<String, Any?>>? ?: listOf()
             )
@@ -35,6 +36,13 @@ class GoogleCastMediaInfo {
             val builder = MediaInfo.Builder(contentId)
             if (contentUrl != null)
                 builder.setContentUrl(contentUrl)
+            if (streamType != null)
+                builder.setStreamType(when (streamType) {
+                    "BUFFERED" -> MediaInfo.STREAM_TYPE_BUFFERED
+                    "LIVE" -> MediaInfo.STREAM_TYPE_LIVE
+                    "NONE" -> MediaInfo.STREAM_TYPE_NONE
+                    else -> MediaInfo.STREAM_TYPE_INVALID
+                })
             if (contentType != null)
                 builder.setContentType(contentType)
             if (tracks.isNotEmpty())

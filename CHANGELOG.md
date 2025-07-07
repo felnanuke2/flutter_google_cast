@@ -1,3 +1,17 @@
+## 1.2.2 - Repeat Mode Bug Fix
+### 🐛 Bug Fixes
+- **Cross-Platform Repeat Mode Fix**: Fixed repeat mode handling across Android and iOS platforms
+  - **Android**: Updated repeat mode parsing to use string-based values instead of integer mapping
+  - **iOS**: Fixed GCKMediaQueueLoadOptions repeat mode enum parsing to handle string values
+  - **Dart**: Enhanced GoogleCastMediaRepeatMode enum with proper string value mapping
+  - **Consistency**: Ensured consistent repeat mode behavior across all platforms
+
+### 🔧 Code Improvements
+- **Removed Platform-Specific Code**: Eliminated Android-specific repeat mode extensions for cleaner architecture
+- **Type Safety**: Improved type safety in repeat mode handling with proper string-to-enum conversion
+- **Code Formatting**: Applied consistent code formatting and styling improvements
+
+
 ## 1.2.1 - Documentation & Testing Improvements
 ### 📚 Documentation Enhancements
 - **Expanded API Documentation**: Added comprehensive documentation for public members across all Dart classes

@@ -23,11 +23,11 @@ class GoogleCastQueueLoadOptions {
   });
 
   /// Converts these options to a map representation.
-  Map<String, dynamic> toMap() {
+  Map<String, dynamic> toMap({bool android = false}) {
     return {
       'startIndex': startIndex,
       'playPosition': playPosition.inSeconds,
-      'repeatMode': repeatMode.index,
+      'repeatMode': repeatMode.value,
       'customData': customData,
     };
   }

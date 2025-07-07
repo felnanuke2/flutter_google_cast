@@ -14,7 +14,18 @@ extension GCKMediaInformation{
     static func fromMap(_ arguments: Dictionary<String, Any> ) -> GCKMediaInformation? {
         
         let contentID = arguments["contentID"] as! String
-        let streamType = GCKMediaStreamType.unknown
+        let streamType: GCKMediaStreamType = {
+                    switch arguments["streamType"] as? String {
+                    case "BUFFERED":
+                        return .buffered
+                    case "LIVE":
+                        return .live
+                    case "NONE":
+                        return .none
+                    default:
+                        return .unknown
+                    }
+                }()
         guard let  contentUrl = URL.init(string: arguments["contentURL"] as! String) else { return nil}
         let builder =  GCKMediaInformationBuilder.init()
         builder.contentID  = contentID
@@ -52,6 +63,8 @@ extension GCKMediaInformation{
         dict["contentURL"] = self.contentURL?.absoluteString
         dict["duration"] = self.streamDuration
         dict["metadata"] = self.metadata?.toMap()
+        dict["customData"] = self.customData
+
         if(self.mediaTracks != nil){
             dict["tracks"] = self.mediaTracks!.map{
                 track in
@@ -59,11 +72,7 @@ extension GCKMediaInformation{
                 
             }
         }
-        
-      
-        
-        
-        
+
         return dict
     }
     

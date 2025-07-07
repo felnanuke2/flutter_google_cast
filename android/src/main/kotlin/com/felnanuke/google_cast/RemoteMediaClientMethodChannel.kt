@@ -3,6 +3,10 @@ package com.felnanuke.google_cast
 import android.media.session.MediaSession
 import android.util.Log
 import com.felnanuke.google_cast.extensions.*
+import com.google.android.gms.cast.MediaStatus.REPEAT_MODE_REPEAT_ALL
+import com.google.android.gms.cast.MediaStatus.REPEAT_MODE_REPEAT_ALL_AND_SHUFFLE
+import com.google.android.gms.cast.MediaStatus.REPEAT_MODE_REPEAT_OFF
+import com.google.android.gms.cast.MediaStatus.REPEAT_MODE_REPEAT_SINGLE
 import com.google.android.gms.cast.framework.CastContext
 import com.google.android.gms.cast.framework.media.RemoteMediaClient
 import com.google.gson.Gson
@@ -18,7 +22,7 @@ private const val TAG = "RemoteMediaClient"
 
 /**
  * Flutter method channel for Google Cast remote media client operations
- * 
+ *
  * This class manages all media-related operations for Google Cast sessions, providing
  * comprehensive control over media playback, queue management, and media status monitoring.
  * It implements Google Cast remote media client callback interfaces to receive media
@@ -54,22 +58,22 @@ private const val TAG = "RemoteMediaClient"
  */
 class RemoteMediaClientMethodChannel : FlutterPlugin, MethodChannel.MethodCallHandler,
     RemoteMediaClient.Callback(), RemoteMediaClient.ProgressListener {
-    
+
     /**
      * Flutter method channel for remote media client communication
-     * 
+     *
      * Handles method calls related to media control operations and sends
      * media status and progress updates to Flutter. Channel name:
      * "com.felnanuke.google_cast.remote_media_client"
      */
     private lateinit var channel: MethodChannel
-    
+
     /**
      * Current remote media client instance for the active Cast session
-     * 
+     *
      * Provides access to the media client for the current Cast session.
      * Returns null if no Cast session is active or no media client is available.
-     * 
+     *
      * @return The current remote media client, or null if not available
      */
     private val currentRemoteMediaClient: RemoteMediaClient?
@@ -81,7 +85,7 @@ class RemoteMediaClientMethodChannel : FlutterPlugin, MethodChannel.MethodCallHa
 
     /**
      * Called when the Flutter plugin is attached to the Flutter engine
-     * 
+     *
      * Initializes the remote media client method channel for media operations.
      *
      * Setup operations:
@@ -99,7 +103,7 @@ class RemoteMediaClientMethodChannel : FlutterPlugin, MethodChannel.MethodCallHa
 
     /**
      * Called when the Flutter plugin is detached from the Flutter engine
-     * 
+     *
      * Performs cleanup of remote media client resources to prevent memory leaks.
      *
      * Cleanup operations:
@@ -116,10 +120,10 @@ class RemoteMediaClientMethodChannel : FlutterPlugin, MethodChannel.MethodCallHa
     }
 
     // MARK: - Flutter Method Call Handling
-    
+
     /**
      * Handles method calls from the Flutter side
-     * 
+     *
      * Processes incoming method calls for media control operations. Supports
      * comprehensive media management including loading, playback control,
      * queue management, and track selection.
@@ -151,62 +155,77 @@ class RemoteMediaClientMethodChannel : FlutterPlugin, MethodChannel.MethodCallHa
                 loadMedia(call.arguments as Map<String, Any?>)
                 result.success(true)
             }
+
             "queueLoadItems" -> {
                 queueLoadItems(call.arguments as Map<String, Any?>)
                 result.success(true)
             }
+
             "queueInsertItems" -> {
                 queueInsertItems(call.arguments as Map<String, Any?>)
                 result.success(true)
             }
+
             "queueInsertItemAndPlay" -> {
                 queueInsertItemAndPlay(call.arguments as Map<String, Any?>)
                 result.success(true)
             }
+
             "queueNextItem" -> {
                 queueNextItem()
                 result.success(true)
             }
+
             "queuePrevItem" -> {
                 queuePrevItem()
                 result.success(true)
             }
+
             "queueJumpToItemWithId" -> {
                 queueJumpToItemWithId(call.arguments)
                 result.success(true)
             }
+
             "queueRemoveItemsWithIds" -> {
                 queueRemoveItemsWithIds(call.arguments)
                 result.success(true)
             }
+
             "queueReorderItems" -> {
                 queueReorderItems(call.arguments)
                 result.success(true)
             }
+
             "seek" -> {
                 seek(call.arguments)
                 result.success(true)
             }
+
             "setActiveTrackIds" -> {
                 setActiveTrackIds(call.arguments)
                 result.success(true)
             }
+
             "setPlaybackRate" -> {
                 setPlaybackRate(call.arguments)
                 result.success(true)
             }
+
             "setTextTrackStyle" -> {
                 setTextTrackStyle(call.arguments)
                 result.success(true)
             }
+
             "play" -> {
                 play()
                 result.success(true)
             }
+
             "pause" -> {
                 pause()
                 result.success(true)
             }
+
             else -> result.notImplemented()
         }
     }
@@ -225,16 +244,16 @@ class RemoteMediaClientMethodChannel : FlutterPlugin, MethodChannel.MethodCallHa
         val longArray = arguments.map {
             it.toLong()
         }
-        currentRemoteMediaClient?.setActiveMediaTracks(longArray.toLongArray())?.addStatusListener {status->
-            if(status.isSuccess){
+        currentRemoteMediaClient?.setActiveMediaTracks(longArray.toLongArray())
+            ?.addStatusListener { status ->
+                if (status.isSuccess) {
 
-                Log.w(TAG, "setActiveTrackIds success $longArray")
-            }
-            else {
-                Log.w(TAG, "setActiveTrackIds failed $longArray")
-            }
+                    Log.w(TAG, "setActiveTrackIds success $longArray")
+                } else {
+                    Log.w(TAG, "setActiveTrackIds failed $longArray")
+                }
 
-        }
+            }
 
 
     }
@@ -244,12 +263,15 @@ class RemoteMediaClientMethodChannel : FlutterPlugin, MethodChannel.MethodCallHa
         val options = GoogleCastSeekOptionsBuilder.fromMap(arguments)
         currentRemoteMediaClient?.seek(options)
     }
+
     private fun queueReorderItems(arguments: Any?) {
-        arguments as Map<String,Any?>
+        arguments as Map<String, Any?>
         val itemIds = arguments["itemsIds"] as IntArray
-        val beforeItemWithId = (arguments["beforeItemWithId"] as Int?)?: MediaSession.QueueItem.UNKNOWN_ID
-        currentRemoteMediaClient?.queueReorderItems(itemIds,beforeItemWithId, JSONObject())
+        val beforeItemWithId =
+            (arguments["beforeItemWithId"] as Int?) ?: MediaSession.QueueItem.UNKNOWN_ID
+        currentRemoteMediaClient?.queueReorderItems(itemIds, beforeItemWithId, JSONObject())
     }
+
     private fun queueRemoveItemsWithIds(arguments: Any?) {
         arguments as IntArray
         currentRemoteMediaClient?.queueRemoveItems(arguments, JSONObject())
@@ -281,7 +303,8 @@ class RemoteMediaClientMethodChannel : FlutterPlugin, MethodChannel.MethodCallHa
     private fun queueInsertItems(arguments: Map<String, Any?>) {
         val items =
             GoogleCastQueueItemBuilder.listFromMap(arguments["items"] as List<Map<String, Any?>>)
-        val beforeItemWithId = (arguments["beforeItemWithId"] as Int?) ?: MediaSession.QueueItem.UNKNOWN_ID
+        val beforeItemWithId =
+            (arguments["beforeItemWithId"] as Int?) ?: MediaSession.QueueItem.UNKNOWN_ID
         var jsonObject = JSONObject()
         currentRemoteMediaClient?.queueInsertItems(
             items.toTypedArray(),
@@ -304,13 +327,19 @@ class RemoteMediaClientMethodChannel : FlutterPlugin, MethodChannel.MethodCallHa
         val queueItemsData = arguments["queueItems"] as List<Map<String, Any?>>
         val optionsData = arguments["options"] as Map<String, Any?>
         val startIndex = optionsData["startIndex"] as Int
-        val repeatMode = optionsData["repeatMode"] as Int
+        val repeatMode = optionsData["repeatMode"] as String?
         val playPosition = optionsData["playPosition"] as Int
         val queueItems = GoogleCastQueueItemBuilder.listFromMap(queueItemsData)
         currentRemoteMediaClient?.queueLoad(
             queueItems.toTypedArray(),
             startIndex,
-            repeatMode,
+            when (repeatMode) {
+                "OFF" -> REPEAT_MODE_REPEAT_OFF
+                "ALL" -> REPEAT_MODE_REPEAT_ALL
+                "SINGLE" -> REPEAT_MODE_REPEAT_SINGLE
+                "ALL_AND_SHUFFLE" -> REPEAT_MODE_REPEAT_ALL_AND_SHUFFLE
+                else -> REPEAT_MODE_REPEAT_OFF
+            },
             playPosition.toLong() * 1000,
             JSONObject()
         )
