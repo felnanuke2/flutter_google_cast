@@ -128,6 +128,10 @@ public class SwiftGoogleCastPlugin:GCKCastContext, GCKLoggerDelegate, FlutterPlu
         // Enable console logging for debugging
         GCKLogger.sharedInstance().consoleLoggingEnabled = true
         GCKLogger.sharedInstance().delegate = self
+
+        let filter = GCKLoggerFilter.init()
+        filter.minimumLevel = GCKLoggerLevel.verbose
+        GCKLogger.sharedInstance().filter = filter
         
         // Register listeners for Cast events
         discoveryManager.add(FGCDiscoveryManagerMethodChannel.instance)
