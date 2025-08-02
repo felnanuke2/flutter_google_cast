@@ -118,11 +118,12 @@ public class SwiftGoogleCastPlugin:GCKCastContext, GCKLoggerDelegate, FlutterPlu
     ///   - result: Flutter result callback (currently unused)
     /// - Note: This method should be called once during app initialization
     private func setSharedInstanceWithOption(arguments: Dictionary<String, Any> ,result: @escaping FlutterResult){
-        // Parse Cast options from Flutter arguments
-        let option = GCKCastOptions.fromMap(arguments)
+      
+            // Parse Cast options from Flutter arguments
+        let option =  GCKCastOptions.fromMap(arguments)
         
         // Initialize the shared Cast context with parsed options
-        GCKCastContext.setSharedInstanceWith(option)
+       GCKCastContext.setSharedInstanceWith(option)
         
         // Enable console logging for debugging
         GCKLogger.sharedInstance().consoleLoggingEnabled = true
@@ -134,9 +135,10 @@ public class SwiftGoogleCastPlugin:GCKCastContext, GCKLoggerDelegate, FlutterPlu
 
          // Start discovering Cast devices automatically
         discoveryManager.startDiscovery()
+
+        print("Cast context initialized")
         
         result(true)
-       
     }
     
     // MARK: - Google Cast Logging Delegate
