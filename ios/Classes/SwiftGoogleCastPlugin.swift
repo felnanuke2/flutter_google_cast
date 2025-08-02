@@ -29,6 +29,8 @@ public class SwiftGoogleCastPlugin:GCKCastContext, GCKLoggerDelegate, FlutterPlu
     /// Flutter method channel for Cast context operations
     /// Handles communication between Flutter and native iOS for context-related methods
     private var channel : FlutterMethodChannel?
+
+    private var discoveryListener: CastDiscoveryListener?
    
     // MARK: - Google Cast SDK Properties
     
@@ -133,11 +135,13 @@ public class SwiftGoogleCastPlugin:GCKCastContext, GCKLoggerDelegate, FlutterPlu
         filter.minimumLevel = GCKLoggerLevel.verbose
         GCKLogger.sharedInstance().filter = filter
 
-        let discoveryListener = CastDiscoveryListener()
+         discoveryListener = CastDiscoveryListener(discoveryManager: discoveryManager)
+    // CastDiscoveryListener’s init already calls discoveryManager.add(self).
+        // discoveryManager.startDiscovery()
         
         // Register listeners for Cast events
         // discoveryManager.add(FGCDiscoveryManagerMethodChannel.instance)
-        discoveryManager.add(discoveryListener)
+        // discoveryManager.add(discoveryListener)
         sessionManager.add(FGCSessionManagerMethodChannel.instance )
 
          // Start discovering Cast devices automatically
