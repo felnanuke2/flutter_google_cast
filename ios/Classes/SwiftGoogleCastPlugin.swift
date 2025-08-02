@@ -30,8 +30,6 @@ public class SwiftGoogleCastPlugin:GCKCastContext, GCKLoggerDelegate, FlutterPlu
     /// Handles communication between Flutter and native iOS for context-related methods
     private var channel : FlutterMethodChannel?
 
-    private var discoveryListener: CastDiscoveryListener?
-   
     // MARK: - Google Cast SDK Properties
     
     /// Override to provide access to the shared Cast session manager
@@ -134,14 +132,9 @@ public class SwiftGoogleCastPlugin:GCKCastContext, GCKLoggerDelegate, FlutterPlu
         let filter = GCKLoggerFilter.init()
         filter.minimumLevel = GCKLoggerLevel.verbose
         GCKLogger.sharedInstance().filter = filter
-
-         discoveryListener = CastDiscoveryListener(discoveryManager: discoveryManager)
-    // CastDiscoveryListener’s init already calls discoveryManager.add(self).
-        // discoveryManager.startDiscovery()
         
         // Register listeners for Cast events
-        // discoveryManager.add(FGCDiscoveryManagerMethodChannel.instance)
-        // discoveryManager.add(discoveryListener)
+        discoveryManager.add(FGCDiscoveryManagerMethodChannel.instance)   
         sessionManager.add(FGCSessionManagerMethodChannel.instance )
 
          // Start discovering Cast devices automatically
@@ -177,79 +170,4 @@ public class SwiftGoogleCastPlugin:GCKCastContext, GCKLoggerDelegate, FlutterPlu
 
     
     
-    
-    
-    
-    
 }
-
-import GoogleCast
-
-/// Simple listener that prints every discovery-related event.
-/// Attach it early in your app lifecycle (e.g. inside AppDelegate, or the view
-/// that hosts your custom Cast picker).
-final class CastDiscoveryListener: NSObject, GCKDiscoveryManagerListener {
-
-    // Hold a weak reference so we don’t create a retain-cycle.
-    private weak var discoveryManager: GCKDiscoveryManager?
-
-    /// Pass the discovery manager you want to observe.
-    /// Defaults to `GCKCastContext.sharedInstance().discoveryManager`.
-    init(discoveryManager: GCKDiscoveryManager = GCKCastContext.sharedInstance().discoveryManager) {
-        self.discoveryManager = discoveryManager
-        super.init()
-        discoveryManager.add(self)          // Start receiving callbacks
-    }
-
-    deinit {
-        discoveryManager?.remove(self)      // Stop when this object is released
-    }
-
-    // MARK: - GCKDiscoveryManagerListener callbacks
-    // All of these methods are *optional* in the protocol.  
-    // Implement only the ones you need for your UI / analytics.
-
-    func didStartDiscovery(forDeviceCategory deviceCategory: String!) {
-        print("▶️ Discovery started for category: \(deviceCategory ?? "nil")")
-    }
-
-    func willUpdateDeviceList() {
-        print("⏳ Will update device list…")
-    }
-
-    func didUpdateDeviceList() {
-        print("✅ Device list updated (\(discoveryManager?.deviceCount ?? 0) devices).")
-    }
-
-    func didInsert(_ device: GCKDevice!, at index: UInt) {
-        guard let device = device else { return }
-        print("➕ Inserted \(device.friendlyName ?? "Unnamed") at index \(index)")
-    }
-
-    func didUpdate(_ device: GCKDevice!, at index: UInt) {
-        guard let device = device else { return }
-        print("♻️  Updated \(device.friendlyName ?? "Unnamed") at index \(index)")
-    }
-
-    func didUpdate(_ device: GCKDevice!, at index: UInt, andMoveTo newIndex: UInt) {
-        guard let device = device else { return }
-        print("🔀 \(device.friendlyName ?? "Unnamed") moved \(index) → \(newIndex)")
-    }
-
-    func didRemoveDevice(at index: UInt) {
-        print("➖ Removed device at index \(index)")
-    }
-
-    func didRemove(_ device: GCKDevice!, at index: UInt) {
-        guard let device = device else { return }
-        print("🗑️  Removed \(device.friendlyName ?? device.deviceID) at index \(index)")
-    }
-
-    func didHaveDiscoveredDeviceWhenStartingDiscovery() {
-        print("📂 Started discovery with \(discoveryManager?.deviceCount ?? 0) cached device(s)")
-    }
-}
-
-
-
-
