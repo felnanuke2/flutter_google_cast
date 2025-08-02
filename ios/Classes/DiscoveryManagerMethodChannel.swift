@@ -105,7 +105,7 @@ class FGCDiscoveryManagerMethodChannel : UIResponder, GCKDiscoveryManagerListene
     /// - Parameters:
     ///   - device: The updated Cast device
     ///   - index: The index position of the device in the discovery list
-    public func didUpdate(_ device: GCKDevice, at index: UInt) {
+    public func didUpdateDevice(_ device: GCKDevice, at index: UInt) {
         devices[index] = device
     }
     
@@ -117,7 +117,7 @@ class FGCDiscoveryManagerMethodChannel : UIResponder, GCKDiscoveryManagerListene
     /// - Parameters:
     ///   - device: The newly discovered Cast device
     ///   - index: The index position assigned to the device
-    public func didInsert(_ device: GCKDevice, at index: UInt) {
+    public func didInsertDevice(_ device: GCKDevice, at index: UInt) {
         devices[index] = device
     }
     
@@ -130,7 +130,7 @@ class FGCDiscoveryManagerMethodChannel : UIResponder, GCKDiscoveryManagerListene
     /// - Parameters:
     ///   - device: The Cast device that was removed
     ///   - index: The index position of the removed device
-    public func didRemove(_ device: GCKDevice, at index: UInt) {
+    public func didRemoveDevice(_ device: GCKDevice, at index: UInt) {
         devices.removeValue(forKey: index)
     }
     

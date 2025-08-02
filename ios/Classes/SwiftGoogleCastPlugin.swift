@@ -129,8 +129,8 @@ public class SwiftGoogleCastPlugin:GCKCastContext, GCKLoggerDelegate, FlutterPlu
         GCKLogger.sharedInstance().delegate = self
         
         // Register listeners for Cast events
-        discoveryManager.add(FGCDiscoveryManagerMethodChannel.instance)
-        sessionManager.add(FGCSessionManagerMethodChannel.instance )
+        discoveryManager.addListener(FGCDiscoveryManagerMethodChannel.instance)
+        sessionManager.addListener(FGCSessionManagerMethodChannel.instance )
 
          // Start discovering Cast devices automatically
         discoveryManager.startDiscovery()

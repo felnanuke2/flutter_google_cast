@@ -17,7 +17,7 @@ A new Flutter plugin project.
   s.dependency 'Flutter'
   s.platform = :ios, '12.0'
   s.ios.deployment_target  = '12.0'
-  s.dependency 'google-cast-sdk-no-bluetooth'
+  s.dependency 'google-cast-sdk'
   s.dependency 'Protobuf'
   s.static_framework = true 
   s.pod_target_xcconfig = { 'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'arm64' }
