@@ -27,13 +27,13 @@ ios/
 
 **File**: `SwiftGoogleCastPlugin.swift`
 
-The main plugin class that inherits from `GCKCastContext` and implements multiple protocols:
+The main plugin class that manages the Google Cast context and implements multiple protocols:
 - `FlutterPlugin`: Flutter plugin interface
 - `GCKLoggerDelegate`: Google Cast logging
 - `UIApplicationDelegate`: iOS app lifecycle
 
 ```swift
-public class SwiftGoogleCastPlugin: GCKCastContext, GCKLoggerDelegate, FlutterPlugin, UIApplicationDelegate
+public class SwiftGoogleCastPlugin: NSObject, GCKLoggerDelegate, FlutterPlugin, UIApplicationDelegate
 ```
 
 **Key Properties**:
