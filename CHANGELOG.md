@@ -1,4 +1,13 @@
+## 1.2.3 - iOS Teardown Crash Fix
+### 🐛 Bug Fixes
+- **iOS Teardown Safety**: Safely teardown Google Cast listeners on iOS to avoid a crash when the app terminates.
+  - Fix merged via pull request #32: https://github.com/felnanuke2/flutter_google_cast/pull/32
+
+### 🔧 Notes
+- No public API changes. This is a small internal lifecycle fix for iOS listener teardown.
+
 ## 1.2.2 - Repeat Mode Bug Fix
+### 🐛 Bug Fixes
 ### 🐛 Bug Fixes
 - **Cross-Platform Repeat Mode Fix**: Fixed repeat mode handling across Android and iOS platforms
   - **Android**: Updated repeat mode parsing to use string-based values instead of integer mapping
