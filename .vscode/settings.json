@@ -1,6 +1,7 @@
 {
-    "cSpell.words": [
-        "Backgrounded",
-        "felnanuke"
-    ]
+  "cSpell.words": [
+    "Backgrounded",
+    "felnanuke"
+  ],
+  "dart.flutterSdkPath": ".fvm/versions/stable"
 }

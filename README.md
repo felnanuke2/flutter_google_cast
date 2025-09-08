@@ -1,6 +1,5 @@
 # Flutter Google Cast
 
-[![Coverage Status](https://coveralls.io/repos/github/felnanuke2/flutter_google_cast/badge.svg?branch=master)](https://coveralls.io/github/felnanuke2/flutter_google_cast?branch=master)
 [![Codecov](https://codecov.io/gh/felnanuke2/flutter_google_cast/branch/master/graph/badge.svg)](https://codecov.io/gh/felnanuke2/flutter_google_cast)
 [![CI](https://github.com/felnanuke2/flutter_google_cast/workflows/Flutter%20CI%20with%20Test%20Enforcement/badge.svg)](https://github.com/felnanuke2/flutter_google_cast/actions)
 
@@ -805,15 +804,10 @@ flutter test --coverage
 
 ### Coverage Reports
 
-Coverage is automatically generated and reported on every PR. The project uses multiple coverage services:
-
-- **Coveralls**: Provides coverage badges and detailed reports
-- **Codecov**: Additional coverage analysis and GitHub integration
-- **GitHub Actions**: Generates coverage artifacts for every workflow run
+Coverage is automatically generated and reported on every PR. Reports are uploaded to Codecov and the workflow produces HTML artifacts for each run.
 
 Coverage badges at the top of this README show the current coverage status. Detailed coverage reports are available:
 - As artifacts in GitHub Actions workflow runs
-- On [Coveralls](https://coveralls.io/github/felnanuke2/flutter_google_cast)
 - On [Codecov](https://codecov.io/gh/felnanuke2/flutter_google_cast)
 
 ### Coverage Scripts
