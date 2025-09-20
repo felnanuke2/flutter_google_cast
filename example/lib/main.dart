@@ -367,14 +367,18 @@ class _MyAppState extends State<MyApp> {
                                               mainAxisSize: MainAxisSize.min,
                                               children: [
                                                 IconButton(
-                                                  icon: const Icon(Icons.file_download),
-                                                  onPressed: () => _loadSingleMedia(),
+                                                  icon: const Icon(
+                                                      Icons.file_download),
+                                                  onPressed: () =>
+                                                      _loadSingleMedia(),
                                                   tooltip: 'Load Media',
                                                   color: Colors.blue,
                                                 ),
                                                 IconButton(
-                                                  icon: const Icon(Icons.play_arrow),
-                                                  onPressed: () => _loadAndPlayMedia(),
+                                                  icon: const Icon(
+                                                      Icons.play_arrow),
+                                                  onPressed: () =>
+                                                      _loadAndPlayMedia(),
                                                   tooltip: 'Play Media',
                                                   color: Colors.green,
                                                 ),
