@@ -1,3 +1,12 @@
+## 1.2.4 - Misc fixes and Android method channel improvements
+### 🐛 Bug Fixes
+- **Android remote media client**: Fixes in `android_remote_media_client_method_channel.dart` to address method channel behavior when loading single media items.
+- **Example fixes**: Minor example app updates to `example/lib/main.dart` and `example/android/app/build.gradle` to keep the sample project in sync with the plugin changes.
+- **Pubspec tidy**: Updated `pubspec.yaml` to reflect dependency/metadata housekeeping.
+
+### 🔧 Notes
+- No public API breaking changes. This release contains internal fixes and example updates.
+
 ## 1.2.3 - iOS Teardown Crash Fix
 ### 🐛 Bug Fixes
 - **iOS Teardown Safety**: Safely teardown Google Cast listeners on iOS to avoid a crash when the app terminates.
