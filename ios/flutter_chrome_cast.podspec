@@ -20,8 +20,7 @@ A new Flutter plugin project.
   s.dependency 'google-cast-sdk'
   s.dependency 'Protobuf'
   s.static_framework = true 
-  s.pod_target_xcconfig = { 'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'arm64' }
-  s.user_target_xcconfig = { 'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'arm64' }
+
 
   s.swift_version = '5.0'
 end
