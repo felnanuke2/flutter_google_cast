@@ -1,0 +1,6 @@
+# Exclude local FVM files from published package
+# These files are present in the repo but should not be uploaded to pub.dev
+# See: https://dart.dev/go/pubignore
+
+.fvm/
+

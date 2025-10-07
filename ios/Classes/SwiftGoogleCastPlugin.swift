@@ -18,7 +18,7 @@ import GoogleCast
 /// - Note: This class follows the singleton pattern provided by the Google Cast SDK
 /// - Author: LUIZ FELIPE ALVES LIMA
 /// - Since: iOS 10.0+
-public class SwiftGoogleCastPlugin:GCKCastContext, GCKLoggerDelegate, FlutterPlugin, UIApplicationDelegate    {
+public class SwiftGoogleCastPlugin: NSObject, GCKLoggerDelegate, FlutterPlugin, UIApplicationDelegate {
     
     // MARK: - Properties
     
@@ -32,15 +32,15 @@ public class SwiftGoogleCastPlugin:GCKCastContext, GCKLoggerDelegate, FlutterPlu
 
     // MARK: - Google Cast SDK Properties
     
-    /// Override to provide access to the shared Cast session manager
+    /// Access the shared Cast session manager
     /// - Returns: The global GCKSessionManager instance from the Cast context
-    public override var sessionManager: GCKSessionManager {
+    public var sessionManager: GCKSessionManager {
         GCKCastContext.sharedInstance().sessionManager
     }
-    
-    /// Override to provide access to the shared Cast discovery manager
+
+    /// Access the shared Cast discovery manager
     /// - Returns: The global GCKDiscoveryManager instance from the Cast context
-    public override var discoveryManager: GCKDiscoveryManager {
+    public var discoveryManager: GCKDiscoveryManager {
         GCKCastContext.sharedInstance().discoveryManager
     }
 
@@ -137,12 +137,77 @@ public class SwiftGoogleCastPlugin:GCKCastContext, GCKLoggerDelegate, FlutterPlu
         discoveryManager.add(FGCDiscoveryManagerMethodChannel.instance)   
         sessionManager.add(FGCSessionManagerMethodChannel.instance )
 
-         // Start discovering Cast devices automatically
+        // Start discovering Cast devices automatically
         discoveryManager.startDiscovery()
 
         print("Cast context initialized")
         
+        // Observe application lifecycle to stop discovery and remove listeners when app closes
+        addLifecycleObserversIfNeeded()
+        
         result(true)
+    }
+
+    // MARK: - Teardown / Lifecycle handlers
+
+    /// Cleanly stops discovery and removes registered listeners to avoid callbacks after deallocation.
+    private func tearDown() {
+        // Stop discovery if it's running
+        if kDebugLoggingEnabled {
+            print("SwiftGoogleCastPlugin: tearing down - stopping discovery and removing listeners")
+        }
+        discoveryManager.stopDiscovery()
+
+        // Remove any previously registered listeners (safe to call even if not registered)
+        discoveryManager.remove(FGCDiscoveryManagerMethodChannel.instance)
+        sessionManager.remove(FGCSessionManagerMethodChannel.instance)
+
+        // Remove logger delegate
+        GCKLogger.sharedInstance().delegate = nil
+    }
+
+    @objc private func applicationWillTerminateNotification(_ notification: Notification) {
+        tearDown()
+    }
+
+    @objc private func applicationDidEnterBackgroundNotification(_ notification: Notification) {
+        // Optionally stop discovery when app goes to background to avoid background callbacks
+        discoveryManager.stopDiscovery()
+    }
+
+    deinit {
+        removeLifecycleObserversIfNeeded()
+        tearDown()
+    }
+
+    // MARK: - Lifecycle observer helpers
+
+    private var lifecycleObserversAdded = false
+
+    private func addLifecycleObserversIfNeeded() {
+        guard !lifecycleObserversAdded else { return }
+        lifecycleObserversAdded = true
+
+        if kDebugLoggingEnabled {
+            print("SwiftGoogleCastPlugin: adding lifecycle observers")
+        }
+
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(applicationWillTerminateNotification(_:)),
+                                               name: UIApplication.willTerminateNotification,
+                                               object: nil)
+
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(applicationDidEnterBackgroundNotification(_:)),
+                                               name: UIApplication.didEnterBackgroundNotification,
+                                               object: nil)
+    }
+
+    private func removeLifecycleObserversIfNeeded() {
+        guard lifecycleObserversAdded else { return }
+        lifecycleObserversAdded = false
+        NotificationCenter.default.removeObserver(self, name: UIApplication.willTerminateNotification, object: nil)
+        NotificationCenter.default.removeObserver(self, name: UIApplication.didEnterBackgroundNotification, object: nil)
     }
     
     // MARK: - Google Cast Logging Delegate

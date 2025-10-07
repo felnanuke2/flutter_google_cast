@@ -20,7 +20,7 @@ jobs:
     - name: Setup Flutter
       uses: subosito/flutter-action@v2
       with:
-        flutter-version: '3.32.4'
+        flutter-version: '3.35.3'
         channel: 'stable'
     
     - name: Install dependencies
@@ -70,11 +70,7 @@ jobs:
         fail_ci_if_error: false
         token: ${{ secrets.CODECOV_TOKEN }}
     
-    - name: Upload coverage to Coveralls
-      uses: coverallsapp/github-action@v2
-      with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-        path-to-lcov: coverage/lcov_cleaned.info
+  # Coveralls removed — we only upload to Codecov now
     
     - name: Upload coverage HTML report
       uses: actions/upload-artifact@v4

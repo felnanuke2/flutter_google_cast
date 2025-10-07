@@ -368,6 +368,14 @@ class _MyAppState extends State<MyApp> {
                                               children: [
                                                 IconButton(
                                                   icon: const Icon(
+                                                      Icons.file_download),
+                                                  onPressed: () =>
+                                                      _loadSingleMedia(),
+                                                  tooltip: 'Load Media',
+                                                  color: Colors.blue,
+                                                ),
+                                                IconButton(
+                                                  icon: const Icon(
                                                       Icons.play_arrow),
                                                   onPressed: () =>
                                                       _loadAndPlayMedia(),
@@ -586,6 +594,47 @@ class _MyAppState extends State<MyApp> {
       ),
       beforeItemWithId: 2,
     );
+  }
+
+  void _loadSingleMedia() async {
+    try {
+      final mediaInfo = GoogleCastMediaInformation(
+        contentId: 'single_0',
+        streamType: CastMediaStreamType.buffered,
+        contentUrl: Uri.parse(
+            'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4'),
+        contentType: 'video/mp4',
+        metadata: GoogleCastMovieMediaMetadata(
+          title: 'Big Buck Bunny (single load)',
+          releaseDate: DateTime(2011),
+          images: [
+            GoogleCastImage(
+              url: Uri.parse(
+                  'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/images/BigBuckBunny.jpg'),
+              height: 480,
+              width: 854,
+            ),
+          ],
+        ),
+      );
+
+      await GoogleCastRemoteMediaClient.instance.loadMedia(mediaInfo);
+
+      ScaffoldMessenger.of(_scaffoldKey.currentContext!).showSnackBar(
+        const SnackBar(
+          content: Text('Single media loaded successfully'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (e, st) {
+      debugPrint('Error loading single media: $e\n$st');
+      ScaffoldMessenger.of(_scaffoldKey.currentContext!).showSnackBar(
+        SnackBar(
+          content: Text('Failed to load media: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   void _startDiscovery() {
