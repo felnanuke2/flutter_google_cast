@@ -225,6 +225,10 @@ class RemoteMediaClientMethodChannel : FlutterPlugin, MethodChannel.MethodCallHa
                 pause()
                 result.success(true)
             }
+            "stop" -> {
+                stop()
+                result.success(true)
+            }
 
             else -> result.notImplemented()
         }
@@ -321,6 +325,10 @@ class RemoteMediaClientMethodChannel : FlutterPlugin, MethodChannel.MethodCallHa
     private fun play() {
         currentRemoteMediaClient?.play()
 
+    }
+
+    private fun stop() {
+        currentRemoteMediaClient?.stop()
     }
 
     private fun queueLoadItems(arguments: Map<String, Any?>) {
