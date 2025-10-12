@@ -1,3 +1,30 @@
+## 1.2.5 - iOS Apple Silicon Support & Enhanced Media Controls
+### ✨ New Features
+- **Missing Audio Control**: Added missing `stop` method for audio control in remote casting client
+  - Implements the stop functionality that was previously missing from the Android remote media client
+  - Fix contributed via PR #40 by @abdulmajedkhan
+
+### 🔧 Platform Improvements
+- **Apple Silicon Support**: Added full support for Apple Silicon (M1/M2/M3) Mac simulators
+  - Updated Google Cast SDK dependency from `google-cast-sdk-no-bluetooth` to standard `google-cast-sdk` ~> 4.7
+  - Removed arm64 simulator architecture exclusions that prevented builds on Apple Silicon
+  - Fixes contributed via PR #39 by @SVyatoslavG and @nsikaktradearies
+- **iOS Deployment Target**: Bumped minimum iOS deployment target to 13.0 to align with modern platform requirements
+- **Enhanced Logging**: Improved debug logging capabilities with conditional debug print statements
+
+### 🚀 Performance & Developer Experience
+- **Faster Plugin Initialization**: Returns Flutter plugin result earlier during initialization for faster feedback
+- **Conditional Logging**: Gated console logging behind debug flags to reduce noise in production builds
+- **Better Discovery**: Enhanced device discovery initialization and lifecycle management
+
+### 🔧 Technical Updates
+- **CocoaPods Integration**: Updated CocoaPods and Xcode project metadata to reflect dependency changes
+- **Build System**: Improved build phases and linker configuration for better compatibility
+
+### 🔧 Notes
+- No breaking API changes. This release focuses on platform compatibility and missing functionality
+- Existing projects may need to update their iOS deployment target to 13.0 for optimal compatibility
+
 ## 1.2.4 - Misc fixes and Android method channel improvements
 ### 🐛 Bug Fixes
 - **Android remote media client**: Fixes in `android_remote_media_client_method_channel.dart` to address method channel behavior when loading single media items.
