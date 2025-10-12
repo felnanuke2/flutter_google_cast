@@ -29,7 +29,7 @@ public class SwiftGoogleCastPlugin: NSObject, GCKLoggerDelegate, FlutterPlugin, 
     /// Flutter method channel for Cast context operations
     /// Handles communication between Flutter and native iOS for context-related methods
     private var channel : FlutterMethodChannel?
-   
+
     // MARK: - Google Cast SDK Properties
     
     /// Access the shared Cast session manager
@@ -118,25 +118,38 @@ public class SwiftGoogleCastPlugin: NSObject, GCKLoggerDelegate, FlutterPlugin, 
     ///   - result: Flutter result callback (currently unused)
     /// - Note: This method should be called once during app initialization
     private func setSharedInstanceWithOption(arguments: Dictionary<String, Any> ,result: @escaping FlutterResult){
-        // Parse Cast options from Flutter arguments
-        let option = GCKCastOptions.fromMap(arguments)
+      
+            // Parse Cast options from Flutter arguments
+        let option =  GCKCastOptions.fromMap(arguments)
         
         // Initialize the shared Cast context with parsed options
-        GCKCastContext.setSharedInstanceWith(option)
+       GCKCastContext.setSharedInstanceWith(option)
         
         // Enable console logging for debugging
         GCKLogger.sharedInstance().consoleLoggingEnabled = true
         GCKLogger.sharedInstance().delegate = self
+
+        let filter = GCKLoggerFilter.init()
+        filter.minimumLevel = GCKLoggerLevel.verbose
+        GCKLogger.sharedInstance().filter = filter
         
         // Register listeners for Cast events
-        discoveryManager.add(FGCDiscoveryManagerMethodChannel.instance)
+        discoveryManager.add(FGCDiscoveryManagerMethodChannel.instance)   
         sessionManager.add(FGCSessionManagerMethodChannel.instance )
 
         // Start discovering Cast devices automatically
+        // Return to Flutter immediately before starting potentially expensive operations
+        // so the Dart side gets fast feedback.
+        result(true)
+
         discoveryManager.startDiscovery()
 
-    // Observe application lifecycle to stop discovery and remove listeners when app closes
-    addLifecycleObserversIfNeeded()
+        if kDebugLoggingEnabled {
+            print("Cast context initialized")
+        }
+
+        // Observe application lifecycle to stop discovery and remove listeners when app closes
+        addLifecycleObserversIfNeeded()
     }
 
     // MARK: - Teardown / Lifecycle handlers
@@ -144,18 +157,17 @@ public class SwiftGoogleCastPlugin: NSObject, GCKLoggerDelegate, FlutterPlugin, 
     /// Cleanly stops discovery and removes registered listeners to avoid callbacks after deallocation.
     private func tearDown() {
         // Stop discovery if it's running
-    // Stop discovery if it's running
-    if kDebugLoggingEnabled {
-        print("SwiftGoogleCastPlugin: tearing down - stopping discovery and removing listeners")
-    }
-    discoveryManager.stopDiscovery()
+        if kDebugLoggingEnabled {
+            print("SwiftGoogleCastPlugin: tearing down - stopping discovery and removing listeners")
+        }
+        discoveryManager.stopDiscovery()
 
-    // Remove any previously registered listeners (safe to call even if not registered)
-    discoveryManager.remove(FGCDiscoveryManagerMethodChannel.instance)
-    sessionManager.remove(FGCSessionManagerMethodChannel.instance)
+        // Remove any previously registered listeners (safe to call even if not registered)
+        discoveryManager.remove(FGCDiscoveryManagerMethodChannel.instance)
+        sessionManager.remove(FGCSessionManagerMethodChannel.instance)
 
-    // Remove logger delegate
-    GCKLogger.sharedInstance().delegate = nil
+        // Remove logger delegate
+        GCKLogger.sharedInstance().delegate = nil
     }
 
     @objc private func applicationWillTerminateNotification(_ notification: Notification) {
@@ -220,19 +232,13 @@ public class SwiftGoogleCastPlugin: NSObject, GCKLoggerDelegate, FlutterPlugin, 
                       fromFunction function: String,
                       location: String) {
           // Print formatted log message with function name for easier debugging
-          print(function + " - " + message)
+          if kDebugLoggingEnabled {
+              print(function + " - " + message)
+          }
     }
     
   
 
     
     
-    
-    
-    
-    
 }
-
-
-
-
