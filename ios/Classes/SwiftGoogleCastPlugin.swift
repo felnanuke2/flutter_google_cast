@@ -138,14 +138,18 @@ public class SwiftGoogleCastPlugin: NSObject, GCKLoggerDelegate, FlutterPlugin, 
         sessionManager.add(FGCSessionManagerMethodChannel.instance )
 
         // Start discovering Cast devices automatically
+        // Return to Flutter immediately before starting potentially expensive operations
+        // so the Dart side gets fast feedback.
+        result(true)
+
         discoveryManager.startDiscovery()
 
-        print("Cast context initialized")
-        
+        if kDebugLoggingEnabled {
+            print("Cast context initialized")
+        }
+
         // Observe application lifecycle to stop discovery and remove listeners when app closes
         addLifecycleObserversIfNeeded()
-        
-        result(true)
     }
 
     // MARK: - Teardown / Lifecycle handlers
@@ -228,7 +232,9 @@ public class SwiftGoogleCastPlugin: NSObject, GCKLoggerDelegate, FlutterPlugin, 
                       fromFunction function: String,
                       location: String) {
           // Print formatted log message with function name for easier debugging
-          print(function + " - " + message)
+          if kDebugLoggingEnabled {
+              print(function + " - " + message)
+          }
     }
     
   
