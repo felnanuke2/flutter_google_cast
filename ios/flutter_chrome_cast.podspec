@@ -4,7 +4,7 @@
 #
 Pod::Spec.new do |s|
   s.name             = 'flutter_chrome_cast'
-  s.version          = '0.0.2'
+  s.version          = '1.2.6'
   s.summary          = 'A new Flutter plugin project.'
   s.description      = <<-DESC
 A new Flutter plugin project.
@@ -19,7 +19,7 @@ A new Flutter plugin project.
   s.ios.deployment_target  = '12.0'
   s.dependency 'google-cast-sdk', '~> 4.7'
   s.dependency 'Protobuf'
-  s.static_framework = true 
+  s.static_framework = true
 
   # IMPORTANT: Architecture exclusion for iOS Simulator builds
   # 
@@ -33,8 +33,15 @@ A new Flutter plugin project.
   # Note: This only affects simulator builds - real device builds work correctly.
   # This workaround should be removed once Google releases a Cast SDK version
   # that fully supports Apple Silicon simulators.
-  s.pod_target_xcconfig = { 'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'arm64' }
-  s.user_target_xcconfig = { 'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'arm64' }
+  s.pod_target_xcconfig = { 
+    'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'arm64',
+    'ENABLE_TESTING_SEARCH_PATHS' => 'YES',
+    'DEFINES_MODULE' => 'YES'
+  }
+  s.user_target_xcconfig = { 
+    'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'arm64',
+    'ENABLE_TESTING_SEARCH_PATHS' => 'YES'
+  }
 
   s.swift_version = '5.0'
 end

@@ -1,3 +1,15 @@
+## 1.2.6 - iOS Simulator Build Compatibility Fix
+### 🐛 Bug Fixes
+- **iOS Simulator Module Resolution**: Fixed "Module 'flutter_chrome_cast' not found" parse error that occurred during iOS simulator builds
+  - Issue affected only simulator builds; device builds and IPA generation worked correctly
+  - Added `DEFINES_MODULE=YES` to podspec for proper Swift module header generation
+  - Added `ENABLE_TESTING_SEARCH_PATHS=YES` to improve module resolution during simulator compilation
+  - Maintains full compatibility with static framework linking for transitive Google Cast SDK dependencies
+
+### 🔧 Notes
+- No public API changes. This release focuses on build system compatibility for iOS simulator builds
+- Resolves issue #XX where users encountered "Module not found" errors on some machines while others were unaffected
+
 ## 1.2.5 - iOS Apple Silicon Support & Enhanced Media Controls
 ### ✨ New Features
 - **Missing Audio Control**: Added missing `stop` method for audio control in remote casting client
