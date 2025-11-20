@@ -1,6 +1,6 @@
 PODS:
   - Flutter (1.0.0)
-  - flutter_chrome_cast (0.0.2):
+  - flutter_chrome_cast (1.2.6):
     - Flutter
     - google-cast-sdk (~> 4.7)
     - Protobuf
@@ -33,7 +33,7 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
-  flutter_chrome_cast: 9e83c278d842ff53a67e16184ee9c7c9df4f3094
+  flutter_chrome_cast: 9671f5786e2297f2697929e3af913228b2b73b69
   google-cast-sdk: afeb1aac0744b1bc4f70bc3db8468e33fabbff38
   permission_handler_apple: 4ed2196e43d0651e8ff7ca3483a069d469701f2d
   Protobuf: 164aea2ae380c3951abdc3e195220c01d17400e0

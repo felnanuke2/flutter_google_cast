@@ -54,7 +54,7 @@ jobs:
     - name: Run tests
       run: flutter test
 
-  build:
+  build-android:
     needs: test
     runs-on: ubuntu-latest
     
