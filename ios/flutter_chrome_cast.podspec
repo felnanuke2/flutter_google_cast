@@ -16,23 +16,19 @@ full support for media streaming, playback controls, queue management, and real-
   s.author           = { 'Luiz Felipe Alves Lima' => 'https://github.com/felnanuke2' }
   s.source           = { :path => '.' }
   s.source_files = 'Classes/**/*'
-  s.public_header_files = 'Classes/**/*.h'
   s.dependency 'Flutter'
-  s.platform = :ios, '12.0'
-  s.ios.deployment_target  = '12.0'
+  s.platform = :ios, '14.0'
+  s.ios.deployment_target  = '14.0'
   s.dependency 'google-cast-sdk', '~> 4.8'
   s.dependency 'Protobuf'
   s.static_framework = true
 
   s.pod_target_xcconfig = { 
-    'DEFINES_MODULE' => 'YES',
-    'SWIFT_INCLUDE_PATHS' => '$(inherited) $(PODS_TARGET_SRCROOT)/Classes',
-    'SWIFT_COMPILATION_MODE' => 'wholemodule',
-    'CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES' => 'YES',
+    'ENABLE_TESTING_SEARCH_PATHS' => 'YES',
+    'DEFINES_MODULE' => 'YES'
   }
-
-  s.user_target_xcconfig = {
-    'CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES' => 'YES',
+  s.user_target_xcconfig = { 
+    'ENABLE_TESTING_SEARCH_PATHS' => 'YES'
   }
 
   s.swift_version = '5.0'

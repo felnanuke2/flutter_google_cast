@@ -4,10 +4,7 @@ PODS:
     - Flutter
     - google-cast-sdk (~> 4.8)
     - Protobuf
-  - google-cast-sdk (4.8.0):
-    - google-cast-sdk/Core (= 4.8.0)
-    - Protobuf (~> 3.13)
-  - google-cast-sdk/Core (4.8.0):
+  - google-cast-sdk (4.8.3):
     - Protobuf (~> 3.13)
   - permission_handler_apple (9.3.0):
     - Flutter
@@ -33,11 +30,11 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
-  flutter_chrome_cast: d88b914e45e9f6475fd80d0c87dd1db3e8467732
-  google-cast-sdk: afeb1aac0744b1bc4f70bc3db8468e33fabbff38
+  flutter_chrome_cast: b0048319f35c7b4fd09941303fb53cdac417d48d
+  google-cast-sdk: 1fb6724e94cc5ff23b359176e0cf6360586bb97a
   permission_handler_apple: 4ed2196e43d0651e8ff7ca3483a069d469701f2d
   Protobuf: 164aea2ae380c3951abdc3e195220c01d17400e0
 
-PODFILE CHECKSUM: 29e8894873f45b17384f90ba496d7cdefdfd1e70
+PODFILE CHECKSUM: 775997f741c536251164e3eacf6e34abf2eb7a17
 
 COCOAPODS: 1.16.2
