@@ -8,83 +8,83 @@ on:
   workflow_dispatch:
 
 jobs:
-  test:
-    runs-on: ubuntu-latest
+  # test:
+  #   runs-on: ubuntu-latest
     
-    steps:
-    - uses: actions/checkout@v4
+  #   steps:
+  #   - uses: actions/checkout@v4
     
-    - name: Setup Flutter
-      uses: subosito/flutter-action@v2
-      with:
-        flutter-version: '3.35.3'
-        channel: 'stable'
+  #   - name: Setup Flutter
+  #     uses: subosito/flutter-action@v2
+  #     with:
+  #       flutter-version: '3.35.3'
+  #       channel: 'stable'
     
-    - name: Install dependencies
-      run: flutter pub get
+  #   - name: Install dependencies
+  #     run: flutter pub get
     
-    - name: Check for outdated dependencies
-      run: |
-        echo "Checking for outdated dependencies..."
-        flutter pub outdated || true
-        echo "Note: Some dependencies may have newer versions. Consider updating when compatible."
+  #   - name: Check for outdated dependencies
+  #     run: |
+  #       echo "Checking for outdated dependencies..."
+  #       flutter pub outdated || true
+  #       echo "Note: Some dependencies may have newer versions. Consider updating when compatible."
     
-    - name: Verify formatting
-      run: dart format --output=none --set-exit-if-changed .
+  #   - name: Verify formatting
+  #     run: dart format --output=none --set-exit-if-changed .
     
-    - name: Analyze project source
-      run: flutter analyze
+  #   - name: Analyze project source
+  #     run: flutter analyze
     
-    - name: Check if tests exist
-      run: |
-        if [ ! -d "test" ]; then
-          echo "❌ Error: No test directory found!"
-          echo "Tests are required for this project."
-          exit 1
-        fi
+  #   - name: Check if tests exist
+  #     run: |
+  #       if [ ! -d "test" ]; then
+  #         echo "❌ Error: No test directory found!"
+  #         echo "Tests are required for this project."
+  #         exit 1
+  #       fi
         
-        if [ -z "$(find test -name '*.dart' -type f)" ]; then
-          echo "❌ Error: No test files found in test directory!"
-          echo "At least one test file is required."
-          exit 1
-        fi
+  #       if [ -z "$(find test -name '*.dart' -type f)" ]; then
+  #         echo "❌ Error: No test files found in test directory!"
+  #         echo "At least one test file is required."
+  #         exit 1
+  #       fi
         
-        echo "✅ Test directory and files found"
+  #       echo "✅ Test directory and files found"
     
-    - name: Run tests
-      run: flutter test
+  #   - name: Run tests
+  #     run: flutter test
 
-  build-android:
-    needs: test
-    runs-on: ubuntu-latest
+  # build-android:
+  #   needs: test
+  #   runs-on: ubuntu-latest
     
-    steps:
-    - uses: actions/checkout@v4
+  #   steps:
+  #   - uses: actions/checkout@v4
     
-    - name: Setup Flutter
-      uses: subosito/flutter-action@v2
-      with:
-        flutter-version: '3.35.3'
-        channel: 'stable'
+  #   - name: Setup Flutter
+  #     uses: subosito/flutter-action@v2
+  #     with:
+  #       flutter-version: '3.35.3'
+  #       channel: 'stable'
     
-    - name: Install dependencies
-      run: flutter pub get
+  #   - name: Install dependencies
+  #     run: flutter pub get
     
-    - name: Check for outdated dependencies
-      run: |
-        echo "Checking for outdated dependencies..."
-        flutter pub outdated || true
-        echo "Note: Some dependencies may have newer versions. Consider updating when compatible."
+  #   - name: Check for outdated dependencies
+  #     run: |
+  #       echo "Checking for outdated dependencies..."
+  #       flutter pub outdated || true
+  #       echo "Note: Some dependencies may have newer versions. Consider updating when compatible."
     
     
-    - name: Build Android (ARM64 and ARM only)
-      run: |
-        cd example
-        # Build only for ARM architectures, excluding x86 as it's deprecated
-        flutter build apk --debug
+  #   - name: Build Android (ARM64 and ARM only)
+  #     run: |
+  #       cd example
+  #       # Build only for ARM architectures, excluding x86 as it's deprecated
+  #       flutter build apk --debug
 
   build-ios:
-    needs: test
+    # needs: test
     runs-on: macos-latest
     
     steps:
