@@ -81,11 +81,31 @@ jobs:
         cd example
         # Build only for ARM architectures, excluding x86 as it's deprecated
         flutter build apk --debug
+
+  build-ios:
+    needs: test
+    runs-on: macos-latest
     
-    - name: Build iOS (if on macOS)
-      if: runner.os == 'macOS'
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.35.3'
+        channel: 'stable'
+    
+    - name: Install dependencies
+      run: flutter pub get
+    
+    - name: Build iOS Simulator
       run: |
         cd example
-        flutter build ios --no-codesign
+        flutter build ios --simulator --no-codesign
+    
+    - name: Build iOS for Device (Release)
+      run: |
+        cd example
+        flutter build ios --release --no-codesign
 
 
