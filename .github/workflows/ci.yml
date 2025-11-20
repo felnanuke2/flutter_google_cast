@@ -2,7 +2,7 @@ name: Flutter CI with Test Enforcement
 
 on:
   push:
-    branches: [ main, develop, master ]
+    branches: [ main, develop, master, 'fix/**', 'feature/**' ]
   pull_request:
     branches: [ main, develop, master ]
   workflow_dispatch:
