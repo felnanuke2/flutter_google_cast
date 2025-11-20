@@ -4,37 +4,32 @@
 #
 Pod::Spec.new do |s|
   s.name             = 'flutter_chrome_cast'
-  s.version          = '0.0.2'
-  s.summary          = 'A new Flutter plugin project.'
+  s.version          = '1.2.6'
+  s.summary          = 'A comprehensive Flutter plugin for Google Cast SDK integration on iOS and Android.'
   s.description      = <<-DESC
-A new Flutter plugin project.
+FlutterGoogleCast provides seamless integration with the Google Cast SDK for Flutter applications.
+Discover, connect to, and control Chromecast devices and other Google Cast-enabled receivers with
+full support for media streaming, playback controls, queue management, and real-time status updates.
                        DESC
-  s.homepage         = 'http://example.com'
+  s.homepage         = 'https://github.com/felnanuke2/flutter_google_cast'
   s.license          = { :file => '../LICENSE' }
-  s.author           = { 'Your Company' => 'email@example.com' }
+  s.author           = { 'Luiz Felipe Alves Lima' => 'https://github.com/felnanuke2' }
   s.source           = { :path => '.' }
   s.source_files = 'Classes/**/*'
   s.dependency 'Flutter'
-  s.platform = :ios, '12.0'
-  s.ios.deployment_target  = '12.0'
-  s.dependency 'google-cast-sdk', '~> 4.7'
+  s.platform = :ios, '14.0'
+  s.ios.deployment_target  = '14.0'
+  s.dependency 'google-cast-sdk', '~> 4.8'
   s.dependency 'Protobuf'
-  s.static_framework = true 
+  s.static_framework = true
 
-  # IMPORTANT: Architecture exclusion for iOS Simulator builds
-  # 
-  # The Google Cast SDK (version 4.7.0) contains pre-compiled binaries that cause
-  # linking errors when building for iOS Simulator on Apple Silicon Macs.
-  # Error: "Building for 'iOS-simulator', but linking in object file built for 'iOS'"
-  #
-  # This exclusion prevents the linker from trying to use arm64 binaries when
-  # building for the simulator, which requires x86_64 architecture.
-  #
-  # Note: This only affects simulator builds - real device builds work correctly.
-  # This workaround should be removed once Google releases a Cast SDK version
-  # that fully supports Apple Silicon simulators.
-  s.pod_target_xcconfig = { 'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'arm64' }
-  s.user_target_xcconfig = { 'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'arm64' }
+  s.pod_target_xcconfig = { 
+    'ENABLE_TESTING_SEARCH_PATHS' => 'YES',
+    'DEFINES_MODULE' => 'YES'
+  }
+  s.user_target_xcconfig = { 
+    'ENABLE_TESTING_SEARCH_PATHS' => 'YES'
+  }
 
   s.swift_version = '5.0'
 end
