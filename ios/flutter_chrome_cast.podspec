@@ -34,12 +34,12 @@ A new Flutter plugin project.
   # This workaround should be removed once Google releases a Cast SDK version
   # that fully supports Apple Silicon simulators.
   s.pod_target_xcconfig = { 
-    'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'arm64',
+    'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'arm64 i386',
     'ENABLE_TESTING_SEARCH_PATHS' => 'YES',
     'DEFINES_MODULE' => 'YES'
   }
   s.user_target_xcconfig = { 
-    'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'arm64',
+    'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'arm64 i386',
     'ENABLE_TESTING_SEARCH_PATHS' => 'YES'
   }
 
