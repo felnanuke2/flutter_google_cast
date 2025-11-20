@@ -4,6 +4,7 @@
   - Issue affected only simulator builds; device builds and IPA generation worked correctly
   - Added `DEFINES_MODULE=YES` to podspec for proper Swift module header generation
   - Added `ENABLE_TESTING_SEARCH_PATHS=YES` to improve module resolution during simulator compilation
+  - Updated Google Cast SDK to ~> 4.8
   - Maintains full compatibility with static framework linking for transitive Google Cast SDK dependencies
 
 ### 🔧 Notes
