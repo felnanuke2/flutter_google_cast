@@ -16,6 +16,7 @@ full support for media streaming, playback controls, queue management, and real-
   s.author           = { 'Luiz Felipe Alves Lima' => 'https://github.com/felnanuke2' }
   s.source           = { :path => '.' }
   s.source_files = 'Classes/**/*'
+  s.public_header_files = 'Classes/**/*.h'
   s.dependency 'Flutter'
   s.platform = :ios, '12.0'
   s.ios.deployment_target  = '12.0'
@@ -25,11 +26,13 @@ full support for media streaming, playback controls, queue management, and real-
 
   s.pod_target_xcconfig = { 
     'DEFINES_MODULE' => 'YES',
-    'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'arm64',
+    'SWIFT_INCLUDE_PATHS' => '$(inherited) $(PODS_TARGET_SRCROOT)/Classes',
+    'SWIFT_COMPILATION_MODE' => 'wholemodule',
+    'CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES' => 'YES',
   }
 
   s.user_target_xcconfig = {
-    'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'arm64',
+    'CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES' => 'YES',
   }
 
   s.swift_version = '5.0'
