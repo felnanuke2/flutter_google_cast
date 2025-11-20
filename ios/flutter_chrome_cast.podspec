@@ -17,18 +17,12 @@ A new Flutter plugin project.
   s.dependency 'Flutter'
   s.platform = :ios, '12.0'
   s.ios.deployment_target  = '12.0'
-  s.dependency 'google-cast-sdk', '~> 4.7'
+  s.dependency 'google-cast-sdk', '~> 4.8'
   s.dependency 'Protobuf'
   s.static_framework = true
 
   s.pod_target_xcconfig = { 
-    'ENABLE_TESTING_SEARCH_PATHS' => 'YES',
     'DEFINES_MODULE' => 'YES',
-    'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'arm64'
-  }
-  s.user_target_xcconfig = { 
-    'ENABLE_TESTING_SEARCH_PATHS' => 'YES',
-    'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'arm64'
   }
 
   s.swift_version = '5.0'
