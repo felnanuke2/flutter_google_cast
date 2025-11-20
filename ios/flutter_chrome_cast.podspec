@@ -21,24 +21,28 @@ A new Flutter plugin project.
   s.dependency 'Protobuf'
   s.static_framework = true
 
-  # IMPORTANT: Architecture configuration for iOS Simulator builds
+  # IMPORTANT: Architecture exclusion for iOS Simulator builds
   # 
-  # Google Cast SDK (version 4.7.0+) supports both Intel and Apple Silicon simulators.
-  # We only exclude i386 as it's truly deprecated and no longer supported.
-  # 
-  # - i386: 32-bit Intel architecture (deprecated since iOS 11)
-  # - x86_64: 64-bit Intel architecture (for Intel Mac simulators)
-  # - arm64: Apple Silicon architecture (for M1/M2/M3 Mac simulators and devices)
+  # The Google Cast SDK (versions 4.7.x - 4.8.x) contains pre-compiled binaries that only
+  # include device architectures (arm64 for iOS devices). When building for simulator,
+  # the SDK's arm64 slice is for devices, not simulators, causing linker errors:
+  # "Building for 'iOS-simulator', but linking in object file built for 'iOS'"
   #
-  # This configuration allows building for both Intel (x86_64) and Apple Silicon (arm64)
-  # simulators, as well as arm64 devices.
+  # This exclusion forces simulator builds to use x86_64 architecture (Intel),
+  # which works on both Intel Macs natively and Apple Silicon Macs via Rosetta 2.
+  #
+  # Excluded architectures:
+  # - arm64: Excluded for simulator to avoid linking device binaries
+  # - i386: 32-bit architecture, deprecated since iOS 11
+  #
+  # CI/CD Note: Apple Silicon runners must use arch -x86_64 or similar to build x86_64
   s.pod_target_xcconfig = { 
-    'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'i386',
+    'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'arm64',
     'ENABLE_TESTING_SEARCH_PATHS' => 'YES',
     'DEFINES_MODULE' => 'YES'
   }
   s.user_target_xcconfig = { 
-    'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'i386',
+    'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'arm64',
     'ENABLE_TESTING_SEARCH_PATHS' => 'YES'
   }
 
