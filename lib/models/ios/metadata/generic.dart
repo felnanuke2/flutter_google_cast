@@ -16,9 +16,10 @@ class GoogleCastGenericMediaMetadataIOS extends GoogleCastGenericMediaMetadata {
       title: map['title'] as String?,
       subtitle: map['subtitle'] as String?,
       images: map['images'] != null
-          ? (map['images'] as List).map(
-              (x) => GoogleCastImage.fromMap(Map<String, dynamic>.from(x)))
-              .whereType<GoogleCastImage>().toList()
+          ? (map['images'] as List)
+              .map((x) => GoogleCastImage.fromMap(Map<String, dynamic>.from(x)))
+              .whereType<GoogleCastImage>()
+              .toList()
           : null,
       releaseDate: map['releaseDate'] != null && map['releaseDate'] is int
           ? DateTime.fromMillisecondsSinceEpoch(map['releaseDate'])

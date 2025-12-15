@@ -89,7 +89,8 @@ class _ExpandedGoogleCastPlayerControllerState
         stream: GoogleCastRemoteMediaClient.instance.mediaStatusStream,
         builder: (context, snapshot) {
           // Use snapshot.data to get the latest value from the stream
-          final mediaStatus = snapshot.data ?? GoogleCastRemoteMediaClient.instance.mediaStatus;
+          final mediaStatus =
+              snapshot.data ?? GoogleCastRemoteMediaClient.instance.mediaStatus;
           final deviceName = GoogleCastSessionManager
               .instance.currentSession?.device?.friendlyName;
           if (mediaStatus == null) return const SizedBox.shrink();
@@ -393,17 +394,28 @@ class _ExpandedGoogleCastPlayerControllerState
                                       return SizedBox(
                                         width: 48,
                                         child: Text(
-                                          (mediaStatus.mediaInformation?.streamType == CastMediaStreamType.live && (mediaStatus.mediaInformation?.duration == null || mediaStatus.mediaInformation!.duration!.inSeconds == 0))
+                                          (mediaStatus.mediaInformation
+                                                          ?.streamType ==
+                                                      CastMediaStreamType
+                                                          .live &&
+                                                  (mediaStatus.mediaInformation
+                                                              ?.duration ==
+                                                          null ||
+                                                      mediaStatus
+                                                              .mediaInformation!
+                                                              .duration!
+                                                              .inSeconds ==
+                                                          0))
                                               ? ''
                                               : _isSliding
-                                              ? _getDurationToSeek(
-                                                      _sliderPercentage,
-                                                      mediaStatus)
-                                                  .formatted
-                                              : GoogleCastRemoteMediaClient
-                                                  .instance
-                                                  .playerPosition
-                                                  .formatted,
+                                                  ? _getDurationToSeek(
+                                                          _sliderPercentage,
+                                                          mediaStatus)
+                                                      .formatted
+                                                  : GoogleCastRemoteMediaClient
+                                                      .instance
+                                                      .playerPosition
+                                                      .formatted,
                                           style: theme?.timeTextStyle ??
                                               Theme.of(context)
                                                   .textTheme
@@ -419,11 +431,21 @@ class _ExpandedGoogleCastPlayerControllerState
                                   SizedBox(
                                     width: 48,
                                     child: Text(
-                                      (mediaStatus.mediaInformation?.streamType == CastMediaStreamType.live && (mediaStatus.mediaInformation?.duration == null || mediaStatus.mediaInformation!.duration!.inSeconds == 0))
+                                      (mediaStatus.mediaInformation
+                                                      ?.streamType ==
+                                                  CastMediaStreamType.live &&
+                                              (mediaStatus.mediaInformation
+                                                          ?.duration ==
+                                                      null ||
+                                                  mediaStatus
+                                                          .mediaInformation!
+                                                          .duration!
+                                                          .inSeconds ==
+                                                      0))
                                           ? 'LIVE'
-                                          : mediaStatus.mediaInformation?.duration
-                                              ?.formatted ??
-                                          '-',
+                                          : mediaStatus.mediaInformation
+                                                  ?.duration?.formatted ??
+                                              '-',
                                       style: theme?.timeTextStyle ??
                                           Theme.of(context)
                                               .textTheme
@@ -474,14 +496,18 @@ class _ExpandedGoogleCastPlayerControllerState
                                       GestureDetector(
                                         behavior: HitTestBehavior.opaque,
                                         onTap: () {
-                                          debugPrint('[Flutter] Play/Pause GestureDetector tapped! playerState: ${mediaStatus.playerState} (index: ${mediaStatus.playerState.index})');
+                                          debugPrint(
+                                              '[Flutter] Play/Pause GestureDetector tapped! playerState: ${mediaStatus.playerState} (index: ${mediaStatus.playerState.index})');
                                           _togglePlayAndPause(
                                               mediaStatus.playerState);
                                           // Treat buffering as playing for animation (not loading - loading means resuming)
-                                          final isPlaying = mediaStatus.playerState ==
-                                                  CastMediaPlayerState.playing ||
+                                          final isPlaying = mediaStatus
+                                                      .playerState ==
+                                                  CastMediaPlayerState
+                                                      .playing ||
                                               mediaStatus.playerState ==
-                                                  CastMediaPlayerState.buffering ||
+                                                  CastMediaPlayerState
+                                                      .buffering ||
                                               mediaStatus.playerState ==
                                                   CastMediaPlayerState.loading;
                                           if (isPlaying) {
@@ -495,8 +521,8 @@ class _ExpandedGoogleCastPlayerControllerState
                                           child: AnimatedIcon(
                                             icon: AnimatedIcons.play_pause,
                                             progress: _playPauseController,
-                                            color:
-                                                theme?.iconColor ?? Colors.white,
+                                            color: theme?.iconColor ??
+                                                Colors.white,
                                             size: theme?.iconSize != null
                                                 ? theme!.iconSize! + 16
                                                 : 56,
@@ -600,21 +626,41 @@ class _ExpandedGoogleCastPlayerControllerState
                     (theme?.iconColor ?? Colors.white).withValues(alpha: 0.2),
               ),
               child: Slider(
-                value: (mediaStatus?.mediaInformation?.streamType == CastMediaStreamType.live && (mediaStatus?.mediaInformation?.duration == null || mediaStatus?.mediaInformation?.duration?.inSeconds == 0))
+                value: (mediaStatus?.mediaInformation?.streamType ==
+                            CastMediaStreamType.live &&
+                        (mediaStatus?.mediaInformation?.duration == null ||
+                            mediaStatus
+                                    ?.mediaInformation?.duration?.inSeconds ==
+                                0))
                     ? 1.0
                     : _isSliding
-                    ? _sliderPercentage
-                    : _getProgressPercentage(
-                        mediaStatus,
-                        GoogleCastRemoteMediaClient.instance.playerPosition,
-                      ),
-                onChanged: (mediaStatus?.mediaInformation?.streamType == CastMediaStreamType.live && (mediaStatus?.mediaInformation?.duration == null || mediaStatus?.mediaInformation?.duration?.inSeconds == 0))
+                        ? _sliderPercentage
+                        : _getProgressPercentage(
+                            mediaStatus,
+                            GoogleCastRemoteMediaClient.instance.playerPosition,
+                          ),
+                onChanged: (mediaStatus?.mediaInformation?.streamType ==
+                            CastMediaStreamType.live &&
+                        (mediaStatus?.mediaInformation?.duration == null ||
+                            mediaStatus
+                                    ?.mediaInformation?.duration?.inSeconds ==
+                                0))
                     ? null
                     : _onSliderChanged,
-                onChangeStart: (mediaStatus?.mediaInformation?.streamType == CastMediaStreamType.live && (mediaStatus?.mediaInformation?.duration == null || mediaStatus?.mediaInformation?.duration?.inSeconds == 0))
+                onChangeStart: (mediaStatus?.mediaInformation?.streamType ==
+                            CastMediaStreamType.live &&
+                        (mediaStatus?.mediaInformation?.duration == null ||
+                            mediaStatus
+                                    ?.mediaInformation?.duration?.inSeconds ==
+                                0))
                     ? null
                     : _onSliderStarts,
-                onChangeEnd: (mediaStatus?.mediaInformation?.streamType == CastMediaStreamType.live && (mediaStatus?.mediaInformation?.duration == null || mediaStatus?.mediaInformation?.duration?.inSeconds == 0))
+                onChangeEnd: (mediaStatus?.mediaInformation?.streamType ==
+                            CastMediaStreamType.live &&
+                        (mediaStatus?.mediaInformation?.duration == null ||
+                            mediaStatus
+                                    ?.mediaInformation?.duration?.inSeconds ==
+                                0))
                     ? null
                     : (value) => _onSliderEnd.call(value, mediaStatus!),
               ),
@@ -636,7 +682,8 @@ class _ExpandedGoogleCastPlayerControllerState
   void _previous() => GoogleCastRemoteMediaClient.instance.queuePrevItem();
 
   void _togglePlayAndPause(CastMediaPlayerState playerState) {
-    debugPrint('[Flutter] _togglePlayAndPause called with state: $playerState (index: ${playerState.index})');
+    debugPrint(
+        '[Flutter] _togglePlayAndPause called with state: $playerState (index: ${playerState.index})');
     switch (playerState) {
       case CastMediaPlayerState.playing:
       case CastMediaPlayerState.buffering:

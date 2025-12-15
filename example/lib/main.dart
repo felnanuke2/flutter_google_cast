@@ -375,8 +375,8 @@ class _MyAppState extends State<MyApp> {
                                                   color: Colors.blue,
                                                 ),
                                                 IconButton(
-                                                  icon: const Icon(
-                                                      Icons.live_tv),
+                                                  icon:
+                                                      const Icon(Icons.live_tv),
                                                   onPressed: () =>
                                                       _loadHlsMedia(),
                                                   tooltip: 'Load HLS Media',

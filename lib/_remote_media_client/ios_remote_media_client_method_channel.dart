@@ -157,9 +157,11 @@ class GoogleCastRemoteMediaClientIOSMethodChannel
     if (arguments != null) {
       try {
         arguments = Map<String, dynamic>.from(arguments);
-        debugPrint('[Flutter] _onUpdateMediaStatus received: playerState=${arguments['playerState']}');
+        debugPrint(
+            '[Flutter] _onUpdateMediaStatus received: playerState=${arguments['playerState']}');
         final mediaStatus = GoogleCastIOSMediaStatus.fromMap(arguments);
-        debugPrint('[Flutter] _onUpdateMediaStatus parsed: playerState=${mediaStatus.playerState}');
+        debugPrint(
+            '[Flutter] _onUpdateMediaStatus parsed: playerState=${mediaStatus.playerState}');
         _queueHasNextItem = arguments["queueHasNextItem"];
         _mediaStatusStreamController.add(mediaStatus);
       } catch (e) {

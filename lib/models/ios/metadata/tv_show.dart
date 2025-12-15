@@ -18,9 +18,10 @@ class GoogleCastTvShowMediaMetadataIOS extends GoogleCastTvShowMediaMetadata {
       season: map['seasonNumber']?.toInt(),
       episode: map['episodeNumber']?.toInt(),
       images: map['images'] != null
-          ? (map['images'] as List).map(
-              (x) => GoogleCastImage.fromMap(Map<String, dynamic>.from(x)))
-              .whereType<GoogleCastImage>().toList()
+          ? (map['images'] as List)
+              .map((x) => GoogleCastImage.fromMap(Map<String, dynamic>.from(x)))
+              .whereType<GoogleCastImage>()
+              .toList()
           : null,
       originalAirDate: map['releaseDate'] != null
           ? DateTimeString.tryParse(map['releaseDate'])

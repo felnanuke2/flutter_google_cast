@@ -27,9 +27,10 @@ class GoogleCastMusicMediaMetadataIOS extends GoogleCastMusicMediaMetadata {
       trackNumber: map['trackNumber']?.toInt(),
       discNumber: map['discNumber']?.toInt(),
       images: map['images'] != null
-          ? (map['images'] as List).map(
-              (x) => GoogleCastImage.fromMap(Map<String, dynamic>.from(x)))
-              .whereType<GoogleCastImage>().toList()
+          ? (map['images'] as List)
+              .map((x) => GoogleCastImage.fromMap(Map<String, dynamic>.from(x)))
+              .whereType<GoogleCastImage>()
+              .toList()
           : null,
       releaseDate: map['releaseDate'] != null && map['releaseDate'] is int
           ? DateTime.fromMillisecondsSinceEpoch(map['releaseDate'])
