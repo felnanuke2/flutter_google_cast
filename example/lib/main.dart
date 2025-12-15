@@ -376,6 +376,14 @@ class _MyAppState extends State<MyApp> {
                                                 ),
                                                 IconButton(
                                                   icon: const Icon(
+                                                      Icons.live_tv),
+                                                  onPressed: () =>
+                                                      _loadHlsMedia(),
+                                                  tooltip: 'Load HLS Media',
+                                                  color: Colors.orange,
+                                                ),
+                                                IconButton(
+                                                  icon: const Icon(
                                                       Icons.play_arrow),
                                                   onPressed: () =>
                                                       _loadAndPlayMedia(),
@@ -631,6 +639,49 @@ class _MyAppState extends State<MyApp> {
       ScaffoldMessenger.of(_scaffoldKey.currentContext!).showSnackBar(
         SnackBar(
           content: Text('Failed to load media: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  void _loadHlsMedia() async {
+    try {
+      final mediaInfo = GoogleCastMediaInformation(
+        contentId: 'hls_sample',
+        // Note: Use 'buffered' for VOD HLS streams that have a finite duration
+        // Use 'live' only for true live streams without a known duration
+        streamType: CastMediaStreamType.buffered,
+        contentUrl: Uri.parse(
+            'https://devstreaming-cdn.apple.com/videos/streaming/examples/img_bipbop_adv_example_ts/master.m3u8'),
+        contentType: 'application/x-mpegURL',
+        metadata: GoogleCastMovieMediaMetadata(
+          title: 'Apple HLS Sample',
+          subtitle: 'HLS Stream Test',
+          images: [
+            GoogleCastImage(
+              url: Uri.parse(
+                  'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/images/BigBuckBunny.jpg'),
+              height: 480,
+              width: 854,
+            ),
+          ],
+        ),
+      );
+
+      await GoogleCastRemoteMediaClient.instance.loadMedia(mediaInfo);
+
+      ScaffoldMessenger.of(_scaffoldKey.currentContext!).showSnackBar(
+        const SnackBar(
+          content: Text('HLS media loaded successfully'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (e, st) {
+      debugPrint('Error loading HLS media: $e\n$st');
+      ScaffoldMessenger.of(_scaffoldKey.currentContext!).showSnackBar(
+        SnackBar(
+          content: Text('Failed to load HLS media: $e'),
           backgroundColor: Colors.red,
         ),
       );

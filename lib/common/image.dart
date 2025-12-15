@@ -28,9 +28,16 @@ class GoogleCastImage {
   }
 
   /// Creates a [GoogleCastImage] from a map representation.
-  factory GoogleCastImage.fromMap(Map<String, dynamic> map) {
+  /// Returns null if the URL is missing or invalid.
+  static GoogleCastImage? fromMap(Map<String, dynamic> map) {
+    final urlString = map['url'];
+    if (urlString == null || urlString is! String || urlString.isEmpty) {
+      return null;
+    }
+    final uri = Uri.tryParse(urlString);
+    if (uri == null) return null;
     return GoogleCastImage(
-      url: Uri.parse(map['url']),
+      url: uri,
       height: map['height']?.toInt(),
       width: map['width']?.toInt(),
     );
@@ -40,6 +47,6 @@ class GoogleCastImage {
   String toJson() => json.encode(toMap());
 
   /// Creates a [GoogleCastImage] from a JSON string.
-  factory GoogleCastImage.fromJson(String source) =>
+  static GoogleCastImage? fromJson(String source) =>
       GoogleCastImage.fromMap(json.decode(source));
 }

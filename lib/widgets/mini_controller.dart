@@ -383,12 +383,17 @@ class _GoogleCastMiniControllerState extends State<GoogleCastMiniController> {
   void _togglePlayAndPause(CastMediaPlayerState playerState) {
     switch (playerState) {
       case CastMediaPlayerState.playing:
+      case CastMediaPlayerState.buffering:
+      case CastMediaPlayerState.loading:
+        // When playing or buffering - pause the media
         GoogleCastRemoteMediaClient.instance.pause();
         break;
       case CastMediaPlayerState.paused:
+      case CastMediaPlayerState.idle:
+      case CastMediaPlayerState.unknown:
+        // When paused, idle, loading, or unknown - play the media
         GoogleCastRemoteMediaClient.instance.play();
         break;
-      default:
     }
   }
 
@@ -397,9 +402,12 @@ class _GoogleCastMiniControllerState extends State<GoogleCastMiniController> {
     IconData iconData;
     switch (playerState) {
       case CastMediaPlayerState.playing:
+      case CastMediaPlayerState.buffering:
         iconData = Icons.pause_rounded;
         break;
       case CastMediaPlayerState.paused:
+      case CastMediaPlayerState.idle:
+      case CastMediaPlayerState.unknown:
         iconData = Icons.play_arrow_rounded;
         break;
       case CastMediaPlayerState.loading:
@@ -413,8 +421,6 @@ class _GoogleCastMiniControllerState extends State<GoogleCastMiniController> {
             ),
           ),
         );
-      default:
-        return const SizedBox.shrink();
     }
     return Icon(
       iconData,

@@ -56,7 +56,9 @@ class CastBreak {
   /// Creates a [CastBreak] from a map representation.
   factory CastBreak.fromMap(Map<String, dynamic> map) {
     return CastBreak(
-      breakClipIds: List<String>.from(map['breakClipIds']),
+      breakClipIds: map['breakClipIds'] != null
+          ? List<String>.from(map['breakClipIds'])
+          : [],
       duration: map['duration'] != null
           ? Duration(seconds: map['duration'].round())
           : null,

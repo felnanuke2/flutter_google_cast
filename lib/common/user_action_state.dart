@@ -34,7 +34,9 @@ class UserActionState {
   /// [map] - The map to create the instance from.
   factory UserActionState.fromMap(Map<String, dynamic> map) {
     return UserActionState(
-      customData: Map<String, dynamic>.from(map['customData']),
+      customData: map['customData'] != null
+          ? Map<String, dynamic>.from(map['customData'])
+          : null,
       userAction: map['userAction'] != null
           ? UserAction.fromMap(map['userAction'])
           : null,

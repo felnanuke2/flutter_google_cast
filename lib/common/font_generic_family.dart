@@ -46,7 +46,7 @@ enum TextTrackFontGenericFamily {
       case 'SMALL_CAPITALS':
         return TextTrackFontGenericFamily.smallCapitals;
       default:
-        throw ArgumentError('Unknown TextTrackFontGenericFamily: $value');
+        return TextTrackFontGenericFamily.sansSerif;
     }
   }
 }

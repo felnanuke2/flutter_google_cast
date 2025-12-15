@@ -15,15 +15,16 @@ class GoogleCastMovieMediaMetadataIOS extends GoogleCastMovieMediaMetadata {
   /// Creates a movie media metadata instance from a map.
   factory GoogleCastMovieMediaMetadataIOS.fromMap(Map<String, dynamic> map) {
     return GoogleCastMovieMediaMetadataIOS(
-      title: map['title'],
-      subtitle: map['subtitle'],
-      studio: map['studio'],
+      title: map['title'] as String?,
+      subtitle: map['subtitle'] as String?,
+      studio: map['studio'] as String?,
       images: map['images'] != null
-          ? List<GoogleCastImage>.from(map['images']?.map(
-              (x) => GoogleCastImage.fromMap(Map<String, dynamic>.from(x))))
+          ? (map['images'] as List).map(
+              (x) => GoogleCastImage.fromMap(Map<String, dynamic>.from(x)))
+              .whereType<GoogleCastImage>().toList()
           : null,
-      releaseDate: map['releaseDate'] != null
-          ? DateTime.fromMicrosecondsSinceEpoch(map['releaseDate'] ?? 0)
+      releaseDate: map['releaseDate'] != null && map['releaseDate'] is int
+          ? DateTime.fromMillisecondsSinceEpoch(map['releaseDate'])
           : null,
     );
   }

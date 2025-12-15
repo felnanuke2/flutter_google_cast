@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_chrome_cast/_remote_media_client/remote_media_client_platform.dart';
 import 'package:flutter_chrome_cast/entities/cast_media_status.dart';
@@ -156,10 +157,13 @@ class GoogleCastRemoteMediaClientIOSMethodChannel
     if (arguments != null) {
       try {
         arguments = Map<String, dynamic>.from(arguments);
+        debugPrint('[Flutter] _onUpdateMediaStatus received: playerState=${arguments['playerState']}');
         final mediaStatus = GoogleCastIOSMediaStatus.fromMap(arguments);
+        debugPrint('[Flutter] _onUpdateMediaStatus parsed: playerState=${mediaStatus.playerState}');
         _queueHasNextItem = arguments["queueHasNextItem"];
         _mediaStatusStreamController.add(mediaStatus);
       } catch (e) {
+        debugPrint('[Flutter] _onUpdateMediaStatus error: $e');
         rethrow;
       }
     }

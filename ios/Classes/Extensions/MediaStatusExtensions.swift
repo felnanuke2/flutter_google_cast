@@ -24,6 +24,10 @@ extension GCKMediaStatus {
         dict["queueHasNextItem"] = self.queueHasNextItem
         dict["queueHasPreviousItem"] =  self.queueHasPreviousItem
         dict["currentItemId"] = self.currentItemID
+        
+        // Add stream position if available, though it's usually retrieved separately
+        // dict["streamPosition"] = self.streamPosition
+        
         return dict
     }
     

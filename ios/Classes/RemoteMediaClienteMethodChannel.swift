@@ -187,7 +187,10 @@ class RemoteMediaClienteMethodChannel :UIResponder, FlutterPlugin, GCKRemoteMedi
     private func queueInsertItemAndPlay(_ arguments: Dictionary<String,Any>, result : FlutterResult) {
         let itemDict = arguments["item"] as! Dictionary<String,Any>
         let beforItemWithId = arguments["beforeItemWithId"] as! UInt
-        let item = GCKMediaQueueItem.fromMap(itemDict)
+        guard let item = GCKMediaQueueItem.fromMap(itemDict) else {
+            result(FlutterError(code: "INVALID_ARGUMENT", message: "Invalid item", details: nil))
+            return
+        }
         let request =  currentRemoteMediaCliente?.queueInsertAndPlay(item, beforeItemWithID: beforItemWithId)
         result(request?.toMap())
     }
@@ -195,7 +198,7 @@ class RemoteMediaClienteMethodChannel :UIResponder, FlutterPlugin, GCKRemoteMedi
     private func queueInsertItems(_ arguments: Dictionary<String,Any>, result : FlutterResult) {
         let itemsDict = arguments["items"] as! [Dictionary<String,Any>]
         let beforItemWithId = arguments["beforeItemWithId"] as? UInt
-        let items = itemsDict.map{
+        let items = itemsDict.compactMap{
             dict in
             GCKMediaQueueItem.fromMap(dict)
         }
@@ -205,7 +208,7 @@ class RemoteMediaClienteMethodChannel :UIResponder, FlutterPlugin, GCKRemoteMedi
     
     private func queueLoadItem(_ arguments: Dictionary<String,Any>, result : FlutterResult) {
         let itemsDict = arguments["items"] as! [Dictionary<String, Any>]
-        let items = itemsDict.map{
+        let items = itemsDict.compactMap{
             map in
             GCKMediaQueueItem.fromMap(map)
         }
@@ -219,14 +222,15 @@ class RemoteMediaClienteMethodChannel :UIResponder, FlutterPlugin, GCKRemoteMedi
     }
     
     private  func loadMedia(_ arguments : Dictionary<String,Any>, result : FlutterResult )  {
+        print("[GoogleCast] loadMedia() called with arguments: \(arguments)")
         guard let mediaInfo = GCKMediaInformation.fromMap(arguments) else {
-            
+            print("[GoogleCast] loadMedia() failed to create GCKMediaInformation")
             result(FlutterError.init(code: "1", message:"fail to generate media info", details: nil))
             return
             
         }
         
-        
+        print("[GoogleCast] loadMedia() mediaInfo created - contentID: \(mediaInfo.contentID ?? "nil"), contentType: \(mediaInfo.contentType ?? "nil"), streamType: \(mediaInfo.streamType.rawValue)")
         
         let options = GCKMediaLoadOptions.init()
         if let autoPlay = arguments["autoPlay"] as? Bool {
@@ -248,23 +252,26 @@ class RemoteMediaClienteMethodChannel :UIResponder, FlutterPlugin, GCKRemoteMedi
         if let credentials = arguments["credentials"] as? String {
             options.credentials = credentials
         }
-        print("\(options)")
+        print("[GoogleCast] loadMedia() options: autoplay=\(options.autoplay), playPosition=\(options.playPosition)")
+        print("[GoogleCast] loadMedia() remoteMediaClient: \(String(describing: currentRemoteMediaCliente))")
         let request = currentRemoteMediaCliente?.loadMedia(mediaInfo,with:  options)
+        print("[GoogleCast] loadMedia() request: \(String(describing: request))")
         result(request?.toMap())
         
         
     }
     
     private func pause(_ result : FlutterResult){
-        
+        print("[GoogleCast] pause() called, remoteMediaClient: \(String(describing: currentRemoteMediaCliente))")
         let request =  currentRemoteMediaCliente?.pause()
+        print("[GoogleCast] pause() request: \(String(describing: request))")
         result(  request?.toMap() )
         
         
     }
     
     private func stop(_ result : FlutterResult){
-        
+        print("[GoogleCast] stop() called, remoteMediaClient: \(String(describing: currentRemoteMediaCliente))")
         let request =  currentRemoteMediaCliente?.stop()
         result(  request?.toMap() )
         
@@ -272,7 +279,9 @@ class RemoteMediaClienteMethodChannel :UIResponder, FlutterPlugin, GCKRemoteMedi
     }
     
     private func play(_ result : FlutterResult){
+        print("[GoogleCast] play() called, remoteMediaClient: \(String(describing: currentRemoteMediaCliente))")
         let request =  currentRemoteMediaCliente?.play()
+        print("[GoogleCast] play() request: \(String(describing: request))")
         result(  request?.toMap() )
         
         
@@ -284,7 +293,11 @@ class RemoteMediaClienteMethodChannel :UIResponder, FlutterPlugin, GCKRemoteMedi
     }
     
     private func seek(_ result : FlutterResult, _ args : Dictionary<String, Any>){
-        let request =  currentRemoteMediaCliente?.seek(with: GCKMediaSeekOptions.fromMap(args: args))
+        print("[GoogleCast] seek() called with args: \(args), remoteMediaClient: \(String(describing: currentRemoteMediaCliente))")
+        let seekOptions = GCKMediaSeekOptions.fromMap(args: args)
+        print("[GoogleCast] seek() options - interval: \(seekOptions.interval), relative: \(seekOptions.relative)")
+        let request =  currentRemoteMediaCliente?.seek(with: seekOptions)
+        print("[GoogleCast] seek() request: \(String(describing: request))")
         result(request?.toMap())
     }
     
@@ -299,6 +312,7 @@ class RemoteMediaClienteMethodChannel :UIResponder, FlutterPlugin, GCKRemoteMedi
     }
     
     public func startListen(){
+        print("[GoogleCast] startListen() called, adding listener to remoteMediaClient: \(String(describing: currentRemoteMediaCliente))")
         currentRemoteMediaCliente?.add(self)
     }
     
@@ -307,6 +321,8 @@ class RemoteMediaClienteMethodChannel :UIResponder, FlutterPlugin, GCKRemoteMedi
     
 
     func remoteMediaClient(_ client: GCKRemoteMediaClient, didUpdate mediaStatus: GCKMediaStatus?) {
+        print("[GoogleCast] didUpdate mediaStatus - playerState: \(mediaStatus?.playerState.rawValue ?? -1), idleReason: \(mediaStatus?.idleReason.rawValue ?? -1)")
+        print("[GoogleCast] mediaStatus contentID: \(mediaStatus?.mediaInformation?.contentID ?? "nil")")
         startListenPlayerPosition()
      let data = mediaStatus?.toMap()
        
@@ -325,6 +341,7 @@ class RemoteMediaClienteMethodChannel :UIResponder, FlutterPlugin, GCKRemoteMedi
       
     }
     func remoteMediaClient(_ client: GCKRemoteMediaClient, didStartMediaSessionWithID sessionID: Int) {
+        print("[GoogleCast] didStartMediaSessionWithID: \(sessionID)")
         startListenPlayerPosition()
     }
     

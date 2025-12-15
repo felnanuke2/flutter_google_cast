@@ -13,14 +13,15 @@ class GoogleCastGenericMediaMetadataIOS extends GoogleCastGenericMediaMetadata {
   /// Creates a generic media metadata instance from a map.
   factory GoogleCastGenericMediaMetadataIOS.fromMap(Map<String, dynamic> map) {
     return GoogleCastGenericMediaMetadataIOS(
-      title: map['title'],
-      subtitle: map['subtitle'],
+      title: map['title'] as String?,
+      subtitle: map['subtitle'] as String?,
       images: map['images'] != null
-          ? List<GoogleCastImage>.from(map['images']?.map(
-              (x) => GoogleCastImage.fromMap(Map<String, dynamic>.from(x))))
+          ? (map['images'] as List).map(
+              (x) => GoogleCastImage.fromMap(Map<String, dynamic>.from(x)))
+              .whereType<GoogleCastImage>().toList()
           : null,
-      releaseDate: map['releaseDate'] != null
-          ? DateTime.fromMillisecondsSinceEpoch(map['releaseDate'] ?? 0)
+      releaseDate: map['releaseDate'] != null && map['releaseDate'] is int
+          ? DateTime.fromMillisecondsSinceEpoch(map['releaseDate'])
           : null,
     );
   }

@@ -13,7 +13,7 @@ extension GCKMediaInformation{
     
     static func fromMap(_ arguments: Dictionary<String, Any> ) -> GCKMediaInformation? {
         
-        let contentID = arguments["contentID"] as! String
+        guard let contentID = arguments["contentID"] as? String else { return nil }
         let streamType: GCKMediaStreamType = {
                     switch arguments["streamType"] as? String {
                     case "BUFFERED":
@@ -26,8 +26,10 @@ extension GCKMediaInformation{
                         return .unknown
                     }
                 }()
-        guard let  contentUrl = URL.init(string: arguments["contentURL"] as! String) else { return nil}
-        let builder =  GCKMediaInformationBuilder.init()
+        guard let contentUrlString = arguments["contentURL"] as? String,
+              let contentUrl = URL(string: contentUrlString) else { return nil}
+        
+        let builder =  GCKMediaInformationBuilder()
         builder.contentID  = contentID
         builder.streamType = streamType
         builder.contentURL = contentUrl
@@ -36,6 +38,8 @@ extension GCKMediaInformation{
         }
         if let duration = arguments["duration"] as? TimeInterval {
             builder.streamDuration = duration
+        } else if let duration = arguments["duration"] as? NSNumber {
+            builder.streamDuration = duration.doubleValue
         }
         if let startAbsoluteTime = arguments["startAbsoluteTime"] as? Double {
             builder.startAbsoluteTime = startAbsoluteTime / 1000.0
@@ -74,14 +78,14 @@ extension GCKMediaInformation{
         
     
         if let tracksDict = arguments["tracks"] as? [Dictionary<String, Any>] {
-    builder.mediaTracks = tracksDict.map{
+            builder.mediaTracks = tracksDict.compactMap{
                 dict in
                 GCKMediaTrack.fromMap(dict)
             }
         }
       
-        if let metadataDict = arguments["metadata"] {
-        builder.metadata = GCKMediaMetadata.fromMap(metadataDict as! Dictionary<String, Any>)
+        if let metadataDict = arguments["metadata"] as? Dictionary<String, Any> {
+            builder.metadata = GCKMediaMetadata.fromMap(metadataDict)
         }
       
         let buildedMediaInfo = builder.build()
@@ -99,7 +103,11 @@ extension GCKMediaInformation{
         dict["contentType"] = self.contentType
         dict["streamType"] = self.streamType.rawValue
         dict["contentURL"] = self.contentURL?.absoluteString
-        dict["duration"] = self.streamDuration
+        if self.streamDuration.isInfinite || self.streamDuration.isNaN {
+             dict["duration"] = 0.0
+        } else {
+             dict["duration"] = self.streamDuration
+        }
         dict["metadata"] = self.metadata?.toMap()
         dict["customData"] = self.customData
 

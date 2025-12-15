@@ -20,8 +20,6 @@ enum HlsVideoSegmentFormat {
         return HlsVideoSegmentFormat.mpeg2Ts;
       case 'FMP4':
         return HlsVideoSegmentFormat.fmp4;
-      case 'NONE':
-        return HlsVideoSegmentFormat.none;
       default:
         return HlsVideoSegmentFormat.none;
     }
