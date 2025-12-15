@@ -31,6 +31,15 @@ extension GCKMediaInformation{
         builder.contentID  = contentID
         builder.streamType = streamType
         builder.contentURL = contentUrl
+        if let contentType = arguments["contentType"] as? String {
+             builder.contentType = contentType
+        }
+        if let duration = arguments["duration"] as? TimeInterval {
+            builder.streamDuration = duration
+        }
+        if let startAbsoluteTime = arguments["startAbsoluteTime"] as? Double {
+            builder.startAbsoluteTime = startAbsoluteTime / 1000.0
+        }
         builder.customData = arguments["customData"]
       
         
