@@ -40,6 +40,35 @@ extension GCKMediaInformation{
         if let startAbsoluteTime = arguments["startAbsoluteTime"] as? Double {
             builder.startAbsoluteTime = startAbsoluteTime / 1000.0
         }
+        
+        if let hlsSegmentFormat = arguments["hlsSegmentFormat"] as? String {
+             switch hlsSegmentFormat {
+             case "aac":
+                 builder.hlsSegmentFormat = .AAC
+             case "ac3":
+                 builder.hlsSegmentFormat = .AC3
+             case "mp3":
+                 builder.hlsSegmentFormat = .MP3
+             case "ts":
+                 builder.hlsSegmentFormat = .TS
+             case "tsAac":
+                 builder.hlsSegmentFormat = .TS_AAC
+             default:
+                 break
+             }
+         }
+         
+         if let hlsVideoSegmentFormat = arguments["hlsVideoSegmentFormat"] as? String {
+             switch hlsVideoSegmentFormat {
+             case "mpeg2Ts":
+                 builder.hlsVideoSegmentFormat = .MPEG2_TS
+             case "fmp4":
+                 builder.hlsVideoSegmentFormat = .FMP4
+             default:
+                 break
+             }
+         }
+        
         builder.customData = arguments["customData"]
       
         
