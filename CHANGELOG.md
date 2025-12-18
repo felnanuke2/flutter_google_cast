@@ -1,3 +1,13 @@
+## 1.2.7
+## What's Changed
+* Unknown track languages in m3u8 playlists cause player state events to be lost by @RabbitKabong in https://github.com/felnanuke2/flutter_google_cast/pull/46
+* Bump version to 1.2.7 in pubspec.yaml by @felnanuke2 in https://github.com/felnanuke2/flutter_google_cast/pull/48
+
+## New Contributors
+* @RabbitKabong made their first contribution in https://github.com/felnanuke2/flutter_google_cast/pull/46
+
+**Full Changelog**: https://github.com/felnanuke2/flutter_google_cast/compare/v1.2.6...v1.2.7
+
 ## 1.2.6 - iOS Simulator Build Compatibility Fix
 ### 🐛 Bug Fixes
 - **iOS Simulator Module Resolution**: Fixed "Module 'flutter_chrome_cast' not found" parse error that occurred during iOS simulator builds
