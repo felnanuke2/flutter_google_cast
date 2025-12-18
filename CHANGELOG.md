@@ -1,3 +1,14 @@
+## 1.2.8 - iOS HLS & Media Safety
+### 🐛 Fixes
+- Hardened iOS media parsing to avoid crashes from missing/invalid metadata; `fromMap` now bails out safely and treats infinite/NaN durations as zero.
+- Improved HLS playback support by mapping segment formats, honoring `startAbsoluteTime`, and correctly propagating `playPosition`, `startTime`, and `preloadTime` values.
+- Queue load options now respect fractional play positions, keeping live and buffered streams in sync.
+
+### 🧭 UX
+- Tweaked expanded player and mini controller behavior for live streams (slider, play/pause), improving control feedback during HLS playback.
+
+**Full Changelog**: https://github.com/felnanuke2/flutter_google_cast/compare/v1.2.7...v1.2.8
+
 ## 1.2.7
 ## What's Changed
 * Unknown track languages in m3u8 playlists cause player state events to be lost by @RabbitKabong in https://github.com/felnanuke2/flutter_google_cast/pull/46
