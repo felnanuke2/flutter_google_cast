@@ -71,7 +71,8 @@ void main() {
       expect(info.contentId, 'abc123');
       expect(info.streamType, CastMediaStreamType.buffered);
       expect(info.contentType, 'application/vnd.apple.mpegurl');
-      expect(info.contentUrl?.toString(), 'https://cdn.example.com/stream.m3u8');
+      expect(
+          info.contentUrl?.toString(), 'https://cdn.example.com/stream.m3u8');
       expect(info.duration, isA<Duration>());
       expect(info.duration?.inMilliseconds, greaterThan(120000));
       expect(info.metadata?.extractedTitle, 'Some Title');
@@ -80,7 +81,8 @@ void main() {
       expect(info.textTrackStyle, isNotNull);
       expect(info.tracks, isNotNull);
       expect(info.tracks!.first, isA<GoogleCastMediaTrack>());
-      expect((info.tracks!.first as IosMediaTrack).trackContentType, 'text/vtt');
+      expect(
+          (info.tracks!.first as IosMediaTrack).trackContentType, 'text/vtt');
       expect(info.userActionStates, isNotNull);
     });
 

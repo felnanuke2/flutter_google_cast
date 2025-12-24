@@ -18,7 +18,11 @@ void main() {
           'trackNumber': 3,
           'discNumber': 1,
           'images': [
-            {'url': 'https://example.com/img1.jpg', 'width': 100, 'height': 100},
+            {
+              'url': 'https://example.com/img1.jpg',
+              'width': 100,
+              'height': 100
+            },
             {'url': '', 'width': 50, 'height': 50},
           ],
           // milliseconds since epoch
@@ -88,7 +92,9 @@ void main() {
           artist: 'Artist',
           composer: 'Composer',
           discNumber: 2,
-          images: [GoogleCastImage(url: Uri.parse('https://example.com/img.jpg'))],
+          images: [
+            GoogleCastImage(url: Uri.parse('https://example.com/img.jpg'))
+          ],
           releaseDate: DateTime(2023, 1, 1),
           title: 'Title',
           trackNumber: 5,
@@ -144,7 +150,11 @@ void main() {
           'subtitle': 'A Subtitle',
           'studio': 'Studio Q',
           'images': [
-            {'url': 'https://example.com/poster.png', 'width': 300, 'height': 450},
+            {
+              'url': 'https://example.com/poster.png',
+              'width': 300,
+              'height': 450
+            },
           ],
           'releaseDate': DateTime(2022, 1, 1).millisecondsSinceEpoch,
         };
@@ -153,7 +163,8 @@ void main() {
         expect(m.title, 'A Movie');
         expect(m.subtitle, 'A Subtitle');
         expect(m.studio, 'Studio Q');
-        expect(m.images!.first.url.toString(), 'https://example.com/poster.png');
+        expect(
+            m.images!.first.url.toString(), 'https://example.com/poster.png');
         expect(m.releaseDate, isA<DateTime>());
       });
 
@@ -192,7 +203,9 @@ void main() {
           title: 'Movie Title',
           subtitle: 'Subtitle',
           studio: 'Studio',
-          images: [GoogleCastImage(url: Uri.parse('https://example.com/poster.jpg'))],
+          images: [
+            GoogleCastImage(url: Uri.parse('https://example.com/poster.jpg'))
+          ],
           releaseDate: DateTime(2023, 6, 15),
         );
 
@@ -210,7 +223,11 @@ void main() {
         'subtitle': 'A Subtitle',
         'studio': 'Studio Q',
         'images': [
-          {'url': 'https://example.com/poster.png', 'width': 300, 'height': 450},
+          {
+            'url': 'https://example.com/poster.png',
+            'width': 300,
+            'height': 450
+          },
         ],
         'releaseDate': DateTime(2022, 1, 1).millisecondsSinceEpoch,
       };
@@ -280,7 +297,9 @@ void main() {
         final m = GoogleCastGenericMediaMetadataIOS(
           title: 'Title',
           subtitle: 'Subtitle',
-          images: [GoogleCastImage(url: Uri.parse('https://example.com/img.jpg'))],
+          images: [
+            GoogleCastImage(url: Uri.parse('https://example.com/img.jpg'))
+          ],
           releaseDate: DateTime(2023, 3, 20),
         );
 
@@ -365,7 +384,9 @@ void main() {
           seriesTitle: 'Series Title',
           season: 3,
           episode: 10,
-          images: [GoogleCastImage(url: Uri.parse('https://example.com/episode.jpg'))],
+          images: [
+            GoogleCastImage(url: Uri.parse('https://example.com/episode.jpg'))
+          ],
           originalAirDate: DateTime(2023, 9, 15),
         );
 

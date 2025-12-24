@@ -22,7 +22,8 @@ void main() {
     });
 
     test('toJson/fromJson roundtrip', () {
-      final img = GoogleCastImage(url: Uri.parse('https://ex.com/x.jpg'), width: 10, height: 20);
+      final img = GoogleCastImage(
+          url: Uri.parse('https://ex.com/x.jpg'), width: 10, height: 20);
       final json = img.toJson();
       final parsed = GoogleCastImage.fromJson(json);
       expect(parsed!.url.toString(), 'https://ex.com/x.jpg');
@@ -101,7 +102,8 @@ void main() {
     });
 
     test('fromJson parses JSON string correctly', () {
-      const jsonString = '{"url":"https://example.com/json.png","width":300,"height":400}';
+      const jsonString =
+          '{"url":"https://example.com/json.png","width":300,"height":400}';
       final img = GoogleCastImage.fromJson(jsonString);
       expect(img, isNotNull);
       expect(img!.url.toString(), 'https://example.com/json.png');

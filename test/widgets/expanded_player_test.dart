@@ -80,7 +80,8 @@ void main() {
       expect(texts.nowPlaying, equals('Now Playing'));
       expect(texts.noCaptionsAvailable, equals('No captions available'));
       expect(texts.captionsOff, equals('Off'));
-      expect(texts.castingToDevice('Test Device'), equals('Casting to Test Device'));
+      expect(texts.castingToDevice('Test Device'),
+          equals('Casting to Test Device'));
       expect(texts.trackFallback(1), equals('Track 1'));
     });
 
@@ -190,10 +191,10 @@ void main() {
       expect(duration1.inHours, equals(1));
       expect(duration1.inMinutes, equals(90));
       expect(duration1.inSeconds, equals(5445));
-      
+
       expect(duration2.inMinutes, equals(5));
       expect(duration2.inSeconds, equals(330));
-      
+
       expect(duration3.inSeconds, equals(45));
     });
   });

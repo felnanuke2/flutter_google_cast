@@ -137,31 +137,46 @@ void main() {
 
     test('all player states are defined', () {
       expect(CastMediaPlayerState.values, hasLength(6));
-      expect(CastMediaPlayerState.values, contains(CastMediaPlayerState.playing));
-      expect(CastMediaPlayerState.values, contains(CastMediaPlayerState.paused));
-      expect(CastMediaPlayerState.values, contains(CastMediaPlayerState.buffering));
+      expect(
+          CastMediaPlayerState.values, contains(CastMediaPlayerState.playing));
+      expect(
+          CastMediaPlayerState.values, contains(CastMediaPlayerState.paused));
+      expect(CastMediaPlayerState.values,
+          contains(CastMediaPlayerState.buffering));
       expect(CastMediaPlayerState.values, contains(CastMediaPlayerState.idle));
-      expect(CastMediaPlayerState.values, contains(CastMediaPlayerState.unknown));
-      expect(CastMediaPlayerState.values, contains(CastMediaPlayerState.loading));
+      expect(
+          CastMediaPlayerState.values, contains(CastMediaPlayerState.unknown));
+      expect(
+          CastMediaPlayerState.values, contains(CastMediaPlayerState.loading));
     });
   });
 
   group('Media metadata type icon mapping', () {
     test('all metadata types are defined', () {
-      expect(GoogleCastMediaMetadataType.values, contains(GoogleCastMediaMetadataType.movieMediaMetadata));
-      expect(GoogleCastMediaMetadataType.values, contains(GoogleCastMediaMetadataType.musicTrackMediaMetadata));
-      expect(GoogleCastMediaMetadataType.values, contains(GoogleCastMediaMetadataType.tvShowMediaMetadata));
-      expect(GoogleCastMediaMetadataType.values, contains(GoogleCastMediaMetadataType.photoMediaMetadata));
-      expect(GoogleCastMediaMetadataType.values, contains(GoogleCastMediaMetadataType.genericMediaMetadata));
+      expect(GoogleCastMediaMetadataType.values,
+          contains(GoogleCastMediaMetadataType.movieMediaMetadata));
+      expect(GoogleCastMediaMetadataType.values,
+          contains(GoogleCastMediaMetadataType.musicTrackMediaMetadata));
+      expect(GoogleCastMediaMetadataType.values,
+          contains(GoogleCastMediaMetadataType.tvShowMediaMetadata));
+      expect(GoogleCastMediaMetadataType.values,
+          contains(GoogleCastMediaMetadataType.photoMediaMetadata));
+      expect(GoogleCastMediaMetadataType.values,
+          contains(GoogleCastMediaMetadataType.genericMediaMetadata));
     });
 
     test('metadata type indexes are consistent', () {
       // Ensure indexes are stable for serialization
-      expect(GoogleCastMediaMetadataType.genericMediaMetadata.index, isNonNegative);
-      expect(GoogleCastMediaMetadataType.movieMediaMetadata.index, isNonNegative);
-      expect(GoogleCastMediaMetadataType.tvShowMediaMetadata.index, isNonNegative);
-      expect(GoogleCastMediaMetadataType.musicTrackMediaMetadata.index, isNonNegative);
-      expect(GoogleCastMediaMetadataType.photoMediaMetadata.index, isNonNegative);
+      expect(GoogleCastMediaMetadataType.genericMediaMetadata.index,
+          isNonNegative);
+      expect(
+          GoogleCastMediaMetadataType.movieMediaMetadata.index, isNonNegative);
+      expect(
+          GoogleCastMediaMetadataType.tvShowMediaMetadata.index, isNonNegative);
+      expect(GoogleCastMediaMetadataType.musicTrackMediaMetadata.index,
+          isNonNegative);
+      expect(
+          GoogleCastMediaMetadataType.photoMediaMetadata.index, isNonNegative);
     });
   });
 }
