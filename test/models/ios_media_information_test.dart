@@ -1,6 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_chrome_cast/lib.dart';
-import 'package:flutter_chrome_cast/models/ios/ios_media_information.dart';
 import 'package:flutter_chrome_cast/models/ios/ios_media_track.dart';
 
 void main() {

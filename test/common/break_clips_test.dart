@@ -1,7 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_chrome_cast/common/break_clips.dart';
 import 'package:flutter_chrome_cast/common/hls_segment_format.dart';
-import 'package:flutter_chrome_cast/common/vast_ads_request.dart';
 
 void main() {
   group('CastBreakClips', () {

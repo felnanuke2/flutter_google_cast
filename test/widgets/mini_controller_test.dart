@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_chrome_cast/lib.dart';
-import 'package:flutter_chrome_cast/themes.dart';
-import 'package:flutter_chrome_cast/widgets/mini_controller.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();

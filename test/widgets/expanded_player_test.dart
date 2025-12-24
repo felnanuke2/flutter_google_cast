@@ -1,13 +1,7 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_chrome_cast/lib.dart';
-import 'package:flutter_chrome_cast/themes.dart';
-import 'package:flutter_chrome_cast/widgets/expanded_player.dart';
-import 'package:flutter_chrome_cast/_remote_media_client/ios_remote_media_client_method_channel.dart';
-import 'package:flutter_chrome_cast/_session_manager/ios_cast_session_manager.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
