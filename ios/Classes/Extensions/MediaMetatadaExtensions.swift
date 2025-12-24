@@ -68,20 +68,21 @@ extension GCKMediaMetadata {
         var mutableDict = imulatbleDict
        
         
-       guard  let metadataType = GCKMediaMetadataType.init(rawValue: mutableDict["metadataType"] as! Int) else {
+       guard let metadataTypeValue = mutableDict["metadataType"] as? Int,
+             let metadataType = GCKMediaMetadataType(rawValue: metadataTypeValue) else {
            return nil
            
        }
         mutableDict.removeValue(forKey: "metadataType")
-        let metadata = GCKMediaMetadata.init(metadataType: metadataType)
+        let metadata = GCKMediaMetadata(metadataType: metadataType)
         
         if let images = mutableDict["images"] as? [Dictionary<String, Any>] {
             for image in images {
 
-            guard let url = URL.init(string: image["url"] as? String ?? "" ) else {
+            guard let url = URL(string: image["url"] as? String ?? "" ) else {
                     continue
                 }    
-                metadata.addImage(GCKImage.init(url: url, width: image["width"] as? Int ?? 0 , height: image["height"] as? Int ?? 0 ))
+                metadata.addImage(GCKImage(url: url, width: image["width"] as? Int ?? 0 , height: image["height"] as? Int ?? 0 ))
                 
             }
         }
@@ -92,32 +93,28 @@ extension GCKMediaMetadata {
       
         for mapValue in mutableDict{
             switch mapValue.value {
-            case is String:
-                metadata.setString(mapValue.value as! String, forKey: mapValue.key)
-                break
-            case is Int:
-                metadata.setInteger(mapValue.value as! Int, forKey: mapValue.key)
-                break
+            case let stringValue as String:
+                metadata.setString(stringValue, forKey: mapValue.key)
+            case let intValue as Int:
+                metadata.setInteger(intValue, forKey: mapValue.key)
+            case let doubleValue as Double:
+                 metadata.setDouble(doubleValue, forKey: mapValue.key)
             default:
                 break
             }
             
-            switch mapValue.key {
-            case "broadcastDate":
-                let  date = Date(timeIntervalSince1970:  mapValue.value as! TimeInterval / 1000)
-                metadata.setDate(date, forKey: kGCKMetadataKeyBroadcastDate)
-                break
-            case "releaseDate":
-                let  date = Date(timeIntervalSince1970:  mapValue.value as! TimeInterval / 1000)
-                metadata.setDate(date, forKey: kGCKMetadataKeyReleaseDate)
-                break
-            case "creationDate":
-                let  date = Date(timeIntervalSince1970:  mapValue.value as! TimeInterval / 1000)
-                metadata.setDate(date, forKey: kGCKMetadataKeyCreationDate)
-                
-                break
-            default:
-                break
+            if let timeInterval = mapValue.value as? Double {
+                let date = Date(timeIntervalSince1970: timeInterval / 1000)
+                switch mapValue.key {
+                case "broadcastDate":
+                    metadata.setDate(date, forKey: kGCKMetadataKeyBroadcastDate)
+                case "releaseDate":
+                    metadata.setDate(date, forKey: kGCKMetadataKeyReleaseDate)
+                case "creationDate":
+                    metadata.setDate(date, forKey: kGCKMetadataKeyCreationDate)
+                default:
+                    break
+                }
             }
             
         }

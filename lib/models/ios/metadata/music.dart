@@ -19,19 +19,21 @@ class GoogleCastMusicMediaMetadataIOS extends GoogleCastMusicMediaMetadata {
   /// Creates a music media metadata instance from a map.
   factory GoogleCastMusicMediaMetadataIOS.fromMap(Map<String, dynamic> map) {
     return GoogleCastMusicMediaMetadataIOS(
-      albumName: map['albumTitle'],
-      title: map['title'],
-      albumArtist: map['albumArtist'],
-      artist: map['artist'],
-      composer: map['composer'],
+      albumName: map['albumTitle'] as String?,
+      title: map['title'] as String?,
+      albumArtist: map['albumArtist'] as String?,
+      artist: map['artist'] as String?,
+      composer: map['composer'] as String?,
       trackNumber: map['trackNumber']?.toInt(),
       discNumber: map['discNumber']?.toInt(),
       images: map['images'] != null
-          ? List<GoogleCastImage>.from(map['images']?.map(
-              (x) => GoogleCastImage.fromMap(Map<String, dynamic>.from(x))))
+          ? (map['images'] as List)
+              .map((x) => GoogleCastImage.fromMap(Map<String, dynamic>.from(x)))
+              .whereType<GoogleCastImage>()
+              .toList()
           : null,
-      releaseDate: map['releaseDate'] != null
-          ? DateTime.fromMillisecondsSinceEpoch(map['releaseDate'] ?? 0)
+      releaseDate: map['releaseDate'] != null && map['releaseDate'] is int
+          ? DateTime.fromMillisecondsSinceEpoch(map['releaseDate'])
           : null,
     );
   }

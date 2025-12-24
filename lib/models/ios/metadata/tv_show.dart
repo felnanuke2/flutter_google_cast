@@ -14,12 +14,14 @@ class GoogleCastTvShowMediaMetadataIOS extends GoogleCastTvShowMediaMetadata {
   /// Creates a TV show media metadata instance from a map.
   factory GoogleCastTvShowMediaMetadataIOS.fromMap(Map<String, dynamic> map) {
     return GoogleCastTvShowMediaMetadataIOS(
-      seriesTitle: map['seriesTitle'],
+      seriesTitle: map['seriesTitle'] as String?,
       season: map['seasonNumber']?.toInt(),
       episode: map['episodeNumber']?.toInt(),
       images: map['images'] != null
-          ? List<GoogleCastImage>.from(map['images']?.map(
-              (x) => GoogleCastImage.fromMap(Map<String, dynamic>.from(x))))
+          ? (map['images'] as List)
+              .map((x) => GoogleCastImage.fromMap(Map<String, dynamic>.from(x)))
+              .whereType<GoogleCastImage>()
+              .toList()
           : null,
       originalAirDate: map['releaseDate'] != null
           ? DateTimeString.tryParse(map['releaseDate'])

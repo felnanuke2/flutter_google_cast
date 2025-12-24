@@ -47,7 +47,7 @@ class CastBreakClips {
   final String? title;
 
   ///VAST ad request configuration. Used if contentId or contentUrl is not provided.
-  final VastAdsRequest vastAdsRequest;
+  final VastAdsRequest? vastAdsRequest;
 
   ///The time in seconds when this break clip becomes skippable.
   /// 5 means that end user can skip this break clip after 5 seconds.
@@ -81,7 +81,7 @@ class CastBreakClips {
     required this.id,
     this.posterUrl,
     this.title,
-    required this.vastAdsRequest,
+    this.vastAdsRequest,
     this.whenSkippable,
   });
 
@@ -98,7 +98,7 @@ class CastBreakClips {
       'id': id,
       'posterUrl': posterUrl,
       'title': title,
-      'vastAdsRequest': vastAdsRequest.toMap(),
+      'vastAdsRequest': vastAdsRequest?.toMap(),
       'whenSkippable': whenSkippable?.inSeconds,
     };
   }
@@ -112,7 +112,9 @@ class CastBreakClips {
       contentId: map['contentId'],
       contentType: map['contentType'],
       contentUrl: map['contentUrl'],
-      customData: Map<String, dynamic>.from(map['customData']),
+      customData: map['customData'] != null
+          ? Map<String, dynamic>.from(map['customData'])
+          : null,
       duration: map['duration'] != null
           ? Duration(seconds: map['duration'].round())
           : null,
@@ -122,7 +124,9 @@ class CastBreakClips {
       id: map['id'] ?? '',
       posterUrl: map['posterUrl'],
       title: map['title'],
-      vastAdsRequest: VastAdsRequest.fromMap(map['vastAdsRequest']),
+      vastAdsRequest: map['vastAdsRequest'] != null
+          ? VastAdsRequest.fromMap(map['vastAdsRequest'])
+          : null,
       whenSkippable: map['whenSkippable'] != null
           ? Duration(seconds: map['whenSkippable'].round())
           : null,

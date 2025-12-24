@@ -23,7 +23,7 @@ enum TextTrackWindowType {
       case 'ROUNDED_CORNERS':
         return TextTrackWindowType.roundedCorners;
       default:
-        throw ArgumentError('Unknown TextTrackWindowType: $value');
+        return TextTrackWindowType.none;
     }
   }
 }

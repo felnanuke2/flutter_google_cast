@@ -60,12 +60,14 @@ class GoogleCastMediaInformationIOS extends GoogleCastMediaInformation {
       streamType: CastMediaStreamType.values[map['streamType']],
       contentType: map['contentType'] ?? '',
       metadata: map['metadata'] != null
-          ? _getCastMediaMetadata(Map.from(map['metadata']))
+          ? _getCastMediaMetadata(Map<String, dynamic>.from(map['metadata']))
           : null,
       duration: map['duration'] != null
-          ? Duration(seconds: map['duration']?.round() ?? 0)
+          ? Duration(milliseconds: (map['duration'] * 1000).round())
           : null,
-      customData: Map<String, dynamic>.from(map['customData'] ?? {}),
+      customData: map['customData'] != null
+          ? Map<String, dynamic>.from(map['customData'])
+          : null,
       breaks: map['breaks'] != null
           ? List<CastBreak>.from(
               map['breaks']?.map((x) => CastBreak.fromMap(x)))
@@ -103,7 +105,9 @@ class GoogleCastMediaInformationIOS extends GoogleCastMediaInformation {
 }
 
 GoogleCastMediaMetadata? _getCastMediaMetadata(Map<String, dynamic> map) {
-  final type = GoogleCastMediaMetadataType.values[map['type']];
+  final typeIndex = map['type'] ?? map['metadataType'];
+  if (typeIndex == null) return null;
+  final type = GoogleCastMediaMetadataType.values[typeIndex];
   if (type == GoogleCastMediaMetadataType.genericMediaMetadata) {
     return GoogleCastGenericMediaMetadataIOS.fromMap(map);
   } else if (type == GoogleCastMediaMetadataType.movieMediaMetadata) {

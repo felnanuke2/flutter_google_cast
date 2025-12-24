@@ -24,7 +24,7 @@ class IosMediaTrack extends GoogleCastMediaTrack {
   /// The [json] map should contain keys matching the expected track properties.
   factory IosMediaTrack.fromMap(Map json) {
     return IosMediaTrack(
-      trackContentType: json['content_type'],
+      trackContentType: json['content_type'] ?? '',
       trackId: json['id'],
       type: TrackType.values[json['type']],
       language: Rfc5646Language.fromMap(json['language_code']),
@@ -33,7 +33,9 @@ class IosMediaTrack extends GoogleCastMediaTrack {
           ? TextTrackType.values[json['subtype']]
           : null,
       trackContentId: json['content_id'],
-      customData: json['custom_data'],
+      customData: json['custom_data'] != null
+          ? Map<String, dynamic>.from(json['custom_data'])
+          : null,
     );
   }
 }

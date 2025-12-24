@@ -46,10 +46,6 @@ enum CastHlsSegmentFormat {
         return CastHlsSegmentFormat.tsAac;
       case 'E_AC3':
         return CastHlsSegmentFormat.eAc3;
-      case 'FMP4':
-        return CastHlsSegmentFormat.fmp4;
-      case 'NONE':
-        return CastHlsSegmentFormat.none;
       default:
         return CastHlsSegmentFormat.none;
     }

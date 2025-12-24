@@ -15,7 +15,7 @@ extension GCKMediaQueueLoadOptions {
         }
 
         let startIndex = args!["startIndex"] as? UInt ?? 0
-        let playPosition = args!["playPosition"] as? TimeInterval ?? 0
+        let playPosition = (args!["playPosition"] as? NSNumber)?.doubleValue ?? 0
         let repeatModeString = args!["repeatMode"] as? String ?? "OFF"
         let repeatMode: GCKMediaRepeatMode = {
             switch repeatModeString {

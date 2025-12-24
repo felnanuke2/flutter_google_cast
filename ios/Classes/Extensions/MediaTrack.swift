@@ -10,7 +10,7 @@ import GoogleCast
 
 extension GCKMediaTrack {
     
-    static func fromMap(_ args : Dictionary<String, Any> ) -> GCKMediaTrack{
+    static func fromMap(_ args : Dictionary<String, Any> ) -> GCKMediaTrack? {
         
         let identifier = args["trackId"] as? Int ?? 0
         let contentIdentifier = args["trackContentId"] as? String
@@ -43,10 +43,10 @@ extension GCKMediaTrack {
             customData: nil)
         
        
-     print("\(mediaTrack)")
+     print("\(String(describing: mediaTrack))")
         
         
-        return mediaTrack!
+        return mediaTrack
     }
     
     func toMap() -> Dictionary<String, Any>{

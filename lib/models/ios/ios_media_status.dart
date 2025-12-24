@@ -45,7 +45,9 @@ class GoogleCastIOSMediaStatus extends GoggleCastMediaStatus {
       repeatMode: GoogleCastMediaRepeatMode.values[(map['repeatMode'])],
       currentItemId: map['currentItemId']?.toInt(),
 
-      activeTrackIds: List<int>.from(map['activeTrackIds'] ?? []),
+      activeTrackIds: map['activeTrackIds'] != null
+          ? List<int>.from(map['activeTrackIds'])
+          : [],
       // adBreakStatus: map['adBreakStatus'] != null
       //     ? GoogleCastBrakeStatus.fromMap(map['adBreakStatus'])
       //     : null,

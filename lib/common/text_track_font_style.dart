@@ -28,7 +28,7 @@ enum TextTrackFontStyle {
       case 'ITALIC':
         return TextTrackFontStyle.italic;
       default:
-        throw ArgumentError('Unknown TextTrackFontStyle: $value');
+        return TextTrackFontStyle.normal;
     }
   }
 }
