@@ -1,3 +1,7 @@
+## 1.2.9 - iOS Cast contentURL fix
+### 🐛 Fixes
+- Use `GCKMediaInformationBuilder(contentURL:)` instead of deprecated `contentID` to align with current Google Cast SDK and fix media load failures (including HLS) on iOS.
+
 ## 1.2.8 - iOS HLS & Media Safety
 ### 🐛 Fixes
 - Hardened iOS media parsing to avoid crashes from missing/invalid metadata; `fromMap` now bails out safely and treats infinite/NaN durations as zero.
