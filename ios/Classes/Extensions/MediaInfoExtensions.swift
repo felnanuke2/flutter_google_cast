@@ -9,11 +9,7 @@ import Foundation
 import GoogleCast
 
 extension GCKMediaInformation{
-    
-    
     static func fromMap(_ arguments: Dictionary<String, Any> ) -> GCKMediaInformation? {
-        
-        guard let contentID = arguments["contentID"] as? String else { return nil }
         let streamType: GCKMediaStreamType = {
                     switch arguments["streamType"] as? String {
                     case "BUFFERED":
@@ -29,10 +25,8 @@ extension GCKMediaInformation{
         guard let contentUrlString = arguments["contentURL"] as? String,
               let contentUrl = URL(string: contentUrlString) else { return nil}
         
-        let builder =  GCKMediaInformationBuilder()
-        builder.contentID  = contentID
+        let builder =  GCKMediaInformationBuilder.init(contentURL: contentUrl)
         builder.streamType = streamType
-        builder.contentURL = contentUrl
         if let contentType = arguments["contentType"] as? String {
              builder.contentType = contentType
         }
@@ -74,9 +68,7 @@ extension GCKMediaInformation{
          }
         
         builder.customData = arguments["customData"]
-      
         
-    
         if let tracksDict = arguments["tracks"] as? [Dictionary<String, Any>] {
             builder.mediaTracks = tracksDict.compactMap{
                 dict in
@@ -87,15 +79,12 @@ extension GCKMediaInformation{
         if let metadataDict = arguments["metadata"] as? Dictionary<String, Any> {
             builder.metadata = GCKMediaMetadata.fromMap(metadataDict)
         }
-      
+        
         let buildedMediaInfo = builder.build()
         
         return buildedMediaInfo
     
     }
-    
-    
-    
     
     func toMap() -> Dictionary<String, Any> {
         var dict = Dictionary<String, Any>()
