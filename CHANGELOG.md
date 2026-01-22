@@ -1,3 +1,19 @@
+## 1.2.10 - Stop Casting on App Terminated
+### ✨ New Features
+- **Stop Casting on App Kill**: Added `stopCastingOnAppTerminated` option to automatically stop casting and end the session when the app is killed/terminated
+  - Available on both iOS and Android platforms
+  - Configurable via `IOSGoogleCastOptions` and `GoogleCastOptionsAndroid`
+  - When enabled, the Chromecast device stops playing when the user closes the app
+  - Default is `false` (casting continues after app is closed, maintaining previous behavior)
+
+### 🔧 Platform Improvements  
+- **iOS**: Added lifecycle observer to detect app termination and end cast session with `endSessionAndStopCasting(true)`
+- **Android**: Implemented `ActivityLifecycleCallbacks` to monitor activity destruction and properly end cast sessions
+
+### 📚 Documentation
+- Updated README with configuration options table
+- Added code examples for both iOS and Android showing how to enable `stopCastingOnAppTerminated`
+
 ## 1.2.9 - iOS Cast contentURL fix
 ### 🐛 Fixes
 - Use `GCKMediaInformationBuilder(contentURL:)` instead of deprecated `contentID` to align with current Google Cast SDK and fix media load failures (including HLS) on iOS.

@@ -184,6 +184,7 @@ void main() {
             'suspendSessionsWhenBackgrounded': false,
             'stopReceiverApplicationWhenEndingSession': true,
             'startDiscoveryAfterFirstTapOnCastButton': false,
+            'stopCastingOnAppTerminated': false,
           }));
     });
 
@@ -214,6 +215,7 @@ void main() {
             'suspendSessionsWhenBackgrounded': true,
             'stopReceiverApplicationWhenEndingSession': false,
             'startDiscoveryAfterFirstTapOnCastButton': true,
+            'stopCastingOnAppTerminated': false,
           }));
     });
 
