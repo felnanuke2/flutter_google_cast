@@ -153,10 +153,25 @@ class GoogleCastRemoteMediaClientIOSMethodChannel
     _playerPositionStreamController.add(duration);
   }
 
+  /// Recursively converts a Map<Object?, Object?> to Map<String, dynamic>.
+  ///
+  /// This is necessary because the platform channel may return nested maps
+  /// as Map<Object?, Object?>, which needs to be converted for proper parsing.
+  dynamic _convertToStringDynamicMap(dynamic value) {
+    if (value is Map) {
+      return value.map<String, dynamic>(
+        (key, val) => MapEntry(key.toString(), _convertToStringDynamicMap(val)),
+      );
+    } else if (value is List) {
+      return value.map((e) => _convertToStringDynamicMap(e)).toList();
+    }
+    return value;
+  }
+
   FutureOr<void> _onUpdateMediaStatus(dynamic arguments) {
     if (arguments != null) {
       try {
-        arguments = Map<String, dynamic>.from(arguments);
+        arguments = _convertToStringDynamicMap(arguments) as Map<String, dynamic>;
         debugPrint(
             '[Flutter] _onUpdateMediaStatus received: playerState=${arguments['playerState']}');
         final mediaStatus = GoogleCastIOSMediaStatus.fromMap(arguments);
