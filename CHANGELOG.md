@@ -1,3 +1,17 @@
+## 1.3.0 - Swift Package Manager Support
+### ✨ New Features
+- **Swift Package Manager (SPM) Support**: Added full SPM support for iOS
+  - Added `Package.swift` manifest with [SRGSSR/google-cast-sdk](https://github.com/SRGSSR/google-cast-sdk) dependency
+  - Plugin now supports both CocoaPods and SPM for iOS dependency management
+  - Resolves pub.dev scoring requirement for SPM support
+
+### 🔧 Platform Changes
+- **iOS Deployment Target**: Updated minimum iOS version from 14.0 to 15.0 (required by GoogleCast SPM package)
+
+### 📚 Documentation
+- Updated README with SPM usage instructions
+- Added SPM documentation to podspec
+
 ## 1.2.9 - iOS Cast contentURL fix
 ### 🐛 Fixes
 - Use `GCKMediaInformationBuilder(contentURL:)` instead of deprecated `contentID` to align with current Google Cast SDK and fix media load failures (including HLS) on iOS.
