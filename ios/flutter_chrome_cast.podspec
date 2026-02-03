@@ -7,7 +7,7 @@
 #
 Pod::Spec.new do |s|
   s.name             = 'flutter_chrome_cast'
-  s.version          = '1.2.6'
+  s.version          = '1.3.1'
   s.summary          = 'A comprehensive Flutter plugin for Google Cast SDK integration on iOS and Android.'
   s.description      = <<-DESC
 FlutterGoogleCast provides seamless integration with the Google Cast SDK for Flutter applications.
