@@ -3,7 +3,7 @@
 # Run `pod lib lint google_cast.podspec` to validate before publishing.
 #
 # This plugin supports both CocoaPods (this file) and Swift Package Manager (Package.swift).
-# For SPM support, see Package.swift in this same directory.
+# For SPM support, see flutter_chrome_cast/Package.swift.
 #
 Pod::Spec.new do |s|
   s.name             = 'flutter_chrome_cast'
@@ -20,7 +20,7 @@ This plugin supports both CocoaPods and Swift Package Manager (SPM) for iOS depe
   s.license          = { :file => '../LICENSE' }
   s.author           = { 'Luiz Felipe Alves Lima' => 'https://github.com/felnanuke2' }
   s.source           = { :path => '.' }
-  s.source_files = 'Classes/**/*'
+  s.source_files = 'flutter_chrome_cast/Sources/flutter_chrome_cast/**/*'
   s.dependency 'Flutter'
   s.platform = :ios, '15.0'
   s.ios.deployment_target  = '15.0'

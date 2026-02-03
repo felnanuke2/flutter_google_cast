@@ -1,3 +1,15 @@
+## 1.3.1 - Swift Package Manager Fixes
+### 🐛 Bug Fixes
+- **SPM Build Fixes**: Fixed Swift compiler errors when building with Swift Package Manager
+  - Added missing `import Flutter` statements to all method channel Swift files
+  - Added `@objc(GoogleCastPlugin)` attribute to expose Swift plugin class with correct name for Flutter's plugin registrant
+  - Fixes "Cannot find type 'FlutterPlugin' in scope" and related compiler errors
+  - Fixes "Unknown receiver 'GoogleCastPlugin'" error in GeneratedPluginRegistrant.m
+
+### 🔧 Notes
+- SPM support now fully functional for iOS builds
+- No breaking API changes
+
 ## 1.3.0 - Swift Package Manager Support
 ### ✨ New Features
 - **Swift Package Manager (SPM) Support**: Added full SPM support for iOS

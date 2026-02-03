@@ -1,40 +1,22 @@
 PODS:
   - Flutter (1.0.0)
-  - flutter_chrome_cast (1.2.6):
-    - Flutter
-    - google-cast-sdk (~> 4.8)
-    - Protobuf
-  - google-cast-sdk (4.8.3):
-    - Protobuf (~> 3.13)
   - permission_handler_apple (9.3.0):
     - Flutter
-  - Protobuf (3.29.5)
 
 DEPENDENCIES:
   - Flutter (from `Flutter`)
-  - flutter_chrome_cast (from `.symlinks/plugins/flutter_chrome_cast/ios`)
   - permission_handler_apple (from `.symlinks/plugins/permission_handler_apple/ios`)
-
-SPEC REPOS:
-  trunk:
-    - google-cast-sdk
-    - Protobuf
 
 EXTERNAL SOURCES:
   Flutter:
     :path: Flutter
-  flutter_chrome_cast:
-    :path: ".symlinks/plugins/flutter_chrome_cast/ios"
   permission_handler_apple:
     :path: ".symlinks/plugins/permission_handler_apple/ios"
 
 SPEC CHECKSUMS:
   Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
-  flutter_chrome_cast: ce5c5152116b9a7944c4003b336628c772ff5aa6
-  google-cast-sdk: 1fb6724e94cc5ff23b359176e0cf6360586bb97a
   permission_handler_apple: 4ed2196e43d0651e8ff7ca3483a069d469701f2d
-  Protobuf: 164aea2ae380c3951abdc3e195220c01d17400e0
 
-PODFILE CHECKSUM: 775997f741c536251164e3eacf6e34abf2eb7a17
+PODFILE CHECKSUM: 57c8aed26fba39d3ec9424816221f294a07c58eb
 
 COCOAPODS: 1.16.2

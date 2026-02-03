@@ -6,9 +6,6 @@
 //
 // The Google Cast SDK dependency is provided by the SRGSSR community wrapper since Google does not
 // officially provide an SPM-compatible distribution.
-//
-// Note: SPM support includes only Swift sources. The Objective-C bridging code (GoogleCastPlugin.m/h)
-// is used by CocoaPods and Flutter's build system handles plugin registration automatically.
 
 import PackageDescription
 
@@ -35,31 +32,17 @@ let package = Package(
             dependencies: [
                 .product(name: "GoogleCast", package: "google-cast-sdk")
             ],
-            path: "Classes",
             exclude: [
                 // Exclude Objective-C files - they are used by CocoaPods only
                 // Flutter's build system generates plugin registration code separately
                 "GoogleCastPlugin.m",
                 "GoogleCastPlugin.h"
             ],
-            sources: [
-                "SwiftGoogleCastPlugin.swift",
-                "DiscoveryManagerMethodChannel.swift",
-                "SessionManagerMethodChannel.swift",
-                "SessionMethodChannel.swift",
-                "RemoteMediaClienteMethodChannel.swift",
-                "Extensions/CastDeviceExtensions.swift",
-                "Extensions/CastImageExtensions.swift",
-                "Extensions/CastOptionsExtensions.swift",
-                "Extensions/MediaInfoExtensions.swift",
-                "Extensions/MediaMetatadaExtensions.swift",
-                "Extensions/MediaStatusExtensions.swift",
-                "Extensions/MediaTrack.swift",
-                "Extensions/QueuLoadOptions.swift",
-                "Extensions/QueueItemsExtensions.swift",
-                "Extensions/RequestExtensions.swift",
-                "Extensions/SeekOptionsExtensions.swift",
-                "Extensions/SessionExtensions.swift"
+            resources: [
+                // TODO: If your plugin requires a privacy manifest
+                // (e.g. if it uses any required reason APIs), update the PrivacyInfo.xcprivacy file
+                // to describe your plugin's privacy impact, and then uncomment this line.
+                // .process("PrivacyInfo.xcprivacy"),
             ]
         )
     ]
