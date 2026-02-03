@@ -7,7 +7,7 @@
 #
 Pod::Spec.new do |s|
   s.name             = 'flutter_chrome_cast'
-  s.version          = '1.2.6'
+  s.version          = '1.3.1'
   s.summary          = 'A comprehensive Flutter plugin for Google Cast SDK integration on iOS and Android.'
   s.description      = <<-DESC
 FlutterGoogleCast provides seamless integration with the Google Cast SDK for Flutter applications.
@@ -20,7 +20,8 @@ This plugin supports both CocoaPods and Swift Package Manager (SPM) for iOS depe
   s.license          = { :file => '../LICENSE' }
   s.author           = { 'Luiz Felipe Alves Lima' => 'https://github.com/felnanuke2' }
   s.source           = { :path => '.' }
-  s.source_files = 'flutter_chrome_cast/Sources/flutter_chrome_cast/**/*'
+  s.source_files = 'flutter_chrome_cast/Sources/flutter_chrome_cast/**/*.swift'
+  s.exclude_files = 'flutter_chrome_cast/Sources/flutter_chrome_cast/GoogleCastPlugin.h', 'flutter_chrome_cast/Sources/flutter_chrome_cast/GoogleCastPlugin.m'
   s.dependency 'Flutter'
   s.platform = :ios, '15.0'
   s.ios.deployment_target  = '15.0'
