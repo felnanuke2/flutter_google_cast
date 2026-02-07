@@ -608,6 +608,12 @@ void main() {
           'repeatMode': 'OFF',
           'currentItemId': 1,
           'activeTrackIds': '[]',
+          'liveSeekableRange': {
+            'start': 0,
+            'end': 3600,
+            'isLiveDone': false,
+            'isMovingWindow': true,
+          },
         });
 
         // Simulate the native platform calling the method handler
@@ -626,6 +632,15 @@ void main() {
         expect(remoteMediaClient.mediaStatus, isNotNull);
         expect(remoteMediaClient.mediaStatus!.currentItemId, equals(1));
         expect(remoteMediaClient.mediaStatus!.mediaSessionID, equals(123));
+        expect(remoteMediaClient.mediaStatus!.liveSeekableRange, isNotNull);
+        expect(remoteMediaClient.mediaStatus!.liveSeekableRange!.start,
+            equals(Duration.zero));
+        expect(remoteMediaClient.mediaStatus!.liveSeekableRange!.end,
+            equals(Duration(seconds: 3600)));
+        expect(
+            remoteMediaClient.mediaStatus!.liveSeekableRange!.isLiveDone, isFalse);
+        expect(remoteMediaClient.mediaStatus!.liveSeekableRange!.isMovingWindow,
+            isTrue);
       });
 
       test('should handle onMediaStatusChanged with null data', () async {
