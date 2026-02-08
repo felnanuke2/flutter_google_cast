@@ -171,7 +171,8 @@ class GoogleCastRemoteMediaClientIOSMethodChannel
   FutureOr<void> _onUpdateMediaStatus(dynamic arguments) {
     if (arguments != null) {
       try {
-        arguments = _convertToStringDynamicMap(arguments) as Map<String, dynamic>;
+        arguments =
+            _convertToStringDynamicMap(arguments) as Map<String, dynamic>;
         debugPrint(
             '[Flutter] _onUpdateMediaStatus received: playerState=${arguments['playerState']}');
         final mediaStatus = GoogleCastIOSMediaStatus.fromMap(arguments);

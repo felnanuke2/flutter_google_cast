@@ -637,8 +637,8 @@ void main() {
             equals(Duration.zero));
         expect(remoteMediaClient.mediaStatus!.liveSeekableRange!.end,
             equals(Duration(seconds: 3600)));
-        expect(
-            remoteMediaClient.mediaStatus!.liveSeekableRange!.isLiveDone, isFalse);
+        expect(remoteMediaClient.mediaStatus!.liveSeekableRange!.isLiveDone,
+            isFalse);
         expect(remoteMediaClient.mediaStatus!.liveSeekableRange!.isMovingWindow,
             isTrue);
       });
