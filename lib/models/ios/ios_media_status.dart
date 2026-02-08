@@ -51,9 +51,9 @@ class GoogleCastIOSMediaStatus extends GoggleCastMediaStatus {
       // adBreakStatus: map['adBreakStatus'] != null
       //     ? GoogleCastBrakeStatus.fromMap(map['adBreakStatus'])
       //     : null,
-      // liveSeekableRange: map['liveSeekableRange'] != null
-      //     ? GoogleCastMediaLiveSeekableRange.fromMap(map['liveSeekableRange'])
-      //     : null,
+      liveSeekableRange: map['liveSeekableRange'] != null
+          ? GoogleCastMediaLiveSeekableRange.fromMap(map['liveSeekableRange'])
+          : null,
       // queueData: map['queueData'] != null
       //     ? GoogleCastMediaQueueData.fromMap(map['queueData'])
       //     : null,

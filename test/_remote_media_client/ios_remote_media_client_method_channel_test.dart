@@ -506,6 +506,12 @@ void main() {
           'queueHasNextItem': true,
           'currentItemId': 1,
           'activeTrackIds': [1, 2],
+          'liveSeekableRange': {
+            'start': 0,
+            'end': 3600,
+            'isLiveDone': false,
+            'isMovingWindow': true,
+          },
         };
 
         // Set up a fresh client and handle method calls directly
@@ -525,6 +531,13 @@ void main() {
                   // Simulate the stream updates that would happen
                   expect(arguments["queueHasNextItem"], isTrue);
                   expect(mediaStatus.mediaSessionID, equals(123));
+                  expect(mediaStatus.liveSeekableRange, isNotNull);
+                  expect(mediaStatus.liveSeekableRange!.start,
+                      equals(Duration.zero));
+                  expect(mediaStatus.liveSeekableRange!.end,
+                      equals(Duration(seconds: 3600)));
+                  expect(mediaStatus.liveSeekableRange!.isLiveDone, isFalse);
+                  expect(mediaStatus.liveSeekableRange!.isMovingWindow, isTrue);
                 } catch (e) {
                   // Test error handling
                   expect(e, isNotNull);

@@ -24,10 +24,20 @@ extension GCKMediaStatus {
         dict["queueHasNextItem"] = self.queueHasNextItem
         dict["queueHasPreviousItem"] =  self.queueHasPreviousItem
         dict["currentItemId"] = self.currentItemID
-        
+
+        // Live seekable range
+        if let liveSeekableRange = self.liveSeekableRange {
+            dict["liveSeekableRange"] = [
+                "start": Int(liveSeekableRange.startTime),
+                "end": Int(liveSeekableRange.endTime),
+                "isMovingWindow": liveSeekableRange.isMovingWindow,
+                "isLiveDone": liveSeekableRange.isLiveDone
+            ]
+        }
+
         // Add stream position if available, though it's usually retrieved separately
         // dict["streamPosition"] = self.streamPosition
-        
+
         return dict
     }
     
