@@ -184,6 +184,7 @@ void main() {
             'suspendSessionsWhenBackgrounded': false,
             'stopReceiverApplicationWhenEndingSession': true,
             'startDiscoveryAfterFirstTapOnCastButton': false,
+            'stopCastingOnAppTerminated': false,
           }));
     });
   });

@@ -44,10 +44,14 @@ class _MyAppState extends State<MyApp> {
     if (Platform.isIOS) {
       options = IOSGoogleCastOptions(
         GoogleCastDiscoveryCriteriaInitialize.initWithApplicationID(appId),
+        // Set to true to automatically stop casting when the app is killed
+        stopCastingOnAppTerminated: false,
       );
     } else if (Platform.isAndroid) {
       options = GoogleCastOptionsAndroid(
         appId: appId,
+        // Set to true to automatically stop casting when the app is killed
+        stopCastingOnAppTerminated: false,
       );
     }
     GoogleCastContext.instance.setSharedInstanceWithOptions(options!);

@@ -174,6 +174,12 @@ class CastContextMethodChannel : FlutterPlugin, MethodChannel.MethodCallHandler 
             optionsBuilder.setResumeSavedSession(true)
             optionsBuilder.setEnableReconnectionService(true)
             GoogleCastOptionsProvider.options = optionsBuilder.build()
+            
+            // Store the stopCastingOnAppTerminated option
+            val stopCastingOnAppTerminated = map["stopCastingOnAppTerminated"] as? Boolean ?: false
+            GoogleCastOptionsProvider.stopCastingOnAppTerminated = stopCastingOnAppTerminated
+            Log.d(TAG, "stopCastingOnAppTerminated set to: $stopCastingOnAppTerminated")
+            
             CastContext.getSharedInstance(appContext).sessionManager.addSessionManagerListener(sessionManagerMethodChannel)
             result.success(true)
         } catch (e: Exception) {

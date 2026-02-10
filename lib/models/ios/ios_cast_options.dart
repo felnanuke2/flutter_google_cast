@@ -10,7 +10,13 @@ class IOSGoogleCastOptions extends GoogleCastOptions {
   final GoogleCastDiscoveryCriteriaInitialize _discoveryCriteria;
 
   /// Creates an instance of [IOSGoogleCastOptions] with the given [discoveryCriteria].
-  IOSGoogleCastOptions(this._discoveryCriteria);
+  ///
+  /// [stopCastingOnAppTerminated] when set to true, will automatically stop
+  /// casting and end the session when the app is killed/terminated. Defaults to false.
+  IOSGoogleCastOptions(
+    this._discoveryCriteria, {
+    super.stopCastingOnAppTerminated,
+  });
 
   /// Converts this iOS Cast options object to a map representation.
   ///
