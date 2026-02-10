@@ -18,6 +18,20 @@ class GoogleCastOptions {
   /// Whether to start discovery after first tap on cast button.
   final bool startDiscoveryAfterFirstTapOnCastButton;
 
+  /// Whether to automatically stop casting and end the session when the app is killed/terminated.
+  ///
+  /// When set to `true`, the plugin will automatically call `endSessionAndStopCasting()`
+  /// when the app is terminated (killed by user or system). This ensures the Chromecast
+  /// device stops playing when the app is closed.
+  ///
+  /// When set to `false` (default), casting will continue on the receiver device even
+  /// after the app is killed, allowing the user to resume control later.
+  ///
+  /// Note: This works for normal app closure and most system-initiated kills.
+  /// Force-kills (swipe away from recent apps) may not always trigger this behavior
+  /// depending on the platform and circumstances.
+  final bool stopCastingOnAppTerminated;
+
   /// Creates a new [GoogleCastOptions] instance.
   GoogleCastOptions({
     this.physicalVolumeButtonsWillControlDeviceVolume = true,
@@ -26,6 +40,7 @@ class GoogleCastOptions {
     this.suspendSessionsWhenBackgrounded = true,
     this.stopReceiverApplicationWhenEndingSession = false,
     this.startDiscoveryAfterFirstTapOnCastButton = true,
+    this.stopCastingOnAppTerminated = false,
   });
 
   /// Converts this options object to a map representation.
@@ -40,6 +55,7 @@ class GoogleCastOptions {
           stopReceiverApplicationWhenEndingSession,
       'startDiscoveryAfterFirstTapOnCastButton':
           startDiscoveryAfterFirstTapOnCastButton,
+      'stopCastingOnAppTerminated': stopCastingOnAppTerminated,
     };
   }
 }

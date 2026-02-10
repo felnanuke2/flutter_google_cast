@@ -29,6 +29,15 @@ class GoogleCastOptionsProvider : OptionsProvider {
          * launch options, and other Cast framework configuration.
          */
         lateinit var options: CastOptions
+        
+        /**
+         * Whether to stop casting when the app is terminated
+         * 
+         * When true, the plugin will automatically end the cast session
+         * and stop casting on the receiver when the app is killed.
+         * Default is false (casting continues after app is closed).
+         */
+        var stopCastingOnAppTerminated: Boolean = false
     }
     
     /**

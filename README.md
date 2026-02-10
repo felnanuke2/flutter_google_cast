@@ -321,10 +321,14 @@ Future<void> initPlatformState() async {
   if (Platform.isIOS) {
     options = IOSGoogleCastOptions(
       GoogleCastDiscoveryCriteriaInitialize.initWithApplicationID(appId),
+      // Optional: Stop casting when app is killed (default: false)
+      stopCastingOnAppTerminated: true,
     );
   } else if (Platform.isAndroid) {
     options = GoogleCastOptionsAndroid(
       appId: appId,
+      // Optional: Stop casting when app is killed (default: false)
+      stopCastingOnAppTerminated: true,
     );
   }
   
@@ -332,6 +336,37 @@ Future<void> initPlatformState() async {
   GoogleCastContext.instance.setSharedInstanceWithOptions(options!);
 }
 ```
+
+### Configuration Options
+
+The `GoogleCastOptions` class and its platform-specific subclasses support the following configuration options:
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `stopCastingOnAppTerminated` | `bool` | `false` | When `true`, automatically stops casting and ends the session when the app is killed/terminated. Useful when you want casting to stop when users close the app. |
+| `physicalVolumeButtonsWillControlDeviceVolume` | `bool` | `true` | Whether hardware volume buttons control the Cast device volume. |
+| `suspendSessionsWhenBackgrounded` | `bool` | `true` | Whether to suspend sessions when the app goes to background. |
+| `stopReceiverApplicationWhenEndingSession` | `bool` | `false` | Whether to stop the receiver application when ending a session. |
+
+#### Stop Casting on App Terminated
+
+By default, when you close/kill your app, casting continues on the Chromecast device. If you want the casting to stop when the app is killed, set `stopCastingOnAppTerminated: true`:
+
+```dart
+// iOS
+options = IOSGoogleCastOptions(
+  GoogleCastDiscoveryCriteriaInitialize.initWithApplicationID(appId),
+  stopCastingOnAppTerminated: true,  // Stop casting when app is killed
+);
+
+// Android
+options = GoogleCastOptionsAndroid(
+  appId: appId,
+  stopCastingOnAppTerminated: true,  // Stop casting when app is killed
+);
+```
+
+> **Note:** This works for normal app closures and most system-initiated kills. Force-kills (swiping away from recent apps) may not always trigger this behavior depending on the platform and circumstances.
 
 ### 3. Device Discovery
 

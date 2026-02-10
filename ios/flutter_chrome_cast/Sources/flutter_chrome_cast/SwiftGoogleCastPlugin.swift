@@ -27,6 +27,10 @@ public class SwiftGoogleCastPlugin: NSObject, GCKLoggerDelegate, FlutterPlugin, 
     /// Set to `true` to enable verbose logging for debugging Cast operations
     let kDebugLoggingEnabled = true
     
+    /// Whether to stop casting when the app is terminated
+    /// This is set from Flutter via GoogleCastOptions.stopCastingOnAppTerminated
+    private var stopCastingOnAppTerminated = false
+    
     /// Flutter method channel for Cast context operations
     /// Handles communication between Flutter and native iOS for context-related methods
     private var channel : FlutterMethodChannel?
@@ -123,6 +127,14 @@ public class SwiftGoogleCastPlugin: NSObject, GCKLoggerDelegate, FlutterPlugin, 
             // Parse Cast options from Flutter arguments
         let option =  GCKCastOptions.fromMap(arguments)
         
+        // Store the stopCastingOnAppTerminated option
+        if let stopOnTerminated = arguments["stopCastingOnAppTerminated"] as? Bool {
+            stopCastingOnAppTerminated = stopOnTerminated
+            if kDebugLoggingEnabled {
+                print("stopCastingOnAppTerminated set to: \(stopOnTerminated)")
+            }
+        }
+        
         // Initialize the shared Cast context with parsed options
        GCKCastContext.setSharedInstanceWith(option)
         
@@ -172,6 +184,14 @@ public class SwiftGoogleCastPlugin: NSObject, GCKLoggerDelegate, FlutterPlugin, 
     }
 
     @objc private func applicationWillTerminateNotification(_ notification: Notification) {
+        // End the cast session and stop casting when app is terminated (if option is enabled)
+        // This ensures the receiver stops casting when the app is killed
+        if stopCastingOnAppTerminated && sessionManager.hasConnectedSession() {
+            if kDebugLoggingEnabled {
+                print("SwiftGoogleCastPlugin: App terminating - ending cast session and stopping casting (stopCastingOnAppTerminated=true)")
+            }
+            sessionManager.endSessionAndStopCasting(true)
+        }
         tearDown()
     }
 

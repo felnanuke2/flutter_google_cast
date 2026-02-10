@@ -6,14 +6,21 @@ class GoogleCastOptionsAndroid extends GoogleCastOptions {
   final String appId;
 
   /// Creates a new [GoogleCastOptionsAndroid].
+  ///
+  /// [appId] is required and specifies the Cast application ID.
+  ///
+  /// [stopCastingOnAppTerminated] when set to true, will automatically stop
+  /// casting and end the session when the app is killed/terminated. Defaults to false.
   GoogleCastOptionsAndroid({
     required this.appId,
+    super.stopCastingOnAppTerminated,
   });
 
   @override
   Map<String, dynamic> toMap() {
-    return {
-      'appId': appId,
-    };
+    return super.toMap()
+      ..addAll({
+        'appId': appId,
+      });
   }
 }
