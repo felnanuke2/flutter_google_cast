@@ -8,7 +8,7 @@ class GoogleCastOptionsAndroid extends GoogleCastOptions {
   /// Creates a new [GoogleCastOptionsAndroid].
   ///
   /// [appId] is required and specifies the Cast application ID.
-  /// 
+  ///
   /// [stopCastingOnAppTerminated] when set to true, will automatically stop
   /// casting and end the session when the app is killed/terminated. Defaults to false.
   GoogleCastOptionsAndroid({
