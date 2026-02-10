@@ -5,6 +5,7 @@
 //  Created by LUIZ FELIPE ALVES LIMA on 30/06/22.
 //
 
+import Flutter
 import Foundation
 import GoogleCast
 

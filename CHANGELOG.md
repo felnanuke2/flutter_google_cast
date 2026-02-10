@@ -1,4 +1,4 @@
-## 1.2.10 - Stop Casting on App Terminated
+## 1.4.1 - Stop Casting on App Terminated
 ### ✨ New Features
 - **Stop Casting on App Kill**: Added `stopCastingOnAppTerminated` option to automatically stop casting and end the session when the app is killed/terminated
   - Available on both iOS and Android platforms
@@ -13,6 +13,31 @@
 ### 📚 Documentation
 - Updated README with configuration options table
 - Added code examples for both iOS and Android showing how to enable `stopCastingOnAppTerminated`
+## 1.3.1 - Swift Package Manager Fixes
+### 🐛 Bug Fixes
+- **SPM Build Fixes**: Fixed Swift compiler errors when building with Swift Package Manager
+  - Added missing `import Flutter` statements to all method channel Swift files
+  - Added `@objc(GoogleCastPlugin)` attribute to expose Swift plugin class with correct name for Flutter's plugin registrant
+  - Fixes "Cannot find type 'FlutterPlugin' in scope" and related compiler errors
+  - Fixes "Unknown receiver 'GoogleCastPlugin'" error in GeneratedPluginRegistrant.m
+
+### 🔧 Notes
+- SPM support now fully functional for iOS builds
+- No breaking API changes
+
+## 1.3.0 - Swift Package Manager Support
+### ✨ New Features
+- **Swift Package Manager (SPM) Support**: Added full SPM support for iOS
+  - Added `Package.swift` manifest with [SRGSSR/google-cast-sdk](https://github.com/SRGSSR/google-cast-sdk) dependency
+  - Plugin now supports both CocoaPods and SPM for iOS dependency management
+  - Resolves pub.dev scoring requirement for SPM support
+
+### 🔧 Platform Changes
+- **iOS Deployment Target**: Updated minimum iOS version from 14.0 to 15.0 (required by GoogleCast SPM package)
+
+### 📚 Documentation
+- Updated README with SPM usage instructions
+- Added SPM documentation to podspec
 
 ## 1.2.9 - iOS Cast contentURL fix
 ### 🐛 Fixes

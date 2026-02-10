@@ -5,6 +5,7 @@
 //  Created by LUIZ FELIPE ALVES LIMA on 24/06/22.
 //
 
+import Flutter
 import Foundation
 
 /// Flutter method channel for individual Google Cast session operations

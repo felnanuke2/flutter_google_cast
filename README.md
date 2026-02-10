@@ -93,6 +93,10 @@ import 'package:flutter_chrome_cast/widgets.dart';
 
 ### iOS Configuration
 
+This plugin supports both **CocoaPods** (default) and **Swift Package Manager (SPM)** for iOS dependency management.
+
+#### Info.plist Configuration
+
 Add the following configuration to your `ios/Runner/Info.plist` file:
 
 ```xml
@@ -106,6 +110,26 @@ Add the following configuration to your `ios/Runner/Info.plist` file:
 ```
 
 > **Note**: Replace `_CC1AD845._googlecast._tcp` with your actual Google Cast application ID.
+
+#### Using Swift Package Manager (SPM)
+
+If you prefer to use SPM instead of CocoaPods, or if you're experiencing CocoaPods read-only issues, this plugin provides full SPM support.
+
+The plugin uses the [SRGSSR/google-cast-sdk](https://github.com/SRGSSR/google-cast-sdk) community wrapper since Google does not officially provide an SPM-compatible distribution of the Cast SDK.
+
+To use SPM:
+
+1. Open your iOS project in Xcode
+2. Navigate to File → Add Package Dependencies
+3. Add the flutter_chrome_cast plugin's iOS package
+
+Or add it to your project's `Package.swift`:
+
+```swift
+dependencies: [
+    .package(url: "https://github.com/felnanuke2/flutter_google_cast.git", from: "1.2.6")
+]
+```
 
 <details>
 <summary>Complete iOS Info.plist example</summary>

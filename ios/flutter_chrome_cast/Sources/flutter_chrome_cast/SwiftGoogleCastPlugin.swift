@@ -18,6 +18,7 @@ import GoogleCast
 /// - Note: This class follows the singleton pattern provided by the Google Cast SDK
 /// - Author: LUIZ FELIPE ALVES LIMA
 /// - Since: iOS 10.0+
+@objc(GoogleCastPlugin)
 public class SwiftGoogleCastPlugin: NSObject, GCKLoggerDelegate, FlutterPlugin, UIApplicationDelegate {
     
     // MARK: - Properties
