@@ -153,10 +153,10 @@ class GoogleCastRemoteMediaClientIOSMethodChannel
     _playerPositionStreamController.add(duration);
   }
 
-  /// Recursively converts a Map<Object?, Object?> to Map<String, dynamic>.
+  /// Recursively converts a `Map<Object?, Object?>` to `Map<String, dynamic>`.
   ///
   /// This is necessary because the platform channel may return nested maps
-  /// as Map<Object?, Object?>, which needs to be converted for proper parsing.
+  /// as `Map<Object?, Object?>`, which needs to be converted for proper parsing.
   dynamic _convertToStringDynamicMap(dynamic value) {
     if (value is Map) {
       return value.map<String, dynamic>(
