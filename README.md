@@ -824,7 +824,7 @@ A pre-built widget that provides basic media controls when casting.
 
 ## 📚 Documentation
 
-- **API Documentation (GitHub Pages):** https://felnanuke2.github.io/flutter_google_cast/
+- **API Documentation (GitHub Pages):** http://fluttergcp.felnanuke.com.br/
 - API reference is built from source by GitHub Actions on every push to `master`/`main`.
 
 ### User Guides
