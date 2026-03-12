@@ -1,0 +1,55 @@
+name: Publish API Docs to GitHub Pages
+
+on:
+  push:
+    branches: [ master, main, feature/gh-page ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build-docs:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.38.7'
+          channel: stable
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Generate API documentation
+        run: dart doc --output doc/api
+
+      - name: Disable Jekyll processing
+        run: touch doc/api/.nojekyll
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload docs artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: doc/api
+
+  deploy-docs:
+    runs-on: ubuntu-latest
+    needs: build-docs
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

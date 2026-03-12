@@ -7,10 +7,6 @@
 
 > **📱 Alternative for Non-Cast Devices**: If you need to integrate with devices that don't have Google Cast built-in or are not Chromecast devices, you may be interested in https://github.com/felnanuke2/media_cast_dlna - take a look!
 
-## Support the Project
-
-<a href='https://ko-fi.com/Y8Y61HCG2P' target='_blank'><img height='36' style='border:0px;height:36px;' src='https://storage.ko-fi.com/cdn/kofi5.png?v=6' border='0' alt='Buy Me a Coffee at ko-fi.com' /></a>
-
 ## Demo Video
 
 <video src="https://raw.githubusercontent.com/felnanuke2/flutter_google_cast/refs/heads/master/Screen_Recording_20250618_125333.mp4" controls width="600" poster="https://raw.githubusercontent.com/felnanuke2/flutter_google_cast/refs/heads/master/Screenshot_20250618_130514.jpg">
@@ -827,6 +823,9 @@ A pre-built widget that provides basic media controls when casting.
 - **Streaming**: HLS (m3u8), DASH
 
 ## 📚 Documentation
+
+- **API Documentation (GitHub Pages):** http://fluttergcp.felnanuke.com.br/
+- API reference is built from source by GitHub Actions on every push to `master`/`main`.
 
 ### User Guides
 - **[Import Guide](IMPORT_GUIDE.md)** - Optimize your Flutter imports for better performance
