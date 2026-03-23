@@ -48,10 +48,21 @@ class FGCDiscoveryManagerMethodChannel : UIResponder, GCKDiscoveryManagerListene
     
     // MARK: - Properties
     
-    /// Reference to the Google Cast discovery manager
-    /// - Returns: The discovery manager from the shared Cast context
-    private var discoveryManager: GCKDiscoveryManager{
-        GCKCastContext.sharedInstance().discoveryManager
+    /// Returns the discovery manager only after the Cast context has been initialized.
+    ///
+    /// Accessing `GCKCastContext.sharedInstance()` before initialization throws,
+    /// so callers must guard through this helper when handling Flutter method calls.
+    private func withDiscoveryManager(result: @escaping FlutterResult, _ body: (GCKDiscoveryManager) -> Void) {
+        guard GCKCastContext.isSharedInstanceInitialized() else {
+            result(FlutterError(
+                code: "cast_context_not_initialized",
+                message: "Google Cast context is not initialized. Call setSharedInstanceWithOptions before using discovery APIs.",
+                details: nil
+            ))
+            return
+        }
+
+        body(GCKCastContext.sharedInstance().discoveryManager)
     }
     
     /// Dictionary storing discovered Cast devices indexed by their discovery position
@@ -95,33 +106,37 @@ class FGCDiscoveryManagerMethodChannel : UIResponder, GCKDiscoveryManagerListene
     ///   - call: The Flutter method call
     ///   - result: Callback to return results to Flutter
     func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
-        switch call.method {
-        case "startDiscovery":
-            discoveryManager.passiveScan = false
-            if discoveryManager.discoveryState == .stopped {
-                discoveryManager.startDiscovery()
+        withDiscoveryManager(result: result) { discoveryManager in
+            switch call.method {
+            case "startDiscovery":
+                SwiftGoogleCastPlugin.instance?.shouldResumeDiscoveryOnForeground = true
+                discoveryManager.passiveScan = false
+                if discoveryManager.discoveryState == .stopped {
+                    discoveryManager.startDiscovery()
+                }
+                // Re-send current device list so Flutter gets immediate state
+                didUpdateDeviceList()
+                result(true)
+            case "stopDiscovery":
+                SwiftGoogleCastPlugin.instance?.shouldResumeDiscoveryOnForeground = false
+                if discoveryManager.discoveryState == .running {
+                    discoveryManager.stopDiscovery()
+                }
+                // Clear cached devices and notify Flutter with an empty list
+                devices.removeAll()
+                didUpdateDeviceList()
+                result(true)
+            case "isDiscoveryActiveForDeviceCategory":
+                if let args = call.arguments as? Dictionary<String, Any>,
+                   let deviceCategory = args["deviceCategory"] as? String {
+                    let isActive = discoveryManager.isDiscoveryActive(forDeviceCategory: deviceCategory)
+                    result(isActive)
+                } else {
+                    result(false)
+                }
+            default:
+                result(FlutterMethodNotImplemented)
             }
-            // Re-send current device list so Flutter gets immediate state
-            didUpdateDeviceList()
-            result(true)
-        case "stopDiscovery":
-            if discoveryManager.discoveryState == .running {
-                discoveryManager.stopDiscovery()
-            }
-            // Clear cached devices and notify Flutter with an empty list
-            devices.removeAll()
-            didUpdateDeviceList()
-            result(true)
-        case "isDiscoveryActiveForDeviceCategory":
-            if let args = call.arguments as? Dictionary<String, Any>,
-               let deviceCategory = args["deviceCategory"] as? String {
-                let isActive = discoveryManager.isDiscoveryActive(forDeviceCategory: deviceCategory)
-                result(isActive)
-            } else {
-                result(false)
-            }
-        default:
-            result(FlutterMethodNotImplemented)
         }
     }
     

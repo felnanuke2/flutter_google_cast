@@ -20,6 +20,7 @@ import GoogleCast
 /// - Since: iOS 10.0+
 @objc(GoogleCastPlugin)
 public class SwiftGoogleCastPlugin: NSObject, GCKLoggerDelegate, FlutterPlugin, UIApplicationDelegate {
+    static weak var instance: SwiftGoogleCastPlugin?
     
     // MARK: - Properties
     
@@ -30,6 +31,11 @@ public class SwiftGoogleCastPlugin: NSObject, GCKLoggerDelegate, FlutterPlugin, 
     /// Whether to stop casting when the app is terminated
     /// This is set from Flutter via GoogleCastOptions.stopCastingOnAppTerminated
     private var stopCastingOnAppTerminated = false
+
+    /// Tracks whether discovery should be restored when returning to foreground.
+    /// This stays aligned with Flutter-driven start/stop requests and the
+    /// discovery state observed before backgrounding.
+    var shouldResumeDiscoveryOnForeground = false
     
     /// Flutter method channel for Cast context operations
     /// Handles communication between Flutter and native iOS for context-related methods
@@ -68,6 +74,7 @@ public class SwiftGoogleCastPlugin: NSObject, GCKLoggerDelegate, FlutterPlugin, 
   public static func register(with registrar: FlutterPluginRegistrar) {
    
       let instance = SwiftGoogleCastPlugin()
+      Self.instance = instance
       
       // Set up main Cast context method channel
       instance.channel = FlutterMethodChannel(name: "google_cast.context", binaryMessenger: registrar.messenger())
@@ -155,6 +162,7 @@ public class SwiftGoogleCastPlugin: NSObject, GCKLoggerDelegate, FlutterPlugin, 
         // so the Dart side gets fast feedback.
         result(true)
 
+        shouldResumeDiscoveryOnForeground = true
         discoveryManager.startDiscovery()
 
         if kDebugLoggingEnabled {
@@ -198,18 +206,22 @@ public class SwiftGoogleCastPlugin: NSObject, GCKLoggerDelegate, FlutterPlugin, 
     @objc private func applicationDidEnterBackgroundNotification(_ notification: Notification) {
         // Switch to passive scan when app goes to background to save resources
         // but keep discovery alive so we don't lose state
+        shouldResumeDiscoveryOnForeground = discoveryManager.discoveryState == .running && !discoveryManager.passiveScan
         discoveryManager.passiveScan = true
     }
 
     @objc private func applicationWillEnterForegroundNotification(_ notification: Notification) {
         // Restart active discovery when app returns to foreground
         discoveryManager.passiveScan = false
-        if discoveryManager.discoveryState == .stopped {
+        if shouldResumeDiscoveryOnForeground && discoveryManager.discoveryState == .stopped {
             discoveryManager.startDiscovery()
         }
     }
 
     deinit {
+        if Self.instance === self {
+            Self.instance = nil
+        }
         removeLifecycleObserversIfNeeded()
         tearDown()
     }
