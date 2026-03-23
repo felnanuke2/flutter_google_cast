@@ -1,3 +1,12 @@
+## 1.4.2 - iOS Discovery Reliability Fix
+### 🐛 Bug Fixes
+- **iOS Cast Discovery Stability**: Fixed unreliable Cast device discovery on iOS
+  - Added proper handling for discovery method channel calls on iOS
+  - Improved discovery lifecycle handling between background and foreground states
+
+### 🔧 Notes
+- No public API changes
+
 ## 1.4.1 - Stop Casting on App Terminated
 ### ✨ New Features
 - **Stop Casting on App Kill**: Added `stopCastingOnAppTerminated` option to automatically stop casting and end the session when the app is killed/terminated
