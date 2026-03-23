@@ -84,16 +84,42 @@ class FGCDiscoveryManagerMethodChannel : UIResponder, GCKDiscoveryManagerListene
     
     /// Handles method calls from the Flutter side
     /// 
-    /// Currently, this class primarily operates through the discovery manager
-    /// listener callbacks rather than explicit method calls. The discovery
-    /// process is started automatically when the Cast context is initialized.
+    /// Processes incoming method calls for device discovery operations.
+    ///
+    /// Supported methods:
+    /// - `startDiscovery`: Starts or restarts active device scanning
+    /// - `stopDiscovery`: Stops active device scanning
+    /// - `isDiscoveryActiveForDeviceCategory`: Checks if discovery is active for a device category
     ///
     /// - Parameters:
     ///   - call: The Flutter method call
     ///   - result: Callback to return results to Flutter
     func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
-        // Most discovery operations are handled automatically
-        // Additional methods can be added here as needed
+        switch call.method {
+        case "startDiscovery":
+            discoveryManager.passiveScan = false
+            if discoveryManager.discoveryState == .stopped {
+                discoveryManager.startDiscovery()
+            }
+            // Re-send current device list so Flutter gets immediate state
+            didUpdateDeviceList()
+            result(true)
+        case "stopDiscovery":
+            if discoveryManager.discoveryState == .running {
+                discoveryManager.stopDiscovery()
+            }
+            result(true)
+        case "isDiscoveryActiveForDeviceCategory":
+            if let args = call.arguments as? Dictionary<String, Any>,
+               let deviceCategory = args["deviceCategory"] as? String {
+                let isActive = discoveryManager.isDiscoveryActive(forDeviceCategory: deviceCategory)
+                result(isActive)
+            } else {
+                result(false)
+            }
+        default:
+            result(FlutterMethodNotImplemented)
+        }
     }
     
     // MARK: - Google Cast Discovery Manager Listener

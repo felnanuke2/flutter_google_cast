@@ -196,8 +196,17 @@ public class SwiftGoogleCastPlugin: NSObject, GCKLoggerDelegate, FlutterPlugin, 
     }
 
     @objc private func applicationDidEnterBackgroundNotification(_ notification: Notification) {
-        // Optionally stop discovery when app goes to background to avoid background callbacks
-        discoveryManager.stopDiscovery()
+        // Switch to passive scan when app goes to background to save resources
+        // but keep discovery alive so we don't lose state
+        discoveryManager.passiveScan = true
+    }
+
+    @objc private func applicationWillEnterForegroundNotification(_ notification: Notification) {
+        // Restart active discovery when app returns to foreground
+        discoveryManager.passiveScan = false
+        if discoveryManager.discoveryState == .stopped {
+            discoveryManager.startDiscovery()
+        }
     }
 
     deinit {
@@ -226,6 +235,11 @@ public class SwiftGoogleCastPlugin: NSObject, GCKLoggerDelegate, FlutterPlugin, 
                                                selector: #selector(applicationDidEnterBackgroundNotification(_:)),
                                                name: UIApplication.didEnterBackgroundNotification,
                                                object: nil)
+
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(applicationWillEnterForegroundNotification(_:)),
+                                               name: UIApplication.willEnterForegroundNotification,
+                                               object: nil)
     }
 
     private func removeLifecycleObserversIfNeeded() {
@@ -233,6 +247,7 @@ public class SwiftGoogleCastPlugin: NSObject, GCKLoggerDelegate, FlutterPlugin, 
         lifecycleObserversAdded = false
         NotificationCenter.default.removeObserver(self, name: UIApplication.willTerminateNotification, object: nil)
         NotificationCenter.default.removeObserver(self, name: UIApplication.didEnterBackgroundNotification, object: nil)
+        NotificationCenter.default.removeObserver(self, name: UIApplication.willEnterForegroundNotification, object: nil)
     }
     
     // MARK: - Google Cast Logging Delegate
