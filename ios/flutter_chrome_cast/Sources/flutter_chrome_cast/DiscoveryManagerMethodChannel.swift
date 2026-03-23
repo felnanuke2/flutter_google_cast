@@ -108,6 +108,9 @@ class FGCDiscoveryManagerMethodChannel : UIResponder, GCKDiscoveryManagerListene
             if discoveryManager.discoveryState == .running {
                 discoveryManager.stopDiscovery()
             }
+            // Clear cached devices and notify Flutter with an empty list
+            devices.removeAll()
+            didUpdateDeviceList()
             result(true)
         case "isDiscoveryActiveForDeviceCategory":
             if let args = call.arguments as? Dictionary<String, Any>,
