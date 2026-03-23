@@ -31,4 +31,3 @@ migrate_working_dir/
 build/
 
 .fvm/
-example/pubspec.lock
