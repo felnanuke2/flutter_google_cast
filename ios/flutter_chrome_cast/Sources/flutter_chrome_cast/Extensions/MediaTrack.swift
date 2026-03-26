@@ -31,7 +31,18 @@ extension GCKMediaTrack {
         
         let name = args["name"] as? String
         let language = args["language"] as? String
-        
+
+        // For text tracks (subtitles/captions), a missing or empty language code
+        // prevents GCKMediaTrack from loading correctly on the receiver side.
+        // Fall back to "und" (ISO 639-2 undetermined) so the track is always valid.
+        let resolvedLanguage: String?
+        if trackType == .text {
+            let raw = language ?? ""
+            resolvedLanguage = raw.isEmpty ? "und" : raw
+        } else {
+            resolvedLanguage = language
+        }
+
         let mediaTrack = GCKMediaTrack.init(
             identifier: identifier,
             contentIdentifier: contentIdentifier,
@@ -39,13 +50,9 @@ extension GCKMediaTrack {
             type: trackType,
             textSubtype: trackSubtype,
             name: name,
-            languageCode: language,
+            languageCode: resolvedLanguage,
             customData: nil)
-        
-       
-     print("\(String(describing: mediaTrack))")
-        
-        
+
         return mediaTrack
     }
     
