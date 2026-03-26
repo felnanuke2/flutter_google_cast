@@ -52,11 +52,7 @@ extension GCKMediaTrack {
             name: name,
             languageCode: resolvedLanguage,
             customData: nil)
-        
-       
-     print("\(String(describing: mediaTrack))")
-        
-        
+
         return mediaTrack
     }
     
