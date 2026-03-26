@@ -11,10 +11,36 @@ class IOSGoogleCastOptions extends GoogleCastOptions {
 
   /// Creates an instance of [IOSGoogleCastOptions] with the given [discoveryCriteria].
   ///
-  /// [stopCastingOnAppTerminated] when set to true, will automatically stop
-  /// casting and end the session when the app is killed/terminated. Defaults to false.
+  /// All [GoogleCastOptions] fields are forwarded to the native iOS Cast SDK:
+  ///
+  /// [physicalVolumeButtonsWillControlDeviceVolume] controls whether hardware
+  /// volume buttons adjust the Cast device volume. Defaults to true.
+  ///
+  /// [suspendSessionsWhenBackgrounded] when false, keeps the Cast session alive
+  /// while the app is in the background. Defaults to true.
+  ///
+  /// [disableDiscoveryAutostart] when true, prevents automatic device discovery
+  /// at startup. Defaults to false.
+  ///
+  /// [disableAnalyticsLogging] when true, disables Google Cast analytics.
+  /// Defaults to false.
+  ///
+  /// [stopReceiverApplicationWhenEndingSession] when true, stops the receiver
+  /// app when the session ends. Defaults to false.
+  ///
+  /// [startDiscoveryAfterFirstTapOnCastButton] controls when discovery starts.
+  /// Defaults to true.
+  ///
+  /// [stopCastingOnAppTerminated] when true, automatically stops casting and
+  /// ends the session when the app is killed/terminated. Defaults to false.
   IOSGoogleCastOptions(
     this._discoveryCriteria, {
+    super.physicalVolumeButtonsWillControlDeviceVolume,
+    super.suspendSessionsWhenBackgrounded,
+    super.disableDiscoveryAutostart,
+    super.disableAnalyticsLogging,
+    super.stopReceiverApplicationWhenEndingSession,
+    super.startDiscoveryAfterFirstTapOnCastButton,
     super.stopCastingOnAppTerminated,
   });
 

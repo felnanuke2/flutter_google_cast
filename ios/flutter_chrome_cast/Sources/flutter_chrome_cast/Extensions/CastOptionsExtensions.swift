@@ -83,10 +83,27 @@ extension  GCKCastOptions{
             // Set whether hardware volume buttons control Cast device volume
             option.physicalVolumeButtonsWillControlDeviceVolume = physicalVolumeButtonsWillControlDeviceVolume
         }
-     
-        
-        
-        
+
+        if let suspendSessionsWhenBackgrounded = map["suspendSessionsWhenBackgrounded"] as? Bool {
+            option.suspendSessionsWhenBackgrounded = suspendSessionsWhenBackgrounded
+        }
+
+        if let disableDiscoveryAutostart = map["disableDiscoveryAutostart"] as? Bool {
+            option.disableDiscoveryAutostart = disableDiscoveryAutostart
+        }
+
+        if let disableAnalyticsLogging = map["disableAnalyticsLogging"] as? Bool {
+            option.disableAnalyticsLogging = disableAnalyticsLogging
+        }
+
+        if let stopReceiverApplicationWhenEndingSession = map["stopReceiverApplicationWhenEndingSession"] as? Bool {
+            option.stopReceiverApplicationWhenEndingSession = stopReceiverApplicationWhenEndingSession
+        }
+
+        if let startDiscoveryAfterFirstTapOnCastButton = map["startDiscoveryAfterFirstTapOnCastButton"] as? Bool {
+            option.startDiscoveryAfterFirstTapOnCastButton = startDiscoveryAfterFirstTapOnCastButton
+        }
+
         return option
     }
     
