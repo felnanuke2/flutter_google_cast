@@ -25,10 +25,10 @@ void main() {
       expect(map.containsKey('suspendSessionsWhenBackgrounded'), isTrue);
       expect(map.containsKey('disableDiscoveryAutostart'), isTrue);
       expect(map.containsKey('disableAnalyticsLogging'), isTrue);
-      expect(map.containsKey('stopReceiverApplicationWhenEndingSession'),
-          isTrue);
-      expect(map.containsKey('startDiscoveryAfterFirstTapOnCastButton'),
-          isTrue);
+      expect(
+          map.containsKey('stopReceiverApplicationWhenEndingSession'), isTrue);
+      expect(
+          map.containsKey('startDiscoveryAfterFirstTapOnCastButton'), isTrue);
       expect(map.containsKey('stopCastingOnAppTerminated'), isTrue);
     });
 
