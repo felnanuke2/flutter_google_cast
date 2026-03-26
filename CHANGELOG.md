@@ -1,3 +1,21 @@
+## 1.4.3 - iOS Options Forwarding and Subtitle Language Fallback
+### 🐛 Bug Fixes
+- **iOS options forwarding**: Fixed `IOSGoogleCastOptions` so all base `GoogleCastOptions` fields can be configured and are forwarded through `super` parameters.
+  - Previously, only `stopCastingOnAppTerminated` was exposed in the iOS constructor.
+  - Options such as `suspendSessionsWhenBackgrounded`, `physicalVolumeButtonsWillControlDeviceVolume`, and `disableDiscoveryAutostart` are now settable and correctly propagated.
+- **Native iOS Cast options mapping**: Fixed `CastOptionsExtensions.fromMap()` to apply all parsed options to `GCKCastOptions` instead of silently dropping most fields.
+  - Added guards to map `suspendSessionsWhenBackgrounded`, `disableDiscoveryAutostart`, `disableAnalyticsLogging`, `stopReceiverApplicationWhenEndingSession`, and `startDiscoveryAfterFirstTapOnCastButton`.
+- **Subtitle/caption language fallback**: Fixed text track creation on iOS when subtitle language is missing.
+  - `GCKMediaTrack` requires a non-nil `languageCode` for text tracks.
+  - For `.text` tracks only, nil/empty language now falls back to `"und"` (ISO 639-2 undetermined) to ensure subtitle tracks render on the receiver.
+
+### 🧪 Tests
+- Added `test/models/ios_cast_options_test.dart` with unit coverage for `IOSGoogleCastOptions.toMap()`:
+  - default values,
+  - individually configurable fields,
+  - type hierarchy behavior,
+  - namespace-based discovery criteria serialization.
+
 ## 1.4.2 - iOS Discovery Reliability Fix
 ### 🐛 Bug Fixes
 - **iOS Cast Discovery Stability**: Fixed unreliable Cast device discovery on iOS
