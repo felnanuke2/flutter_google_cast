@@ -31,6 +31,15 @@ extension GCKMediaTrack {
         
         let name = args["name"] as? String
         let language = args["language"] as? String
+        let effectiveLanguage: String?
+        if let language, !language.isEmpty {
+            effectiveLanguage = language
+        } else if trackSubtype == .subtitles || trackSubtype == .captions {
+            // Subtitle/caption tracks should always expose a language code.
+            effectiveLanguage = "en"
+        } else {
+            effectiveLanguage = nil
+        }
         
         let mediaTrack = GCKMediaTrack.init(
             identifier: identifier,
@@ -39,13 +48,9 @@ extension GCKMediaTrack {
             type: trackType,
             textSubtype: trackSubtype,
             name: name,
-            languageCode: language,
+            languageCode: effectiveLanguage,
             customData: nil)
-        
-       
-     print("\(String(describing: mediaTrack))")
-        
-        
+
         return mediaTrack
     }
     

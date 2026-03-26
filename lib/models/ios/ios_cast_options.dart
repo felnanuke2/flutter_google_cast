@@ -15,6 +15,12 @@ class IOSGoogleCastOptions extends GoogleCastOptions {
   /// casting and end the session when the app is killed/terminated. Defaults to false.
   IOSGoogleCastOptions(
     this._discoveryCriteria, {
+    super.physicalVolumeButtonsWillControlDeviceVolume,
+    super.disableDiscoveryAutostart,
+    super.disableAnalyticsLogging,
+    super.suspendSessionsWhenBackgrounded,
+    super.stopReceiverApplicationWhenEndingSession,
+    super.startDiscoveryAfterFirstTapOnCastButton,
     super.stopCastingOnAppTerminated,
   });
 
@@ -24,10 +30,6 @@ class IOSGoogleCastOptions extends GoogleCastOptions {
   @override
   Map<String, dynamic> toMap() {
     return super.toMap()
-      ..addAll(
-        {
-          'discoveryCriteria': _discoveryCriteria.toMap(),
-        },
-      );
+      ..addAll({'discoveryCriteria': _discoveryCriteria.toMap()});
   }
 }
