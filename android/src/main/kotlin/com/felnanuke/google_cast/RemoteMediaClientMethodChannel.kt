@@ -356,8 +356,30 @@ class RemoteMediaClientMethodChannel : FlutterPlugin, MethodChannel.MethodCallHa
     private fun loadMedia(arguments: Map<String, Any?>) {
         val mediaInfo =
             GoogleCastMediaInfo.fromMap(arguments["mediaInfo"] as Map<String, Any?>) ?: return
-        val options = GoogleCastMediaLoadOptions.fromMap(arguments)
-        currentRemoteMediaClient?.load(mediaInfo, options)
+        val customHeaders = arguments["customHeaders"] as Map<*, *>?
+        if (customHeaders != null) {
+            val autoPlay = arguments["autoPlay"] as? Boolean ?: true
+            val playPosition = arguments["playPosition"] as? Int ?: 0
+            val activeTrackIds = arguments["activeTrackIds"] as? ArrayList<Long>
+            val credentials = arguments["credentials"] as? String
+            val credentialsType = arguments["credentialsType"] as? String
+            val playbackRate = arguments["playbackRate"] as? Double ?: 1.0
+            val headersJson = JSONObject(customHeaders.mapKeys { it.key.toString() })
+            val requestDataBuilder = com.google.android.gms.cast.MediaLoadRequestData.Builder()
+                .setMediaInfo(mediaInfo)
+                .setAutoplay(autoPlay)
+                .setCurrentTime((playPosition * 1000).toLong())
+                .setPlaybackRate(playbackRate)
+                .setHttpRequestHeaders(headersJson)
+            if (activeTrackIds != null)
+                requestDataBuilder.setActiveTrackIds(activeTrackIds.toLongArray())
+            requestDataBuilder.setCredentials(credentials)
+            requestDataBuilder.setCredentialsType(credentialsType)
+            currentRemoteMediaClient?.load(requestDataBuilder.build())
+        } else {
+            val options = GoogleCastMediaLoadOptions.fromMap(arguments)
+            currentRemoteMediaClient?.load(mediaInfo, options)
+        }
     }
 
     fun startListen() {

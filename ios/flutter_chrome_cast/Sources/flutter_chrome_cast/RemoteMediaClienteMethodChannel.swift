@@ -233,29 +233,32 @@ class RemoteMediaClienteMethodChannel :UIResponder, FlutterPlugin, GCKRemoteMedi
         
         print("[GoogleCast] loadMedia() mediaInfo created - contentID: \(mediaInfo.contentID ?? "nil"), contentType: \(mediaInfo.contentType ?? "nil"), streamType: \(mediaInfo.streamType.rawValue)")
         
-        let options = GCKMediaLoadOptions.init()
+        let requestData = GCKMediaLoadRequestData()
+        requestData.mediaInformation = mediaInfo
         if let autoPlay = arguments["autoPlay"] as? Bool {
-            options.autoplay = autoPlay
+            requestData.autoplay = NSNumber(value: autoPlay)
         }
         if let playPosition = arguments["playPosition"] as? TimeInterval {
-            options.playPosition = playPosition
+            requestData.startTime = playPosition
         }
-        
         if let playbackRate = arguments["playbackRate"] as? Float {
-            options.playbackRate = playbackRate
+            requestData.playbackRate = playbackRate
         }
         if let activeTrackIds = arguments["activeTrackIds"] as? [NSNumber] {
-            options.activeTrackIDs = activeTrackIds
+            requestData.activeTrackIDs = activeTrackIds
         }
         if let credentialType = arguments["credentialsType"] as? String {
-            options.credentialsType = credentialType
+            requestData.credentialsType = credentialType
         }
         if let credentials = arguments["credentials"] as? String {
-            options.credentials = credentials
+            requestData.credentials = credentials
         }
-        print("[GoogleCast] loadMedia() options: autoplay=\(options.autoplay), playPosition=\(options.playPosition)")
+        if let customHeaders = arguments["customHeaders"] as? [String: String] {
+            requestData.httpRequestHeaders = customHeaders
+        }
+        print("[GoogleCast] loadMedia() options: autoplay=\(String(describing: requestData.autoplay)), playPosition=\(requestData.startTime)")
         print("[GoogleCast] loadMedia() remoteMediaClient: \(String(describing: currentRemoteMediaCliente))")
-        let request = currentRemoteMediaCliente?.loadMedia(mediaInfo,with:  options)
+        let request = currentRemoteMediaCliente?.loadMedia(with: requestData)
         print("[GoogleCast] loadMedia() request: \(String(describing: request))")
         result(request?.toMap())
         

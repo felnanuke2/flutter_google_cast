@@ -33,6 +33,11 @@ abstract class GoogleCastRemoteMediaClientPlatformInterface
   bool get queueHasPreviousItem;
 
   /// Loads media on the remote media client.
+  ///
+  /// [customHeaders] allows sending custom HTTP request headers when loading
+  /// media. Due to Google Cast SDK limitations, custom headers are only
+  /// supported for adaptive streaming formats (DASH and HLS). They will not
+  /// work for progressive download formats such as MP4.
   Future<void> loadMedia(
     GoogleCastMediaInformation mediaInfo, {
     bool autoPlay = true,
@@ -41,6 +46,7 @@ abstract class GoogleCastRemoteMediaClientPlatformInterface
     List<int>? activeTrackIds,
     String? credentials,
     String? credentialsType,
+    Map<String, String>? customHeaders,
   });
 
   /// Loads queue items on the remote media client.

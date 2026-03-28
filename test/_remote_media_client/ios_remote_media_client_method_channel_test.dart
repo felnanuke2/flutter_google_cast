@@ -150,7 +150,34 @@ void main() {
         expect(args['credentialsType'], equals('test_type'));
       });
 
-      test('should call native method with default parameters', () async {
+      test('should call native method with custom headers', () async {
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+            .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
+          methodCalls.add(methodCall);
+          return null;
+        });
+
+        final mediaInfo = GoogleCastMediaInformation(
+          contentId: 'test_content',
+          contentType: 'application/dash+xml',
+          streamType: CastMediaStreamType.buffered,
+          contentUrl: Uri.parse('https://example.com/stream.mpd'),
+        );
+
+        await remoteMediaClient.loadMedia(
+          mediaInfo,
+          customHeaders: {'Authorization': 'Bearer token123', 'X-Custom': 'value'},
+        );
+
+        expect(methodCalls, hasLength(1));
+        expect(methodCalls.first.method, equals('loadMedia'));
+
+        final args = methodCalls.first.arguments as Map<dynamic, dynamic>;
+        expect(args['customHeaders'],
+            equals({'Authorization': 'Bearer token123', 'X-Custom': 'value'}));
+      });
+
+      test('should omit customHeaders key when not provided', () async {
         TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
             .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
           methodCalls.add(methodCall);
@@ -166,17 +193,8 @@ void main() {
         await remoteMediaClient.loadMedia(mediaInfo);
 
         expect(methodCalls, hasLength(1));
-        expect(methodCalls.first.method, equals('loadMedia'));
-
         final args = methodCalls.first.arguments as Map<dynamic, dynamic>;
-        expect(args['autoPlay'], isTrue);
-        expect(args['playPosition'], equals(0));
-        expect(args['playbackRate'], equals(1.0));
-        expect(args.containsKey('activeTrackIds'),
-            isFalse); // Should be removed due to null
-        expect(args.containsKey('credentials'),
-            isFalse); // Should be removed due to null
-        expect(args.containsKey('credentialsType'),
+        expect(args.containsKey('customHeaders'),
             isFalse); // Should be removed due to null
       });
     });

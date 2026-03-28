@@ -74,6 +74,7 @@ class GoogleCastRemoteMediaClientIOSMethodChannel
     List<int>? activeTrackIds,
     String? credentials,
     String? credentialsType,
+    Map<String, String>? customHeaders,
   }) async {
     _channel.invokeMethod(
         'loadMedia',
@@ -86,6 +87,7 @@ class GoogleCastRemoteMediaClientIOSMethodChannel
               'activeTrackIds': activeTrackIds,
               'credentials': credentials,
               'credentialsType': credentialsType,
+              'customHeaders': customHeaders,
             }..removeWhere((key, value) => value == null),
           ));
   }

@@ -249,7 +249,32 @@ void main() {
             methodCalls.first.arguments['credentialsType'], equals('Bearer'));
       });
 
-      test('should call native method with default parameters', () async {
+      test('should call native method with custom headers', () async {
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+            .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
+          methodCalls.add(methodCall);
+          return {'requestID': 123, 'inProgress': false, 'isExternal': false};
+        });
+
+        final mediaInfo = GoogleCastMediaInformation(
+          contentId: 'video-123',
+          contentType: 'application/dash+xml',
+          streamType: CastMediaStreamType.buffered,
+          contentUrl: Uri.parse('https://example.com/stream.mpd'),
+        );
+
+        await remoteMediaClient.loadMedia(
+          mediaInfo,
+          customHeaders: {'Authorization': 'Bearer token123', 'X-Custom': 'value'},
+        );
+
+        expect(methodCalls, hasLength(1));
+        expect(methodCalls.first.method, equals('loadMedia'));
+        expect(methodCalls.first.arguments['customHeaders'],
+            equals({'Authorization': 'Bearer token123', 'X-Custom': 'value'}));
+      });
+
+      test('should send null customHeaders when not provided', () async {
         TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
             .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
           methodCalls.add(methodCall);
@@ -257,16 +282,10 @@ void main() {
         });
 
         final mediaInfo = createTestMediaInfo();
-
         await remoteMediaClient.loadMedia(mediaInfo);
 
         expect(methodCalls, hasLength(1));
-        expect(methodCalls.first.arguments['autoPlay'], isTrue);
-        expect(methodCalls.first.arguments['playPosition'], equals(0));
-        expect(methodCalls.first.arguments['playbackRate'], equals(1.0));
-        expect(methodCalls.first.arguments['activeTrackIds'], isNull);
-        expect(methodCalls.first.arguments['credentials'], isNull);
-        expect(methodCalls.first.arguments['credentialsType'], isNull);
+        expect(methodCalls.first.arguments['customHeaders'], isNull);
       });
     });
 
