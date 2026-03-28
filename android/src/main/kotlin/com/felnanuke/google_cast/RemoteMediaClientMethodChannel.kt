@@ -358,29 +358,41 @@ class RemoteMediaClientMethodChannel : FlutterPlugin, MethodChannel.MethodCallHa
             GoogleCastMediaInfo.fromMap(arguments["mediaInfo"] as Map<String, Any?>) ?: return
         val customHeaders = arguments["customHeaders"] as Map<*, *>?
         if (customHeaders != null) {
-            val autoPlay = arguments["autoPlay"] as? Boolean ?: true
-            val playPosition = arguments["playPosition"] as? Int ?: 0
-            val activeTrackIds = (arguments["activeTrackIds"] as? ArrayList<Number>)?.map { it.toLong() }?.toLongArray()
-            val credentials = arguments["credentials"] as? String
-            val credentialsType = arguments["credentialsType"] as? String
-            val playbackRate = arguments["playbackRate"] as? Double ?: 1.0
+        val requestData = buildMediaLoadRequestData(mediaInfo, arguments, customHeaders)
+        currentRemoteMediaClient?.load(requestData)
+    }
+
+    private fun buildMediaLoadRequestData(
+        mediaInfo: GoogleCastMediaInfo,
+        arguments: Map<String, Any?>,
+        customHeaders: Map<*, *>?
+    ): com.google.android.gms.cast.MediaLoadRequestData {
+        val autoPlay = arguments["autoPlay"] as? Boolean ?: true
+        val playPosition = arguments["playPosition"] as? Int ?: 0
+        val activeTrackIds = arguments["activeTrackIds"] as? ArrayList<Long>
+        val credentials = arguments["credentials"] as? String
+        val credentialsType = arguments["credentialsType"] as? String
+        val playbackRate = arguments["playbackRate"] as? Double ?: 1.0
+
+        val requestDataBuilder = com.google.android.gms.cast.MediaLoadRequestData.Builder()
+            .setMediaInfo(mediaInfo)
+            .setAutoplay(autoPlay)
+            .setCurrentTime((playPosition * 1000).toLong())
+            .setPlaybackRate(playbackRate)
+
+        if (customHeaders != null) {
             val headersJson = JSONObject(customHeaders.mapKeys { it.key.toString() })
-            val customData = JSONObject().put("httpRequestHeaders", headersJson)
-            val requestDataBuilder = com.google.android.gms.cast.MediaLoadRequestData.Builder()
-                .setMediaInfo(mediaInfo)
-                .setAutoplay(autoPlay)
-                .setCurrentTime((playPosition * 1000).toLong())
-                .setPlaybackRate(playbackRate)
-                .setCustomData(customData)
-            if (activeTrackIds != null)
-                requestDataBuilder.setActiveTrackIds(activeTrackIds)
-            requestDataBuilder.setCredentials(credentials)
-            requestDataBuilder.setCredentialsType(credentialsType)
-            currentRemoteMediaClient?.load(requestDataBuilder.build())
-        } else {
-            val options = GoogleCastMediaLoadOptions.fromMap(arguments)
-            currentRemoteMediaClient?.load(mediaInfo, options)
+            requestDataBuilder.setHttpRequestHeaders(headersJson)
         }
+
+        if (activeTrackIds != null) {
+            requestDataBuilder.setActiveTrackIds(activeTrackIds.toLongArray())
+        }
+
+        requestDataBuilder.setCredentials(credentials)
+        requestDataBuilder.setCredentialsType(credentialsType)
+
+        return requestDataBuilder.build()
     }
 
     fun startListen() {
