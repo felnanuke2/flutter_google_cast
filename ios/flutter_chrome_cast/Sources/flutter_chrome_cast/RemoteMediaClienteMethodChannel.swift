@@ -223,7 +223,9 @@ class RemoteMediaClienteMethodChannel :UIResponder, FlutterPlugin, GCKRemoteMedi
     }
     
     private  func loadMedia(_ arguments : Dictionary<String,Any>, result : FlutterResult )  {
-        print("[GoogleCast] loadMedia() called with arguments: \(arguments)")
+        let sensitiveKeys: Set<String> = ["customHeaders", "credentials"]
+        let safeArgs = arguments.filter { !sensitiveKeys.contains($0.key) }
+        print("[GoogleCast] loadMedia() called with arguments: \(safeArgs)")
         guard let mediaInfo = GCKMediaInformation.fromMap(arguments) else {
             print("[GoogleCast] loadMedia() failed to create GCKMediaInformation")
             result(FlutterError.init(code: "1", message:"fail to generate media info", details: nil))
