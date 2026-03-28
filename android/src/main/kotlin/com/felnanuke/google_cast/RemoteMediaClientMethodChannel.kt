@@ -360,7 +360,7 @@ class RemoteMediaClientMethodChannel : FlutterPlugin, MethodChannel.MethodCallHa
         if (customHeaders != null) {
             val autoPlay = arguments["autoPlay"] as? Boolean ?: true
             val playPosition = arguments["playPosition"] as? Int ?: 0
-            val activeTrackIds = arguments["activeTrackIds"] as? ArrayList<Long>
+            val activeTrackIds = (arguments["activeTrackIds"] as? ArrayList<Number>)?.map { it.toLong() }?.toLongArray()
             val credentials = arguments["credentials"] as? String
             val credentialsType = arguments["credentialsType"] as? String
             val playbackRate = arguments["playbackRate"] as? Double ?: 1.0
@@ -373,7 +373,7 @@ class RemoteMediaClientMethodChannel : FlutterPlugin, MethodChannel.MethodCallHa
                 .setPlaybackRate(playbackRate)
                 .setCustomData(customData)
             if (activeTrackIds != null)
-                requestDataBuilder.setActiveTrackIds(activeTrackIds.toLongArray())
+                requestDataBuilder.setActiveTrackIds(activeTrackIds)
             requestDataBuilder.setCredentials(credentials)
             requestDataBuilder.setCredentialsType(credentialsType)
             currentRemoteMediaClient?.load(requestDataBuilder.build())
