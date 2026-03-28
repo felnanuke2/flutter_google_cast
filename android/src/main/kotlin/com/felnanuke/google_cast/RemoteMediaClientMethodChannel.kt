@@ -356,14 +356,13 @@ class RemoteMediaClientMethodChannel : FlutterPlugin, MethodChannel.MethodCallHa
     private fun loadMedia(arguments: Map<String, Any?>) {
         val mediaInfo =
             GoogleCastMediaInfo.fromMap(arguments["mediaInfo"] as Map<String, Any?>) ?: return
-        val customHeaders = arguments["customHeaders"] as Map<*, *>?
-        if (customHeaders != null) {
+        val customHeaders = arguments["customHeaders"] as? Map<*, *>
         val requestData = buildMediaLoadRequestData(mediaInfo, arguments, customHeaders)
         currentRemoteMediaClient?.load(requestData)
     }
 
     private fun buildMediaLoadRequestData(
-        mediaInfo: GoogleCastMediaInfo,
+        mediaInfo: com.google.android.gms.cast.MediaInfo,
         arguments: Map<String, Any?>,
         customHeaders: Map<*, *>?
     ): com.google.android.gms.cast.MediaLoadRequestData {
@@ -381,16 +380,28 @@ class RemoteMediaClientMethodChannel : FlutterPlugin, MethodChannel.MethodCallHa
             .setPlaybackRate(playbackRate)
 
         if (customHeaders != null) {
-            val headersJson = JSONObject(customHeaders.mapKeys { it.key.toString() })
-            requestDataBuilder.setHttpRequestHeaders(headersJson)
+            val headersJson = JSONObject()
+            customHeaders.forEach { (key, value) ->
+                if (key != null && value != null) {
+                    headersJson.put(key.toString(), value.toString())
+                }
+            }
+            requestDataBuilder.setCustomData(
+                JSONObject().put("httpRequestHeaders", headersJson)
+            )
         }
 
         if (activeTrackIds != null) {
             requestDataBuilder.setActiveTrackIds(activeTrackIds.toLongArray())
         }
 
-        requestDataBuilder.setCredentials(credentials)
-        requestDataBuilder.setCredentialsType(credentialsType)
+        if (credentials != null) {
+            requestDataBuilder.setCredentials(credentials)
+        }
+
+        if (credentialsType != null) {
+            requestDataBuilder.setCredentialsType(credentialsType)
+        }
 
         return requestDataBuilder.build()
     }
