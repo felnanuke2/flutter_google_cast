@@ -365,12 +365,13 @@ class RemoteMediaClientMethodChannel : FlutterPlugin, MethodChannel.MethodCallHa
             val credentialsType = arguments["credentialsType"] as? String
             val playbackRate = arguments["playbackRate"] as? Double ?: 1.0
             val headersJson = JSONObject(customHeaders.mapKeys { it.key.toString() })
+            val customData = JSONObject().put("httpRequestHeaders", headersJson)
             val requestDataBuilder = com.google.android.gms.cast.MediaLoadRequestData.Builder()
                 .setMediaInfo(mediaInfo)
                 .setAutoplay(autoPlay)
                 .setCurrentTime((playPosition * 1000).toLong())
                 .setPlaybackRate(playbackRate)
-                .setHttpRequestHeaders(headersJson)
+                .setCustomData(customData)
             if (activeTrackIds != null)
                 requestDataBuilder.setActiveTrackIds(activeTrackIds.toLongArray())
             requestDataBuilder.setCredentials(credentials)

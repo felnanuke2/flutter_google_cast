@@ -233,29 +233,31 @@ class RemoteMediaClienteMethodChannel :UIResponder, FlutterPlugin, GCKRemoteMedi
         
         print("[GoogleCast] loadMedia() mediaInfo created - contentID: \(mediaInfo.contentID ?? "nil"), contentType: \(mediaInfo.contentType ?? "nil"), streamType: \(mediaInfo.streamType.rawValue)")
         
-        let requestData = GCKMediaLoadRequestData()
-        requestData.mediaInformation = mediaInfo
+        let requestDataBuilder = GCKMediaLoadRequestDataBuilder()
+        requestDataBuilder.mediaInformation = mediaInfo
         if let autoPlay = arguments["autoPlay"] as? Bool {
-            requestData.autoplay = NSNumber(value: autoPlay)
+            requestDataBuilder.autoplay = NSNumber(value: autoPlay)
         }
         if let playPosition = arguments["playPosition"] as? TimeInterval {
-            requestData.startTime = playPosition
+            requestDataBuilder.startTime = playPosition
         }
         if let playbackRate = arguments["playbackRate"] as? Float {
-            requestData.playbackRate = playbackRate
+            requestDataBuilder.playbackRate = playbackRate
         }
         if let activeTrackIds = arguments["activeTrackIds"] as? [NSNumber] {
-            requestData.activeTrackIDs = activeTrackIds
+            requestDataBuilder.activeTrackIDs = activeTrackIds
         }
         if let credentialType = arguments["credentialsType"] as? String {
-            requestData.credentialsType = credentialType
+            requestDataBuilder.credentialsType = credentialType
         }
         if let credentials = arguments["credentials"] as? String {
-            requestData.credentials = credentials
+            requestDataBuilder.credentials = credentials
         }
         if let customHeaders = arguments["customHeaders"] as? [String: String] {
-            requestData.httpRequestHeaders = customHeaders
+            requestDataBuilder.customData = ["httpRequestHeaders": customHeaders]
+            print("[GoogleCast] loadMedia() customHeaders forwarded to request customData on iOS (native header injection is not available in iOS Cast SDK)")
         }
+        let requestData = requestDataBuilder.build()
         print("[GoogleCast] loadMedia() options: autoplay=\(String(describing: requestData.autoplay)), playPosition=\(requestData.startTime)")
         print("[GoogleCast] loadMedia() remoteMediaClient: \(String(describing: currentRemoteMediaCliente))")
         let request = currentRemoteMediaCliente?.loadMedia(with: requestData)

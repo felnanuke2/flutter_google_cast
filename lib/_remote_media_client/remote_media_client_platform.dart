@@ -38,6 +38,10 @@ abstract class GoogleCastRemoteMediaClientPlatformInterface
   /// media. Due to Google Cast SDK limitations, custom headers are only
   /// supported for adaptive streaming formats (DASH and HLS). They will not
   /// work for progressive download formats such as MP4.
+  ///
+  /// On both Android and iOS in this plugin implementation, headers are
+  /// forwarded in `MediaLoadRequestData.customData` under the
+  /// `httpRequestHeaders` key for custom receiver handling.
   Future<void> loadMedia(
     GoogleCastMediaInformation mediaInfo, {
     bool autoPlay = true,

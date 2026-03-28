@@ -166,7 +166,10 @@ void main() {
 
         await remoteMediaClient.loadMedia(
           mediaInfo,
-          customHeaders: {'Authorization': 'Bearer token123', 'X-Custom': 'value'},
+          customHeaders: {
+            'Authorization': 'Bearer token123',
+            'X-Custom': 'value'
+          },
         );
 
         expect(methodCalls, hasLength(1));
