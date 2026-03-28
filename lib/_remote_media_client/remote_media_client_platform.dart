@@ -34,14 +34,12 @@ abstract class GoogleCastRemoteMediaClientPlatformInterface
 
   /// Loads media on the remote media client.
   ///
-  /// [customHeaders] allows sending custom HTTP request headers when loading
-  /// media. Due to Google Cast SDK limitations, custom headers are only
-  /// supported for adaptive streaming formats (DASH and HLS). They will not
-  /// work for progressive download formats such as MP4.
-  ///
-  /// On both Android and iOS in this plugin implementation, headers are
-  /// forwarded in `MediaLoadRequestData.customData` under the
-  /// `httpRequestHeaders` key for custom receiver handling.
+  /// [customData] is an optional arbitrary data map that is forwarded to the
+  /// Cast receiver application via the standard Google Cast SDK
+  /// `MediaLoadRequestData.customData` field. The receiver application can
+  /// read this map to configure playback — for example, to inject custom HTTP
+  /// request headers for adaptive streams (DASH/HLS) when using a custom
+  /// receiver.
   Future<void> loadMedia(
     GoogleCastMediaInformation mediaInfo, {
     bool autoPlay = true,
@@ -50,7 +48,7 @@ abstract class GoogleCastRemoteMediaClientPlatformInterface
     List<int>? activeTrackIds,
     String? credentials,
     String? credentialsType,
-    Map<String, String>? customHeaders,
+    Map<String, dynamic>? customData,
   });
 
   /// Loads queue items on the remote media client.

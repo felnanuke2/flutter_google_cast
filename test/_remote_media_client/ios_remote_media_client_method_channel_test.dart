@@ -150,7 +150,7 @@ void main() {
         expect(args['credentialsType'], equals('test_type'));
       });
 
-      test('should call native method with custom headers', () async {
+      test('should call native method with customData', () async {
         TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
             .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
           methodCalls.add(methodCall);
@@ -166,7 +166,7 @@ void main() {
 
         await remoteMediaClient.loadMedia(
           mediaInfo,
-          customHeaders: {
+          customData: {
             'Authorization': 'Bearer token123',
             'X-Custom': 'value'
           },
@@ -176,11 +176,11 @@ void main() {
         expect(methodCalls.first.method, equals('loadMedia'));
 
         final args = methodCalls.first.arguments as Map<dynamic, dynamic>;
-        expect(args['customHeaders'],
+        expect(args['customData'],
             equals({'Authorization': 'Bearer token123', 'X-Custom': 'value'}));
       });
 
-      test('should omit customHeaders key when not provided', () async {
+      test('should omit customData key when not provided', () async {
         TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
             .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
           methodCalls.add(methodCall);
@@ -197,7 +197,7 @@ void main() {
 
         expect(methodCalls, hasLength(1));
         final args = methodCalls.first.arguments as Map<dynamic, dynamic>;
-        expect(args.containsKey('customHeaders'),
+        expect(args.containsKey('customData'),
             isFalse); // Should be removed due to null
       });
     });

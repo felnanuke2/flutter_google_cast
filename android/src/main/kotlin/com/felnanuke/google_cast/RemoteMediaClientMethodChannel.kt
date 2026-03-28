@@ -356,15 +356,15 @@ class RemoteMediaClientMethodChannel : FlutterPlugin, MethodChannel.MethodCallHa
     private fun loadMedia(arguments: Map<String, Any?>) {
         val mediaInfo =
             GoogleCastMediaInfo.fromMap(arguments["mediaInfo"] as Map<String, Any?>) ?: return
-        val customHeaders = arguments["customHeaders"] as? Map<*, *>
-        val requestData = buildMediaLoadRequestData(mediaInfo, arguments, customHeaders)
+        val customData = arguments["customData"] as? Map<*, *>
+        val requestData = buildMediaLoadRequestData(mediaInfo, arguments, customData)
         currentRemoteMediaClient?.load(requestData)
     }
 
     private fun buildMediaLoadRequestData(
         mediaInfo: com.google.android.gms.cast.MediaInfo,
         arguments: Map<String, Any?>,
-        customHeaders: Map<*, *>?
+        customData: Map<*, *>?
     ): com.google.android.gms.cast.MediaLoadRequestData {
         val autoPlay = arguments["autoPlay"] as? Boolean ?: true
         val playPosition = arguments["playPosition"] as? Int ?: 0
@@ -379,16 +379,8 @@ class RemoteMediaClientMethodChannel : FlutterPlugin, MethodChannel.MethodCallHa
             .setCurrentTime((playPosition * 1000).toLong())
             .setPlaybackRate(playbackRate)
 
-        if (customHeaders != null) {
-            val headersJson = JSONObject()
-            customHeaders.forEach { (key, value) ->
-                if (key != null && value != null) {
-                    headersJson.put(key.toString(), value.toString())
-                }
-            }
-            requestDataBuilder.setCustomData(
-                JSONObject().put("httpRequestHeaders", headersJson)
-            )
+        if (customData != null) {
+            requestDataBuilder.setCustomData(mapToJsonObject(customData))
         }
 
         if (activeTrackIds != null) {
@@ -404,6 +396,33 @@ class RemoteMediaClientMethodChannel : FlutterPlugin, MethodChannel.MethodCallHa
         }
 
         return requestDataBuilder.build()
+    }
+
+    /** Recursively converts a Flutter/codec map to a JSONObject, preserving value types. */
+    private fun mapToJsonObject(map: Map<*, *>): JSONObject {
+        val json = JSONObject()
+        map.forEach { (key, value) ->
+            if (key != null) {
+                json.put(key.toString(), toJsonValue(value))
+            }
+        }
+        return json
+    }
+
+    /** Recursively converts a Flutter/codec list to a JSONArray, preserving value types. */
+    private fun listToJsonArray(list: List<*>): org.json.JSONArray {
+        val arr = org.json.JSONArray()
+        list.forEach { arr.put(toJsonValue(it)) }
+        return arr
+    }
+
+    private fun toJsonValue(value: Any?): Any? {
+        return when (value) {
+            null -> JSONObject.NULL
+            is Map<*, *> -> mapToJsonObject(value)
+            is List<*> -> listToJsonArray(value)
+            else -> value
+        }
     }
 
     fun startListen() {

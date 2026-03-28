@@ -223,7 +223,7 @@ class RemoteMediaClienteMethodChannel :UIResponder, FlutterPlugin, GCKRemoteMedi
     }
     
     private  func loadMedia(_ arguments : Dictionary<String,Any>, result : FlutterResult )  {
-        let sensitiveKeys: Set<String> = ["customHeaders", "credentials"]
+        let sensitiveKeys: Set<String> = ["customData", "credentials"]
         let safeArgs = arguments.filter { !sensitiveKeys.contains($0.key) }
         print("[GoogleCast] loadMedia() called with arguments: \(safeArgs)")
         guard let mediaInfo = GCKMediaInformation.fromMap(arguments) else {
@@ -255,9 +255,8 @@ class RemoteMediaClienteMethodChannel :UIResponder, FlutterPlugin, GCKRemoteMedi
         if let credentials = arguments["credentials"] as? String {
             requestDataBuilder.credentials = credentials
         }
-        if let customHeaders = arguments["customHeaders"] as? [String: String] {
-            requestDataBuilder.customData = ["httpRequestHeaders": customHeaders]
-            print("[GoogleCast] loadMedia() customHeaders forwarded to request customData on iOS (native header injection is not available in iOS Cast SDK)")
+        if let customData = arguments["customData"] as? [String: Any] {
+            requestDataBuilder.customData = customData as NSObject
         }
         let requestData = requestDataBuilder.build()
         print("[GoogleCast] loadMedia() options: autoplay=\(String(describing: requestData.autoplay)), playPosition=\(requestData.startTime)")
