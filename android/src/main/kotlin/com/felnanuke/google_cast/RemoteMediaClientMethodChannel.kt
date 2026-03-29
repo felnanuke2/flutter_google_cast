@@ -333,10 +333,16 @@ class RemoteMediaClientMethodChannel : FlutterPlugin, MethodChannel.MethodCallHa
 
     private fun queueLoadItems(arguments: Map<String, Any?>) {
         val queueItemsData = arguments["queueItems"] as List<Map<String, Any?>>
-        val optionsData = arguments["options"] as Map<String, Any?>
-        val startIndex = optionsData["startIndex"] as Int
+        val optionsData = arguments["options"] as? Map<String, Any?> ?: emptyMap()
+        val startIndex = (optionsData["startIndex"] as? Number)?.toInt() ?: 0
         val repeatMode = optionsData["repeatMode"] as String?
-        val playPosition = optionsData["playPosition"] as Int
+        val playPosition = (optionsData["playPosition"] as? Number)?.toLong() ?: 0L
+        val queueCustomData = optionsData["customData"] as? Map<*, *>
+        val queueCustomDataJson = if (queueCustomData != null) {
+            mapToJsonObject(queueCustomData)
+        } else {
+            JSONObject()
+        }
         val queueItems = GoogleCastQueueItemBuilder.listFromMap(queueItemsData)
         currentRemoteMediaClient?.queueLoad(
             queueItems.toTypedArray(),
@@ -348,16 +354,81 @@ class RemoteMediaClientMethodChannel : FlutterPlugin, MethodChannel.MethodCallHa
                 "ALL_AND_SHUFFLE" -> REPEAT_MODE_REPEAT_ALL_AND_SHUFFLE
                 else -> REPEAT_MODE_REPEAT_OFF
             },
-            playPosition.toLong() * 1000,
-            JSONObject()
+            playPosition * 1000,
+            queueCustomDataJson
         )
     }
 
     private fun loadMedia(arguments: Map<String, Any?>) {
         val mediaInfo =
             GoogleCastMediaInfo.fromMap(arguments["mediaInfo"] as Map<String, Any?>) ?: return
-        val options = GoogleCastMediaLoadOptions.fromMap(arguments)
-        currentRemoteMediaClient?.load(mediaInfo, options)
+        val customData = arguments["customData"] as? Map<*, *>
+        val requestData = buildMediaLoadRequestData(mediaInfo, arguments, customData)
+        currentRemoteMediaClient?.load(requestData)
+    }
+
+    private fun buildMediaLoadRequestData(
+        mediaInfo: com.google.android.gms.cast.MediaInfo,
+        arguments: Map<String, Any?>,
+        customData: Map<*, *>?
+    ): com.google.android.gms.cast.MediaLoadRequestData {
+        val autoPlay = arguments["autoPlay"] as? Boolean ?: true
+        val playPosition = arguments["playPosition"] as? Int ?: 0
+        val activeTrackIds = (arguments["activeTrackIds"] as? ArrayList<Number>)?.map { it.toLong() }?.toLongArray()
+        val credentials = arguments["credentials"] as? String
+        val credentialsType = arguments["credentialsType"] as? String
+        val playbackRate = arguments["playbackRate"] as? Double ?: 1.0
+
+        val requestDataBuilder = com.google.android.gms.cast.MediaLoadRequestData.Builder()
+            .setMediaInfo(mediaInfo)
+            .setAutoplay(autoPlay)
+            .setCurrentTime((playPosition * 1000).toLong())
+            .setPlaybackRate(playbackRate)
+
+        if (customData != null) {
+            requestDataBuilder.setCustomData(mapToJsonObject(customData))
+        }
+
+        if (activeTrackIds != null) {
+            requestDataBuilder.setActiveTrackIds(activeTrackIds)
+        }
+
+        if (credentials != null) {
+            requestDataBuilder.setCredentials(credentials)
+        }
+
+        if (credentialsType != null) {
+            requestDataBuilder.setCredentialsType(credentialsType)
+        }
+
+        return requestDataBuilder.build()
+    }
+
+    /** Recursively converts a Flutter/codec map to a JSONObject, preserving value types. */
+    private fun mapToJsonObject(map: Map<*, *>): JSONObject {
+        val json = JSONObject()
+        map.forEach { (key, value) ->
+            if (key != null) {
+                json.put(key.toString(), toJsonValue(value))
+            }
+        }
+        return json
+    }
+
+    /** Recursively converts a Flutter/codec list to a JSONArray, preserving value types. */
+    private fun listToJsonArray(list: List<*>): org.json.JSONArray {
+        val arr = org.json.JSONArray()
+        list.forEach { arr.put(toJsonValue(it)) }
+        return arr
+    }
+
+    private fun toJsonValue(value: Any?): Any? {
+        return when (value) {
+            null -> JSONObject.NULL
+            is Map<*, *> -> mapToJsonObject(value)
+            is List<*> -> listToJsonArray(value)
+            else -> value
+        }
     }
 
     fun startListen() {

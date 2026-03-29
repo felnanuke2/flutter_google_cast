@@ -223,7 +223,9 @@ class RemoteMediaClienteMethodChannel :UIResponder, FlutterPlugin, GCKRemoteMedi
     }
     
     private  func loadMedia(_ arguments : Dictionary<String,Any>, result : FlutterResult )  {
-        print("[GoogleCast] loadMedia() called with arguments: \(arguments)")
+        let sensitiveKeys: Set<String> = ["customData", "credentials"]
+        let safeArgs = arguments.filter { !sensitiveKeys.contains($0.key) }
+        print("[GoogleCast] loadMedia() called with arguments: \(safeArgs)")
         guard let mediaInfo = GCKMediaInformation.fromMap(arguments) else {
             print("[GoogleCast] loadMedia() failed to create GCKMediaInformation")
             result(FlutterError.init(code: "1", message:"fail to generate media info", details: nil))
@@ -233,29 +235,33 @@ class RemoteMediaClienteMethodChannel :UIResponder, FlutterPlugin, GCKRemoteMedi
         
         print("[GoogleCast] loadMedia() mediaInfo created - contentID: \(mediaInfo.contentID ?? "nil"), contentType: \(mediaInfo.contentType ?? "nil"), streamType: \(mediaInfo.streamType.rawValue)")
         
-        let options = GCKMediaLoadOptions.init()
+        let requestDataBuilder = GCKMediaLoadRequestDataBuilder()
+        requestDataBuilder.mediaInformation = mediaInfo
         if let autoPlay = arguments["autoPlay"] as? Bool {
-            options.autoplay = autoPlay
+            requestDataBuilder.autoplay = NSNumber(value: autoPlay)
         }
         if let playPosition = arguments["playPosition"] as? TimeInterval {
-            options.playPosition = playPosition
+            requestDataBuilder.startTime = playPosition
         }
-        
         if let playbackRate = arguments["playbackRate"] as? Float {
-            options.playbackRate = playbackRate
+            requestDataBuilder.playbackRate = playbackRate
         }
         if let activeTrackIds = arguments["activeTrackIds"] as? [NSNumber] {
-            options.activeTrackIDs = activeTrackIds
+            requestDataBuilder.activeTrackIDs = activeTrackIds
         }
         if let credentialType = arguments["credentialsType"] as? String {
-            options.credentialsType = credentialType
+            requestDataBuilder.credentialsType = credentialType
         }
         if let credentials = arguments["credentials"] as? String {
-            options.credentials = credentials
+            requestDataBuilder.credentials = credentials
         }
-        print("[GoogleCast] loadMedia() options: autoplay=\(options.autoplay), playPosition=\(options.playPosition)")
+        if let customData = arguments["customData"] as? [String: Any] {
+            requestDataBuilder.customData = customData as NSObject
+        }
+        let requestData = requestDataBuilder.build()
+        print("[GoogleCast] loadMedia() options: autoplay=\(String(describing: requestData.autoplay)), playPosition=\(requestData.startTime)")
         print("[GoogleCast] loadMedia() remoteMediaClient: \(String(describing: currentRemoteMediaCliente))")
-        let request = currentRemoteMediaCliente?.loadMedia(mediaInfo,with:  options)
+        let request = currentRemoteMediaCliente?.loadMedia(with: requestData)
         print("[GoogleCast] loadMedia() request: \(String(describing: request))")
         result(request?.toMap())
         

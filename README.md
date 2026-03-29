@@ -578,6 +578,66 @@ Future<void> _loadMediaQueue(GoogleCastDevice device) async {
 }
 ```
 
+### 7.1 Custom HTTP Headers and Custom Receiver (Important)
+
+Google Cast SDK does not provide a standard sender-side API to force arbitrary HTTP headers directly in media requests for all receiver scenarios.
+
+If your use case requires custom headers (for example `Authorization`, signed tokens, tenant headers, etc.), the recommended approach is:
+
+1. Send required values through `customData` in `loadMedia` or `queueLoadItems`.
+2. Implement a Custom Web Receiver that reads this `customData`.
+3. Apply the values in your receiver-side networking or request interception logic.
+
+#### Sender-side example (`loadMedia`)
+
+```dart
+await GoogleCastRemoteMediaClient.instance.loadMedia(
+  mediaInfo,
+  customData: {
+    'headers': {
+      'Authorization': 'Bearer <token>',
+      'X-Tenant': 'tenant-123',
+    },
+    'requestContext': {
+      'sessionId': 'abc-123',
+    },
+  },
+);
+```
+
+#### Sender-side example (`queueLoadItems`)
+
+```dart
+await GoogleCastRemoteMediaClient.instance.queueLoadItems(
+  [
+    GoogleCastQueueItem(
+      mediaInformation: mediaInfo,
+      customData: {
+        'headers': {
+          'Authorization': 'Bearer <token-item-level>',
+        },
+      },
+    ),
+  ],
+  options: GoogleCastQueueLoadOptions(
+    customData: {
+      'headers': {
+        'X-Queue-Token': 'queue-token-123',
+      },
+    },
+  ),
+);
+```
+
+#### Receiver-side setup references
+
+- Cast Web Receiver overview: https://developers.google.com/cast/docs/web_receiver
+- Create and run a Custom Web Receiver: https://developers.google.com/cast/docs/web_receiver/basic
+- CAF Receiver framework: https://developers.google.com/cast/docs/web_receiver/caf_receiver
+- Register your receiver application in Google Cast SDK Developer Console: https://developers.google.com/cast/docs/registration
+
+> Note: In a Custom Receiver flow, your receiver app is responsible for reading `customData` and applying any custom authentication/header strategy needed by your backend/CDN.
+
 ### 8. Media Playback Controls
 
 #### Basic Controls

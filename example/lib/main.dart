@@ -387,6 +387,14 @@ class _MyAppState extends State<MyApp> {
                                                   color: Colors.orange,
                                                 ),
                                                 IconButton(
+                                                  icon: const Icon(Icons.http),
+                                                  onPressed: () =>
+                                                      _loadHlsMediaWithCustomData(),
+                                                  tooltip:
+                                                      'Load HLS + customData',
+                                                  color: Colors.deepPurple,
+                                                ),
+                                                IconButton(
                                                   icon: const Icon(
                                                       Icons.play_arrow),
                                                   onPressed: () =>
@@ -686,6 +694,65 @@ class _MyAppState extends State<MyApp> {
       ScaffoldMessenger.of(_scaffoldKey.currentContext!).showSnackBar(
         SnackBar(
           content: Text('Failed to load HLS media: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  void _loadHlsMediaWithCustomData() async {
+    try {
+      final mediaInfo = GoogleCastMediaInformation(
+        contentId: 'hls_custom_data_sample',
+        streamType: CastMediaStreamType.buffered,
+        contentUrl: Uri.parse(
+            'https://devstreaming-cdn.apple.com/videos/streaming/examples/img_bipbop_adv_example_ts/master.m3u8'),
+        contentType: 'application/x-mpegURL',
+        metadata: GoogleCastMovieMediaMetadata(
+          title: 'Apple HLS Sample (customData)',
+          subtitle: 'HLS Stream with customData',
+          images: [
+            GoogleCastImage(
+              url: Uri.parse(
+                  'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/images/BigBuckBunny.jpg'),
+              height: 480,
+              width: 854,
+            ),
+          ],
+        ),
+      );
+
+      const customData = {
+        'headers': {
+          'Authorization': 'Bearer demo-token-123',
+          'X-Client': 'flutter_google_cast_example',
+          'X-Feature': 'custom-data-validation',
+        },
+        'options': {
+          'retry': true,
+          'timeoutSeconds': 20,
+        },
+        'tags': ['hls', 'customData', 'native-log-check'],
+      };
+
+      debugPrint('[Example] loadMedia customData payload: $customData');
+
+      await GoogleCastRemoteMediaClient.instance.loadMedia(
+        mediaInfo,
+        customData: customData,
+      );
+
+      ScaffoldMessenger.of(_scaffoldKey.currentContext!).showSnackBar(
+        const SnackBar(
+          content: Text('HLS with customData sent to native side'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (e, st) {
+      debugPrint('Error loading HLS media with customData: $e\n$st');
+      ScaffoldMessenger.of(_scaffoldKey.currentContext!).showSnackBar(
+        SnackBar(
+          content: Text('Failed to load HLS with customData: $e'),
           backgroundColor: Colors.red,
         ),
       );

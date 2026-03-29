@@ -10,9 +10,9 @@ class GoogleCastMetadataBuilder {
     companion object {
         fun fromMap(args: Map<String, Any?>): MediaMetadata? {
 
-            var map = args.toMutableMap()
+            val map = args.toMutableMap()
             if (map.isEmpty()) return null
-            val type = args["metadataType"] as Int
+            val type = (args["metadataType"] as? Number)?.toInt() ?: return null
             val metadata = MediaMetadata(type)
 
 
@@ -23,9 +23,15 @@ class GoogleCastMetadataBuilder {
                     "creationDateTime",
                     "creationDate"
                 )
+                if (item.key == "metadataType" || item.key == "images") continue
+                if (item.value == null) continue
+
                 if (item.key in datesKey) {
+                    val millis = (item.value as? Number)?.toLong()
+                    if (millis == null) continue
+
                     val calendar = Calendar.getInstance()
-                    calendar.timeInMillis = item.value as Long
+                    calendar.timeInMillis = millis
                     when (item.key) {
                         "releaseDate" -> metadata.putDate(MediaMetadata.KEY_RELEASE_DATE, calendar)
                         "broadcastDate" -> metadata.putDate(
@@ -41,12 +47,15 @@ class GoogleCastMetadataBuilder {
 
 
                 } else {
-                    when (item.value) {
-                        is String -> metadata.putString(item.key, item.value as String)
+                    val value = item.value
+                    when (value) {
+                        is String -> metadata.putString(item.key, value)
                         is Int -> metadata.putInt(
-                            item.key, item.value as Int
+                            item.key, value
                         )
-                        is Double -> metadata.putDouble(item.key, item.value as Double)
+                        is Long -> metadata.putInt(item.key, value.toInt())
+                        is Float -> metadata.putDouble(item.key, value.toDouble())
+                        is Double -> metadata.putDouble(item.key, value)
 
                     }
                 }

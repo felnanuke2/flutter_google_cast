@@ -77,6 +77,7 @@ class GoogleCastRemoteMediaClientAndroidMethodChannel
     List<int>? activeTrackIds,
     String? credentials,
     String? credentialsType,
+    Map<String, dynamic>? customData,
   }) async {
     await _channel.invokeMethod('loadMedia', {
       'mediaInfo': mediaInfo.toMap(),
@@ -86,6 +87,7 @@ class GoogleCastRemoteMediaClientAndroidMethodChannel
       'activeTrackIds': activeTrackIds,
       'credentials': credentials,
       'credentialsType': credentialsType,
+      'customData': customData,
     });
   }
 
