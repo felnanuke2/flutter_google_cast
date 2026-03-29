@@ -1,3 +1,16 @@
+## 1.4.4 - Custom Data for Media Load and Queue Load
+### ✨ New Features
+- Added support for passing `customData` in `loadMedia` requests on Android and iOS native load request builders.
+- Added support for forwarding `customData` in Android `queueLoadItems` options payload.
+
+### 📚 Documentation
+- Added README guidance for custom HTTP header scenarios where Google Cast SDK does not provide standard direct header control.
+- Documented the recommended Custom Web Receiver approach using `customData` (sender -> receiver) for app-specific header/auth handling.
+- Added official Google Cast documentation links for creating and registering a Custom Receiver.
+
+### 🔧 Notes
+- For custom header requirements, implement the logic on your Custom Receiver side by consuming `customData` and applying it in your receiver network pipeline.
+
 ## 1.4.3 - iOS Options Forwarding and Subtitle Language Fallback
 ### 🐛 Bug Fixes
 - **iOS options forwarding**: Fixed `IOSGoogleCastOptions` so all base `GoogleCastOptions` fields can be configured and are forwarded through `super` parameters.
