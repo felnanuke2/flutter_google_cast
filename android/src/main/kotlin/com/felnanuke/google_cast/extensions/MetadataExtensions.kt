@@ -24,8 +24,13 @@ class GoogleCastMetadataBuilder {
                     "creationDate"
                 )
                 if (item.key in datesKey) {
+                    val timeMillis: Long = when (val v = item.value) {
+                        is Long -> v
+                        is Int -> v.toLong()
+                        else -> continue
+                    }
                     val calendar = Calendar.getInstance()
-                    calendar.timeInMillis = item.value as Long
+                    calendar.timeInMillis = timeMillis
                     when (item.key) {
                         "releaseDate" -> metadata.putDate(MediaMetadata.KEY_RELEASE_DATE, calendar)
                         "broadcastDate" -> metadata.putDate(
