@@ -333,10 +333,16 @@ class RemoteMediaClientMethodChannel : FlutterPlugin, MethodChannel.MethodCallHa
 
     private fun queueLoadItems(arguments: Map<String, Any?>) {
         val queueItemsData = arguments["queueItems"] as List<Map<String, Any?>>
-        val optionsData = arguments["options"] as Map<String, Any?>
-        val startIndex = optionsData["startIndex"] as Int
+        val optionsData = arguments["options"] as? Map<String, Any?> ?: emptyMap()
+        val startIndex = (optionsData["startIndex"] as? Number)?.toInt() ?: 0
         val repeatMode = optionsData["repeatMode"] as String?
-        val playPosition = optionsData["playPosition"] as Int
+        val playPosition = (optionsData["playPosition"] as? Number)?.toLong() ?: 0L
+        val queueCustomData = optionsData["customData"] as? Map<*, *>
+        val queueCustomDataJson = if (queueCustomData != null) {
+            mapToJsonObject(queueCustomData)
+        } else {
+            JSONObject()
+        }
         val queueItems = GoogleCastQueueItemBuilder.listFromMap(queueItemsData)
         currentRemoteMediaClient?.queueLoad(
             queueItems.toTypedArray(),
@@ -348,8 +354,8 @@ class RemoteMediaClientMethodChannel : FlutterPlugin, MethodChannel.MethodCallHa
                 "ALL_AND_SHUFFLE" -> REPEAT_MODE_REPEAT_ALL_AND_SHUFFLE
                 else -> REPEAT_MODE_REPEAT_OFF
             },
-            playPosition.toLong() * 1000,
-            JSONObject()
+            playPosition * 1000,
+            queueCustomDataJson
         )
     }
 

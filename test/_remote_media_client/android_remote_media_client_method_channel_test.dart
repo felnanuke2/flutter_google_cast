@@ -277,6 +277,42 @@ void main() {
             equals({'Authorization': 'Bearer token123', 'X-Custom': 'value'}));
       });
 
+      test('should call native method with nested customData', () async {
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+            .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
+          methodCalls.add(methodCall);
+          return {'requestID': 123, 'inProgress': false, 'isExternal': false};
+        });
+
+        final mediaInfo = GoogleCastMediaInformation(
+          contentId: 'video-123',
+          contentType: 'application/x-mpegURL',
+          streamType: CastMediaStreamType.buffered,
+          contentUrl: Uri.parse('https://example.com/playlist.m3u8'),
+        );
+
+        const nestedCustomData = {
+          'headers': {
+            'Authorization': 'Bearer token123',
+            'X-Client': 'flutter-test',
+          },
+          'options': {
+            'retry': true,
+            'timeout': 30,
+          },
+          'tags': ['sports', 'live']
+        };
+
+        await remoteMediaClient.loadMedia(
+          mediaInfo,
+          customData: nestedCustomData,
+        );
+
+        expect(methodCalls, hasLength(1));
+        expect(methodCalls.first.method, equals('loadMedia'));
+        expect(methodCalls.first.arguments['customData'], equals(nestedCustomData));
+      });
+
       test('should send null customData when not provided', () async {
         TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
             .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
