@@ -389,9 +389,9 @@ class _MyAppState extends State<MyApp> {
                                                 IconButton(
                                                   icon: const Icon(Icons.http),
                                                   onPressed: () =>
-                                                    _loadHlsMediaWithCustomData(),
+                                                      _loadHlsMediaWithCustomData(),
                                                   tooltip:
-                                                    'Load HLS + customData',
+                                                      'Load HLS + customData',
                                                   color: Colors.deepPurple,
                                                 ),
                                                 IconButton(

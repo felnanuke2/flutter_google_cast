@@ -265,10 +265,7 @@ void main() {
 
         await remoteMediaClient.loadMedia(
           mediaInfo,
-          customData: {
-            'Authorization': 'Bearer token123',
-            'X-Custom': 'value'
-          },
+          customData: {'Authorization': 'Bearer token123', 'X-Custom': 'value'},
         );
 
         expect(methodCalls, hasLength(1));
@@ -310,7 +307,8 @@ void main() {
 
         expect(methodCalls, hasLength(1));
         expect(methodCalls.first.method, equals('loadMedia'));
-        expect(methodCalls.first.arguments['customData'], equals(nestedCustomData));
+        expect(methodCalls.first.arguments['customData'],
+            equals(nestedCustomData));
       });
 
       test('should send null customData when not provided', () async {
