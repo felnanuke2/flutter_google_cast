@@ -652,16 +652,14 @@ class _MyAppState extends State<MyApp> {
   void _loadHlsMedia() async {
     try {
       final mediaInfo = GoogleCastMediaInformation(
-        contentId: 'hls_sample',
-        // Note: Use 'buffered' for VOD HLS streams that have a finite duration
-        // Use 'live' only for true live streams without a known duration
+        contentId: 'webhook_headers_test',
         streamType: CastMediaStreamType.buffered,
         contentUrl: Uri.parse(
-            'https://devstreaming-cdn.apple.com/videos/streaming/examples/img_bipbop_adv_example_ts/master.m3u8'),
+            'https://webhook.site/15aff382-4284-40fb-9d77-021e4a95204e'),
         contentType: 'application/x-mpegURL',
         metadata: GoogleCastMovieMediaMetadata(
-          title: 'Apple HLS Sample',
-          subtitle: 'HLS Stream Test',
+          title: 'Webhook Header Test',
+          subtitle: 'Inspect webhook.site request payload',
           images: [
             GoogleCastImage(
               url: Uri.parse(
@@ -673,11 +671,17 @@ class _MyAppState extends State<MyApp> {
         ),
       );
 
-      await GoogleCastRemoteMediaClient.instance.loadMedia(mediaInfo);
+      await GoogleCastRemoteMediaClient.instance.loadMedia(
+        mediaInfo,
+        customHeaders: {
+          'Authorization': 'Bearer webhook-site-test',
+          'X-Debug-Source': 'flutter_google_cast_example',
+        },
+      );
 
       ScaffoldMessenger.of(_scaffoldKey.currentContext!).showSnackBar(
         const SnackBar(
-          content: Text('HLS media loaded successfully'),
+          content: Text('Webhook test request sent. Check webhook.site logs.'),
           backgroundColor: Colors.green,
         ),
       );
