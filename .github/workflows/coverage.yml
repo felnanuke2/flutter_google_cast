@@ -24,7 +24,7 @@ jobs:
         channel: 'stable'
     
     - name: Install workspace dependencies
-      run: dart pub get
+      run: flutter pub get
     
     - name: Run tests with coverage
       run: flutter test --coverage
