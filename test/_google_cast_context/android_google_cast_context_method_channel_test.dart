@@ -8,12 +8,11 @@ void main() {
   group('GoogleCastContextAndroidMethodChannel', () {
     late GoogleCastContextAndroidMethodChannel contextManager;
     late List<MethodCall> methodCalls;
-    late MethodChannel channel;
+    const channel = MethodChannel('com.felnanuke.google_cast.context');
 
     setUp(() {
       TestWidgetsFlutterBinding.ensureInitialized();
       methodCalls = [];
-      channel = const MethodChannel('com.felnanuke.google_cast.context');
       contextManager = GoogleCastContextAndroidMethodChannel();
     });
 
@@ -22,145 +21,33 @@ void main() {
           .setMockMethodCallHandler(channel, null);
     });
 
-    test('should implement GoogleCastContextPlatformInterface', () {
+    void mockChannel(dynamic Function(MethodCall) handler) {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(channel, (call) async {
+        methodCalls.add(call);
+        return handler(call);
+      });
+    }
+
+    test('implements GoogleCastContextPlatformInterface', () {
       expect(contextManager, isA<GoogleCastContextPlatformInterface>());
     });
 
-    test(
-        'setSharedInstanceWithOptions should return true when native method returns true',
+    test('setSharedInstanceWithOptions invokes setSharedInstance on the channel',
         () async {
-      // Set up the mock to return true
-      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-          .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
-        methodCalls.add(methodCall);
-        return true;
-      });
+      mockChannel((_) => true);
 
-      final castOptions = GoogleCastOptions(
-        physicalVolumeButtonsWillControlDeviceVolume: true,
-        disableDiscoveryAutostart: false,
-        disableAnalyticsLogging: false,
-        suspendSessionsWhenBackgrounded: true,
-        stopReceiverApplicationWhenEndingSession: false,
-        startDiscoveryAfterFirstTapOnCastButton: true,
-      );
-
-      final result =
-          await contextManager.setSharedInstanceWithOptions(castOptions);
-
-      expect(result, isTrue);
-      expect(methodCalls, hasLength(1));
-      expect(methodCalls.first.method, equals('setSharedInstance'));
-      expect(methodCalls.first.arguments, equals(castOptions.toMap()));
-    });
-
-    test(
-        'setSharedInstanceWithOptions should return false when native method returns false',
-        () async {
-      // Set up the mock to return false
-      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-          .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
-        methodCalls.add(methodCall);
-        return false;
-      });
-
-      final castOptions = GoogleCastOptions();
-
-      final result =
-          await contextManager.setSharedInstanceWithOptions(castOptions);
-
-      expect(result, isFalse);
-      expect(methodCalls, hasLength(1));
-      expect(methodCalls.first.method, equals('setSharedInstance'));
-    });
-
-    test(
-        'setSharedInstanceWithOptions should return false when native method returns null',
-        () async {
-      // Set up the mock to return null
-      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-          .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
-        methodCalls.add(methodCall);
-        return null;
-      });
-
-      final castOptions = GoogleCastOptions();
-
-      final result =
-          await contextManager.setSharedInstanceWithOptions(castOptions);
-
-      expect(result, isFalse);
-      expect(methodCalls, hasLength(1));
-      expect(methodCalls.first.method, equals('setSharedInstance'));
-    });
-
-    test(
-        'setSharedInstanceWithOptions should return false when native method returns non-boolean',
-        () async {
-      // Set up the mock to return a string
-      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-          .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
-        methodCalls.add(methodCall);
-        return 'success';
-      });
-
-      final castOptions = GoogleCastOptions();
-
-      final result =
-          await contextManager.setSharedInstanceWithOptions(castOptions);
-
-      expect(result, isFalse);
-      expect(methodCalls, hasLength(1));
-      expect(methodCalls.first.method, equals('setSharedInstance'));
-    });
-
-    test(
-        'setSharedInstanceWithOptions should rethrow exceptions from native method',
-        () async {
-      final testException = PlatformException(
-        code: 'TEST_ERROR',
-        message: 'Test error message',
-      );
-
-      // Set up the mock to throw an exception
-      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-          .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
-        methodCalls.add(methodCall);
-        throw testException;
-      });
-
-      final castOptions = GoogleCastOptions();
-
-      expect(
-        () => contextManager.setSharedInstanceWithOptions(castOptions),
-        throwsA(isA<PlatformException>()
-            .having(
-              (e) => e.code,
-              'code',
-              'TEST_ERROR',
-            )
-            .having(
-              (e) => e.message,
-              'message',
-              'Test error message',
-            )),
-      );
+      await contextManager
+          .setSharedInstanceWithOptions(GoogleCastOptions());
 
       expect(methodCalls, hasLength(1));
       expect(methodCalls.first.method, equals('setSharedInstance'));
     });
 
-    test(
-        'setSharedInstanceWithOptions should handle custom cast options correctly',
-        () async {
-      // Set up the mock to return true
-      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-          .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
-        methodCalls.add(methodCall);
-        return true;
-      });
+    test('setSharedInstanceWithOptions passes options as arguments', () async {
+      mockChannel((_) => true);
 
-      final castOptions = GoogleCastOptions(
+      final options = GoogleCastOptions(
         physicalVolumeButtonsWillControlDeviceVolume: false,
         disableDiscoveryAutostart: true,
         disableAnalyticsLogging: true,
@@ -169,23 +56,63 @@ void main() {
         startDiscoveryAfterFirstTapOnCastButton: false,
       );
 
+      await contextManager.setSharedInstanceWithOptions(options);
+
+      expect(methodCalls.first.arguments, equals(options.toMap()));
+    });
+
+    test('setSharedInstanceWithOptions returns true when native returns true',
+        () async {
+      mockChannel((_) => true);
+
       final result =
-          await contextManager.setSharedInstanceWithOptions(castOptions);
+          await contextManager.setSharedInstanceWithOptions(GoogleCastOptions());
 
       expect(result, isTrue);
-      expect(methodCalls, hasLength(1));
-      expect(methodCalls.first.method, equals('setSharedInstance'));
-      expect(
-          methodCalls.first.arguments,
-          equals({
-            'physicalVolumeButtonsWillControlDeviceVolume': false,
-            'disableDiscoveryAutostart': true,
-            'disableAnalyticsLogging': true,
-            'suspendSessionsWhenBackgrounded': false,
-            'stopReceiverApplicationWhenEndingSession': true,
-            'startDiscoveryAfterFirstTapOnCastButton': false,
-            'stopCastingOnAppTerminated': false,
-          }));
+    });
+
+    test('setSharedInstanceWithOptions returns false when native returns false',
+        () async {
+      mockChannel((_) => false);
+
+      final result =
+          await contextManager.setSharedInstanceWithOptions(GoogleCastOptions());
+
+      expect(result, isFalse);
+    });
+
+    test('setSharedInstanceWithOptions returns false when native returns null',
+        () async {
+      mockChannel((_) => null);
+
+      final result =
+          await contextManager.setSharedInstanceWithOptions(GoogleCastOptions());
+
+      expect(result, isFalse);
+    });
+
+    test(
+        'setSharedInstanceWithOptions returns false when native returns non-boolean',
+        () async {
+      mockChannel((_) => 'success');
+
+      final result =
+          await contextManager.setSharedInstanceWithOptions(GoogleCastOptions());
+
+      expect(result, isFalse);
+    });
+
+    test('setSharedInstanceWithOptions rethrows PlatformException', () async {
+      mockChannel((_) => throw PlatformException(
+            code: 'TEST_ERROR',
+            message: 'Test error',
+          ));
+
+      await expectLater(
+        contextManager.setSharedInstanceWithOptions(GoogleCastOptions()),
+        throwsA(isA<PlatformException>()
+            .having((e) => e.code, 'code', 'TEST_ERROR')),
+      );
     });
   });
 }

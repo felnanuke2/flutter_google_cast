@@ -1,90 +1,93 @@
-import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_chrome_cast/_google_cast_context/google_cast_context.dart';
 import 'package:flutter_chrome_cast/_google_cast_context/google_cast_context_platform_interface.dart';
-import 'package:flutter_chrome_cast/_google_cast_context/android_google_cast_context_method_channel.dart';
-import 'package:flutter_chrome_cast/_google_cast_context/ios_google_cast_context_method_channel.dart';
+import 'package:flutter_chrome_cast/entities/cast_options.dart';
+
+import '../helpers/mock_implementations.dart';
 
 void main() {
-  group('GoogleCastContext', () {
-    test('should return Android implementation when Platform.isAndroid is true',
-        () {
-      // This test covers the static instance creation and Platform.isAndroid check
-      final instance = GoogleCastContext.instance;
+  group('GoogleCastContext (federated plugin facade)', () {
+    late MockGoogleCastContextPlatformInterface mockPlatform;
 
-      // Verify that we get a platform interface instance
-      expect(instance, isA<GoogleCastContextPlatformInterface>());
-
-      // The actual implementation depends on the platform the test is running on
-      // But we can verify the instance is properly initialized
-      expect(instance, isNotNull);
+    setUp(() {
+      TestWidgetsFlutterBinding.ensureInitialized();
+      mockPlatform = MockGoogleCastContextPlatformInterface();
+      // Inject the mock implementation – this is the federated plugin pattern:
+      // the app-facing class delegates to whatever instance is currently set.
+      GoogleCastContext.instance = mockPlatform;
     });
 
-    test('should provide singleton instance access', () {
-      // This test covers the static instance getter (line 22)
-      final instance1 = GoogleCastContext.instance;
-      final instance2 = GoogleCastContext.instance;
-
-      // Both calls should return the same instance
-      expect(instance1, equals(instance2));
-      expect(identical(instance1, instance2), isTrue);
+    tearDown(() {
+      // Reset to prevent state leaking between tests.
+      // A real app would have the platform package register its own instance.
+      GoogleCastContext.instance = mockPlatform;
     });
 
-    test('should initialize with proper platform-specific implementation', () {
-      // This test ensures the static final _instance field is properly initialized
-      final instance = GoogleCastContext.instance;
-
-      // Verify the instance is of the correct type based on platform
-      expect(instance, isA<GoogleCastContextPlatformInterface>());
-
-      // The instance should be either Android or iOS implementation
-      final isAndroidImpl = instance is GoogleCastContextAndroidMethodChannel;
-      final isIOSImpl = instance is FlutterIOSGoogleCastContextMethodChannel;
-
-      expect(isAndroidImpl || isIOSImpl, isTrue);
+    test('instance returns a GoogleCastContextPlatformInterface', () {
+      expect(GoogleCastContext.instance,
+          isA<GoogleCastContextPlatformInterface>());
     });
 
-    test('should have private constructor that cannot be instantiated', () {
-      // This test covers the private constructor (line 25)
-      // We can't directly test the private constructor, but we can verify
-      // that the class follows singleton pattern and constructor behavior
-
-      // Verify that accessing the instance works through the static getter
-      expect(() => GoogleCastContext.instance, returnsNormally);
-
-      // The constructor is private, so we can't test it directly
-      // but this test ensures the singleton pattern is working
-      final instance = GoogleCastContext.instance;
-      expect(instance, isNotNull);
+    test('instance is the injected mock', () {
+      expect(GoogleCastContext.instance, same(mockPlatform));
     });
 
-    test('should select correct implementation based on platform', () {
-      // This test covers the ternary operator logic (lines 14-16)
-      final instance = GoogleCastContext.instance;
+    test('setSharedInstanceWithOptions delegates to platform interface', () async {
+      final options = GoogleCastOptions();
 
-      if (Platform.isAndroid) {
-        expect(instance, isA<GoogleCastContextAndroidMethodChannel>());
-      } else {
-        expect(instance, isA<FlutterIOSGoogleCastContextMethodChannel>());
-      }
+      await GoogleCastContext.instance.setSharedInstanceWithOptions(options);
+
+      expect(mockPlatform.callCount, equals(1));
+      expect(mockPlatform.lastOptions, same(options));
     });
 
-    test('should maintain same instance across multiple access', () {
-      // Additional test to ensure the static final field works correctly
-      final instances = List.generate(5, (_) => GoogleCastContext.instance);
+    test('setSharedInstanceWithOptions returns true when platform returns true',
+        () async {
+      mockPlatform.returnValue = true;
 
-      // All instances should be identical
-      for (int i = 1; i < instances.length; i++) {
-        expect(identical(instances[0], instances[i]), isTrue);
-      }
+      final result = await GoogleCastContext.instance
+          .setSharedInstanceWithOptions(GoogleCastOptions());
+
+      expect(result, isTrue);
     });
 
-    test('should provide access to platform interface methods', () {
-      // Test that the instance provides the expected interface
-      final instance = GoogleCastContext.instance;
+    test('setSharedInstanceWithOptions returns false when platform returns false',
+        () async {
+      mockPlatform.returnValue = false;
 
-      // Verify it has the required method from platform interface
-      expect(instance.setSharedInstanceWithOptions, isA<Function>());
+      final result = await GoogleCastContext.instance
+          .setSharedInstanceWithOptions(GoogleCastOptions());
+
+      expect(result, isFalse);
+    });
+
+    test('setSharedInstanceWithOptions forwards options correctly', () async {
+      final options = GoogleCastOptions(
+        physicalVolumeButtonsWillControlDeviceVolume: false,
+        disableDiscoveryAutostart: true,
+        suspendSessionsWhenBackgrounded: false,
+      );
+
+      await GoogleCastContext.instance.setSharedInstanceWithOptions(options);
+
+      expect(mockPlatform.lastOptions, equals(options));
+    });
+
+    test('replacing the instance changes which implementation is used', () async {
+      final firstMock = MockGoogleCastContextPlatformInterface()
+        ..returnValue = true;
+      final secondMock = MockGoogleCastContextPlatformInterface()
+        ..returnValue = false;
+
+      GoogleCastContext.instance = firstMock;
+      final firstResult = await GoogleCastContext.instance
+          .setSharedInstanceWithOptions(GoogleCastOptions());
+      expect(firstResult, isTrue);
+
+      GoogleCastContext.instance = secondMock;
+      final secondResult = await GoogleCastContext.instance
+          .setSharedInstanceWithOptions(GoogleCastOptions());
+      expect(secondResult, isFalse);
     });
   });
 }

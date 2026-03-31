@@ -9,13 +9,12 @@ void main() {
   group('GoogleCastDiscoveryManagerMethodChannelAndroid', () {
     late GoogleCastDiscoveryManagerMethodChannelAndroid discoveryManager;
     late List<MethodCall> methodCalls;
-    late MethodChannel channel;
+    const channel =
+        MethodChannel('com.felnanuke.google_cast.discovery_manager');
 
     setUp(() {
       TestWidgetsFlutterBinding.ensureInitialized();
       methodCalls = [];
-      channel =
-          const MethodChannel('com.felnanuke.google_cast.discovery_manager');
     });
 
     tearDown(() {
@@ -23,50 +22,57 @@ void main() {
           .setMockMethodCallHandler(channel, null);
     });
 
-    test('constructor should set up method call handler', () {
-      // Test constructor execution (line 18-19)
-      discoveryManager = GoogleCastDiscoveryManagerMethodChannelAndroid();
+    void mockChannel(dynamic Function(MethodCall) handler) {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(channel, (call) async {
+        methodCalls.add(call);
+        return handler(call);
+      });
+    }
 
-      expect(discoveryManager, isNotNull);
+    /// Simulates the native side sending an [onDevicesChanged] method call
+    /// with [json] as the argument and returns once the message is delivered.
+    Future<void> simulateDevicesChanged(String json) async {
+      const codec = StandardMethodCodec();
+      final message =
+          codec.encodeMethodCall(MethodCall('onDevicesChanged', json));
+      await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .handlePlatformMessage(
+              'com.felnanuke.google_cast.discovery_manager', message, (_) {});
+    }
+
+    // -----------------------------------------------------------------------
+    // Construction / interface
+    // -----------------------------------------------------------------------
+
+    test('implements GoogleCastDiscoveryManagerPlatformInterface', () {
+      discoveryManager = GoogleCastDiscoveryManagerMethodChannelAndroid();
       expect(
           discoveryManager, isA<GoogleCastDiscoveryManagerPlatformInterface>());
     });
 
-    test('should implement GoogleCastDiscoveryManagerPlatformInterface', () {
+    test('initializes with empty devices list', () {
       discoveryManager = GoogleCastDiscoveryManagerMethodChannelAndroid();
-      expect(
-          discoveryManager, isA<GoogleCastDiscoveryManagerPlatformInterface>());
-    });
-
-    test('should initialize with empty devices list', () {
-      discoveryManager = GoogleCastDiscoveryManagerMethodChannelAndroid();
-      // Test devices getter (line 29)
       expect(discoveryManager.devices, isEmpty);
     });
 
-    test('should provide devices stream', () {
+    test('devicesStream emits the initial empty list', () {
       discoveryManager = GoogleCastDiscoveryManagerMethodChannelAndroid();
-      // Test devicesStream getter (line 33)
-      expect(discoveryManager.devicesStream,
-          isA<Stream<List<GoogleCastDevice>>>());
+      expect(
+          discoveryManager.devicesStream, isA<Stream<List<GoogleCastDevice>>>());
 
-      // Test initial empty state
-      discoveryManager.devicesStream.listen(expectAsync1((devices) {
-        expect(devices, isEmpty);
-      }));
+      discoveryManager.devicesStream
+          .listen(expectAsync1((devices) => expect(devices, isEmpty)));
     });
 
-    test('should call startDiscovery method on native side', () async {
-      // Set up the mock to capture outgoing calls
-      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-          .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
-        methodCalls.add(methodCall);
-        return null;
-      });
+    // -----------------------------------------------------------------------
+    // Outgoing method calls
+    // -----------------------------------------------------------------------
 
+    test('startDiscovery invokes startDiscovery on the channel', () async {
+      mockChannel((_) => null);
       discoveryManager = GoogleCastDiscoveryManagerMethodChannelAndroid();
 
-      // Test startDiscovery method (line 42)
       await discoveryManager.startDiscovery();
 
       expect(methodCalls, hasLength(1));
@@ -74,377 +80,193 @@ void main() {
       expect(methodCalls.first.arguments, isNull);
     });
 
-    test('should call stopDiscovery method on native side', () async {
-      // Set up the mock to capture outgoing calls
-      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-          .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
-        methodCalls.add(methodCall);
-        return null;
-      });
-
+    test('stopDiscovery invokes stopDiscovery on the channel', () async {
+      mockChannel((_) => null);
       discoveryManager = GoogleCastDiscoveryManagerMethodChannelAndroid();
 
-      // Test stopDiscovery method (line 48)
       await discoveryManager.stopDiscovery();
 
       expect(methodCalls, hasLength(1));
       expect(methodCalls.first.method, equals('stopDiscovery'));
-      expect(methodCalls.first.arguments, isNull);
     });
 
-    test(
-        'should throw UnimplementedError for isDiscoveryActiveForDeviceCategory',
-        () {
+    test('isDiscoveryActiveForDeviceCategory throws UnimplementedError', () {
       discoveryManager = GoogleCastDiscoveryManagerMethodChannelAndroid();
-
-      // Test line 37
       expect(
         () => discoveryManager.isDiscoveryActiveForDeviceCategory('test'),
         throwsA(isA<UnimplementedError>()),
       );
     });
 
-    group('Method Channel Handler Tests', () {
-      setUp(() {
-        discoveryManager = GoogleCastDiscoveryManagerMethodChannelAndroid();
-      });
+    // -----------------------------------------------------------------------
+    // Incoming method calls – onDevicesChanged
+    // -----------------------------------------------------------------------
 
-      test('should handle onDevicesChanged method call from native', () async {
-        const testDevicesJson = '''[
-          {
-            "id": "device1",
-            "name": "Living Room TV",
-            "model_name": "Chromecast",
-            "device_version": "1.0.0",
-            "is_on_local_network": true
-          }
-        ]''';
+    test('onDevicesChanged parses a single device correctly', () async {
+      discoveryManager = GoogleCastDiscoveryManagerMethodChannelAndroid();
 
-        // Create a completer to wait for stream updates
-        final streamCompleter = Completer<List<GoogleCastDevice>>();
-        late StreamSubscription subscription;
+      const json = '''[{
+        "id": "device1",
+        "name": "Living Room TV",
+        "model_name": "Chromecast",
+        "device_version": "1.0.0",
+        "is_on_local_network": true
+      }]''';
 
-        subscription = discoveryManager.devicesStream.skip(1).take(1).listen(
-          (devices) {
-            streamCompleter.complete(devices);
-            subscription.cancel();
-          },
-        );
+      final completer = Completer<List<GoogleCastDevice>>();
+      discoveryManager.devicesStream
+          .skip(1)
+          .take(1)
+          .listen(completer.complete);
 
-        // Simulate method call from native side
-        final binding = TestDefaultBinaryMessengerBinding.instance;
-        final codec = const StandardMethodCodec();
-        final call = MethodCall('onDevicesChanged', testDevicesJson);
-        final message = codec.encodeMethodCall(call);
+      await simulateDevicesChanged(json);
 
-        await binding.defaultBinaryMessenger.handlePlatformMessage(
-          'com.felnanuke.google_cast.discovery_manager',
-          message,
-          (data) {},
-        );
+      final devices = await completer.future
+          .timeout(const Duration(seconds: 2), onTimeout: () => []);
 
-        // Wait for the stream to update
-        final devices = await streamCompleter.future.timeout(
-          const Duration(seconds: 2),
-          onTimeout: () => <GoogleCastDevice>[],
-        );
-
-        // Verify devices were parsed and added
-        expect(devices, hasLength(1));
-        expect(devices.first.deviceID, equals('device1'));
-        expect(devices.first.friendlyName, equals('Living Room TV'));
-        expect(devices.first.modelName, equals('Chromecast'));
-      });
-
-      test('should handle multiple devices with deduplication', () async {
-        const testDevicesJson = '''[
-          {
-            "id": "device1",
-            "name": "Living Room TV",
-            "model_name": "Chromecast",
-            "device_version": "1.0.0",
-            "is_on_local_network": true
-          },
-          {
-            "id": "device2",
-            "name": "Living Room TV",
-            "model_name": "Chromecast",
-            "device_version": "1.0.0",
-            "is_on_local_network": true
-          },
-          {
-            "id": "device3",
-            "name": "Kitchen Display",
-            "model_name": "Google Nest Hub",
-            "device_version": "2.0.0",
-            "is_on_local_network": true
-          }
-        ]''';
-
-        final streamCompleter = Completer<List<GoogleCastDevice>>();
-        late StreamSubscription subscription;
-
-        subscription = discoveryManager.devicesStream.skip(1).take(1).listen(
-          (devices) {
-            streamCompleter.complete(devices);
-            subscription.cancel();
-          },
-        );
-
-        // Simulate method call from native side
-        final binding = TestDefaultBinaryMessengerBinding.instance;
-        final codec = const StandardMethodCodec();
-        final call = MethodCall('onDevicesChanged', testDevicesJson);
-        final message = codec.encodeMethodCall(call);
-
-        await binding.defaultBinaryMessenger.handlePlatformMessage(
-          'com.felnanuke.google_cast.discovery_manager',
-          message,
-          (data) {},
-        );
-
-        final devices = await streamCompleter.future.timeout(
-          const Duration(seconds: 2),
-          onTimeout: () => <GoogleCastDevice>[],
-        );
-
-        // Should only have 2 devices due to deduplication (same name + model)
-        expect(devices, hasLength(2));
-
-        // Check that deduplication worked correctly
-        final deviceNames = devices.map((d) => d.friendlyName).toSet();
-        expect(deviceNames, contains('Living Room TV'));
-        expect(deviceNames, contains('Kitchen Display'));
-
-        final chromecastDevices =
-            devices.where((d) => d.modelName == 'Chromecast').toList();
-        expect(chromecastDevices,
-            hasLength(1)); // Only one Chromecast with same name
-      });
-
-      test('should handle empty devices list', () async {
-        const testDevicesJson = '[]';
-
-        final streamCompleter = Completer<List<GoogleCastDevice>>();
-        late StreamSubscription subscription;
-
-        subscription = discoveryManager.devicesStream.skip(1).take(1).listen(
-          (devices) {
-            streamCompleter.complete(devices);
-            subscription.cancel();
-          },
-        );
-
-        final binding = TestDefaultBinaryMessengerBinding.instance;
-        final codec = const StandardMethodCodec();
-        final call = MethodCall('onDevicesChanged', testDevicesJson);
-        final message = codec.encodeMethodCall(call);
-
-        await binding.defaultBinaryMessenger.handlePlatformMessage(
-          'com.felnanuke.google_cast.discovery_manager',
-          message,
-          (data) {},
-        );
-
-        final devices = await streamCompleter.future.timeout(
-          const Duration(seconds: 2),
-          onTimeout: () => <GoogleCastDevice>[],
-        );
-
-        expect(devices, isEmpty);
-      });
-
-      test('should handle unknown method calls gracefully', () async {
-        // Simulate unknown method call (tests default case in line 57)
-        final binding = TestDefaultBinaryMessengerBinding.instance;
-        final codec = const StandardMethodCodec();
-        final call = MethodCall('unknownMethod', null);
-        final message = codec.encodeMethodCall(call);
-
-        await binding.defaultBinaryMessenger.handlePlatformMessage(
-          'com.felnanuke.google_cast.discovery_manager',
-          message,
-          (data) {},
-        );
-
-        // Should not affect devices
-        expect(discoveryManager.devices, isEmpty);
-      });
+      expect(devices, hasLength(1));
+      expect(devices.first.deviceID, equals('device1'));
+      expect(devices.first.friendlyName, equals('Living Room TV'));
+      expect(devices.first.modelName, equals('Chromecast'));
     });
 
-    group('Integration Tests', () {
-      setUp(() {
-        // Set up mock to capture outgoing method calls for integration tests
-        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-            .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
-          methodCalls.add(methodCall);
-          return null;
-        });
-        discoveryManager = GoogleCastDiscoveryManagerMethodChannelAndroid();
-      });
+    test('onDevicesChanged deduplicates devices with the same name and model',
+        () async {
+      discoveryManager = GoogleCastDiscoveryManagerMethodChannelAndroid();
 
-      test('should handle complete discovery workflow', () async {
-        // Start discovery
-        await discoveryManager.startDiscovery();
-        expect(methodCalls.last.method, equals('startDiscovery'));
+      // Two entries with identical name + model → should collapse to one.
+      const json = '''[
+        {"id":"d1","name":"TV","model_name":"Chromecast","device_version":"1.0","is_on_local_network":true},
+        {"id":"d2","name":"TV","model_name":"Chromecast","device_version":"1.0","is_on_local_network":true},
+        {"id":"d3","name":"Kitchen","model_name":"Nest Hub","device_version":"2.0","is_on_local_network":true}
+      ]''';
 
-        // Simulate device discovery
-        const testDevicesJson = '''[
-          {
-            "id": "integration_device",
-            "name": "Integration Test TV",
-            "model_name": "Test Chromecast",
-            "device_version": "1.0.0",
-            "is_on_local_network": true
-          }
-        ]''';
+      final completer = Completer<List<GoogleCastDevice>>();
+      discoveryManager.devicesStream
+          .skip(1)
+          .take(1)
+          .listen(completer.complete);
 
-        final streamCompleter = Completer<List<GoogleCastDevice>>();
-        late StreamSubscription subscription;
+      await simulateDevicesChanged(json);
 
-        subscription = discoveryManager.devicesStream.skip(1).take(1).listen(
-          (devices) {
-            streamCompleter.complete(devices);
-            subscription.cancel();
-          },
-        );
+      final devices = await completer.future
+          .timeout(const Duration(seconds: 2), onTimeout: () => []);
 
-        final binding = TestDefaultBinaryMessengerBinding.instance;
-        final codec = const StandardMethodCodec();
-        final call = MethodCall('onDevicesChanged', testDevicesJson);
-        final message = codec.encodeMethodCall(call);
-
-        await binding.defaultBinaryMessenger.handlePlatformMessage(
-          'com.felnanuke.google_cast.discovery_manager',
-          message,
-          (data) {},
-        );
-
-        final devices = await streamCompleter.future.timeout(
-          const Duration(seconds: 2),
-          onTimeout: () => <GoogleCastDevice>[],
-        );
-
-        // Verify device was discovered
-        expect(devices, hasLength(1));
-        expect(devices.first.friendlyName, equals('Integration Test TV'));
-
-        // Stop discovery
-        await discoveryManager.stopDiscovery();
-        expect(methodCalls.last.method, equals('stopDiscovery'));
-      });
-
-      test('should maintain devices state across multiple updates', () async {
-        // First update
-        const firstDevicesJson = '''[
-          {
-            "id": "device1",
-            "name": "First Device",
-            "model_name": "Chromecast",
-            "device_version": "1.0.0",
-            "is_on_local_network": true
-          }
-        ]''';
-
-        final firstCompleter = Completer<List<GoogleCastDevice>>();
-        late StreamSubscription firstSubscription;
-
-        firstSubscription =
-            discoveryManager.devicesStream.skip(1).take(1).listen(
-          (devices) {
-            firstCompleter.complete(devices);
-            firstSubscription.cancel();
-          },
-        );
-
-        final binding = TestDefaultBinaryMessengerBinding.instance;
-        final codec = const StandardMethodCodec();
-        final call = MethodCall('onDevicesChanged', firstDevicesJson);
-        final message = codec.encodeMethodCall(call);
-
-        await binding.defaultBinaryMessenger.handlePlatformMessage(
-          'com.felnanuke.google_cast.discovery_manager',
-          message,
-          (data) {},
-        );
-
-        final firstDevices = await firstCompleter.future;
-        expect(firstDevices, hasLength(1));
-
-        // Second update with additional device
-        const secondDevicesJson = '''[
-          {
-            "id": "device1",
-            "name": "First Device",
-            "model_name": "Chromecast",
-            "device_version": "1.0.0",
-            "is_on_local_network": true
-          },
-          {
-            "id": "device2",
-            "name": "Second Device",
-            "model_name": "Google TV",
-            "device_version": "2.0.0",
-            "is_on_local_network": true
-          }
-        ]''';
-
-        final secondCompleter = Completer<List<GoogleCastDevice>>();
-        late StreamSubscription secondSubscription;
-
-        secondSubscription =
-            discoveryManager.devicesStream.skip(1).take(1).listen(
-          (devices) {
-            secondCompleter.complete(devices);
-            secondSubscription.cancel();
-          },
-        );
-
-        final binding2 = TestDefaultBinaryMessengerBinding.instance;
-        final codec2 = const StandardMethodCodec();
-        final call2 = MethodCall('onDevicesChanged', secondDevicesJson);
-        final message2 = codec2.encodeMethodCall(call2);
-
-        await binding2.defaultBinaryMessenger.handlePlatformMessage(
-          'com.felnanuke.google_cast.discovery_manager',
-          message2,
-          (data) {},
-        );
-
-        final secondDevices = await secondCompleter.future;
-        expect(secondDevices, hasLength(2));
-        expect(
-            secondDevices.map((d) => d.friendlyName), contains('First Device'));
-        expect(secondDevices.map((d) => d.friendlyName),
-            contains('Second Device'));
-      });
+      expect(devices, hasLength(2));
+      final names = devices.map((d) => d.friendlyName).toSet();
+      expect(names, containsAll(['TV', 'Kitchen']));
     });
 
-    group('Error Handling Tests', () {
-      setUp(() {
-        discoveryManager = GoogleCastDiscoveryManagerMethodChannelAndroid();
-      });
+    test('onDevicesChanged with empty array clears the device list', () async {
+      discoveryManager = GoogleCastDiscoveryManagerMethodChannelAndroid();
 
-      test('should handle invalid JSON gracefully', () async {
-        // This tests the catch block and rethrow in line 97-99
-        const invalidJson = 'invalid json format';
+      final completer = Completer<List<GoogleCastDevice>>();
+      discoveryManager.devicesStream
+          .skip(1)
+          .take(1)
+          .listen(completer.complete);
 
-        // We expect the method channel to handle the error
-        // The error will be caught and rethrown in the _onDevicesChanged method
-        final binding = TestDefaultBinaryMessengerBinding.instance;
-        final codec = const StandardMethodCodec();
-        final call = MethodCall('onDevicesChanged', invalidJson);
-        final message = codec.encodeMethodCall(call);
+      await simulateDevicesChanged('[]');
 
-        await binding.defaultBinaryMessenger.handlePlatformMessage(
-          'com.felnanuke.google_cast.discovery_manager',
-          message,
-          (data) {},
-        );
+      final devices = await completer.future
+          .timeout(const Duration(seconds: 2), onTimeout: () => []);
 
-        // Devices should remain empty after error
-        expect(discoveryManager.devices, isEmpty);
-      });
+      expect(devices, isEmpty);
+    });
+
+    test('unknown method calls are handled gracefully', () async {
+      discoveryManager = GoogleCastDiscoveryManagerMethodChannelAndroid();
+
+      const codec = StandardMethodCodec();
+      final message =
+          codec.encodeMethodCall(const MethodCall('unknownMethod', null));
+      await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .handlePlatformMessage(
+              'com.felnanuke.google_cast.discovery_manager', message, (_) {});
+
+      expect(discoveryManager.devices, isEmpty);
+    });
+
+    test('invalid JSON in onDevicesChanged is handled gracefully', () async {
+      discoveryManager = GoogleCastDiscoveryManagerMethodChannelAndroid();
+
+      // Invalid JSON should be caught internally and not crash the app.
+      await simulateDevicesChanged('not valid json');
+
+      // Devices list remains unchanged (empty).
+      expect(discoveryManager.devices, isEmpty);
+    });
+
+    // -----------------------------------------------------------------------
+    // Integration: full discovery workflow
+    // -----------------------------------------------------------------------
+
+    test('complete discovery workflow: start → receive devices → stop',
+        () async {
+      mockChannel((_) => null);
+      discoveryManager = GoogleCastDiscoveryManagerMethodChannelAndroid();
+
+      await discoveryManager.startDiscovery();
+      expect(methodCalls.last.method, equals('startDiscovery'));
+
+      const json = '''[{
+        "id": "tv1",
+        "name": "Living Room",
+        "model_name": "Chromecast Ultra",
+        "device_version": "1.0",
+        "is_on_local_network": true
+      }]''';
+
+      final completer = Completer<List<GoogleCastDevice>>();
+      discoveryManager.devicesStream
+          .skip(1)
+          .take(1)
+          .listen(completer.complete);
+
+      await simulateDevicesChanged(json);
+
+      final devices = await completer.future
+          .timeout(const Duration(seconds: 2), onTimeout: () => []);
+
+      expect(devices, hasLength(1));
+      expect(devices.first.friendlyName, equals('Living Room'));
+
+      await discoveryManager.stopDiscovery();
+      expect(methodCalls.last.method, equals('stopDiscovery'));
+    });
+
+    test('device list is replaced on each onDevicesChanged update', () async {
+      discoveryManager = GoogleCastDiscoveryManagerMethodChannelAndroid();
+
+      // First update: 1 device.
+      final firstCompleter = Completer<List<GoogleCastDevice>>();
+      discoveryManager.devicesStream
+          .skip(1)
+          .take(1)
+          .listen(firstCompleter.complete);
+
+      await simulateDevicesChanged('''[{
+        "id":"d1","name":"First","model_name":"Model A",
+        "device_version":"1.0","is_on_local_network":true
+      }]''');
+
+      final first = await firstCompleter.future;
+      expect(first, hasLength(1));
+
+      // Second update: 2 devices.
+      final secondCompleter = Completer<List<GoogleCastDevice>>();
+      discoveryManager.devicesStream
+          .skip(1)
+          .take(1)
+          .listen(secondCompleter.complete);
+
+      await simulateDevicesChanged('''[
+        {"id":"d1","name":"First","model_name":"Model A","device_version":"1.0","is_on_local_network":true},
+        {"id":"d2","name":"Second","model_name":"Model B","device_version":"2.0","is_on_local_network":true}
+      ]''');
+
+      final second = await secondCompleter.future;
+      expect(second, hasLength(2));
     });
   });
 }

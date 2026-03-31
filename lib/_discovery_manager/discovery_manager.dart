@@ -1,4 +1,6 @@
 import 'dart:io';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter_chrome_cast/_discovery_manager/android_discovery_manager.dart';
 import 'package:flutter_chrome_cast/_discovery_manager/discovery_manager_platform_interface.dart';
 import 'package:flutter_chrome_cast/_discovery_manager/ios_discovery_manager.dart';
@@ -19,6 +21,15 @@ class GoogleCastDiscoveryManager {
     return _instance ??= Platform.isAndroid
         ? GoogleCastDiscoveryManagerMethodChannelAndroid()
         : GoogleCastDiscoveryManagerMethodChannelIOS();
+  }
+
+  /// Sets a custom platform implementation.
+  ///
+  /// This is intended for use in tests only. Production code should rely on
+  /// the default platform-specific implementation.
+  @visibleForTesting
+  static set instance(GoogleCastDiscoveryManagerPlatformInterface? value) {
+    _instance = value;
   }
 
   /// Private constructor to enforce singleton pattern.
