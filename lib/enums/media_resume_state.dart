@@ -1,11 +1,5 @@
-/// Enum representing different media resume states for Google Cast.
-enum GoogleCastMediaResumeState {
-  ///A resume state indicating that the player state should be left unchanged.
-  unchanged,
-
-  ///A resume state indicating that the player should be playing, regardless of its current state.
-  play,
-
-  ///A resume state indicating that the player should be paused, regardless of its current state.
-  pause;
-}
+// Re-exported from flutter_chrome_cast_platform_interface.
+// This file exists for backward compatibility with
+// `package:flutter_chrome_cast/enums/media_resume_state.dart`.
+// All types are now defined in the platform_interface package.
+export 'package:flutter_chrome_cast_platform_interface/src/enums/media_resume_state.dart';

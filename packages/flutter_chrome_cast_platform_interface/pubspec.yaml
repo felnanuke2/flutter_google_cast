@@ -1,0 +1,26 @@
+name: flutter_chrome_cast_platform_interface
+description: >
+  A common platform interface for the flutter_chrome_cast plugin.
+  Houses abstract classes that all platform implementations must implement.
+version: 1.4.4
+repository: https://github.com/felnanuke2/flutter_google_cast
+# publish_to: none  # Remove this line when ready to publish to pub.dev
+
+environment:
+  # All workspace members must align with the toolchain baseline.
+  sdk: ">=3.11.0 <4.0.0"
+  flutter: ">=3.41.6"
+
+# Marks this package as a member of the workspace defined at the repo root.
+resolution: workspace
+
+dependencies:
+  flutter:
+    sdk: flutter
+  plugin_platform_interface: ^2.1.8
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+  mockito: ^5.4.5

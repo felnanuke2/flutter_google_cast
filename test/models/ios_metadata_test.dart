@@ -1,421 +1,84 @@
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_chrome_cast/lib.dart';
-import 'package:flutter_chrome_cast/models/ios/metadata/music.dart';
-import 'package:flutter_chrome_cast/models/ios/metadata/movie.dart';
-import 'package:flutter_chrome_cast/models/ios/metadata/generic.dart';
-import 'package:flutter_chrome_cast/models/ios/metadata/tv_show.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  group('iOS Media Metadata mapping', () {
-    group('GoogleCastMusicMediaMetadataIOS', () {
-      test('fromMap parses all fields', () {
-        final map = {
-          'albumTitle': 'Album X',
-          'title': 'Track Y',
-          'albumArtist': 'Album Artist',
-          'artist': 'Main Artist',
-          'composer': 'Composer Z',
-          'trackNumber': 3,
-          'discNumber': 1,
-          'images': [
-            {
-              'url': 'https://example.com/img1.jpg',
-              'width': 100,
-              'height': 100
-            },
-            {'url': '', 'width': 50, 'height': 50},
-          ],
-          // milliseconds since epoch
-          'releaseDate': DateTime(2023, 7, 20).millisecondsSinceEpoch,
-        };
+  group('Media metadata entities', () {
+    test('movie metadata keeps movie specific fields', () {
+      final metadata = GoogleCastMovieMediaMetadata(
+        title: 'My Movie',
+        studio: 'Studio A',
+      );
 
-        final m = GoogleCastMusicMediaMetadataIOS.fromMap(map);
-        expect(m.albumName, 'Album X');
-        expect(m.title, 'Track Y');
-        expect(m.albumArtist, 'Album Artist');
-        expect(m.artist, 'Main Artist');
-        expect(m.composer, 'Composer Z');
-        expect(m.trackNumber, 3);
-        expect(m.discNumber, 1);
-        expect(m.images, isNotNull);
-        expect(m.images!.length, 1); // invalid image filtered out
-        expect(m.images!.first.url.toString(), 'https://example.com/img1.jpg');
-        expect(m.releaseDate, isA<DateTime>());
-      });
-
-      test('fromMap handles null images', () {
-        final map = {
-          'albumTitle': 'Album',
-          'title': 'Track',
-          'images': null,
-        };
-
-        final m = GoogleCastMusicMediaMetadataIOS.fromMap(map);
-        expect(m.images, isNull);
-      });
-
-      test('fromMap handles empty images list', () {
-        final map = {
-          'albumTitle': 'Album',
-          'title': 'Track',
-          'images': [],
-        };
-
-        final m = GoogleCastMusicMediaMetadataIOS.fromMap(map);
-        expect(m.images, isEmpty);
-      });
-
-      test('fromMap handles null releaseDate', () {
-        final map = {
-          'title': 'Track',
-          'releaseDate': null,
-        };
-
-        final m = GoogleCastMusicMediaMetadataIOS.fromMap(map);
-        expect(m.releaseDate, isNull);
-      });
-
-      test('fromMap handles non-int releaseDate', () {
-        final map = {
-          'title': 'Track',
-          'releaseDate': 'not an int',
-        };
-
-        final m = GoogleCastMusicMediaMetadataIOS.fromMap(map);
-        expect(m.releaseDate, isNull);
-      });
-
-      test('constructor creates instance with all parameters', () {
-        final m = GoogleCastMusicMediaMetadataIOS(
-          albumArtist: 'Album Artist',
-          albumName: 'Album Name',
-          artist: 'Artist',
-          composer: 'Composer',
-          discNumber: 2,
-          images: [
-            GoogleCastImage(url: Uri.parse('https://example.com/img.jpg'))
-          ],
-          releaseDate: DateTime(2023, 1, 1),
-          title: 'Title',
-          trackNumber: 5,
-        );
-
-        expect(m.albumArtist, 'Album Artist');
-        expect(m.albumName, 'Album Name');
-        expect(m.artist, 'Artist');
-        expect(m.composer, 'Composer');
-        expect(m.discNumber, 2);
-        expect(m.images, hasLength(1));
-        expect(m.releaseDate, isNotNull);
-        expect(m.title, 'Title');
-        expect(m.trackNumber, 5);
-      });
+      expect(
+        metadata.metadataType,
+        GoogleCastMediaMetadataType.movieMediaMetadata,
+      );
+      expect(metadata.title, 'My Movie');
+      expect(metadata.studio, 'Studio A');
     });
 
-    test('Music fromMap parses fields', () {
-      final map = {
-        'albumTitle': 'Album X',
-        'title': 'Track Y',
-        'albumArtist': 'Album Artist',
-        'artist': 'Main Artist',
-        'composer': 'Composer Z',
-        'trackNumber': 3,
-        'discNumber': 1,
-        'images': [
-          {'url': 'https://example.com/img1.jpg', 'width': 100, 'height': 100},
-          {'url': '', 'width': 50, 'height': 50},
-        ],
-        // milliseconds since epoch
-        'releaseDate': DateTime(2023, 7, 20).millisecondsSinceEpoch,
-      };
+    test('music metadata keeps track specific fields', () {
+      final metadata = GoogleCastMusicMediaMetadata(
+        title: 'Track Name',
+        albumName: 'Album Name',
+        trackNumber: 3,
+      );
 
-      final m = GoogleCastMusicMediaMetadataIOS.fromMap(map);
-      expect(m.albumName, 'Album X');
-      expect(m.title, 'Track Y');
-      expect(m.albumArtist, 'Album Artist');
-      expect(m.artist, 'Main Artist');
-      expect(m.composer, 'Composer Z');
-      expect(m.trackNumber, 3);
-      expect(m.discNumber, 1);
-      expect(m.images, isNotNull);
-      expect(m.images!.length, 1); // invalid image filtered out
-      expect(m.images!.first.url.toString(), 'https://example.com/img1.jpg');
-      expect(m.releaseDate, isA<DateTime>());
+      expect(
+        metadata.metadataType,
+        GoogleCastMediaMetadataType.musicTrackMediaMetadata,
+      );
+      expect(metadata.title, 'Track Name');
+      expect(metadata.albumName, 'Album Name');
+      expect(metadata.trackNumber, 3);
     });
 
-    group('GoogleCastMovieMediaMetadataIOS', () {
-      test('fromMap parses all fields', () {
-        final map = {
-          'title': 'A Movie',
-          'subtitle': 'A Subtitle',
-          'studio': 'Studio Q',
-          'images': [
-            {
-              'url': 'https://example.com/poster.png',
-              'width': 300,
-              'height': 450
-            },
-          ],
-          'releaseDate': DateTime(2022, 1, 1).millisecondsSinceEpoch,
-        };
+    test('tv show metadata keeps episode fields', () {
+      final metadata = GoogleCastTvShowMediaMetadata(
+        seriesTitle: 'Series Name',
+        season: 2,
+        episode: 5,
+      );
 
-        final m = GoogleCastMovieMediaMetadataIOS.fromMap(map);
-        expect(m.title, 'A Movie');
-        expect(m.subtitle, 'A Subtitle');
-        expect(m.studio, 'Studio Q');
-        expect(
-            m.images!.first.url.toString(), 'https://example.com/poster.png');
-        expect(m.releaseDate, isA<DateTime>());
-      });
-
-      test('fromMap handles null images', () {
-        final map = {
-          'title': 'Movie',
-          'images': null,
-        };
-
-        final m = GoogleCastMovieMediaMetadataIOS.fromMap(map);
-        expect(m.images, isNull);
-      });
-
-      test('fromMap handles null releaseDate', () {
-        final map = {
-          'title': 'Movie',
-          'releaseDate': null,
-        };
-
-        final m = GoogleCastMovieMediaMetadataIOS.fromMap(map);
-        expect(m.releaseDate, isNull);
-      });
-
-      test('fromMap handles non-int releaseDate', () {
-        final map = {
-          'title': 'Movie',
-          'releaseDate': 'not an int',
-        };
-
-        final m = GoogleCastMovieMediaMetadataIOS.fromMap(map);
-        expect(m.releaseDate, isNull);
-      });
-
-      test('constructor creates instance with all parameters', () {
-        final m = GoogleCastMovieMediaMetadataIOS(
-          title: 'Movie Title',
-          subtitle: 'Subtitle',
-          studio: 'Studio',
-          images: [
-            GoogleCastImage(url: Uri.parse('https://example.com/poster.jpg'))
-          ],
-          releaseDate: DateTime(2023, 6, 15),
-        );
-
-        expect(m.title, 'Movie Title');
-        expect(m.subtitle, 'Subtitle');
-        expect(m.studio, 'Studio');
-        expect(m.images, hasLength(1));
-        expect(m.releaseDate, isNotNull);
-      });
+      expect(
+        metadata.metadataType,
+        GoogleCastMediaMetadataType.tvShowMediaMetadata,
+      );
+      expect(metadata.seriesTitle, 'Series Name');
+      expect(metadata.season, 2);
+      expect(metadata.episode, 5);
     });
 
-    test('Movie fromMap parses fields', () {
-      final map = {
-        'title': 'A Movie',
-        'subtitle': 'A Subtitle',
-        'studio': 'Studio Q',
-        'images': [
-          {
-            'url': 'https://example.com/poster.png',
-            'width': 300,
-            'height': 450
-          },
-        ],
-        'releaseDate': DateTime(2022, 1, 1).millisecondsSinceEpoch,
-      };
+    test('photo metadata keeps photo fields', () {
+      final metadata = GoogleCastPhotoMediaMetadata(
+        title: 'Holiday',
+        location: 'Lisbon',
+        width: 1920,
+        height: 1080,
+      );
 
-      final m = GoogleCastMovieMediaMetadataIOS.fromMap(map);
-      expect(m.title, 'A Movie');
-      expect(m.subtitle, 'A Subtitle');
-      expect(m.studio, 'Studio Q');
-      expect(m.images!.first.url.toString(), 'https://example.com/poster.png');
-      expect(m.releaseDate, isA<DateTime>());
+      expect(
+        metadata.metadataType,
+        GoogleCastMediaMetadataType.photoMediaMetadata,
+      );
+      expect(metadata.title, 'Holiday');
+      expect(metadata.location, 'Lisbon');
+      expect(metadata.width, 1920);
+      expect(metadata.height, 1080);
     });
 
-    group('GoogleCastGenericMediaMetadataIOS', () {
-      test('fromMap parses all fields', () {
-        final map = {
-          'title': 'Generic Title',
-          'subtitle': 'Generic Subtitle',
-          'images': [
-            {'url': 'https://example.com/img.png'},
-          ],
-          'releaseDate': DateTime(2021, 5, 10).millisecondsSinceEpoch,
-        };
+    test('generic metadata keeps shared fields', () {
+      final metadata = GoogleCastGenericMediaMetadata(
+        title: 'Generic Title',
+        subtitle: 'Generic Subtitle',
+      );
 
-        final m = GoogleCastGenericMediaMetadataIOS.fromMap(map);
-        expect(m.title, 'Generic Title');
-        expect(m.subtitle, 'Generic Subtitle');
-        expect(m.images!.first.url.toString(), 'https://example.com/img.png');
-        expect(m.releaseDate, isA<DateTime>());
-      });
-
-      test('fromMap handles null images', () {
-        final map = {
-          'title': 'Title',
-          'subtitle': 'Subtitle',
-          'images': null,
-        };
-
-        final m = GoogleCastGenericMediaMetadataIOS.fromMap(map);
-        expect(m.images, isNull);
-      });
-
-      test('fromMap handles null releaseDate', () {
-        final map = {
-          'title': 'Title',
-          'subtitle': 'Subtitle',
-          'images': null,
-          'releaseDate': null,
-        };
-
-        final m = GoogleCastGenericMediaMetadataIOS.fromMap(map);
-        expect(m.releaseDate, isNull);
-      });
-
-      test('fromMap handles non-int releaseDate', () {
-        final map = {
-          'title': 'Title',
-          'subtitle': 'Subtitle',
-          'images': null,
-          'releaseDate': 'string date',
-        };
-
-        final m = GoogleCastGenericMediaMetadataIOS.fromMap(map);
-        expect(m.releaseDate, isNull);
-      });
-
-      test('constructor creates instance with all parameters', () {
-        final m = GoogleCastGenericMediaMetadataIOS(
-          title: 'Title',
-          subtitle: 'Subtitle',
-          images: [
-            GoogleCastImage(url: Uri.parse('https://example.com/img.jpg'))
-          ],
-          releaseDate: DateTime(2023, 3, 20),
-        );
-
-        expect(m.title, 'Title');
-        expect(m.subtitle, 'Subtitle');
-        expect(m.images, hasLength(1));
-        expect(m.releaseDate, isNotNull);
-      });
-    });
-
-    test('Generic fromMap parses fields', () {
-      final map = {
-        'title': 'Generic Title',
-        'subtitle': 'Generic Subtitle',
-        'images': [
-          {'url': 'https://example.com/img.png'},
-        ],
-        'releaseDate': DateTime(2021, 5, 10).millisecondsSinceEpoch,
-      };
-
-      final m = GoogleCastGenericMediaMetadataIOS.fromMap(map);
-      expect(m.title, 'Generic Title');
-      expect(m.subtitle, 'Generic Subtitle');
-      expect(m.images!.first.url.toString(), 'https://example.com/img.png');
-      expect(m.releaseDate, isA<DateTime>());
-    });
-
-    group('GoogleCastTvShowMediaMetadataIOS', () {
-      test('fromMap parses all fields', () {
-        final map = {
-          'seriesTitle': 'Series A',
-          'seasonNumber': 2,
-          'episodeNumber': 7,
-          'images': [
-            {'url': 'https://example.com/cover.jpg'},
-          ],
-          'releaseDate': '20240102',
-        };
-
-        final m = GoogleCastTvShowMediaMetadataIOS.fromMap(map);
-        expect(m.seriesTitle, 'Series A');
-        expect(m.season, 2);
-        expect(m.episode, 7);
-        expect(m.images!.first.url.toString(), 'https://example.com/cover.jpg');
-        expect(m.originalAirDate, isNotNull);
-        expect(m.originalAirDate!.year, 2024);
-      });
-
-      test('fromMap handles null images', () {
-        final map = {
-          'seriesTitle': 'Series',
-          'images': null,
-        };
-
-        final m = GoogleCastTvShowMediaMetadataIOS.fromMap(map);
-        expect(m.images, isNull);
-      });
-
-      test('fromMap handles null releaseDate', () {
-        final map = {
-          'seriesTitle': 'Series',
-          'releaseDate': null,
-        };
-
-        final m = GoogleCastTvShowMediaMetadataIOS.fromMap(map);
-        expect(m.originalAirDate, isNull);
-      });
-
-      test('fromMap handles invalid releaseDate string', () {
-        final map = {
-          'seriesTitle': 'Series',
-          'releaseDate': '2024-01-02', // ISO format should parse
-        };
-
-        final m = GoogleCastTvShowMediaMetadataIOS.fromMap(map);
-        // Should handle gracefully (result depends on DateTimeString.tryParse behavior)
-        expect(m.seriesTitle, 'Series');
-      });
-
-      test('constructor creates instance with all parameters', () {
-        final m = GoogleCastTvShowMediaMetadataIOS(
-          seriesTitle: 'Series Title',
-          season: 3,
-          episode: 10,
-          images: [
-            GoogleCastImage(url: Uri.parse('https://example.com/episode.jpg'))
-          ],
-          originalAirDate: DateTime(2023, 9, 15),
-        );
-
-        expect(m.seriesTitle, 'Series Title');
-        expect(m.season, 3);
-        expect(m.episode, 10);
-        expect(m.images, hasLength(1));
-        expect(m.originalAirDate, isNotNull);
-      });
-    });
-
-    test('TV Show fromMap parses fields', () {
-      final map = {
-        'seriesTitle': 'Series A',
-        'seasonNumber': 2,
-        'episodeNumber': 7,
-        'images': [
-          {'url': 'https://example.com/cover.jpg'},
-        ],
-        'releaseDate': '20240102',
-      };
-
-      final m = GoogleCastTvShowMediaMetadataIOS.fromMap(map);
-      expect(m.seriesTitle, 'Series A');
-      expect(m.season, 2);
-      expect(m.episode, 7);
-      expect(m.images!.first.url.toString(), 'https://example.com/cover.jpg');
-      expect(m.originalAirDate, isNotNull);
-      expect(m.originalAirDate!.year, 2024);
+      expect(
+        metadata.metadataType,
+        GoogleCastMediaMetadataType.genericMediaMetadata,
+      );
+      expect(metadata.title, 'Generic Title');
+      expect(metadata.subtitle, 'Generic Subtitle');
     });
   });
 }

@@ -19,7 +19,7 @@ import GoogleCast
 /// - Author: LUIZ FELIPE ALVES LIMA
 /// - Since: iOS 10.0+
 @objc(GoogleCastPlugin)
-public class SwiftGoogleCastPlugin: NSObject, GCKLoggerDelegate, FlutterPlugin, UIApplicationDelegate {
+public class SwiftGoogleCastPlugin: NSObject, GCKLoggerDelegate, FlutterPlugin, UIApplicationDelegate, GoogleCastContextHostApi {
     static weak var instance: SwiftGoogleCastPlugin?
     
     // MARK: - Properties
@@ -68,7 +68,7 @@ public class SwiftGoogleCastPlugin: NSObject, GCKLoggerDelegate, FlutterPlugin, 
     /// - `google_cast.session_manager`: Session management (via FGCSessionManagerMethodChannel)
     /// - `google_cast.session`: Individual session operations (via FGCSessionMethodChannel)
     /// - `google_cast.discovery_manager`: Device discovery (via FGCDiscoveryManagerMethodChannel)
-    /// - `google_cast.remote_media_client`: Media control (via RemoteMediaClienteMethodChannel)
+    /// - `google_cast.remote_media_client`: Media control (via RemoteMediaClientMethodChannel)
     ///
     /// - Parameter registrar: The Flutter plugin registrar for method channel setup
   public static func register(with registrar: FlutterPluginRegistrar) {
@@ -78,6 +78,7 @@ public class SwiftGoogleCastPlugin: NSObject, GCKLoggerDelegate, FlutterPlugin, 
       
       // Set up main Cast context method channel
       instance.channel = FlutterMethodChannel(name: "google_cast.context", binaryMessenger: registrar.messenger())
+    GoogleCastContextHostApiSetup.setUp(binaryMessenger: registrar.messenger(), api: instance)
     
       registrar.addMethodCallDelegate(instance, channel: instance.channel!)
       
@@ -85,7 +86,7 @@ public class SwiftGoogleCastPlugin: NSObject, GCKLoggerDelegate, FlutterPlugin, 
       FGCSessionManagerMethodChannel.register(with: registrar)
       FGCSessionMethodChannel.register(with: registrar)
       FGCDiscoveryManagerMethodChannel.register(with: registrar)
-      RemoteMediaClienteMethodChannel.register(with: registrar)
+    RemoteMediaClientMethodChannel.register(with: registrar)
   }
 
     // MARK: - Flutter Method Call Handling
@@ -106,7 +107,15 @@ public class SwiftGoogleCastPlugin: NSObject, GCKLoggerDelegate, FlutterPlugin, 
 
       switch call.method {
       case "setSharedInstanceWithOptions":
-          setSharedInstanceWithOption(arguments: call.arguments as! Dictionary<String, Any>, result: result)
+          do {
+              guard let arguments = call.arguments as? Dictionary<String, Any> else {
+                  throw FlutterError(code: "CAST_ERROR", message: "Expected Cast options map", details: nil)
+              }
+              let success = try setSharedInstanceWithOption(arguments: arguments)
+              result(success)
+          } catch {
+              result(error)
+          }
           break
       default:
           result(FlutterMethodNotImplemented)
@@ -127,9 +136,9 @@ public class SwiftGoogleCastPlugin: NSObject, GCKLoggerDelegate, FlutterPlugin, 
     ///
     /// - Parameters:
     ///   - arguments: Dictionary containing Cast configuration options from Flutter
-    ///   - result: Flutter result callback (currently unused)
+    /// - Returns: `true` when context initialization succeeds.
     /// - Note: This method should be called once during app initialization
-    private func setSharedInstanceWithOption(arguments: Dictionary<String, Any> ,result: @escaping FlutterResult){
+    private func setSharedInstanceWithOption(arguments: Dictionary<String, Any>) throws -> Bool {
       
             // Parse Cast options from Flutter arguments
         let option =  GCKCastOptions.fromMap(arguments)
@@ -157,10 +166,9 @@ public class SwiftGoogleCastPlugin: NSObject, GCKLoggerDelegate, FlutterPlugin, 
         discoveryManager.add(FGCDiscoveryManagerMethodChannel.instance)   
         sessionManager.add(FGCSessionManagerMethodChannel.instance )
 
-        // Start discovering Cast devices automatically
-        // Return to Flutter immediately before starting potentially expensive operations
-        // so the Dart side gets fast feedback.
-        result(true)
+        // Start discovering Cast devices automatically.
+        // Returning true before discovery starts keeps the Flutter side responsive.
+        let initResult = true
 
         shouldResumeDiscoveryOnForeground = true
         discoveryManager.startDiscovery()
@@ -171,6 +179,22 @@ public class SwiftGoogleCastPlugin: NSObject, GCKLoggerDelegate, FlutterPlugin, 
 
         // Observe application lifecycle to stop discovery and remove listeners when app closes
         addLifecycleObserversIfNeeded()
+
+        return initResult
+    }
+
+    // MARK: - Pigeon Host API
+
+    func setSharedInstanceWithOptions(request: CastContextInitRequest) throws -> Bool {
+        var options: [String: Any] = [:]
+        for (key, value) in request.options {
+            guard let castKey = key, let castValue = value else {
+                continue
+            }
+            options[castKey] = castValue
+        }
+
+        return try setSharedInstanceWithOption(arguments: options)
     }
 
     // MARK: - Teardown / Lifecycle handlers

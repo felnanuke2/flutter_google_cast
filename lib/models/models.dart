@@ -1,2 +1,1 @@
-export 'android/android.dart';
-export 'ios/ios.dart';
+export 'package:flutter_chrome_cast_platform_interface/flutter_chrome_cast_platform_interface.dart';

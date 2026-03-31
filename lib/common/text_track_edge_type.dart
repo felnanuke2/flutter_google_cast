@@ -1,39 +1,5 @@
-/// Enum representing text track edge types for styling captions.
-enum TextTrackEdgeType {
-  /// No edge effect.
-  none,
-
-  /// Outline edge effect.
-  outline,
-
-  /// Drop shadow edge effect.
-  dropShadow,
-
-  /// Raised edge effect.
-  raised,
-
-  /// Depressed edge effect.
-  depressed;
-
-  factory TextTrackEdgeType.fromMap(String value) {
-    // Try matching by name (lowerCamelCase)
-    for (final v in values) {
-      if (v.name == value) return v;
-    }
-    // Fallback: match legacy UPPER_SNAKE_CASE
-    switch (value) {
-      case 'NONE':
-        return TextTrackEdgeType.none;
-      case 'OUTLINE':
-        return TextTrackEdgeType.outline;
-      case 'DROP_SHADOW':
-        return TextTrackEdgeType.dropShadow;
-      case 'RAISED':
-        return TextTrackEdgeType.raised;
-      case 'DEPRESSED':
-        return TextTrackEdgeType.depressed;
-      default:
-        throw ArgumentError('Unknown TextTrackEdgeType: $value');
-    }
-  }
-}
+// Re-exported from flutter_chrome_cast_platform_interface.
+// This file exists for backward compatibility with
+// `package:flutter_chrome_cast/common/text_track_edge_type.dart`.
+// All types are now defined in the platform_interface package.
+export 'package:flutter_chrome_cast_platform_interface/src/common/text_track_edge_type.dart';

@@ -77,37 +77,40 @@ class _GoogleCastMiniControllerState extends State<GoogleCastMiniController> {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<GoogleCastSession?>(
-        stream: GoogleCastSessionManager.instance.currentSessionStream,
-        builder: (context, snapshot) {
-          return StreamBuilder<GoggleCastMediaStatus?>(
-            stream: GoogleCastRemoteMediaClient.instance.mediaStatusStream,
-            builder: ((context, snapshot) {
-              final mediaStatus = snapshot.data;
-              final hasConnectedSession =
-                  GoogleCastSessionManager.instance.hasConnectedSession;
+      stream: GoogleCastSessionManager.instance.currentSessionStream,
+      builder: (context, snapshot) {
+        return StreamBuilder<GoggleCastMediaStatus?>(
+          stream: GoogleCastRemoteMediaClient.instance.mediaStatusStream,
+          builder: ((context, snapshot) {
+            final mediaStatus = snapshot.data;
+            final hasConnectedSession =
+                GoogleCastSessionManager.instance.hasConnectedSession;
 
-              if (!hasConnectedSession) return const SizedBox.shrink();
+            if (!hasConnectedSession) return const SizedBox.shrink();
 
-              if (mediaStatus == null) return const SizedBox.shrink();
+            if (mediaStatus == null) return const SizedBox.shrink();
 
-              if (isExpanded) {
-                return ExpandedGoogleCastPlayerController(
-                  toggleExpand: _toggleExpand,
-                  theme: widget.theme ??
-                      GoogleCastPlayerTheme(
-                          titleTextStyle: TextStyle(color: Colors.white)),
-                );
-              }
-              return Align(
-                alignment: Alignment.bottomCenter,
-                child: Container(
-                  margin: widget.margin ?? const EdgeInsets.all(16),
-                  child: _miniPlayerController(mediaStatus),
-                ),
+            if (isExpanded) {
+              return ExpandedGoogleCastPlayerController(
+                toggleExpand: _toggleExpand,
+                theme:
+                    widget.theme ??
+                    GoogleCastPlayerTheme(
+                      titleTextStyle: TextStyle(color: Colors.white),
+                    ),
               );
-            }),
-          );
-        });
+            }
+            return Align(
+              alignment: Alignment.bottomCenter,
+              child: Container(
+                margin: widget.margin ?? const EdgeInsets.all(16),
+                child: _miniPlayerController(mediaStatus),
+              ),
+            );
+          }),
+        );
+      },
+    );
   }
 
   Widget _miniPlayerController(GoggleCastMediaStatus mediaStatus) {
@@ -115,10 +118,7 @@ class _GoogleCastMiniControllerState extends State<GoogleCastMiniController> {
     final borderRadius = widget.borderRadius ?? BorderRadius.circular(16);
 
     return Container(
-      constraints: const BoxConstraints(
-        minHeight: 84,
-        maxHeight: 96,
-      ),
+      constraints: const BoxConstraints(minHeight: 84, maxHeight: 96),
       decoration: BoxDecoration(
         color: theme?.backgroundColor ?? Colors.white,
         borderRadius: borderRadius,
@@ -182,8 +182,9 @@ class _GoogleCastMiniControllerState extends State<GoogleCastMiniController> {
                         child: IconButton(
                           onPressed: () =>
                               _togglePlayAndPause.call(mediaStatus.playerState),
-                          icon:
-                              _getIconFromPlayerState(mediaStatus.playerState),
+                          icon: _getIconFromPlayerState(
+                            mediaStatus.playerState,
+                          ),
                           iconSize: theme?.iconSize ?? 28,
                           color: theme?.iconColor ?? Colors.grey[800],
                           padding: const EdgeInsets.all(8),
@@ -221,7 +222,8 @@ class _GoogleCastMiniControllerState extends State<GoogleCastMiniController> {
         height: 56,
         decoration: BoxDecoration(
           borderRadius: theme?.imageBorderRadius ?? BorderRadius.circular(12),
-          boxShadow: theme?.imageShadow ??
+          boxShadow:
+              theme?.imageShadow ??
               [
                 BoxShadow(
                   color: Colors.black.withValues(alpha: 0.2),
@@ -279,7 +281,8 @@ class _GoogleCastMiniControllerState extends State<GoogleCastMiniController> {
       decoration: BoxDecoration(
         color: Colors.grey[300],
         borderRadius: theme?.imageBorderRadius ?? BorderRadius.circular(12),
-        boxShadow: theme?.imageShadow ??
+        boxShadow:
+            theme?.imageShadow ??
             [
               BoxShadow(
                 color: Colors.black.withValues(alpha: 0.2),
@@ -313,10 +316,7 @@ class _GoogleCastMiniControllerState extends State<GoogleCastMiniController> {
   }
 
   /// Helper method to create scrolling text using marquee package
-  Widget _buildScrollingText({
-    required String text,
-    required TextStyle style,
-  }) {
+  Widget _buildScrollingText({required String text, required TextStyle style}) {
     if (text.isEmpty) {
       return const SizedBox.shrink();
     }
@@ -345,7 +345,8 @@ class _GoogleCastMiniControllerState extends State<GoogleCastMiniController> {
       tag: 'com.felnanuke.google_cast.controller.title',
       child: _buildScrollingText(
         text: title,
-        style: theme?.titleTextStyle ??
+        style:
+            theme?.titleTextStyle ??
             TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
@@ -367,16 +368,18 @@ class _GoogleCastMiniControllerState extends State<GoogleCastMiniController> {
 
     return _buildScrollingText(
       text: subtitle,
-      style: (theme?.deviceTextStyle ??
-              TextStyle(
-                fontSize: 12,
-                color: Colors.grey[600],
-                fontWeight: FontWeight.w400,
-              ))
-          .copyWith(
-        fontSize: 11,
-        fontWeight: FontWeight.w300, // Slightly lighter weight for subtitle
-      ),
+      style:
+          (theme?.deviceTextStyle ??
+                  TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey[600],
+                    fontWeight: FontWeight.w400,
+                  ))
+              .copyWith(
+                fontSize: 11,
+                fontWeight:
+                    FontWeight.w300, // Slightly lighter weight for subtitle
+              ),
     );
   }
 

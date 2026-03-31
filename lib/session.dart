@@ -3,4 +3,4 @@
 /// This module provides access to cast session management.
 library session;
 
-export '_session_manager/_session_manager.dart';
+export 'session_manager/session_manager_exports.dart';
