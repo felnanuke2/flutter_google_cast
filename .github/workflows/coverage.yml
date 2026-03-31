@@ -23,8 +23,8 @@ jobs:
         flutter-version: '3.41.6'
         channel: 'stable'
     
-    - name: Install dependencies
-      run: flutter pub get
+    - name: Install workspace dependencies
+      run: dart pub get
     
     - name: Run tests with coverage
       run: flutter test --coverage
@@ -50,7 +50,7 @@ jobs:
         genhtml coverage/lcov_cleaned.info -o coverage/html
         
         # Calculate coverage percentage
-        coverage_percent=$(lcov --summary coverage/lcov_cleaned.info | grep -oP 'lines......: \K\d+\.\d+' | head -1)
+        coverage_percent=$(lcov --summary coverage/lcov_cleaned.info | awk '/lines/{print $2}' | tr -d '%')
         echo "Coverage: $coverage_percent%"
         echo "COVERAGE_PERCENT=$coverage_percent" >> $GITHUB_ENV
         

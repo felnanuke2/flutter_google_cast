@@ -2,13 +2,12 @@ name: flutter_chrome_cast_android
 description: >
   Android implementation of the flutter_chrome_cast plugin.
   Will house the Kotlin/Pigeon native bridge once migrated in Stage 2+.
-version: 0.0.1
+version: 1.4.4
 repository: https://github.com/felnanuke2/flutter_google_cast
-publish_to: none # Remove when ready to publish to pub.dev
 
 environment:
-  sdk: ">=3.6.0 <4.0.0"
-  flutter: ">=3.27.0"
+  sdk: ">=3.11.0 <4.0.0"
+  flutter: ">=3.41.6"
 
 resolution: workspace
 
@@ -16,7 +15,7 @@ dependencies:
   flutter:
     sdk: flutter
   flutter_chrome_cast_platform_interface:
-    path: ../flutter_chrome_cast_platform_interface
+    version: ^1.4.4
   rxdart: ^0.28.0
 
 dev_dependencies:

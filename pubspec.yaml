@@ -5,10 +5,9 @@ repository: https://github.com/felnanuke2/flutter_google_cast
 license: BSD-3-Clause
 
 environment:
-  # Dart 3.6+ is required for the `workspace:` key.
-  # Flutter 3.27.0 (Nov 2024) ships with Dart 3.6.
-  sdk: ">=3.6.0 <4.0.0"
-  flutter: ">=3.27.0"
+  # Flutter 3.41.6 ships with Dart 3.11.4.
+  sdk: ">=3.11.0 <4.0.0"
+  flutter: ">=3.41.6"
 
 # ---------------------------------------------------------------------------
 # Dart Workspace — Stage 1 (Folder Shuffle)
@@ -24,14 +23,12 @@ workspace:
 dependencies:
   flutter:
     sdk: flutter
-  # Stage 1: facade depends on the (still-empty) platform interface package.
-  # Real interface extraction happens in Stage 2.
   flutter_chrome_cast_platform_interface:
-    path: packages/flutter_chrome_cast_platform_interface
+    version: ^1.4.4
   flutter_chrome_cast_android:
-    path: packages/flutter_chrome_cast_android
+    version: ^1.4.4
   flutter_chrome_cast_ios:
-    path: packages/flutter_chrome_cast_ios
+    version: ^1.4.4
   get: ^4.7.2
   marquee: ^2.2.3
   permission_handler: ^12.0.0+1

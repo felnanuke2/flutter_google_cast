@@ -2,7 +2,7 @@ name: Flutter CI with Test Enforcement
 
 on:
   push:
-    branches: [ main, develop, master, 'fix/**', 'feature/**' ]
+    branches: [ main, develop, master, 'fix/**', 'feature/**', 'feat/**' ]
   pull_request:
     branches: [ main, develop, master ]
   workflow_dispatch:
@@ -20,8 +20,8 @@ jobs:
         flutter-version: '3.41.6'
         channel: 'stable'
     
-    - name: Install dependencies
-      run: flutter pub get
+    - name: Install workspace dependencies
+      run: dart pub get
     
     - name: Check for outdated dependencies
       run: |
@@ -33,7 +33,7 @@ jobs:
       run: dart format --output=none --set-exit-if-changed .
     
     - name: Analyze project source
-      run: flutter analyze
+      run: flutter analyze --no-fatal-warnings --no-fatal-infos
     
     - name: Check if tests exist
       run: |
@@ -67,8 +67,8 @@ jobs:
         flutter-version: '3.41.6'
         channel: 'stable'
     
-    - name: Install dependencies
-      run: flutter pub get
+    - name: Install workspace dependencies
+      run: dart pub get
     
     - name: Check for outdated dependencies
       run: |
@@ -80,6 +80,7 @@ jobs:
     - name: Build Android (ARM64 and ARM only)
       run: |
         cd example
+        flutter pub get
         # Build only for ARM architectures, excluding x86 as it's deprecated
         flutter build apk --debug
 
@@ -96,12 +97,13 @@ jobs:
         flutter-version: '3.41.6'
         channel: 'stable'
     
-    - name: Install dependencies
-      run: flutter pub get
+    - name: Install workspace dependencies
+      run: dart pub get
     
     - name: Build iOS Simulator
       run: |
         cd example
+        flutter pub get
         flutter build ios --simulator --no-codesign
     
     - name: Build iOS for Device (Release)

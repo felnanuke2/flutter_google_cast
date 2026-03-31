@@ -6,7 +6,8 @@ description: Demonstrates how to use the google_cast plugin.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
 environment:
-  sdk: ">=3.6.0 <4.0.0"
+  sdk: ">=3.11.0 <4.0.0"
+  flutter: ">=3.41.6"
 
 # Member of the Dart Workspace defined at the repo root.
 # Run `dart pub get` from the repo root, not from this directory.

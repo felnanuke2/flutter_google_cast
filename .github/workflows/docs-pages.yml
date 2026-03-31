@@ -28,8 +28,8 @@ jobs:
           flutter-version: '3.41.6'
           channel: stable
 
-      - name: Install dependencies
-        run: flutter pub get
+      - name: Install workspace dependencies
+        run: dart pub get
 
       - name: Generate API documentation
         run: dart doc --output doc/api
