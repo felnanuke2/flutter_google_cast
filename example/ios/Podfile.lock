@@ -7,7 +7,7 @@ PODS:
   - google-cast-sdk (4.8.4)
   - permission_handler_apple (9.3.0):
     - Flutter
-  - Protobuf (4.33.3)
+  - Protobuf (5.34.1)
 
 DEPENDENCIES:
   - Flutter (from `Flutter`)
@@ -32,7 +32,7 @@ SPEC CHECKSUMS:
   flutter_chrome_cast_ios: f23ac10b91b21fccdf86f9ef378579b231ef31b6
   google-cast-sdk: 32f65af50d164e3c475e79ad123db3cc26fbcd37
   permission_handler_apple: 4ed2196e43d0651e8ff7ca3483a069d469701f2d
-  Protobuf: ce17c35bfa42dcece2b3faf0a9dc4e97114d5e2a
+  Protobuf: b51e2d95aace0c1ce911b7483315efb7c3ab037f
 
 PODFILE CHECKSUM: 57c8aed26fba39d3ec9424816221f294a07c58eb
 

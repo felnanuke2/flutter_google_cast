@@ -227,8 +227,8 @@ class RemoteMediaClientMethodChannel :UIResponder, FlutterPlugin, GCKRemoteMedia
     }
     
     public func startListen(){
-        print("[GoogleCast] startListen() called, adding listener to remoteMediaClient: \(String(describing: currentRemoteMediaCliente))")
-        currentRemoteMediaCliente?.add(self)
+        print("[GoogleCast] startListen() called, adding listener to remoteMediaClient: \(String(describing: currentRemoteMediaClient))")
+        currentRemoteMediaClient?.add(self)
     }
     
     
@@ -313,7 +313,7 @@ class RemoteMediaClientMethodChannel :UIResponder, FlutterPlugin, GCKRemoteMedia
     
     
     public func resumeSession(){
-        currentRemoteMediaCliente?.queueFetchItemIDs();
+        currentRemoteMediaClient?.queueFetchItemIDs();
     }
     
     private func startListenPlayerPosition(){
@@ -322,8 +322,8 @@ class RemoteMediaClientMethodChannel :UIResponder, FlutterPlugin, GCKRemoteMedia
         
         self.positionTimer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true){_ in
             let update = PlayerPositionUpdate(
-                progress: Int64((self.currentRemoteMediaCliente?.approximateStreamPosition() ?? 0) * 1000),
-                duration: Int64((self.currentRemoteMediaCliente?.mediaStatus?.mediaInformation?.streamDuration ?? 0) * 1000)
+                progress: Int64((self.currentRemoteMediaClient?.approximateStreamPosition() ?? 0) * 1000),
+                duration: Int64((self.currentRemoteMediaClient?.mediaStatus?.mediaInformation?.streamDuration ?? 0) * 1000)
             )
             self.flutterApi?.onPlayerPositionChanged(update: update) { _ in }
 
