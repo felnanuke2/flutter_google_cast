@@ -12,7 +12,9 @@ class _FakeContextPlatform extends GoogleCastContextPlatformInterface
   GoogleCastOptions? lastOptions;
 
   @override
-  Future<bool> setSharedInstanceWithOptions(GoogleCastOptions castOptions) async {
+  Future<bool> setSharedInstanceWithOptions(
+    GoogleCastOptions castOptions,
+  ) async {
     lastOptions = castOptions;
     return valueToReturn;
   }
@@ -24,9 +26,8 @@ void main() {
       final fakePlatform = _FakeContextPlatform(true);
       GoogleCastContextPlatformInterface.instance = fakePlatform;
 
-      final result = await GoogleCastContext.instance.setSharedInstanceWithOptions(
-        GoogleCastOptions(),
-      );
+      final result = await GoogleCastContext.instance
+          .setSharedInstanceWithOptions(GoogleCastOptions());
 
       expect(result, isTrue);
       expect(fakePlatform.lastOptions, isNotNull);

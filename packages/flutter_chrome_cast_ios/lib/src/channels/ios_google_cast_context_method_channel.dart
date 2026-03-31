@@ -7,15 +7,15 @@ import 'package:flutter_chrome_cast_platform_interface/flutter_chrome_cast_platf
 class FlutterIOSGoogleCastContextMethodChannel
     extends GoogleCastContextPlatformInterface {
   /// Creates the iOS Google Cast context bridge.
-  FlutterIOSGoogleCastContextMethodChannel({
-    GoogleCastContextHostApi? hostApi,
-  }) : _hostApi = hostApi ?? GoogleCastContextHostApi();
+  FlutterIOSGoogleCastContextMethodChannel({GoogleCastContextHostApi? hostApi})
+    : _hostApi = hostApi ?? GoogleCastContextHostApi();
 
   final GoogleCastContextHostApi _hostApi;
 
   @override
   Future<bool> setSharedInstanceWithOptions(
-      GoogleCastOptions castOptions) async {
+    GoogleCastOptions castOptions,
+  ) async {
     final result = await _hostApi.setSharedInstanceWithOptions(
       CastContextInitRequest(options: _toCastOptionsPigeon(castOptions)),
     );
@@ -39,7 +39,8 @@ class FlutterIOSGoogleCastContextMethodChannel
       discoveryCriteria: castOptions.discoveryCriteria != null
           ? DiscoveryCriteriaPigeon(
               method: _toDiscoveryCriteriaMethodPigeon(
-                  castOptions.discoveryCriteria!.method),
+                castOptions.discoveryCriteria!.method,
+              ),
               applicationID: castOptions.discoveryCriteria!.applicationID,
               namespaces: castOptions.discoveryCriteria!.namespaces?.toList(),
             )
@@ -48,7 +49,8 @@ class FlutterIOSGoogleCastContextMethodChannel
   }
 
   DiscoveryCriteriaMethodPigeon _toDiscoveryCriteriaMethodPigeon(
-      GoogleCastDiscoveryCriteriaInitMethod method) {
+    GoogleCastDiscoveryCriteriaInitMethod method,
+  ) {
     switch (method) {
       case GoogleCastDiscoveryCriteriaInitMethod.initWithApplicationID:
         return DiscoveryCriteriaMethodPigeon.initWithApplicationID;

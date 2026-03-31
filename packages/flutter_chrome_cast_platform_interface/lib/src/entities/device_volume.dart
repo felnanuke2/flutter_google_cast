@@ -2,7 +2,7 @@
 class CastDeviceVolume {
   /// Creates a valid [CastDeviceVolume] between 0.0 and 1.0.
   const CastDeviceVolume(this.value, {this.muted = false})
-      : assert(value >= 0 && value <= 1, 'value must be between 0 and 1');
+    : assert(value >= 0 && value <= 1, 'value must be between 0 and 1');
 
   /// Device volume level in the inclusive range [0.0, 1.0].
   final double value;

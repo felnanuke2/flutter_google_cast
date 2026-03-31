@@ -12,8 +12,5 @@ class UserActionState {
   ///
   /// [customData] - Custom data associated with the user action.
   /// [userAction] - The user action.
-  UserActionState({
-    this.customData,
-    this.userAction,
-  });
+  UserActionState({this.customData, this.userAction});
 }

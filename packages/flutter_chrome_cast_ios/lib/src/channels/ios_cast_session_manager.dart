@@ -91,12 +91,12 @@ class GoogleCastSessionManagerIOSMethodChannel
 
   void _onCurrentSessionChanged(CastSessionPigeon? arguments) async {
     try {
-        final session = arguments == null
+      final session = arguments == null
           ? null
           : _PlatformCastSession(
               device: arguments.device == null
                   ? null
-              : GoogleCastDevice(
+                  : GoogleCastDevice(
                       deviceID: arguments.device!.deviceId,
                       friendlyName: arguments.device!.friendlyName,
                       modelName: arguments.device!.modelName,

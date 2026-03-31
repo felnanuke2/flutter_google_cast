@@ -98,7 +98,7 @@ class GoogleCastSessionManagerAndroidMethodChannel
       final session = _PlatformCastSession(
         device: arguments.device == null
             ? null
-        : GoogleCastDevice(
+            : GoogleCastDevice(
                 deviceID: arguments.device!.deviceId,
                 friendlyName: arguments.device!.friendlyName,
                 modelName: arguments.device!.modelName,
@@ -109,8 +109,8 @@ class GoogleCastSessionManagerAndroidMethodChannel
                 uniqueID: arguments.device!.uniqueId,
               ),
         sessionID: arguments.sessionId,
-        connectionState: GoogleCastConnectState.values[
-            arguments.connectionState.index],
+        connectionState:
+            GoogleCastConnectState.values[arguments.connectionState.index],
         currentDeviceMuted: arguments.currentDeviceMuted,
         currentDeviceVolume: arguments.currentDeviceVolume,
         deviceStatusText: arguments.deviceStatusText,

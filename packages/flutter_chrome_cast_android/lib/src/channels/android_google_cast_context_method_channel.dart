@@ -7,15 +7,15 @@ import 'package:flutter_chrome_cast_platform_interface/flutter_chrome_cast_platf
 class GoogleCastContextAndroidMethodChannel
     extends GoogleCastContextPlatformInterface {
   /// Creates the Android Google Cast context bridge.
-  GoogleCastContextAndroidMethodChannel({
-    GoogleCastContextHostApi? hostApi,
-  }) : _hostApi = hostApi ?? GoogleCastContextHostApi();
+  GoogleCastContextAndroidMethodChannel({GoogleCastContextHostApi? hostApi})
+    : _hostApi = hostApi ?? GoogleCastContextHostApi();
 
   final GoogleCastContextHostApi _hostApi;
 
   @override
   Future<bool> setSharedInstanceWithOptions(
-      GoogleCastOptions castOptions) async {
+    GoogleCastOptions castOptions,
+  ) async {
     final result = await _hostApi.setSharedInstanceWithOptions(
       CastContextInitRequest(options: _toCastOptionsPigeon(castOptions)),
     );

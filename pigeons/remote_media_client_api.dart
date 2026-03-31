@@ -12,24 +12,13 @@ import 'package:pigeon/pigeon.dart';
     ),
     swiftOut:
         'packages/flutter_chrome_cast_ios/ios/flutter_chrome_cast/Sources/flutter_chrome_cast/RemoteMediaClientPigeon.g.swift',
-    swiftOptions: SwiftOptions(
-      includeErrorClass: false,
-    ),
+    swiftOptions: SwiftOptions(includeErrorClass: false),
     dartPackageName: 'flutter_chrome_cast_platform_interface',
   ),
 )
-enum RepeatModePigeon {
-  off,
-  all,
-  single,
-  allAndShuffle,
-}
+enum RepeatModePigeon { off, all, single, allAndShuffle }
 
-enum MediaResumeStatePigeon {
-  play,
-  pause,
-  unchanged,
-}
+enum MediaResumeStatePigeon { play, pause, unchanged }
 
 /// Media track information
 class MediaTrack {
@@ -90,10 +79,7 @@ class MediaInfo {
 
 /// Volume information
 class Volume {
-  Volume({
-    required this.level,
-    required this.muted,
-  });
+  Volume({required this.level, required this.muted});
 
   double level;
   bool muted;
@@ -178,9 +164,7 @@ class SeekOptionPigeon {
 }
 
 class SetPlaybackRateRequestPigeon {
-  SetPlaybackRateRequestPigeon({
-    required this.rate,
-  });
+  SetPlaybackRateRequestPigeon({required this.rate});
 
   double rate;
 }
@@ -208,20 +192,14 @@ class LoadMediaRequestPigeon {
 }
 
 class QueueLoadRequestPigeon {
-  QueueLoadRequestPigeon({
-    required this.items,
-    this.options,
-  });
+  QueueLoadRequestPigeon({required this.items, this.options});
 
   List<MediaQueueItem?> items;
   QueueLoadOptionsPigeon? options;
 }
 
 class QueueInsertItemsRequestPigeon {
-  QueueInsertItemsRequestPigeon({
-    required this.items,
-    this.beforeItemWithId,
-  });
+  QueueInsertItemsRequestPigeon({required this.items, this.beforeItemWithId});
 
   List<MediaQueueItem?> items;
   int? beforeItemWithId;
@@ -249,10 +227,7 @@ class QueueReorderItemsRequestPigeon {
 
 /// Player position update
 class PlayerPositionUpdate {
-  PlayerPositionUpdate({
-    required this.progress,
-    required this.duration,
-  });
+  PlayerPositionUpdate({required this.progress, required this.duration});
 
   int progress;
   int duration;

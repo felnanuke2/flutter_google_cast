@@ -23,8 +23,9 @@ enum CastStatusType {
   /// Returns [CastStatusType.unknow] if the string doesn't match any known type.
   factory CastStatusType.fromString(String name) {
     return CastStatusType.values.firstWhere(
-        (element) => element.rawValue == name,
-        orElse: () => CastStatusType.unknow);
+      (element) => element.rawValue == name,
+      orElse: () => CastStatusType.unknow,
+    );
   }
 }
 
@@ -39,7 +40,5 @@ class CastMessageEvent {
   /// Creates a new cast message event.
   ///
   /// [type] specifies the category of this status event.
-  CastMessageEvent({
-    required this.type,
-  });
+  CastMessageEvent({required this.type});
 }

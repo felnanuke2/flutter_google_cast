@@ -76,7 +76,8 @@ class GoogleCastDiscoveryManagerMethodChannelAndroid
         print('Received ${devices.length} devices from native');
         for (final device in devices) {
           print(
-              'Device: ${device.deviceID} - ${device.friendlyName} (${device.modelName})');
+            'Device: ${device.deviceID} - ${device.friendlyName} (${device.modelName})',
+          );
         }
       }
 
@@ -98,7 +99,8 @@ class GoogleCastDiscoveryManagerMethodChannelAndroid
 
       if (kDebugMode) {
         print(
-            'Final device count after deduplication: ${uniqueDevices.length}');
+          'Final device count after deduplication: ${uniqueDevices.length}',
+        );
       }
       _devicesStreamController.add(uniqueDevices.values.toList());
     } catch (e) {

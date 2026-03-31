@@ -17,18 +17,25 @@ class GoogleCastLoadMediaRequest {
 
   /// Media item to load on the Cast device.
   final GoogleCastMediaInformation mediaInfo;
+
   /// Whether to start playback automatically after loading.
   final bool autoPlay;
+
   /// Offset at which playback should begin.
   final Duration playPosition;
+
   /// Multiplier for playback rate (1.0 = normal speed).
   final double playbackRate;
+
   /// IDs of the tracks to activate.
   final List<int>? activeTrackIds;
+
   /// Optional credentials associated with the media request.
   final String? credentials;
+
   /// Type qualifier for [credentials].
   final String? credentialsType;
+
   /// Arbitrary data forwarded to the receiver application.
   final Map<String, dynamic>? customData;
 }
@@ -43,6 +50,7 @@ class GoogleCastQueueInsertItemsRequest {
 
   /// Items to insert into the queue.
   final List<GoogleCastQueueItem> items;
+
   /// Item ID before which the new items are inserted; appends to end when null.
   final int? beforeItemWithId;
 }
@@ -57,6 +65,7 @@ class GoogleCastQueueInsertItemAndPlayRequest {
 
   /// The queue item to insert and play.
   final GoogleCastQueueItem item;
+
   /// Item ID before which the new item is inserted.
   final int beforeItemWithId;
 }
@@ -71,6 +80,7 @@ class GoogleCastQueueReorderItemsRequest {
 
   /// IDs of items to reorder.
   final List<int> itemsIds;
+
   /// Item ID before which the reordered items are placed; appends to end when null.
   final int? beforeItemWithId;
 }

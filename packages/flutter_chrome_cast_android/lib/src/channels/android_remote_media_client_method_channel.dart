@@ -10,9 +10,9 @@ class _RemoteMediaFlutterApiHandler extends RemoteMediaClientFlutterApi {
 
   final void Function(MediaStatus? status) onMediaStatusChangedCallback;
   final void Function(List<MediaQueueItem?> queueItems)
-      onQueueStatusChangedCallback;
+  onQueueStatusChangedCallback;
   final void Function(PlayerPositionUpdate update)
-      onPlayerPositionChangedCallback;
+  onPlayerPositionChangedCallback;
 
   @override
   void onMediaStatusChanged(MediaStatus? status) {
@@ -100,9 +100,7 @@ class GoogleCastRemoteMediaClientAndroidMethodChannel
   }
 
   @override
-  Future<void> loadMediaWithRequest(
-    GoogleCastLoadMediaRequest request,
-  ) async {
+  Future<void> loadMediaWithRequest(GoogleCastLoadMediaRequest request) async {
     await _hostApi.loadMedia(
       LoadMediaRequestPigeon(
         mediaInfo: _toMediaInfo(request.mediaInfo),
@@ -205,9 +203,7 @@ class GoogleCastRemoteMediaClientAndroidMethodChannel
   }
 
   @override
-  Future<void> setTextTrackStyle(
-    TextTrackStyle textTrackStyle,
-  ) async {
+  Future<void> setTextTrackStyle(TextTrackStyle textTrackStyle) async {
     await _hostApi.setTextTrackStyle(_toTextTrackStylePigeon(textTrackStyle));
   }
 
@@ -393,8 +389,9 @@ class GoogleCastRemoteMediaClientAndroidMethodChannel
       playerState: _playerStateFromString(status.playerState),
       idleReason: _idleReasonFromString(status.idleReason),
       playbackRate: status.playbackRate,
-      mediaInformation:
-          status.media == null ? null : _toMediaInformation(status.media!),
+      mediaInformation: status.media == null
+          ? null
+          : _toMediaInformation(status.media!),
       volume: status.volume.level,
       isMuted: status.volume.muted,
       repeatMode: _repeatModeFromString(status.repeatMode),
@@ -435,7 +432,9 @@ class GoogleCastRemoteMediaClientAndroidMethodChannel
       contentId: media.contentId,
       streamType: CastMediaStreamType.fromMap(media.streamType),
       contentType: media.contentType,
-      contentUrl: media.contentUrl.isEmpty ? null : Uri.tryParse(media.contentUrl),
+      contentUrl: media.contentUrl.isEmpty
+          ? null
+          : Uri.tryParse(media.contentUrl),
       duration: Duration(seconds: media.duration),
       customData: media.customData?.cast<String, dynamic>(),
       tracks: media.tracks

@@ -10,9 +10,5 @@ class GoogleCastImage {
   final int? width;
 
   /// Creates a new [GoogleCastImage] instance.
-  GoogleCastImage({
-    required this.url,
-    this.height,
-    this.width,
-  });
+  GoogleCastImage({required this.url, this.height, this.width});
 }

@@ -15,7 +15,11 @@ PlatformException _createConnectionError(String channelName) {
   );
 }
 
-List<Object?> wrapResponse({Object? result, PlatformException? error, bool empty = false}) {
+List<Object?> wrapResponse({
+  Object? result,
+  PlatformException? error,
+  bool empty = false,
+}) {
   if (empty) {
     return <Object?>[];
   }
@@ -24,33 +28,28 @@ List<Object?> wrapResponse({Object? result, PlatformException? error, bool empty
   }
   return <Object?>[error.code, error.message, error.details];
 }
+
 bool _deepEquals(Object? a, Object? b) {
   if (a is List && b is List) {
     return a.length == b.length &&
-        a.indexed
-        .every(((int, dynamic) item) => _deepEquals(item.$2, b[item.$1]));
+        a.indexed.every(
+          ((int, dynamic) item) => _deepEquals(item.$2, b[item.$1]),
+        );
   }
   if (a is Map && b is Map) {
-    return a.length == b.length && a.entries.every((MapEntry<Object?, Object?> entry) =>
-        (b as Map<Object?, Object?>).containsKey(entry.key) &&
-        _deepEquals(entry.value, b[entry.key]));
+    return a.length == b.length &&
+        a.entries.every(
+          (MapEntry<Object?, Object?> entry) =>
+              (b as Map<Object?, Object?>).containsKey(entry.key) &&
+              _deepEquals(entry.value, b[entry.key]),
+        );
   }
   return a == b;
 }
 
+enum RepeatModePigeon { off, all, single, allAndShuffle }
 
-enum RepeatModePigeon {
-  off,
-  all,
-  single,
-  allAndShuffle,
-}
-
-enum MediaResumeStatePigeon {
-  play,
-  pause,
-  unchanged,
-}
+enum MediaResumeStatePigeon { play, pause, unchanged }
 
 /// Media track information
 class MediaTrack {
@@ -91,7 +90,8 @@ class MediaTrack {
   }
 
   Object encode() {
-    return _toList();  }
+    return _toList();
+  }
 
   static MediaTrack decode(Object result) {
     result as List<Object?>;
@@ -120,8 +120,7 @@ class MediaTrack {
 
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
-  int get hashCode => Object.hashAll(_toList())
-;
+  int get hashCode => Object.hashAll(_toList());
 }
 
 /// Live seekable range for live media streams
@@ -142,16 +141,12 @@ class LiveSeekableRange {
   bool isLiveDone;
 
   List<Object?> _toList() {
-    return <Object?>[
-      start,
-      end,
-      isMovingWindow,
-      isLiveDone,
-    ];
+    return <Object?>[start, end, isMovingWindow, isLiveDone];
   }
 
   Object encode() {
-    return _toList();  }
+    return _toList();
+  }
 
   static LiveSeekableRange decode(Object result) {
     result as List<Object?>;
@@ -177,8 +172,7 @@ class LiveSeekableRange {
 
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
-  int get hashCode => Object.hashAll(_toList())
-;
+  int get hashCode => Object.hashAll(_toList());
 }
 
 /// Media information including content and track details
@@ -220,7 +214,8 @@ class MediaInfo {
   }
 
   Object encode() {
-    return _toList();  }
+    return _toList();
+  }
 
   static MediaInfo decode(Object result) {
     result as List<Object?>;
@@ -230,7 +225,8 @@ class MediaInfo {
       streamType: result[2]! as String,
       contentUrl: result[3]! as String,
       duration: result[4]! as int,
-      customData: (result[5] as Map<Object?, Object?>?)?.cast<String, Object?>(),
+      customData: (result[5] as Map<Object?, Object?>?)
+          ?.cast<String, Object?>(),
       tracks: (result[6] as List<Object?>?)?.cast<MediaTrack?>(),
     );
   }
@@ -249,37 +245,28 @@ class MediaInfo {
 
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
-  int get hashCode => Object.hashAll(_toList())
-;
+  int get hashCode => Object.hashAll(_toList());
 }
 
 /// Volume information
 class Volume {
-  Volume({
-    required this.level,
-    required this.muted,
-  });
+  Volume({required this.level, required this.muted});
 
   double level;
 
   bool muted;
 
   List<Object?> _toList() {
-    return <Object?>[
-      level,
-      muted,
-    ];
+    return <Object?>[level, muted];
   }
 
   Object encode() {
-    return _toList();  }
+    return _toList();
+  }
 
   static Volume decode(Object result) {
     result as List<Object?>;
-    return Volume(
-      level: result[0]! as double,
-      muted: result[1]! as bool,
-    );
+    return Volume(level: result[0]! as double, muted: result[1]! as bool);
   }
 
   @override
@@ -296,8 +283,7 @@ class Volume {
 
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
-  int get hashCode => Object.hashAll(_toList())
-;
+  int get hashCode => Object.hashAll(_toList());
 }
 
 /// Media queue item
@@ -343,7 +329,8 @@ class MediaQueueItem {
   }
 
   Object encode() {
-    return _toList();  }
+    return _toList();
+  }
 
   static MediaQueueItem decode(Object result) {
     result as List<Object?>;
@@ -355,7 +342,8 @@ class MediaQueueItem {
       media: result[4] as MediaInfo?,
       autoplay: result[5]! as bool,
       activeTrackIds: (result[6] as List<Object?>?)?.cast<int?>(),
-      customData: (result[7] as Map<Object?, Object?>?)?.cast<String, Object?>(),
+      customData: (result[7] as Map<Object?, Object?>?)
+          ?.cast<String, Object?>(),
     );
   }
 
@@ -373,8 +361,7 @@ class MediaQueueItem {
 
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
-  int get hashCode => Object.hashAll(_toList())
-;
+  int get hashCode => Object.hashAll(_toList());
 }
 
 /// Complete media status
@@ -428,7 +415,8 @@ class MediaStatus {
   }
 
   Object encode() {
-    return _toList();  }
+    return _toList();
+  }
 
   static MediaStatus decode(Object result) {
     result as List<Object?>;
@@ -460,8 +448,7 @@ class MediaStatus {
 
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
-  int get hashCode => Object.hashAll(_toList())
-;
+  int get hashCode => Object.hashAll(_toList());
 }
 
 class QueueLoadOptionsPigeon {
@@ -481,16 +468,12 @@ class QueueLoadOptionsPigeon {
   Map<String, Object?>? customData;
 
   List<Object?> _toList() {
-    return <Object?>[
-      startIndex,
-      playPosition,
-      repeatMode,
-      customData,
-    ];
+    return <Object?>[startIndex, playPosition, repeatMode, customData];
   }
 
   Object encode() {
-    return _toList();  }
+    return _toList();
+  }
 
   static QueueLoadOptionsPigeon decode(Object result) {
     result as List<Object?>;
@@ -498,7 +481,8 @@ class QueueLoadOptionsPigeon {
       startIndex: result[0]! as int,
       playPosition: result[1]! as int,
       repeatMode: result[2]! as RepeatModePigeon,
-      customData: (result[3] as Map<Object?, Object?>?)?.cast<String, Object?>(),
+      customData: (result[3] as Map<Object?, Object?>?)
+          ?.cast<String, Object?>(),
     );
   }
 
@@ -516,8 +500,7 @@ class QueueLoadOptionsPigeon {
 
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
-  int get hashCode => Object.hashAll(_toList())
-;
+  int get hashCode => Object.hashAll(_toList());
 }
 
 class SeekOptionPigeon {
@@ -537,16 +520,12 @@ class SeekOptionPigeon {
   bool seekToInfinity;
 
   List<Object?> _toList() {
-    return <Object?>[
-      position,
-      relative,
-      resumeState,
-      seekToInfinity,
-    ];
+    return <Object?>[position, relative, resumeState, seekToInfinity];
   }
 
   Object encode() {
-    return _toList();  }
+    return _toList();
+  }
 
   static SeekOptionPigeon decode(Object result) {
     result as List<Object?>;
@@ -572,37 +551,32 @@ class SeekOptionPigeon {
 
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
-  int get hashCode => Object.hashAll(_toList())
-;
+  int get hashCode => Object.hashAll(_toList());
 }
 
 class SetPlaybackRateRequestPigeon {
-  SetPlaybackRateRequestPigeon({
-    required this.rate,
-  });
+  SetPlaybackRateRequestPigeon({required this.rate});
 
   double rate;
 
   List<Object?> _toList() {
-    return <Object?>[
-      rate,
-    ];
+    return <Object?>[rate];
   }
 
   Object encode() {
-    return _toList();  }
+    return _toList();
+  }
 
   static SetPlaybackRateRequestPigeon decode(Object result) {
     result as List<Object?>;
-    return SetPlaybackRateRequestPigeon(
-      rate: result[0]! as double,
-    );
+    return SetPlaybackRateRequestPigeon(rate: result[0]! as double);
   }
 
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
   bool operator ==(Object other) {
-    if (other is! SetPlaybackRateRequestPigeon || other.runtimeType != runtimeType) {
+    if (other is! SetPlaybackRateRequestPigeon ||
+        other.runtimeType != runtimeType) {
       return false;
     }
     if (identical(this, other)) {
@@ -613,8 +587,7 @@ class SetPlaybackRateRequestPigeon {
 
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
-  int get hashCode => Object.hashAll(_toList())
-;
+  int get hashCode => Object.hashAll(_toList());
 }
 
 class LoadMediaRequestPigeon {
@@ -659,7 +632,8 @@ class LoadMediaRequestPigeon {
   }
 
   Object encode() {
-    return _toList();  }
+    return _toList();
+  }
 
   static LoadMediaRequestPigeon decode(Object result) {
     result as List<Object?>;
@@ -671,7 +645,8 @@ class LoadMediaRequestPigeon {
       activeTrackIds: (result[4] as List<Object?>?)?.cast<int?>(),
       credentials: result[5] as String?,
       credentialsType: result[6] as String?,
-      customData: (result[7] as Map<Object?, Object?>?)?.cast<String, Object?>(),
+      customData: (result[7] as Map<Object?, Object?>?)
+          ?.cast<String, Object?>(),
     );
   }
 
@@ -689,29 +664,23 @@ class LoadMediaRequestPigeon {
 
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
-  int get hashCode => Object.hashAll(_toList())
-;
+  int get hashCode => Object.hashAll(_toList());
 }
 
 class QueueLoadRequestPigeon {
-  QueueLoadRequestPigeon({
-    required this.items,
-    this.options,
-  });
+  QueueLoadRequestPigeon({required this.items, this.options});
 
   List<MediaQueueItem?> items;
 
   QueueLoadOptionsPigeon? options;
 
   List<Object?> _toList() {
-    return <Object?>[
-      items,
-      options,
-    ];
+    return <Object?>[items, options];
   }
 
   Object encode() {
-    return _toList();  }
+    return _toList();
+  }
 
   static QueueLoadRequestPigeon decode(Object result) {
     result as List<Object?>;
@@ -735,29 +704,23 @@ class QueueLoadRequestPigeon {
 
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
-  int get hashCode => Object.hashAll(_toList())
-;
+  int get hashCode => Object.hashAll(_toList());
 }
 
 class QueueInsertItemsRequestPigeon {
-  QueueInsertItemsRequestPigeon({
-    required this.items,
-    this.beforeItemWithId,
-  });
+  QueueInsertItemsRequestPigeon({required this.items, this.beforeItemWithId});
 
   List<MediaQueueItem?> items;
 
   int? beforeItemWithId;
 
   List<Object?> _toList() {
-    return <Object?>[
-      items,
-      beforeItemWithId,
-    ];
+    return <Object?>[items, beforeItemWithId];
   }
 
   Object encode() {
-    return _toList();  }
+    return _toList();
+  }
 
   static QueueInsertItemsRequestPigeon decode(Object result) {
     result as List<Object?>;
@@ -770,7 +733,8 @@ class QueueInsertItemsRequestPigeon {
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
   bool operator ==(Object other) {
-    if (other is! QueueInsertItemsRequestPigeon || other.runtimeType != runtimeType) {
+    if (other is! QueueInsertItemsRequestPigeon ||
+        other.runtimeType != runtimeType) {
       return false;
     }
     if (identical(this, other)) {
@@ -781,8 +745,7 @@ class QueueInsertItemsRequestPigeon {
 
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
-  int get hashCode => Object.hashAll(_toList())
-;
+  int get hashCode => Object.hashAll(_toList());
 }
 
 class QueueInsertItemAndPlayRequestPigeon {
@@ -796,14 +759,12 @@ class QueueInsertItemAndPlayRequestPigeon {
   int beforeItemWithId;
 
   List<Object?> _toList() {
-    return <Object?>[
-      item,
-      beforeItemWithId,
-    ];
+    return <Object?>[item, beforeItemWithId];
   }
 
   Object encode() {
-    return _toList();  }
+    return _toList();
+  }
 
   static QueueInsertItemAndPlayRequestPigeon decode(Object result) {
     result as List<Object?>;
@@ -816,7 +777,8 @@ class QueueInsertItemAndPlayRequestPigeon {
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
   bool operator ==(Object other) {
-    if (other is! QueueInsertItemAndPlayRequestPigeon || other.runtimeType != runtimeType) {
+    if (other is! QueueInsertItemAndPlayRequestPigeon ||
+        other.runtimeType != runtimeType) {
       return false;
     }
     if (identical(this, other)) {
@@ -827,8 +789,7 @@ class QueueInsertItemAndPlayRequestPigeon {
 
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
-  int get hashCode => Object.hashAll(_toList())
-;
+  int get hashCode => Object.hashAll(_toList());
 }
 
 class QueueReorderItemsRequestPigeon {
@@ -842,14 +803,12 @@ class QueueReorderItemsRequestPigeon {
   int? beforeItemWithId;
 
   List<Object?> _toList() {
-    return <Object?>[
-      itemsIds,
-      beforeItemWithId,
-    ];
+    return <Object?>[itemsIds, beforeItemWithId];
   }
 
   Object encode() {
-    return _toList();  }
+    return _toList();
+  }
 
   static QueueReorderItemsRequestPigeon decode(Object result) {
     result as List<Object?>;
@@ -862,7 +821,8 @@ class QueueReorderItemsRequestPigeon {
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
   bool operator ==(Object other) {
-    if (other is! QueueReorderItemsRequestPigeon || other.runtimeType != runtimeType) {
+    if (other is! QueueReorderItemsRequestPigeon ||
+        other.runtimeType != runtimeType) {
       return false;
     }
     if (identical(this, other)) {
@@ -873,30 +833,24 @@ class QueueReorderItemsRequestPigeon {
 
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
-  int get hashCode => Object.hashAll(_toList())
-;
+  int get hashCode => Object.hashAll(_toList());
 }
 
 /// Player position update
 class PlayerPositionUpdate {
-  PlayerPositionUpdate({
-    required this.progress,
-    required this.duration,
-  });
+  PlayerPositionUpdate({required this.progress, required this.duration});
 
   int progress;
 
   int duration;
 
   List<Object?> _toList() {
-    return <Object?>[
-      progress,
-      duration,
-    ];
+    return <Object?>[progress, duration];
   }
 
   Object encode() {
-    return _toList();  }
+    return _toList();
+  }
 
   static PlayerPositionUpdate decode(Object result) {
     result as List<Object?>;
@@ -920,8 +874,7 @@ class PlayerPositionUpdate {
 
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
-  int get hashCode => Object.hashAll(_toList())
-;
+  int get hashCode => Object.hashAll(_toList());
 }
 
 class TextTrackStylePigeon {
@@ -978,13 +931,15 @@ class TextTrackStylePigeon {
   }
 
   Object encode() {
-    return _toList();  }
+    return _toList();
+  }
 
   static TextTrackStylePigeon decode(Object result) {
     result as List<Object?>;
     return TextTrackStylePigeon(
       backgroundColor: result[0] as String?,
-      customData: (result[1] as Map<Object?, Object?>?)?.cast<String, Object?>(),
+      customData: (result[1] as Map<Object?, Object?>?)
+          ?.cast<String, Object?>(),
       edgeColor: result[2] as String?,
       fontFamily: result[3] as String?,
       fontGenericFamily: result[4] as String?,
@@ -1011,10 +966,8 @@ class TextTrackStylePigeon {
 
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
-  int get hashCode => Object.hashAll(_toList())
-;
+  int get hashCode => Object.hashAll(_toList());
 }
-
 
 class _PigeonCodec extends StandardMessageCodec {
   const _PigeonCodec();
@@ -1023,58 +976,58 @@ class _PigeonCodec extends StandardMessageCodec {
     if (value is int) {
       buffer.putUint8(4);
       buffer.putInt64(value);
-    }    else if (value is RepeatModePigeon) {
+    } else if (value is RepeatModePigeon) {
       buffer.putUint8(129);
       writeValue(buffer, value.index);
-    }    else if (value is MediaResumeStatePigeon) {
+    } else if (value is MediaResumeStatePigeon) {
       buffer.putUint8(130);
       writeValue(buffer, value.index);
-    }    else if (value is MediaTrack) {
+    } else if (value is MediaTrack) {
       buffer.putUint8(131);
       writeValue(buffer, value.encode());
-    }    else if (value is LiveSeekableRange) {
+    } else if (value is LiveSeekableRange) {
       buffer.putUint8(132);
       writeValue(buffer, value.encode());
-    }    else if (value is MediaInfo) {
+    } else if (value is MediaInfo) {
       buffer.putUint8(133);
       writeValue(buffer, value.encode());
-    }    else if (value is Volume) {
+    } else if (value is Volume) {
       buffer.putUint8(134);
       writeValue(buffer, value.encode());
-    }    else if (value is MediaQueueItem) {
+    } else if (value is MediaQueueItem) {
       buffer.putUint8(135);
       writeValue(buffer, value.encode());
-    }    else if (value is MediaStatus) {
+    } else if (value is MediaStatus) {
       buffer.putUint8(136);
       writeValue(buffer, value.encode());
-    }    else if (value is QueueLoadOptionsPigeon) {
+    } else if (value is QueueLoadOptionsPigeon) {
       buffer.putUint8(137);
       writeValue(buffer, value.encode());
-    }    else if (value is SeekOptionPigeon) {
+    } else if (value is SeekOptionPigeon) {
       buffer.putUint8(138);
       writeValue(buffer, value.encode());
-    }    else if (value is SetPlaybackRateRequestPigeon) {
+    } else if (value is SetPlaybackRateRequestPigeon) {
       buffer.putUint8(139);
       writeValue(buffer, value.encode());
-    }    else if (value is LoadMediaRequestPigeon) {
+    } else if (value is LoadMediaRequestPigeon) {
       buffer.putUint8(140);
       writeValue(buffer, value.encode());
-    }    else if (value is QueueLoadRequestPigeon) {
+    } else if (value is QueueLoadRequestPigeon) {
       buffer.putUint8(141);
       writeValue(buffer, value.encode());
-    }    else if (value is QueueInsertItemsRequestPigeon) {
+    } else if (value is QueueInsertItemsRequestPigeon) {
       buffer.putUint8(142);
       writeValue(buffer, value.encode());
-    }    else if (value is QueueInsertItemAndPlayRequestPigeon) {
+    } else if (value is QueueInsertItemAndPlayRequestPigeon) {
       buffer.putUint8(143);
       writeValue(buffer, value.encode());
-    }    else if (value is QueueReorderItemsRequestPigeon) {
+    } else if (value is QueueReorderItemsRequestPigeon) {
       buffer.putUint8(144);
       writeValue(buffer, value.encode());
-    }    else if (value is PlayerPositionUpdate) {
+    } else if (value is PlayerPositionUpdate) {
       buffer.putUint8(145);
       writeValue(buffer, value.encode());
-    }    else if (value is TextTrackStylePigeon) {
+    } else if (value is TextTrackStylePigeon) {
       buffer.putUint8(146);
       writeValue(buffer, value.encode());
     } else {
@@ -1085,43 +1038,43 @@ class _PigeonCodec extends StandardMessageCodec {
   @override
   Object? readValueOfType(int type, ReadBuffer buffer) {
     switch (type) {
-      case 129: 
+      case 129:
         final int? value = readValue(buffer) as int?;
         return value == null ? null : RepeatModePigeon.values[value];
-      case 130: 
+      case 130:
         final int? value = readValue(buffer) as int?;
         return value == null ? null : MediaResumeStatePigeon.values[value];
-      case 131: 
+      case 131:
         return MediaTrack.decode(readValue(buffer)!);
-      case 132: 
+      case 132:
         return LiveSeekableRange.decode(readValue(buffer)!);
-      case 133: 
+      case 133:
         return MediaInfo.decode(readValue(buffer)!);
-      case 134: 
+      case 134:
         return Volume.decode(readValue(buffer)!);
-      case 135: 
+      case 135:
         return MediaQueueItem.decode(readValue(buffer)!);
-      case 136: 
+      case 136:
         return MediaStatus.decode(readValue(buffer)!);
-      case 137: 
+      case 137:
         return QueueLoadOptionsPigeon.decode(readValue(buffer)!);
-      case 138: 
+      case 138:
         return SeekOptionPigeon.decode(readValue(buffer)!);
-      case 139: 
+      case 139:
         return SetPlaybackRateRequestPigeon.decode(readValue(buffer)!);
-      case 140: 
+      case 140:
         return LoadMediaRequestPigeon.decode(readValue(buffer)!);
-      case 141: 
+      case 141:
         return QueueLoadRequestPigeon.decode(readValue(buffer)!);
-      case 142: 
+      case 142:
         return QueueInsertItemsRequestPigeon.decode(readValue(buffer)!);
-      case 143: 
+      case 143:
         return QueueInsertItemAndPlayRequestPigeon.decode(readValue(buffer)!);
-      case 144: 
+      case 144:
         return QueueReorderItemsRequestPigeon.decode(readValue(buffer)!);
-      case 145: 
+      case 145:
         return PlayerPositionUpdate.decode(readValue(buffer)!);
-      case 146: 
+      case 146:
         return TextTrackStylePigeon.decode(readValue(buffer)!);
       default:
         return super.readValueOfType(type, buffer);
@@ -1133,9 +1086,13 @@ class RemoteMediaClientHostApi {
   /// Constructor for [RemoteMediaClientHostApi].  The [binaryMessenger] named argument is
   /// available for dependency injection.  If it is left null, the default
   /// BinaryMessenger will be used which routes to the host platform.
-  RemoteMediaClientHostApi({BinaryMessenger? binaryMessenger, String messageChannelSuffix = ''})
-      : pigeonVar_binaryMessenger = binaryMessenger,
-        pigeonVar_messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
+  RemoteMediaClientHostApi({
+    BinaryMessenger? binaryMessenger,
+    String messageChannelSuffix = '',
+  }) : pigeonVar_binaryMessenger = binaryMessenger,
+       pigeonVar_messageChannelSuffix = messageChannelSuffix.isNotEmpty
+           ? '.$messageChannelSuffix'
+           : '';
   final BinaryMessenger? pigeonVar_binaryMessenger;
 
   static const MessageCodec<Object?> pigeonChannelCodec = _PigeonCodec();
@@ -1143,13 +1100,17 @@ class RemoteMediaClientHostApi {
   final String pigeonVar_messageChannelSuffix;
 
   Future<void> loadMedia(LoadMediaRequestPigeon request) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_chrome_cast_platform_interface.RemoteMediaClientHostApi.loadMedia$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_chrome_cast_platform_interface.RemoteMediaClientHostApi.loadMedia$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[request],
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[request]);
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_sendFuture as List<Object?>?;
     if (pigeonVar_replyList == null) {
@@ -1166,13 +1127,17 @@ class RemoteMediaClientHostApi {
   }
 
   Future<void> queueLoadItems(QueueLoadRequestPigeon request) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_chrome_cast_platform_interface.RemoteMediaClientHostApi.queueLoadItems$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_chrome_cast_platform_interface.RemoteMediaClientHostApi.queueLoadItems$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[request],
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[request]);
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_sendFuture as List<Object?>?;
     if (pigeonVar_replyList == null) {
@@ -1189,13 +1154,17 @@ class RemoteMediaClientHostApi {
   }
 
   Future<void> queueInsertItems(QueueInsertItemsRequestPigeon request) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_chrome_cast_platform_interface.RemoteMediaClientHostApi.queueInsertItems$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_chrome_cast_platform_interface.RemoteMediaClientHostApi.queueInsertItems$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[request],
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[request]);
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_sendFuture as List<Object?>?;
     if (pigeonVar_replyList == null) {
@@ -1211,14 +1180,20 @@ class RemoteMediaClientHostApi {
     }
   }
 
-  Future<void> queueInsertItemAndPlay(QueueInsertItemAndPlayRequestPigeon request) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_chrome_cast_platform_interface.RemoteMediaClientHostApi.queueInsertItemAndPlay$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
+  Future<void> queueInsertItemAndPlay(
+    QueueInsertItemAndPlayRequestPigeon request,
+  ) async {
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_chrome_cast_platform_interface.RemoteMediaClientHostApi.queueInsertItemAndPlay$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[request],
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[request]);
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_sendFuture as List<Object?>?;
     if (pigeonVar_replyList == null) {
@@ -1235,12 +1210,14 @@ class RemoteMediaClientHostApi {
   }
 
   Future<void> queueNextItem() async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_chrome_cast_platform_interface.RemoteMediaClientHostApi.queueNextItem$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
-    );
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_chrome_cast_platform_interface.RemoteMediaClientHostApi.queueNextItem$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
     final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(null);
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_sendFuture as List<Object?>?;
@@ -1258,12 +1235,14 @@ class RemoteMediaClientHostApi {
   }
 
   Future<void> queuePrevItem() async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_chrome_cast_platform_interface.RemoteMediaClientHostApi.queuePrevItem$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
-    );
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_chrome_cast_platform_interface.RemoteMediaClientHostApi.queuePrevItem$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
     final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(null);
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_sendFuture as List<Object?>?;
@@ -1281,13 +1260,17 @@ class RemoteMediaClientHostApi {
   }
 
   Future<void> queueJumpToItemWithId(int itemId) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_chrome_cast_platform_interface.RemoteMediaClientHostApi.queueJumpToItemWithId$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_chrome_cast_platform_interface.RemoteMediaClientHostApi.queueJumpToItemWithId$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[itemId],
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[itemId]);
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_sendFuture as List<Object?>?;
     if (pigeonVar_replyList == null) {
@@ -1304,13 +1287,17 @@ class RemoteMediaClientHostApi {
   }
 
   Future<void> queueRemoveItemsWithIds(List<int?> itemIds) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_chrome_cast_platform_interface.RemoteMediaClientHostApi.queueRemoveItemsWithIds$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_chrome_cast_platform_interface.RemoteMediaClientHostApi.queueRemoveItemsWithIds$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[itemIds],
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[itemIds]);
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_sendFuture as List<Object?>?;
     if (pigeonVar_replyList == null) {
@@ -1327,13 +1314,17 @@ class RemoteMediaClientHostApi {
   }
 
   Future<void> queueReorderItems(QueueReorderItemsRequestPigeon request) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_chrome_cast_platform_interface.RemoteMediaClientHostApi.queueReorderItems$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_chrome_cast_platform_interface.RemoteMediaClientHostApi.queueReorderItems$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[request],
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[request]);
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_sendFuture as List<Object?>?;
     if (pigeonVar_replyList == null) {
@@ -1350,13 +1341,17 @@ class RemoteMediaClientHostApi {
   }
 
   Future<void> seek(SeekOptionPigeon request) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_chrome_cast_platform_interface.RemoteMediaClientHostApi.seek$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_chrome_cast_platform_interface.RemoteMediaClientHostApi.seek$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[request],
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[request]);
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_sendFuture as List<Object?>?;
     if (pigeonVar_replyList == null) {
@@ -1373,13 +1368,17 @@ class RemoteMediaClientHostApi {
   }
 
   Future<void> setActiveTrackIds(List<int?> trackIds) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_chrome_cast_platform_interface.RemoteMediaClientHostApi.setActiveTrackIds$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_chrome_cast_platform_interface.RemoteMediaClientHostApi.setActiveTrackIds$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[trackIds],
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[trackIds]);
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_sendFuture as List<Object?>?;
     if (pigeonVar_replyList == null) {
@@ -1396,13 +1395,17 @@ class RemoteMediaClientHostApi {
   }
 
   Future<void> setPlaybackRate(SetPlaybackRateRequestPigeon request) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_chrome_cast_platform_interface.RemoteMediaClientHostApi.setPlaybackRate$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_chrome_cast_platform_interface.RemoteMediaClientHostApi.setPlaybackRate$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[request],
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[request]);
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_sendFuture as List<Object?>?;
     if (pigeonVar_replyList == null) {
@@ -1419,13 +1422,17 @@ class RemoteMediaClientHostApi {
   }
 
   Future<void> setTextTrackStyle(TextTrackStylePigeon textTrackStyle) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_chrome_cast_platform_interface.RemoteMediaClientHostApi.setTextTrackStyle$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_chrome_cast_platform_interface.RemoteMediaClientHostApi.setTextTrackStyle$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[textTrackStyle],
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[textTrackStyle]);
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_sendFuture as List<Object?>?;
     if (pigeonVar_replyList == null) {
@@ -1442,12 +1449,14 @@ class RemoteMediaClientHostApi {
   }
 
   Future<void> play() async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_chrome_cast_platform_interface.RemoteMediaClientHostApi.play$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
-    );
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_chrome_cast_platform_interface.RemoteMediaClientHostApi.play$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
     final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(null);
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_sendFuture as List<Object?>?;
@@ -1465,12 +1474,14 @@ class RemoteMediaClientHostApi {
   }
 
   Future<void> pause() async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_chrome_cast_platform_interface.RemoteMediaClientHostApi.pause$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
-    );
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_chrome_cast_platform_interface.RemoteMediaClientHostApi.pause$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
     final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(null);
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_sendFuture as List<Object?>?;
@@ -1488,12 +1499,14 @@ class RemoteMediaClientHostApi {
   }
 
   Future<void> stop() async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_chrome_cast_platform_interface.RemoteMediaClientHostApi.stop$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
-    );
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_chrome_cast_platform_interface.RemoteMediaClientHostApi.stop$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
     final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(null);
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_sendFuture as List<Object?>?;
@@ -1520,18 +1533,29 @@ abstract class RemoteMediaClientFlutterApi {
 
   void onPlayerPositionChanged(PlayerPositionUpdate update);
 
-  static void setUp(RemoteMediaClientFlutterApi? api, {BinaryMessenger? binaryMessenger, String messageChannelSuffix = '',}) {
-    messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
+  static void setUp(
+    RemoteMediaClientFlutterApi? api, {
+    BinaryMessenger? binaryMessenger,
+    String messageChannelSuffix = '',
+  }) {
+    messageChannelSuffix = messageChannelSuffix.isNotEmpty
+        ? '.$messageChannelSuffix'
+        : '';
     {
-      final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-          'dev.flutter.pigeon.flutter_chrome_cast_platform_interface.RemoteMediaClientFlutterApi.onMediaStatusChanged$messageChannelSuffix', pigeonChannelCodec,
-          binaryMessenger: binaryMessenger);
+      final BasicMessageChannel<Object?>
+      pigeonVar_channel = BasicMessageChannel<Object?>(
+        'dev.flutter.pigeon.flutter_chrome_cast_platform_interface.RemoteMediaClientFlutterApi.onMediaStatusChanged$messageChannelSuffix',
+        pigeonChannelCodec,
+        binaryMessenger: binaryMessenger,
+      );
       if (api == null) {
         pigeonVar_channel.setMessageHandler(null);
       } else {
         pigeonVar_channel.setMessageHandler((Object? message) async {
-          assert(message != null,
-          'Argument for dev.flutter.pigeon.flutter_chrome_cast_platform_interface.RemoteMediaClientFlutterApi.onMediaStatusChanged was null.');
+          assert(
+            message != null,
+            'Argument for dev.flutter.pigeon.flutter_chrome_cast_platform_interface.RemoteMediaClientFlutterApi.onMediaStatusChanged was null.',
+          );
           final List<Object?> args = (message as List<Object?>?)!;
           final MediaStatus? arg_status = (args[0] as MediaStatus?);
           try {
@@ -1539,58 +1563,80 @@ abstract class RemoteMediaClientFlutterApi {
             return wrapResponse(empty: true);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);
-          }          catch (e) {
-            return wrapResponse(error: PlatformException(code: 'error', message: e.toString()));
+          } catch (e) {
+            return wrapResponse(
+              error: PlatformException(code: 'error', message: e.toString()),
+            );
           }
         });
       }
     }
     {
-      final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-          'dev.flutter.pigeon.flutter_chrome_cast_platform_interface.RemoteMediaClientFlutterApi.onQueueStatusChanged$messageChannelSuffix', pigeonChannelCodec,
-          binaryMessenger: binaryMessenger);
+      final BasicMessageChannel<Object?>
+      pigeonVar_channel = BasicMessageChannel<Object?>(
+        'dev.flutter.pigeon.flutter_chrome_cast_platform_interface.RemoteMediaClientFlutterApi.onQueueStatusChanged$messageChannelSuffix',
+        pigeonChannelCodec,
+        binaryMessenger: binaryMessenger,
+      );
       if (api == null) {
         pigeonVar_channel.setMessageHandler(null);
       } else {
         pigeonVar_channel.setMessageHandler((Object? message) async {
-          assert(message != null,
-          'Argument for dev.flutter.pigeon.flutter_chrome_cast_platform_interface.RemoteMediaClientFlutterApi.onQueueStatusChanged was null.');
+          assert(
+            message != null,
+            'Argument for dev.flutter.pigeon.flutter_chrome_cast_platform_interface.RemoteMediaClientFlutterApi.onQueueStatusChanged was null.',
+          );
           final List<Object?> args = (message as List<Object?>?)!;
-          final List<MediaQueueItem?>? arg_queueItems = (args[0] as List<Object?>?)?.cast<MediaQueueItem?>();
-          assert(arg_queueItems != null,
-              'Argument for dev.flutter.pigeon.flutter_chrome_cast_platform_interface.RemoteMediaClientFlutterApi.onQueueStatusChanged was null, expected non-null List<MediaQueueItem?>.');
+          final List<MediaQueueItem?>? arg_queueItems =
+              (args[0] as List<Object?>?)?.cast<MediaQueueItem?>();
+          assert(
+            arg_queueItems != null,
+            'Argument for dev.flutter.pigeon.flutter_chrome_cast_platform_interface.RemoteMediaClientFlutterApi.onQueueStatusChanged was null, expected non-null List<MediaQueueItem?>.',
+          );
           try {
             api.onQueueStatusChanged(arg_queueItems!);
             return wrapResponse(empty: true);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);
-          }          catch (e) {
-            return wrapResponse(error: PlatformException(code: 'error', message: e.toString()));
+          } catch (e) {
+            return wrapResponse(
+              error: PlatformException(code: 'error', message: e.toString()),
+            );
           }
         });
       }
     }
     {
-      final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-          'dev.flutter.pigeon.flutter_chrome_cast_platform_interface.RemoteMediaClientFlutterApi.onPlayerPositionChanged$messageChannelSuffix', pigeonChannelCodec,
-          binaryMessenger: binaryMessenger);
+      final BasicMessageChannel<Object?>
+      pigeonVar_channel = BasicMessageChannel<Object?>(
+        'dev.flutter.pigeon.flutter_chrome_cast_platform_interface.RemoteMediaClientFlutterApi.onPlayerPositionChanged$messageChannelSuffix',
+        pigeonChannelCodec,
+        binaryMessenger: binaryMessenger,
+      );
       if (api == null) {
         pigeonVar_channel.setMessageHandler(null);
       } else {
         pigeonVar_channel.setMessageHandler((Object? message) async {
-          assert(message != null,
-          'Argument for dev.flutter.pigeon.flutter_chrome_cast_platform_interface.RemoteMediaClientFlutterApi.onPlayerPositionChanged was null.');
+          assert(
+            message != null,
+            'Argument for dev.flutter.pigeon.flutter_chrome_cast_platform_interface.RemoteMediaClientFlutterApi.onPlayerPositionChanged was null.',
+          );
           final List<Object?> args = (message as List<Object?>?)!;
-          final PlayerPositionUpdate? arg_update = (args[0] as PlayerPositionUpdate?);
-          assert(arg_update != null,
-              'Argument for dev.flutter.pigeon.flutter_chrome_cast_platform_interface.RemoteMediaClientFlutterApi.onPlayerPositionChanged was null, expected non-null PlayerPositionUpdate.');
+          final PlayerPositionUpdate? arg_update =
+              (args[0] as PlayerPositionUpdate?);
+          assert(
+            arg_update != null,
+            'Argument for dev.flutter.pigeon.flutter_chrome_cast_platform_interface.RemoteMediaClientFlutterApi.onPlayerPositionChanged was null, expected non-null PlayerPositionUpdate.',
+          );
           try {
             api.onPlayerPositionChanged(arg_update!);
             return wrapResponse(empty: true);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);
-          }          catch (e) {
-            return wrapResponse(error: PlatformException(code: 'error', message: e.toString()));
+          } catch (e) {
+            return wrapResponse(
+              error: PlatformException(code: 'error', message: e.toString()),
+            );
           }
         });
       }

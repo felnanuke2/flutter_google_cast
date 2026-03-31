@@ -74,13 +74,13 @@ abstract class GoogleCastSessionManagerPlatformInterface
 
   /// Parameters
   ///     openURLOptions	The options that were extracted from the URL.
-// /    sessionOptions	The options for this session, if any. May be nil.
+  // /    sessionOptions	The options for this session, if any. May be nil.
 
-// Returns
-//     YES if the operation has been started successfully, NO if there is a session currently established, or the openURL options do not contain the required Cast options.
+  // Returns
+  //     YES if the operation has been started successfully, NO if there is a session currently established, or the openURL options do not contain the required Cast options.
 
-// Since
-//     4.0
+  // Since
+  //     4.0
 
   Future<bool> startSessionWithOpenURLOptions();
 
@@ -132,9 +132,9 @@ abstract class GoogleCastSessionManagerPlatformInterface
   /// - sessionOptions: nullable GCKSessionOptions
   /// - forDeviceCategory: (NSString *) category
   Future<void> setDefaultSessionOptions(
-      // nullable GCKSessionOptions *\tsessionOptions
-      // forDeviceCategory: \t\t(NSString *)  \tcategory
-      );
+    // nullable GCKSessionOptions *\tsessionOptions
+    // forDeviceCategory: \t\t(NSString *)  \tcategory
+  );
 
   /// Sets the device volume.
   void setDeviceVolumeLevel(CastDeviceVolume volume);

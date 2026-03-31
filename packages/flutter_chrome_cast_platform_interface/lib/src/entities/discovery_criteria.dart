@@ -2,8 +2,8 @@
 abstract class GoogleCastDiscoveryCriteria {
   /// Initializes discovery criteria with the provided configuration.
   static GoogleCastDiscoveryCriteriaInitialize initialize(
-          GoogleCastDiscoveryCriteriaInitialize initializeWith) =>
-      initializeWith;
+    GoogleCastDiscoveryCriteriaInitialize initializeWith,
+  ) => initializeWith;
 
   /// this command is useful to native execute a custom command
 
@@ -46,14 +46,15 @@ class GoogleCastDiscoveryCriteriaInitialize {
 
   /// Backward-compatible view used by existing integrations.
   Map<String, dynamic> get data => <String, dynamic>{
-        'method': method.name,
-        'applicationID': applicationID,
-        'namespaces': namespaces,
-      };
+    'method': method.name,
+    'applicationID': applicationID,
+    'namespaces': namespaces,
+  };
 
   /// Initializes with an application ID.
   factory GoogleCastDiscoveryCriteriaInitialize.initWithApplicationID(
-      String applicationID) {
+    String applicationID,
+  ) {
     _DiscoveryCriteriaAssert.requireValidApplicationId(applicationID);
     return GoogleCastDiscoveryCriteriaInitialize._(
       method: GoogleCastDiscoveryCriteriaInitMethod.initWithApplicationID,
@@ -63,7 +64,8 @@ class GoogleCastDiscoveryCriteriaInitialize {
 
   /// Initializes with a set of namespaces.
   factory GoogleCastDiscoveryCriteriaInitialize.initWithNamespaces(
-      Set<String> namespaces) {
+    Set<String> namespaces,
+  ) {
     _DiscoveryCriteriaAssert.requireValidNamespaces(namespaces);
     return GoogleCastDiscoveryCriteriaInitialize._(
       method: GoogleCastDiscoveryCriteriaInitMethod.initWithNamespaces,

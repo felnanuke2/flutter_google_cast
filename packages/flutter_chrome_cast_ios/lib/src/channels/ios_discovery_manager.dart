@@ -65,16 +65,18 @@ class GoogleCastDiscoveryManagerMethodChannelIOS
 
   void _onDevicesChanged(List<CastDevicePigeon> arguments) {
     final devices = arguments
-      .map((device) => GoogleCastDevice(
-              deviceID: device.deviceId,
-              friendlyName: device.friendlyName,
-              modelName: device.modelName,
-              statusText: device.statusText,
-              deviceVersion: device.deviceVersion,
-              isOnLocalNetwork: device.isOnLocalNetwork,
-              category: device.category,
-              uniqueID: device.uniqueId,
-            ))
+        .map(
+          (device) => GoogleCastDevice(
+            deviceID: device.deviceId,
+            friendlyName: device.friendlyName,
+            modelName: device.modelName,
+            statusText: device.statusText,
+            deviceVersion: device.deviceVersion,
+            isOnLocalNetwork: device.isOnLocalNetwork,
+            category: device.category,
+            uniqueID: device.uniqueId,
+          ),
+        )
         .toList();
 
     _devicesStreamController.add(devices);

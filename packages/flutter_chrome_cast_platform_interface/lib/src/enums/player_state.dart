@@ -20,5 +20,5 @@ enum CastMediaPlayerState {
   buffering,
 
   /// Player is loading media.
-  loading;
+  loading,
 }

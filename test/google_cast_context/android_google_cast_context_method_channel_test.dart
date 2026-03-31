@@ -9,7 +9,9 @@ class _FakeAndroidContextHostApi extends GoogleCastContextHostApi {
   CastContextInitRequest? capturedRequest;
 
   @override
-  Future<bool> setSharedInstanceWithOptions(CastContextInitRequest request) async {
+  Future<bool> setSharedInstanceWithOptions(
+    CastContextInitRequest request,
+  ) async {
     capturedRequest = request;
     return result;
   }
@@ -40,7 +42,10 @@ void main() {
       expect(fakeHost.capturedRequest, isNotNull);
       expect(fakeHost.capturedRequest!.options.appId, 'CC1AD845');
       expect(fakeHost.capturedRequest!.options.discoveryCriteria, isNull);
-      expect(fakeHost.capturedRequest!.options.stopCastingOnAppTerminated, isTrue);
+      expect(
+        fakeHost.capturedRequest!.options.stopCastingOnAppTerminated,
+        isTrue,
+      );
     });
   });
 }

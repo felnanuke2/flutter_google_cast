@@ -6,9 +6,7 @@ import 'package:pigeon/pigeon.dart';
         'packages/flutter_chrome_cast_platform_interface/lib/src/pigeon/session_manager_pigeon.g.dart',
     kotlinOut:
         'packages/flutter_chrome_cast_android/android/src/main/kotlin/com/felnanuke/google_cast/pigeon/SessionManagerPigeon.g.kt',
-    kotlinOptions: KotlinOptions(
-      package: 'com.felnanuke.google_cast.pigeon',
-    ),
+    kotlinOptions: KotlinOptions(package: 'com.felnanuke.google_cast.pigeon'),
     swiftOut:
         'packages/flutter_chrome_cast_ios/ios/flutter_chrome_cast/Sources/flutter_chrome_cast/SessionManagerPigeon.g.swift',
     dartPackageName: 'flutter_chrome_cast_platform_interface',
@@ -64,10 +62,7 @@ class CastSessionPigeon {
 }
 
 class StartSessionRequest {
-  StartSessionRequest({
-    this.deviceId,
-    this.deviceIndex,
-  });
+  StartSessionRequest({this.deviceId, this.deviceIndex});
 
   String? deviceId;
   int? deviceIndex;

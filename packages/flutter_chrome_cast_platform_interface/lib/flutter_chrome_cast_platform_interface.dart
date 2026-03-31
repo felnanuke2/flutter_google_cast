@@ -75,4 +75,3 @@ export 'src/platforms/remote_media_client_platform.dart';
 export 'src/pigeon/google_cast_context_pigeon.g.dart';
 export 'src/pigeon/cast_manager_pigeon.g.dart' hide wrapResponse;
 export 'src/pigeon/remote_media_client_pigeon.g.dart' hide wrapResponse;
-

@@ -16,8 +16,5 @@ class VastAdsRequest {
   ///
   /// [adsResponse] - Specifies a VAST document to be used as the ads response.
   /// [adTagUrl] - URL for VAST file.
-  VastAdsRequest({
-    this.adsResponse,
-    this.adTagUrl,
-  });
+  VastAdsRequest({this.adsResponse, this.adTagUrl});
 }

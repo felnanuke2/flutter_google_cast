@@ -15,7 +15,11 @@ PlatformException _createConnectionError(String channelName) {
   );
 }
 
-List<Object?> wrapResponse({Object? result, PlatformException? error, bool empty = false}) {
+List<Object?> wrapResponse({
+  Object? result,
+  PlatformException? error,
+  bool empty = false,
+}) {
   if (empty) {
     return <Object?>[];
   }
@@ -24,20 +28,24 @@ List<Object?> wrapResponse({Object? result, PlatformException? error, bool empty
   }
   return <Object?>[error.code, error.message, error.details];
 }
+
 bool _deepEquals(Object? a, Object? b) {
   if (a is List && b is List) {
     return a.length == b.length &&
-        a.indexed
-        .every(((int, dynamic) item) => _deepEquals(item.$2, b[item.$1]));
+        a.indexed.every(
+          ((int, dynamic) item) => _deepEquals(item.$2, b[item.$1]),
+        );
   }
   if (a is Map && b is Map) {
-    return a.length == b.length && a.entries.every((MapEntry<Object?, Object?> entry) =>
-        (b as Map<Object?, Object?>).containsKey(entry.key) &&
-        _deepEquals(entry.value, b[entry.key]));
+    return a.length == b.length &&
+        a.entries.every(
+          (MapEntry<Object?, Object?> entry) =>
+              (b as Map<Object?, Object?>).containsKey(entry.key) &&
+              _deepEquals(entry.value, b[entry.key]),
+        );
   }
   return a == b;
 }
-
 
 enum ConnectionStatePigeon {
   disconnected,
@@ -92,7 +100,8 @@ class CastDevicePigeon {
   }
 
   Object encode() {
-    return _toList();  }
+    return _toList();
+  }
 
   static CastDevicePigeon decode(Object result) {
     result as List<Object?>;
@@ -123,8 +132,7 @@ class CastDevicePigeon {
 
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
-  int get hashCode => Object.hashAll(_toList())
-;
+  int get hashCode => Object.hashAll(_toList());
 }
 
 class CastSessionPigeon {
@@ -161,7 +169,8 @@ class CastSessionPigeon {
   }
 
   Object encode() {
-    return _toList();  }
+    return _toList();
+  }
 
   static CastSessionPigeon decode(Object result) {
     result as List<Object?>;
@@ -189,29 +198,23 @@ class CastSessionPigeon {
 
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
-  int get hashCode => Object.hashAll(_toList())
-;
+  int get hashCode => Object.hashAll(_toList());
 }
 
 class StartSessionRequest {
-  StartSessionRequest({
-    this.deviceId,
-    this.deviceIndex,
-  });
+  StartSessionRequest({this.deviceId, this.deviceIndex});
 
   String? deviceId;
 
   int? deviceIndex;
 
   List<Object?> _toList() {
-    return <Object?>[
-      deviceId,
-      deviceIndex,
-    ];
+    return <Object?>[deviceId, deviceIndex];
   }
 
   Object encode() {
-    return _toList();  }
+    return _toList();
+  }
 
   static StartSessionRequest decode(Object result) {
     result as List<Object?>;
@@ -235,10 +238,8 @@ class StartSessionRequest {
 
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
-  int get hashCode => Object.hashAll(_toList())
-;
+  int get hashCode => Object.hashAll(_toList());
 }
-
 
 class _PigeonCodec extends StandardMessageCodec {
   const _PigeonCodec();
@@ -247,16 +248,16 @@ class _PigeonCodec extends StandardMessageCodec {
     if (value is int) {
       buffer.putUint8(4);
       buffer.putInt64(value);
-    }    else if (value is ConnectionStatePigeon) {
+    } else if (value is ConnectionStatePigeon) {
       buffer.putUint8(129);
       writeValue(buffer, value.index);
-    }    else if (value is CastDevicePigeon) {
+    } else if (value is CastDevicePigeon) {
       buffer.putUint8(130);
       writeValue(buffer, value.encode());
-    }    else if (value is CastSessionPigeon) {
+    } else if (value is CastSessionPigeon) {
       buffer.putUint8(131);
       writeValue(buffer, value.encode());
-    }    else if (value is StartSessionRequest) {
+    } else if (value is StartSessionRequest) {
       buffer.putUint8(132);
       writeValue(buffer, value.encode());
     } else {
@@ -267,14 +268,14 @@ class _PigeonCodec extends StandardMessageCodec {
   @override
   Object? readValueOfType(int type, ReadBuffer buffer) {
     switch (type) {
-      case 129: 
+      case 129:
         final int? value = readValue(buffer) as int?;
         return value == null ? null : ConnectionStatePigeon.values[value];
-      case 130: 
+      case 130:
         return CastDevicePigeon.decode(readValue(buffer)!);
-      case 131: 
+      case 131:
         return CastSessionPigeon.decode(readValue(buffer)!);
-      case 132: 
+      case 132:
         return StartSessionRequest.decode(readValue(buffer)!);
       default:
         return super.readValueOfType(type, buffer);
@@ -286,9 +287,13 @@ class DiscoveryManagerHostApi {
   /// Constructor for [DiscoveryManagerHostApi].  The [binaryMessenger] named argument is
   /// available for dependency injection.  If it is left null, the default
   /// BinaryMessenger will be used which routes to the host platform.
-  DiscoveryManagerHostApi({BinaryMessenger? binaryMessenger, String messageChannelSuffix = ''})
-      : pigeonVar_binaryMessenger = binaryMessenger,
-        pigeonVar_messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
+  DiscoveryManagerHostApi({
+    BinaryMessenger? binaryMessenger,
+    String messageChannelSuffix = '',
+  }) : pigeonVar_binaryMessenger = binaryMessenger,
+       pigeonVar_messageChannelSuffix = messageChannelSuffix.isNotEmpty
+           ? '.$messageChannelSuffix'
+           : '';
   final BinaryMessenger? pigeonVar_binaryMessenger;
 
   static const MessageCodec<Object?> pigeonChannelCodec = _PigeonCodec();
@@ -296,12 +301,14 @@ class DiscoveryManagerHostApi {
   final String pigeonVar_messageChannelSuffix;
 
   Future<void> startDiscovery() async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_chrome_cast_platform_interface.DiscoveryManagerHostApi.startDiscovery$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
-    );
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_chrome_cast_platform_interface.DiscoveryManagerHostApi.startDiscovery$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
     final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(null);
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_sendFuture as List<Object?>?;
@@ -319,12 +326,14 @@ class DiscoveryManagerHostApi {
   }
 
   Future<void> stopDiscovery() async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_chrome_cast_platform_interface.DiscoveryManagerHostApi.stopDiscovery$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
-    );
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_chrome_cast_platform_interface.DiscoveryManagerHostApi.stopDiscovery$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
     final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(null);
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_sendFuture as List<Object?>?;
@@ -342,13 +351,17 @@ class DiscoveryManagerHostApi {
   }
 
   Future<bool> isDiscoveryActiveForDeviceCategory(String deviceCategory) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_chrome_cast_platform_interface.DiscoveryManagerHostApi.isDiscoveryActiveForDeviceCategory$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_chrome_cast_platform_interface.DiscoveryManagerHostApi.isDiscoveryActiveForDeviceCategory$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[deviceCategory],
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[deviceCategory]);
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_sendFuture as List<Object?>?;
     if (pigeonVar_replyList == null) {
@@ -375,29 +388,45 @@ abstract class DiscoveryManagerFlutterApi {
 
   void onDevicesChanged(List<CastDevicePigeon> devices);
 
-  static void setUp(DiscoveryManagerFlutterApi? api, {BinaryMessenger? binaryMessenger, String messageChannelSuffix = '',}) {
-    messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
+  static void setUp(
+    DiscoveryManagerFlutterApi? api, {
+    BinaryMessenger? binaryMessenger,
+    String messageChannelSuffix = '',
+  }) {
+    messageChannelSuffix = messageChannelSuffix.isNotEmpty
+        ? '.$messageChannelSuffix'
+        : '';
     {
-      final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-          'dev.flutter.pigeon.flutter_chrome_cast_platform_interface.DiscoveryManagerFlutterApi.onDevicesChanged$messageChannelSuffix', pigeonChannelCodec,
-          binaryMessenger: binaryMessenger);
+      final BasicMessageChannel<Object?>
+      pigeonVar_channel = BasicMessageChannel<Object?>(
+        'dev.flutter.pigeon.flutter_chrome_cast_platform_interface.DiscoveryManagerFlutterApi.onDevicesChanged$messageChannelSuffix',
+        pigeonChannelCodec,
+        binaryMessenger: binaryMessenger,
+      );
       if (api == null) {
         pigeonVar_channel.setMessageHandler(null);
       } else {
         pigeonVar_channel.setMessageHandler((Object? message) async {
-          assert(message != null,
-          'Argument for dev.flutter.pigeon.flutter_chrome_cast_platform_interface.DiscoveryManagerFlutterApi.onDevicesChanged was null.');
+          assert(
+            message != null,
+            'Argument for dev.flutter.pigeon.flutter_chrome_cast_platform_interface.DiscoveryManagerFlutterApi.onDevicesChanged was null.',
+          );
           final List<Object?> args = (message as List<Object?>?)!;
-          final List<CastDevicePigeon>? arg_devices = (args[0] as List<Object?>?)?.cast<CastDevicePigeon>();
-          assert(arg_devices != null,
-              'Argument for dev.flutter.pigeon.flutter_chrome_cast_platform_interface.DiscoveryManagerFlutterApi.onDevicesChanged was null, expected non-null List<CastDevicePigeon>.');
+          final List<CastDevicePigeon>? arg_devices =
+              (args[0] as List<Object?>?)?.cast<CastDevicePigeon>();
+          assert(
+            arg_devices != null,
+            'Argument for dev.flutter.pigeon.flutter_chrome_cast_platform_interface.DiscoveryManagerFlutterApi.onDevicesChanged was null, expected non-null List<CastDevicePigeon>.',
+          );
           try {
             api.onDevicesChanged(arg_devices!);
             return wrapResponse(empty: true);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);
-          }          catch (e) {
-            return wrapResponse(error: PlatformException(code: 'error', message: e.toString()));
+          } catch (e) {
+            return wrapResponse(
+              error: PlatformException(code: 'error', message: e.toString()),
+            );
           }
         });
       }
@@ -409,9 +438,13 @@ class SessionManagerHostApi {
   /// Constructor for [SessionManagerHostApi].  The [binaryMessenger] named argument is
   /// available for dependency injection.  If it is left null, the default
   /// BinaryMessenger will be used which routes to the host platform.
-  SessionManagerHostApi({BinaryMessenger? binaryMessenger, String messageChannelSuffix = ''})
-      : pigeonVar_binaryMessenger = binaryMessenger,
-        pigeonVar_messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
+  SessionManagerHostApi({
+    BinaryMessenger? binaryMessenger,
+    String messageChannelSuffix = '',
+  }) : pigeonVar_binaryMessenger = binaryMessenger,
+       pigeonVar_messageChannelSuffix = messageChannelSuffix.isNotEmpty
+           ? '.$messageChannelSuffix'
+           : '';
   final BinaryMessenger? pigeonVar_binaryMessenger;
 
   static const MessageCodec<Object?> pigeonChannelCodec = _PigeonCodec();
@@ -419,13 +452,17 @@ class SessionManagerHostApi {
   final String pigeonVar_messageChannelSuffix;
 
   Future<bool> startSessionWithDevice(StartSessionRequest request) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_chrome_cast_platform_interface.SessionManagerHostApi.startSessionWithDevice$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_chrome_cast_platform_interface.SessionManagerHostApi.startSessionWithDevice$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[request],
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[request]);
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_sendFuture as List<Object?>?;
     if (pigeonVar_replyList == null) {
@@ -447,12 +484,14 @@ class SessionManagerHostApi {
   }
 
   Future<bool> endSession() async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_chrome_cast_platform_interface.SessionManagerHostApi.endSession$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
-    );
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_chrome_cast_platform_interface.SessionManagerHostApi.endSession$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
     final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(null);
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_sendFuture as List<Object?>?;
@@ -475,12 +514,14 @@ class SessionManagerHostApi {
   }
 
   Future<bool> endSessionAndStopCasting() async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_chrome_cast_platform_interface.SessionManagerHostApi.endSessionAndStopCasting$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
-    );
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_chrome_cast_platform_interface.SessionManagerHostApi.endSessionAndStopCasting$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
     final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(null);
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_sendFuture as List<Object?>?;
@@ -503,13 +544,17 @@ class SessionManagerHostApi {
   }
 
   Future<void> setDeviceVolume(double value) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_chrome_cast_platform_interface.SessionManagerHostApi.setDeviceVolume$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_chrome_cast_platform_interface.SessionManagerHostApi.setDeviceVolume$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[value],
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[value]);
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_sendFuture as List<Object?>?;
     if (pigeonVar_replyList == null) {
@@ -531,27 +576,41 @@ abstract class SessionManagerFlutterApi {
 
   void onSessionChanged(CastSessionPigeon? session);
 
-  static void setUp(SessionManagerFlutterApi? api, {BinaryMessenger? binaryMessenger, String messageChannelSuffix = '',}) {
-    messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
+  static void setUp(
+    SessionManagerFlutterApi? api, {
+    BinaryMessenger? binaryMessenger,
+    String messageChannelSuffix = '',
+  }) {
+    messageChannelSuffix = messageChannelSuffix.isNotEmpty
+        ? '.$messageChannelSuffix'
+        : '';
     {
-      final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-          'dev.flutter.pigeon.flutter_chrome_cast_platform_interface.SessionManagerFlutterApi.onSessionChanged$messageChannelSuffix', pigeonChannelCodec,
-          binaryMessenger: binaryMessenger);
+      final BasicMessageChannel<Object?>
+      pigeonVar_channel = BasicMessageChannel<Object?>(
+        'dev.flutter.pigeon.flutter_chrome_cast_platform_interface.SessionManagerFlutterApi.onSessionChanged$messageChannelSuffix',
+        pigeonChannelCodec,
+        binaryMessenger: binaryMessenger,
+      );
       if (api == null) {
         pigeonVar_channel.setMessageHandler(null);
       } else {
         pigeonVar_channel.setMessageHandler((Object? message) async {
-          assert(message != null,
-          'Argument for dev.flutter.pigeon.flutter_chrome_cast_platform_interface.SessionManagerFlutterApi.onSessionChanged was null.');
+          assert(
+            message != null,
+            'Argument for dev.flutter.pigeon.flutter_chrome_cast_platform_interface.SessionManagerFlutterApi.onSessionChanged was null.',
+          );
           final List<Object?> args = (message as List<Object?>?)!;
-          final CastSessionPigeon? arg_session = (args[0] as CastSessionPigeon?);
+          final CastSessionPigeon? arg_session =
+              (args[0] as CastSessionPigeon?);
           try {
             api.onSessionChanged(arg_session);
             return wrapResponse(empty: true);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);
-          }          catch (e) {
-            return wrapResponse(error: PlatformException(code: 'error', message: e.toString()));
+          } catch (e) {
+            return wrapResponse(
+              error: PlatformException(code: 'error', message: e.toString()),
+            );
           }
         });
       }

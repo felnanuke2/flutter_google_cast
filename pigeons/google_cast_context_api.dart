@@ -5,16 +5,14 @@ import 'package:pigeon/pigeon.dart';
     dartOut:
         'packages/flutter_chrome_cast_platform_interface/lib/src/pigeon/google_cast_context_pigeon.g.dart',
     kotlinOut:
-      'packages/flutter_chrome_cast_android/android/src/main/kotlin/com/felnanuke/google_cast/pigeon/GoogleCastContextPigeon.g.kt',
+        'packages/flutter_chrome_cast_android/android/src/main/kotlin/com/felnanuke/google_cast/pigeon/GoogleCastContextPigeon.g.kt',
     kotlinOptions: KotlinOptions(
       package: 'com.felnanuke.google_cast.pigeon',
       includeErrorClass: false,
     ),
     swiftOut:
-      'packages/flutter_chrome_cast_ios/ios/flutter_chrome_cast/Sources/flutter_chrome_cast/GoogleCastContextPigeon.g.swift',
-    swiftOptions: SwiftOptions(
-      includeErrorClass: false,
-    ),
+        'packages/flutter_chrome_cast_ios/ios/flutter_chrome_cast/Sources/flutter_chrome_cast/GoogleCastContextPigeon.g.swift',
+    swiftOptions: SwiftOptions(includeErrorClass: false),
     dartPackageName: 'flutter_chrome_cast_platform_interface',
   ),
 )
@@ -30,10 +28,7 @@ class DiscoveryCriteriaPigeon {
   List<String?>? namespaces;
 }
 
-enum DiscoveryCriteriaMethodPigeon {
-  initWithApplicationID,
-  initWithNamespaces,
-}
+enum DiscoveryCriteriaMethodPigeon { initWithApplicationID, initWithNamespaces }
 
 class CastOptionsPigeon {
   CastOptionsPigeon({

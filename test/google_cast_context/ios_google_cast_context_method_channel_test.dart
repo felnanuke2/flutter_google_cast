@@ -9,7 +9,9 @@ class _FakeIosContextHostApi extends GoogleCastContextHostApi {
   CastContextInitRequest? capturedRequest;
 
   @override
-  Future<bool> setSharedInstanceWithOptions(CastContextInitRequest request) async {
+  Future<bool> setSharedInstanceWithOptions(
+    CastContextInitRequest request,
+  ) async {
     capturedRequest = request;
     return result;
   }
@@ -27,7 +29,9 @@ void main() {
 
     test('maps discovery criteria into pigeon payload', () async {
       final fakeHost = _FakeIosContextHostApi(result: true);
-      final context = FlutterIOSGoogleCastContextMethodChannel(hostApi: fakeHost);
+      final context = FlutterIOSGoogleCastContextMethodChannel(
+        hostApi: fakeHost,
+      );
 
       final result = await context.setSharedInstanceWithOptions(
         IOSGoogleCastOptions(

@@ -68,9 +68,7 @@ abstract class GoogleCastRemoteMediaClientPlatformInterface
   /// read this map to configure playback — for example, to inject custom HTTP
   /// request headers for adaptive streams (DASH/HLS) when using a custom
   /// receiver.
-  Future<void> loadMediaWithRequest(
-    GoogleCastLoadMediaRequest request,
-  );
+  Future<void> loadMediaWithRequest(GoogleCastLoadMediaRequest request);
 
   /// Loads media on the remote media client.
   @Deprecated('Use loadMediaWithRequest to reduce primitive obsession.')
@@ -172,9 +170,7 @@ abstract class GoogleCastRemoteMediaClientPlatformInterface
   }
 
   /// Removes items from the queue by their IDs.
-  Future<void> queueRemoveItemsWithIds(
-    List<int> itemIds,
-  );
+  Future<void> queueRemoveItemsWithIds(List<int> itemIds);
 
   /// Jumps to a specific item in the queue by its ID.
   Future<void> queueJumpToItemWithId(int itemId);

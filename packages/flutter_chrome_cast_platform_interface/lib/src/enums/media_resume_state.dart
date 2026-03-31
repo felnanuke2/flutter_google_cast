@@ -7,5 +7,5 @@ enum GoogleCastMediaResumeState {
   play,
 
   ///A resume state indicating that the player should be paused, regardless of its current state.
-  pause;
+  pause,
 }

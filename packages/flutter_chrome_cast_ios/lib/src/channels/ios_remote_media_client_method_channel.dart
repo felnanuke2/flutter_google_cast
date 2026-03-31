@@ -13,9 +13,9 @@ class _RemoteMediaFlutterApiHandler extends RemoteMediaClientFlutterApi {
 
   final void Function(MediaStatus? status) onMediaStatusChangedCallback;
   final void Function(List<MediaQueueItem?> queueItems)
-      onQueueStatusChangedCallback;
+  onQueueStatusChangedCallback;
   final void Function(PlayerPositionUpdate update)
-      onPlayerPositionChangedCallback;
+  onPlayerPositionChangedCallback;
 
   @override
   void onMediaStatusChanged(MediaStatus? status) {
@@ -93,9 +93,7 @@ class GoogleCastRemoteMediaClientIOSMethodChannel
   }
 
   @override
-  Future<void> loadMediaWithRequest(
-    GoogleCastLoadMediaRequest request,
-  ) async {
+  Future<void> loadMediaWithRequest(GoogleCastLoadMediaRequest request) async {
     await _hostApi.loadMedia(
       LoadMediaRequestPigeon(
         mediaInfo: _toMediaInfo(request.mediaInfo),
@@ -195,10 +193,13 @@ class GoogleCastRemoteMediaClientIOSMethodChannel
   FutureOr<void> _onUpdateMediaStatus(MediaStatus? arguments) {
     if (arguments != null) {
       try {
-        debugPrint('[Flutter] _onUpdateMediaStatus received: playerState=${arguments.playerState}');
+        debugPrint(
+          '[Flutter] _onUpdateMediaStatus received: playerState=${arguments.playerState}',
+        );
         final mediaStatus = _toMediaStatus(arguments);
         debugPrint(
-            '[Flutter] _onUpdateMediaStatus parsed: playerState=${mediaStatus.playerState}');
+          '[Flutter] _onUpdateMediaStatus parsed: playerState=${mediaStatus.playerState}',
+        );
         _queueHasNextItem = queueHasNextItem;
         _mediaStatusStreamController.add(mediaStatus);
       } catch (e) {
@@ -241,8 +242,10 @@ class GoogleCastRemoteMediaClientIOSMethodChannel
   }
 
   @override
-  Future<void> queueInsertItems(List<GoogleCastQueueItem> items,
-      {int? beforeItemWithId}) async {
+  Future<void> queueInsertItems(
+    List<GoogleCastQueueItem> items, {
+    int? beforeItemWithId,
+  }) async {
     await queueInsertItemsWithRequest(
       GoogleCastQueueInsertItemsRequest(
         items: items,
@@ -312,8 +315,10 @@ class GoogleCastRemoteMediaClientIOSMethodChannel
   }
 
   @override
-  Future<void> queueReorderItems(
-      {required List<int> itemsIds, required int? beforeItemWithId}) async {
+  Future<void> queueReorderItems({
+    required List<int> itemsIds,
+    required int? beforeItemWithId,
+  }) async {
     await queueReorderItemsWithRequest(
       GoogleCastQueueReorderItemsRequest(
         itemsIds: itemsIds,
@@ -391,8 +396,9 @@ class GoogleCastRemoteMediaClientIOSMethodChannel
       playerState: _playerStateFromString(status.playerState),
       idleReason: _idleReasonFromString(status.idleReason),
       playbackRate: status.playbackRate,
-      mediaInformation:
-          status.media == null ? null : _toMediaInformation(status.media!),
+      mediaInformation: status.media == null
+          ? null
+          : _toMediaInformation(status.media!),
       volume: status.volume.level,
       isMuted: status.volume.muted,
       repeatMode: _repeatModeFromString(status.repeatMode),
@@ -433,7 +439,9 @@ class GoogleCastRemoteMediaClientIOSMethodChannel
       contentId: media.contentId,
       streamType: CastMediaStreamType.fromMap(media.streamType),
       contentType: media.contentType,
-      contentUrl: media.contentUrl.isEmpty ? null : Uri.tryParse(media.contentUrl),
+      contentUrl: media.contentUrl.isEmpty
+          ? null
+          : Uri.tryParse(media.contentUrl),
       duration: Duration(seconds: media.duration),
       customData: media.customData?.cast<String, dynamic>(),
       tracks: media.tracks

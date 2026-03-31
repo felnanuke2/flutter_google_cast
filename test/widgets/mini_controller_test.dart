@@ -11,23 +11,26 @@ void main() {
     late MethodChannel sessionChannel;
 
     setUp(() {
-      remoteMediaChannel =
-          const MethodChannel('google_cast.remote_media_client');
+      remoteMediaChannel = const MethodChannel(
+        'google_cast.remote_media_client',
+      );
       sessionChannel = const MethodChannel('google_cast.session_manager');
 
       // Set up mock for remote media client
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-          .setMockMethodCallHandler(remoteMediaChannel,
-              (MethodCall methodCall) async {
-        return null;
-      });
+          .setMockMethodCallHandler(remoteMediaChannel, (
+            MethodCall methodCall,
+          ) async {
+            return null;
+          });
 
       // Set up mock for session manager
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-          .setMockMethodCallHandler(sessionChannel,
-              (MethodCall methodCall) async {
-        return null;
-      });
+          .setMockMethodCallHandler(sessionChannel, (
+            MethodCall methodCall,
+          ) async {
+            return null;
+          });
     });
 
     tearDown(() {
@@ -136,45 +139,75 @@ void main() {
     test('all player states are defined', () {
       expect(CastMediaPlayerState.values, hasLength(6));
       expect(
-          CastMediaPlayerState.values, contains(CastMediaPlayerState.playing));
+        CastMediaPlayerState.values,
+        contains(CastMediaPlayerState.playing),
+      );
       expect(
-          CastMediaPlayerState.values, contains(CastMediaPlayerState.paused));
-      expect(CastMediaPlayerState.values,
-          contains(CastMediaPlayerState.buffering));
+        CastMediaPlayerState.values,
+        contains(CastMediaPlayerState.paused),
+      );
+      expect(
+        CastMediaPlayerState.values,
+        contains(CastMediaPlayerState.buffering),
+      );
       expect(CastMediaPlayerState.values, contains(CastMediaPlayerState.idle));
       expect(
-          CastMediaPlayerState.values, contains(CastMediaPlayerState.unknown));
+        CastMediaPlayerState.values,
+        contains(CastMediaPlayerState.unknown),
+      );
       expect(
-          CastMediaPlayerState.values, contains(CastMediaPlayerState.loading));
+        CastMediaPlayerState.values,
+        contains(CastMediaPlayerState.loading),
+      );
     });
   });
 
   group('Media metadata type icon mapping', () {
     test('all metadata types are defined', () {
-      expect(GoogleCastMediaMetadataType.values,
-          contains(GoogleCastMediaMetadataType.movieMediaMetadata));
-      expect(GoogleCastMediaMetadataType.values,
-          contains(GoogleCastMediaMetadataType.musicTrackMediaMetadata));
-      expect(GoogleCastMediaMetadataType.values,
-          contains(GoogleCastMediaMetadataType.tvShowMediaMetadata));
-      expect(GoogleCastMediaMetadataType.values,
-          contains(GoogleCastMediaMetadataType.photoMediaMetadata));
-      expect(GoogleCastMediaMetadataType.values,
-          contains(GoogleCastMediaMetadataType.genericMediaMetadata));
+      expect(
+        GoogleCastMediaMetadataType.values,
+        contains(GoogleCastMediaMetadataType.movieMediaMetadata),
+      );
+      expect(
+        GoogleCastMediaMetadataType.values,
+        contains(GoogleCastMediaMetadataType.musicTrackMediaMetadata),
+      );
+      expect(
+        GoogleCastMediaMetadataType.values,
+        contains(GoogleCastMediaMetadataType.tvShowMediaMetadata),
+      );
+      expect(
+        GoogleCastMediaMetadataType.values,
+        contains(GoogleCastMediaMetadataType.photoMediaMetadata),
+      );
+      expect(
+        GoogleCastMediaMetadataType.values,
+        contains(GoogleCastMediaMetadataType.genericMediaMetadata),
+      );
     });
 
     test('metadata type indexes are consistent', () {
       // Ensure indexes are stable for serialization
-      expect(GoogleCastMediaMetadataType.genericMediaMetadata.index,
-          isNonNegative);
       expect(
-          GoogleCastMediaMetadataType.movieMediaMetadata.index, isNonNegative);
+        GoogleCastMediaMetadataType.genericMediaMetadata.index,
+        isNonNegative,
+      );
       expect(
-          GoogleCastMediaMetadataType.tvShowMediaMetadata.index, isNonNegative);
-      expect(GoogleCastMediaMetadataType.musicTrackMediaMetadata.index,
-          isNonNegative);
+        GoogleCastMediaMetadataType.movieMediaMetadata.index,
+        isNonNegative,
+      );
       expect(
-          GoogleCastMediaMetadataType.photoMediaMetadata.index, isNonNegative);
+        GoogleCastMediaMetadataType.tvShowMediaMetadata.index,
+        isNonNegative,
+      );
+      expect(
+        GoogleCastMediaMetadataType.musicTrackMediaMetadata.index,
+        isNonNegative,
+      );
+      expect(
+        GoogleCastMediaMetadataType.photoMediaMetadata.index,
+        isNonNegative,
+      );
     });
   });
 }
