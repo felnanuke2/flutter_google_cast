@@ -21,7 +21,7 @@ jobs:
         channel: 'stable'
     
     - name: Install workspace dependencies
-      run: dart pub get
+      run: flutter pub get
     
     - name: Check for outdated dependencies
       run: |
@@ -68,7 +68,7 @@ jobs:
         channel: 'stable'
     
     - name: Install workspace dependencies
-      run: dart pub get
+      run: flutter pub get
     
     - name: Check for outdated dependencies
       run: |
@@ -98,7 +98,7 @@ jobs:
         channel: 'stable'
     
     - name: Install workspace dependencies
-      run: dart pub get
+      run: flutter pub get
     
     - name: Build iOS Simulator
       run: |

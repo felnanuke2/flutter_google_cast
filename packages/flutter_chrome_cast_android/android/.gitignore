@@ -7,3 +7,4 @@
 /build
 /captures
 .cxx
+app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java

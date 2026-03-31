@@ -10,7 +10,7 @@ enum CastStatusType {
   receiverStatus('RECEIVER_STATUS'),
 
   /// Unknown or unhandled status event type.
-  unknow('UNKNOW');
+  unknown('UNKNOWN');
 
   /// The raw string value associated with this status type.
   final String rawValue;
@@ -20,11 +20,16 @@ enum CastStatusType {
 
   /// Creates a [CastStatusType] from a string value.
   ///
-  /// Returns [CastStatusType.unknow] if the string doesn't match any known type.
+  /// Returns [CastStatusType.unknown] if the string doesn't match any known type.
   factory CastStatusType.fromString(String name) {
+    if (name == 'UNKNOW') {
+      // Backward compatibility with legacy typo emitted by older versions.
+      return CastStatusType.unknown;
+    }
+
     return CastStatusType.values.firstWhere(
       (element) => element.rawValue == name,
-      orElse: () => CastStatusType.unknow,
+      orElse: () => CastStatusType.unknown,
     );
   }
 }
