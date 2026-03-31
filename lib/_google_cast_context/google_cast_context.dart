@@ -12,15 +12,18 @@ import 'ios_google_cast_context_method_channel.dart';
 /// managing the Google Cast context. It automatically selects the appropriate
 /// platform-specific implementation based on the current operating system.
 class GoogleCastContext {
-  static GoogleCastContextPlatformInterface _instance = Platform.isAndroid
+  static final GoogleCastContextPlatformInterface _instance = Platform.isAndroid
       ? GoogleCastContextAndroidMethodChannel()
       : FlutterIOSGoogleCastContextMethodChannel();
+
+  static GoogleCastContextPlatformInterface? _testInstance;
 
   /// Gets the singleton instance of the Google Cast context.
   ///
   /// Returns the appropriate platform-specific implementation
   /// (Android or iOS) based on the current platform.
-  static GoogleCastContextPlatformInterface get instance => _instance;
+  static GoogleCastContextPlatformInterface get instance =>
+      _testInstance ?? _instance;
 
   /// Sets a custom platform implementation.
   ///
@@ -28,7 +31,7 @@ class GoogleCastContext {
   /// the default platform-specific implementation.
   @visibleForTesting
   static set instance(GoogleCastContextPlatformInterface value) {
-    _instance = value;
+    _testInstance = value;
   }
 
   /// Private constructor to enforce singleton pattern.

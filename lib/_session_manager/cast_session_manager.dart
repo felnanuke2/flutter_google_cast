@@ -12,16 +12,19 @@ import 'cast_session_manager_platform.dart';
 /// including starting, ending, and monitoring session state. It automatically
 /// selects the appropriate platform-specific implementation based on the current OS.
 class GoogleCastSessionManager {
-  static GoogleCastSessionManagerPlatformInterface _instance =
+  static final GoogleCastSessionManagerPlatformInterface _instance =
       Platform.isAndroid
           ? GoogleCastSessionManagerAndroidMethodChannel()
           : GoogleCastSessionManagerIOSMethodChannel();
+
+  static GoogleCastSessionManagerPlatformInterface? _testInstance;
 
   /// Gets the singleton instance of the session manager.
   ///
   /// Returns the appropriate platform-specific implementation
   /// (Android or iOS) based on the current platform.
-  static GoogleCastSessionManagerPlatformInterface get instance => _instance;
+  static GoogleCastSessionManagerPlatformInterface get instance =>
+      _testInstance ?? _instance;
 
   /// Sets a custom platform implementation.
   ///
@@ -29,7 +32,7 @@ class GoogleCastSessionManager {
   /// the default platform-specific implementation.
   @visibleForTesting
   static set instance(GoogleCastSessionManagerPlatformInterface value) {
-    _instance = value;
+    _testInstance = value;
   }
 
   GoogleCastSessionManager._();

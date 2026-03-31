@@ -15,16 +15,19 @@ class GoogleCastRemoteMediaClient {
   /// Private constructor to enforce singleton pattern.
   GoogleCastRemoteMediaClient._();
 
-  static GoogleCastRemoteMediaClientPlatformInterface _instance =
+  static final GoogleCastRemoteMediaClientPlatformInterface _instance =
       Platform.isAndroid
           ? GoogleCastRemoteMediaClientAndroidMethodChannel()
           : GoogleCastRemoteMediaClientIOSMethodChannel();
+
+  static GoogleCastRemoteMediaClientPlatformInterface? _testInstance;
 
   /// Gets the singleton instance of the remote media client.
   ///
   /// Returns the appropriate platform-specific implementation
   /// (Android or iOS) based on the current platform.
-  static GoogleCastRemoteMediaClientPlatformInterface get instance => _instance;
+  static GoogleCastRemoteMediaClientPlatformInterface get instance =>
+      _testInstance ?? _instance;
 
   /// Sets a custom platform implementation.
   ///
@@ -32,6 +35,6 @@ class GoogleCastRemoteMediaClient {
   /// the default platform-specific implementation.
   @visibleForTesting
   static set instance(GoogleCastRemoteMediaClientPlatformInterface value) {
-    _instance = value;
+    _testInstance = value;
   }
 }

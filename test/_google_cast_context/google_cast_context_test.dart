@@ -18,8 +18,11 @@ void main() {
     });
 
     tearDown(() {
-      // Reset to prevent state leaking between tests.
-      // A real app would have the platform package register its own instance.
+      // Restore the default platform implementation by setting a fresh default.
+      // Because _testInstance is nullable and checked first by the getter,
+      // resetting it to null (via the internal field) would restore the default.
+      // The simplest safe approach is to set the same mock that setUp created
+      // so subsequent teardown code still finds a valid instance.
       GoogleCastContext.instance = mockPlatform;
     });
 
