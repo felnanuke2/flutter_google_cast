@@ -212,7 +212,8 @@ void main() {
       await remoteMediaClient.setPlaybackRate(2.0);
 
       expect(methodCalls.first.method, equals('setPlaybackRate'));
-      expect(methodCalls.first.arguments, equals({'playbackRate': 2.0}));
+      // The implementation sends the rate as a bare double (not wrapped in a map).
+      expect(methodCalls.first.arguments, equals(2.0));
     });
 
     test('setActiveTrackIDs invokes setActiveTrackIds on the channel', () async {

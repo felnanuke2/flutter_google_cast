@@ -307,21 +307,24 @@ void main() {
       final sub = remoteMediaClient.playerPositionStream.listen(
           (pos) => streamUpdated = pos == const Duration(seconds: 10));
 
-      await simulatePlatformCall(
-          'onUpdatePlayerPosition', {'position': 10.0});
+      // The iOS implementation's _onUpdatePlayerPosition(int seconds) expects
+      // the position as a plain integer (seconds), not a Map.
+      await simulatePlatformCall('onUpdatePlayerPosition', 10);
 
       expect(streamUpdated, isTrue);
       await sub.cancel();
     });
 
     test('updateQueueItems updates queueItems and stream', () async {
+      // Field names must match GoogleCastQueueItemIOS.fromMap:
+      //   'mediaInformation' (not 'media'), 'itemId' (not 'itemID').
       final items = [
         {
-          'itemID': 1,
+          'itemId': 1,
           'autoPlay': true,
-          'startTime': 0.0,
-          'preLoadTime': 0.0,
-          'media': {
+          'startTime': 0,
+          'preLoadTime': 0,
+          'mediaInformation': {
             'contentID': 'test1',
             'contentType': 'video/mp4',
             'streamType': 1,
