@@ -1,25 +1,5 @@
-import 'package:flutter_chrome_cast/common/image.dart';
-import 'package:flutter_chrome_cast/enums/media_metadata_type.dart';
-
-/// Holds metadata type and images for a media item.
-class GoogleCastMediaMetadata {
-  /// The type of media metadata.
-  final GoogleCastMediaMetadataType metadataType;
-
-  /// List of images associated with the media.
-  final List<GoogleCastImage>? images;
-
-  /// Creates a new [GoogleCastMediaMetadata] instance.
-  GoogleCastMediaMetadata({
-    required this.metadataType,
-    this.images,
-  });
-
-  /// Converts the object to a map for serialization.
-  Map<String, dynamic> toMap() {
-    return {
-      'metadataType': metadataType.value,
-      'images': images?.map((x) => x.toMap()).toList(),
-    };
-  }
-}
+// Re-exported from flutter_chrome_cast_platform_interface.
+// This file exists for backward compatibility with
+// `package:flutter_chrome_cast/entities/media_metadata/cast_media_metadata.dart`.
+// All types are now defined in the platform_interface package.
+export 'package:flutter_chrome_cast_platform_interface/src/entities/media_metadata/cast_media_metadata.dart';

@@ -7,18 +7,19 @@ The iOS implementation of the Flutter Chrome Cast plugin is built using **Swift*
 ## 📁 File Structure
 
 ```
-ios/
-├── Classes/
-│   ├── SwiftGoogleCastPlugin.swift          # Main plugin entry point
-│   ├── GoogleCastPlugin.h                   # Objective-C header
-│   ├── GoogleCastPlugin.m                   # Objective-C implementation
-│   ├── DiscoveryManagerMethodChannel.swift  # Device discovery
-│   ├── RemoteMediaClienteMethodChannel.swift # Media control
-│   ├── SessionManagerMethodChannel.swift    # Session management
-│   ├── SessionMethodChannel.swift           # Individual session
-│   └── Extensions/                          # Swift extensions
-├── Assets/                                  # Plugin assets
-└── flutter_chrome_cast.podspec            # CocoaPods specification
+packages/flutter_chrome_cast_ios/
+├── ios/
+│   ├── flutter_chrome_cast.podspec          # CocoaPods specification
+│   └── flutter_chrome_cast/
+│       └── Sources/flutter_chrome_cast/
+│           ├── SwiftGoogleCastPlugin.swift  # Main plugin entry point
+│           ├── GoogleCastPlugin.h           # Objective-C header
+│           ├── GoogleCastPlugin.m           # Objective-C implementation
+│           ├── DiscoveryManagerMethodChannel.swift  # Device discovery
+│           ├── RemoteMediaClienteMethodChannel.swift # Media control
+│           ├── SessionManagerMethodChannel.swift    # Session management
+│           ├── SessionMethodChannel.swift           # Individual session
+│           └── Extensions/                  # Swift extensions
 ```
 
 ## 🚀 Core Components
@@ -78,14 +79,14 @@ Each major feature has its own method channel for organized communication:
 ### Building the iOS Plugin
 
 ```bash
-# Navigate to the iOS directory
-cd ios/
+# Navigate to the iOS implementation directory
+cd packages/flutter_chrome_cast_ios/ios/
 
 # Install dependencies
 pod install
 
-# Open workspace in Xcode
-open Runner.xcworkspace
+# Resolve Swift package dependencies
+swift package resolve
 ```
 
 ### Adding the Plugin to an iOS Project

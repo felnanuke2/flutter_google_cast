@@ -1,24 +1,5 @@
-/// Represents the current state of the media player.
-///
-/// This enum defines the different states that a Cast media player
-/// can be in during media playback and control operations.
-enum CastMediaPlayerState {
-  /// Unknown or uninitialized state.
-  unknown,
-
-  /// IDLE - Player has not been loaded yet or has finished playback.
-  idle,
-
-  /// Player is actively playing content.
-  playing,
-
-  /// Player is paused.
-  paused,
-
-  /// Player is in PLAY mode but not actively playing content (currentTime is not changing).
-  /// This typically occurs when the player is loading or buffering content.
-  buffering,
-
-  /// Player is loading media.
-  loading;
-}
+// Re-exported from flutter_chrome_cast_platform_interface.
+// This file exists for backward compatibility with
+// `package:flutter_chrome_cast/enums/player_state.dart`.
+// All types are now defined in the platform_interface package.
+export 'package:flutter_chrome_cast_platform_interface/src/enums/player_state.dart';

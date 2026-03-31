@@ -3,4 +3,4 @@
 /// This module provides access to device discovery features.
 library discovery;
 
-export '_discovery_manager/_discovery_manager.dart';
+export 'discovery_manager/discovery_manager_exports.dart';

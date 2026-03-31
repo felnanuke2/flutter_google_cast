@@ -30,31 +30,37 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   bool _isDiscoveryActive = false;
+  StreamSubscription<List<GoogleCastQueueItem>>? _queueItemsSubscription;
 
   @override
   void initState() {
     super.initState();
+    _queueItemsSubscription =
+        GoogleCastRemoteMediaClient.instance.queueItemsStream.listen((items) {
+      final ids = items.map((e) => e.itemId).toList();
+      debugPrint('[Example][Queue] stream update - count=${items.length}, ids=$ids');
+    });
     initPlatformState();
+  }
+
+  @override
+  void dispose() {
+    _queueItemsSubscription?.cancel();
+    super.dispose();
   }
 
   // Platform messages are asynchronous, so we initialize in an async method.
   Future<void> initPlatformState() async {
     const appId = GoogleCastDiscoveryCriteria.kDefaultApplicationId;
-    GoogleCastOptions? options;
-    if (Platform.isIOS) {
-      options = IOSGoogleCastOptions(
-        GoogleCastDiscoveryCriteriaInitialize.initWithApplicationID(appId),
-        // Set to true to automatically stop casting when the app is killed
-        stopCastingOnAppTerminated: false,
-      );
-    } else if (Platform.isAndroid) {
-      options = GoogleCastOptionsAndroid(
-        appId: appId,
-        // Set to true to automatically stop casting when the app is killed
-        stopCastingOnAppTerminated: false,
-      );
-    }
-    GoogleCastContext.instance.setSharedInstanceWithOptions(options!);
+    final options = GoogleCastOptions(
+      appId: Platform.isAndroid ? appId : null,
+      discoveryCriteria: Platform.isIOS
+          ? GoogleCastDiscoveryCriteriaInitialize.initWithApplicationID(appId)
+          : null,
+      // Set to true to automatically stop casting when the app is killed
+      stopCastingOnAppTerminated: false,
+    );
+    GoogleCastContext.instance.setSharedInstanceWithOptions(options);
 
     // Check initial discovery state for iOS
     if (Platform.isIOS) {
@@ -297,6 +303,20 @@ class _MyAppState extends State<MyApp> {
                                       backgroundColor: Colors.grey[300]),
                                   child: const Text('Minimal Theme',
                                       style: TextStyle(color: Colors.black)),
+                                ),
+                                ElevatedButton(
+                                  onPressed: _loadQueueRemoveReproItems,
+                                  style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.teal),
+                                  child: const Text('Load Queue Repro',
+                                      style: TextStyle(color: Colors.white)),
+                                ),
+                                ElevatedButton(
+                                  onPressed: _runQueueRemoveRepro,
+                                  style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.redAccent),
+                                  child: const Text('Run Remove Repro',
+                                      style: TextStyle(color: Colors.white)),
                                 ),
                               ],
                             ),
@@ -753,6 +773,97 @@ class _MyAppState extends State<MyApp> {
       ScaffoldMessenger.of(_scaffoldKey.currentContext!).showSnackBar(
         SnackBar(
           content: Text('Failed to load HLS with customData: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  Future<void> _loadQueueRemoveReproItems() async {
+    try {
+      final queueItems = List.generate(
+        5,
+        (index) => GoogleCastQueueItem(
+          mediaInformation: GoogleCastMediaInformation(
+            contentId: 'repro_$index',
+            streamType: CastMediaStreamType.buffered,
+            contentUrl: Uri.parse(
+              'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+            ),
+            contentType: 'video/mp4',
+            metadata: GoogleCastMovieMediaMetadata(
+              title: 'Queue Repro Item $index',
+              subtitle: 'Used to reproduce queueRemoveItemsWithIds',
+            ),
+          ),
+        ),
+      );
+
+      await GoogleCastRemoteMediaClient.instance.queueLoadItems(
+        queueItems,
+        options: GoogleCastQueueLoadOptions(startIndex: 0),
+      );
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(_scaffoldKey.currentContext!).showSnackBar(
+        const SnackBar(
+          content: Text('Repro queue loaded. Now tap "Run Remove Repro".'),
+          backgroundColor: Colors.teal,
+        ),
+      );
+    } catch (e, st) {
+      debugPrint('Error loading repro queue: $e\n$st');
+      if (!mounted) return;
+      ScaffoldMessenger.of(_scaffoldKey.currentContext!).showSnackBar(
+        SnackBar(
+          content: Text('Failed to load repro queue: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  Future<void> _runQueueRemoveRepro() async {
+    try {
+      final queueItems = GoogleCastRemoteMediaClient.instance.queueItems;
+      final currentItemId =
+          GoogleCastRemoteMediaClient.instance.mediaStatus?.currentItemId;
+
+      final removableIds = queueItems
+          .map((item) => item.itemId)
+          .whereType<int>()
+          .where((id) => id != currentItemId)
+          .take(2)
+          .toList();
+
+      if (removableIds.length < 2) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(_scaffoldKey.currentContext!).showSnackBar(
+          const SnackBar(
+            content: Text('Load repro queue first and wait queue updates.'),
+            backgroundColor: Colors.orange,
+          ),
+        );
+        return;
+      }
+
+      debugPrint('[Example][Queue] invoking queueRemoveItemsWithIds: $removableIds');
+      await GoogleCastRemoteMediaClient.instance
+          .queueRemoveItemsWithIds(removableIds);
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(_scaffoldKey.currentContext!).showSnackBar(
+        SnackBar(
+          content: Text('Remove request sent for ids: $removableIds'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (e, st) {
+      debugPrint('[Example][Queue] queueRemoveItemsWithIds failed: $e\n$st');
+      if (!mounted) return;
+      ScaffoldMessenger.of(_scaffoldKey.currentContext!).showSnackBar(
+        SnackBar(
+          content: Text('queueRemoveItemsWithIds error: $e'),
           backgroundColor: Colors.red,
         ),
       );

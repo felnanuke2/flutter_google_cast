@@ -2,8 +2,8 @@ import 'dart:convert';
 
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter_chrome_cast/_remote_media_client/android_remote_media_client_method_channel.dart';
-import 'package:flutter_chrome_cast/_remote_media_client/remote_media_client_platform.dart';
+import 'package:flutter_chrome_cast/remote_media_client/android_remote_media_client_method_channel.dart';
+import 'package:flutter_chrome_cast/remote_media_client/remote_media_client_platform.dart';
 import 'package:flutter_chrome_cast/entities/media_information.dart';
 import 'package:flutter_chrome_cast/entities/queue_item.dart';
 import 'package:flutter_chrome_cast/entities/media_seek_option.dart';

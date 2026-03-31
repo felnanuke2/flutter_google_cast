@@ -1,17 +1,5 @@
-/// Represents the connection state of a Google Cast session.
-///
-/// This enum defines the possible states of a Cast connection,
-/// from disconnected to fully connected and ready for media control.
-enum GoogleCastConnectState {
-  /// Disconnected from the device or application.
-  disconnected,
-
-  /// Connecting to the device or application.
-  connecting,
-
-  /// Connected to the device or application.
-  connected,
-
-  ///Disconnecting from the device.
-  disconnecting,
-}
+// Re-exported from flutter_chrome_cast_platform_interface.
+// This file exists for backward compatibility with
+// `package:flutter_chrome_cast/enums/connection_state.dart`.
+// All types are now defined in the platform_interface package.
+export 'package:flutter_chrome_cast_platform_interface/src/enums/connection_state.dart';

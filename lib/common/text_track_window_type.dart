@@ -1,29 +1,5 @@
-///Possible text track window types.
-enum TextTrackWindowType {
-  /// No window background.
-  none,
-
-  /// Normal rectangular window.
-  normal,
-
-  /// Window with rounded corners.
-  roundedCorners;
-
-  factory TextTrackWindowType.fromMap(String value) {
-    // Try matching by name (lowerCamelCase)
-    for (final v in values) {
-      if (v.name == value) return v;
-    }
-    // Fallback: match legacy UPPER_SNAKE_CASE
-    switch (value) {
-      case 'NONE':
-        return TextTrackWindowType.none;
-      case 'NORMAL':
-        return TextTrackWindowType.normal;
-      case 'ROUNDED_CORNERS':
-        return TextTrackWindowType.roundedCorners;
-      default:
-        return TextTrackWindowType.none;
-    }
-  }
-}
+// Re-exported from flutter_chrome_cast_platform_interface.
+// This file exists for backward compatibility with
+// `package:flutter_chrome_cast/common/text_track_window_type.dart`.
+// All types are now defined in the platform_interface package.
+export 'package:flutter_chrome_cast_platform_interface/src/common/text_track_window_type.dart';

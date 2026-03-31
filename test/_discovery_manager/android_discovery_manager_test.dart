@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter_chrome_cast/_discovery_manager/android_discovery_manager.dart';
-import 'package:flutter_chrome_cast/_discovery_manager/discovery_manager_platform_interface.dart';
+import 'package:flutter_chrome_cast/discovery_manager/android_discovery_manager.dart';
+import 'package:flutter_chrome_cast/discovery_manager/discovery_manager_platform_interface.dart';
 import 'package:flutter_chrome_cast/entities/cast_device.dart';
 
 void main() {

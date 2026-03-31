@@ -1,7 +1,7 @@
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter_chrome_cast/_google_cast_context/ios_google_cast_context_method_channel.dart';
-import 'package:flutter_chrome_cast/_google_cast_context/google_cast_context_platform_interface.dart';
+import 'package:flutter_chrome_cast/google_cast_context/ios_google_cast_context_method_channel.dart';
+import 'package:flutter_chrome_cast/google_cast_context/google_cast_context_platform_interface.dart';
 import 'package:flutter_chrome_cast/entities/cast_options.dart';
 
 void main() {

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_chrome_cast/_session_manager/cast_session_manager.dart';
+import 'package:flutter_chrome_cast/entities/device_volume.dart';
+import 'package:flutter_chrome_cast/session_manager/cast_session_manager.dart';
 import 'package:get/get_rx/get_rx.dart';
 
 /// A widget that provides volume control for Google Cast devices.
@@ -102,7 +103,8 @@ class _GoogleCastVolumeState extends State<GoogleCastVolume> {
 
   void _onVolumeChangedEnd(double value) {
     isSliderTapDown = false;
-    GoogleCastSessionManager.instance.setDeviceVolume(value);
+    GoogleCastSessionManager.instance
+        .setDeviceVolumeLevel(CastDeviceVolume(value));
   }
 
   void _onVolumeChangedStart(double value) {

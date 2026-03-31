@@ -7,6 +7,9 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import com.felnanuke.google_cast.pigeon.CastContextInitRequest
+import com.felnanuke.google_cast.pigeon.FlutterError
+import com.felnanuke.google_cast.pigeon.GoogleCastContextHostApi
 import com.google.android.gms.cast.framework.CastContext
 import com.google.android.gms.cast.framework.CastOptions
 import io.flutter.embedding.engine.plugins.FlutterPlugin
@@ -48,7 +51,8 @@ private const val TAG = "CastContext"
  * @author LUIZ FELIPE ALVES LIMA
  * @since Android API 21 (Android 5.0)
  */
-class CastContextMethodChannel : FlutterPlugin, MethodChannel.MethodCallHandler {
+class CastContextMethodChannel : FlutterPlugin, MethodChannel.MethodCallHandler,
+    GoogleCastContextHostApi {
 
     /**
      * Flutter method channel for Cast context communication
@@ -130,11 +134,13 @@ class CastContextMethodChannel : FlutterPlugin, MethodChannel.MethodCallHandler 
         discoveryManager.onAttachedToEngine(binding)
         sessionManagerMethodChannel = SessionManagerMethodChannel(discoveryManager)
         sessionManagerMethodChannel.onAttachedToEngine(binding)
+        GoogleCastContextHostApi.setUp(binding.binaryMessenger, this)
 
     }
 
     override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
         channel.setMethodCallHandler(null)
+        GoogleCastContextHostApi.setUp(binding.binaryMessenger, null)
         // Clean up session manager listener to prevent memory leaks
         try {
             CastContext.getSharedInstance(appContext)?.sessionManager?.removeSessionManagerListener(sessionManagerMethodChannel)
@@ -147,7 +153,16 @@ class CastContextMethodChannel : FlutterPlugin, MethodChannel.MethodCallHandler 
     // MethodCallHandler
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
         when (call.method) {
-            "setSharedInstance" -> setSharedInstance(call.arguments, result)
+            "setSharedInstance" -> {
+                try {
+                    val map = call.arguments as? Map<*, *>
+                        ?: throw IllegalArgumentException("Expected a map for Cast options")
+                    result.success(setSharedInstance(map))
+                } catch (e: Exception) {
+                    Log.e(TAG, "Failed to set shared instance", e)
+                    result.error("CAST_ERROR", "Failed to initialize Cast context: ${e.message}", null)
+                }
+            }
             else -> result.notImplemented()
         }
     }
@@ -164,28 +179,34 @@ class CastContextMethodChannel : FlutterPlugin, MethodChannel.MethodCallHandler 
     }
 
 
-    private fun setSharedInstance(arguments: Any?, result: MethodChannel.Result) {
+    override fun setSharedInstanceWithOptions(request: CastContextInitRequest): Boolean {
         try {
-            val map = arguments as HashMap<*, *>
-            val optionsBuilder = CastOptions.Builder()
-            optionsBuilder.setReceiverApplicationId(map["appId"] as String)
-            val launcherOptions = LaunchOptions.Builder().setAndroidReceiverCompatible(true).build()
-            optionsBuilder.setLaunchOptions(launcherOptions)
-            optionsBuilder.setResumeSavedSession(true)
-            optionsBuilder.setEnableReconnectionService(true)
-            GoogleCastOptionsProvider.options = optionsBuilder.build()
-            
-            // Store the stopCastingOnAppTerminated option
-            val stopCastingOnAppTerminated = map["stopCastingOnAppTerminated"] as? Boolean ?: false
-            GoogleCastOptionsProvider.stopCastingOnAppTerminated = stopCastingOnAppTerminated
-            Log.d(TAG, "stopCastingOnAppTerminated set to: $stopCastingOnAppTerminated")
-            
-            CastContext.getSharedInstance(appContext).sessionManager.addSessionManagerListener(sessionManagerMethodChannel)
-            result.success(true)
+            return setSharedInstance(request.options)
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to set shared instance", e)
-            result.error("CAST_ERROR", "Failed to initialize Cast context: ${e.message}", null)
+            Log.e(TAG, "Failed to set shared instance via Pigeon", e)
+            throw FlutterError("CAST_ERROR", "Failed to initialize Cast context: ${e.message}", null)
         }
+    }
+
+    private fun setSharedInstance(arguments: Map<*, *>): Boolean {
+        val appId = arguments["appId"] as? String
+            ?: throw IllegalArgumentException("Missing required Cast appId")
+
+        val optionsBuilder = CastOptions.Builder()
+        optionsBuilder.setReceiverApplicationId(appId)
+        val launcherOptions = LaunchOptions.Builder().setAndroidReceiverCompatible(true).build()
+        optionsBuilder.setLaunchOptions(launcherOptions)
+        optionsBuilder.setResumeSavedSession(true)
+        optionsBuilder.setEnableReconnectionService(true)
+        GoogleCastOptionsProvider.options = optionsBuilder.build()
+
+        // Store the stopCastingOnAppTerminated option
+        val stopCastingOnAppTerminated = arguments["stopCastingOnAppTerminated"] as? Boolean ?: false
+        GoogleCastOptionsProvider.stopCastingOnAppTerminated = stopCastingOnAppTerminated
+        Log.d(TAG, "stopCastingOnAppTerminated set to: $stopCastingOnAppTerminated")
+
+        CastContext.getSharedInstance(appContext).sessionManager.addSessionManagerListener(sessionManagerMethodChannel)
+        return true
     }
 
 }

@@ -1,9 +1,9 @@
 import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter_chrome_cast/_google_cast_context/google_cast_context.dart';
-import 'package:flutter_chrome_cast/_google_cast_context/google_cast_context_platform_interface.dart';
-import 'package:flutter_chrome_cast/_google_cast_context/android_google_cast_context_method_channel.dart';
-import 'package:flutter_chrome_cast/_google_cast_context/ios_google_cast_context_method_channel.dart';
+import 'package:flutter_chrome_cast/google_cast_context/google_cast_context.dart';
+import 'package:flutter_chrome_cast/google_cast_context/google_cast_context_platform_interface.dart';
+import 'package:flutter_chrome_cast/google_cast_context/android_google_cast_context_method_channel.dart';
+import 'package:flutter_chrome_cast/google_cast_context/ios_google_cast_context_method_channel.dart';
 
 void main() {
   group('GoogleCastContext', () {

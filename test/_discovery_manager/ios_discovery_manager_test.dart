@@ -1,5 +1,5 @@
 import 'package:flutter/services.dart';
-import 'package:flutter_chrome_cast/_discovery_manager/ios_discovery_manager.dart';
+import 'package:flutter_chrome_cast/discovery_manager/ios_discovery_manager.dart';
 import 'package:flutter_chrome_cast/entities/cast_device.dart';
 import 'package:flutter_chrome_cast/models/ios/ios_cast_device.dart';
 import 'package:flutter_test/flutter_test.dart';
