@@ -177,6 +177,14 @@ class SeekOptionPigeon {
   bool seekToInfinity;
 }
 
+class SetPlaybackRateRequestPigeon {
+  SetPlaybackRateRequestPigeon({
+    required this.rate,
+  });
+
+  double rate;
+}
+
 class LoadMediaRequestPigeon {
   LoadMediaRequestPigeon({
     required this.mediaInfo,
@@ -302,7 +310,7 @@ abstract class RemoteMediaClientHostApi {
 
   void setActiveTrackIds(List<int?> trackIds);
 
-  void setPlaybackRate(double rate);
+  void setPlaybackRate(SetPlaybackRateRequestPigeon request);
 
   void setTextTrackStyle(TextTrackStylePigeon textTrackStyle);
 

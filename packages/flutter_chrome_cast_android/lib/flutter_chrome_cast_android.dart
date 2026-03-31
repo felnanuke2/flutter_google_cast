@@ -3,7 +3,7 @@
 /// Exposes the Android platform implementations selected by the facade package
 /// when `Platform.isAndroid` is true.
 /// implementations at runtime when `Platform.isAndroid` is true.
-library flutter_chrome_cast_android;
+library;
 
 // ── Android platform options ───────────────────────────────────────────────
 export 'src/models/android/android_cast_options.dart';

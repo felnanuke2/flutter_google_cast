@@ -457,6 +457,34 @@ data class SeekOptionPigeon (
 }
 
 /** Generated class from Pigeon that represents data sent in messages. */
+data class SetPlaybackRateRequestPigeon (
+  val rate: Double
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): SetPlaybackRateRequestPigeon {
+      val rate = pigeonVar_list[0] as Double
+      return SetPlaybackRateRequestPigeon(rate)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      rate,
+    )
+  }
+  override fun equals(other: Any?): Boolean {
+    if (other !is SetPlaybackRateRequestPigeon) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    return RemoteMediaClientPigeonPigeonUtils.deepEquals(toList(), other.toList())  }
+
+  override fun hashCode(): Int = toList().hashCode()
+}
+
+/** Generated class from Pigeon that represents data sent in messages. */
 data class LoadMediaRequestPigeon (
   val mediaInfo: MediaInfo,
   val autoPlay: Boolean,
@@ -776,35 +804,40 @@ private open class RemoteMediaClientPigeonPigeonCodec : StandardMessageCodec() {
       }
       139.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          LoadMediaRequestPigeon.fromList(it)
+          SetPlaybackRateRequestPigeon.fromList(it)
         }
       }
       140.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          QueueLoadRequestPigeon.fromList(it)
+          LoadMediaRequestPigeon.fromList(it)
         }
       }
       141.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          QueueInsertItemsRequestPigeon.fromList(it)
+          QueueLoadRequestPigeon.fromList(it)
         }
       }
       142.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          QueueInsertItemAndPlayRequestPigeon.fromList(it)
+          QueueInsertItemsRequestPigeon.fromList(it)
         }
       }
       143.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          QueueReorderItemsRequestPigeon.fromList(it)
+          QueueInsertItemAndPlayRequestPigeon.fromList(it)
         }
       }
       144.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          PlayerPositionUpdate.fromList(it)
+          QueueReorderItemsRequestPigeon.fromList(it)
         }
       }
       145.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          PlayerPositionUpdate.fromList(it)
+        }
+      }
+      146.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
           TextTrackStylePigeon.fromList(it)
         }
@@ -854,32 +887,36 @@ private open class RemoteMediaClientPigeonPigeonCodec : StandardMessageCodec() {
         stream.write(138)
         writeValue(stream, value.toList())
       }
-      is LoadMediaRequestPigeon -> {
+      is SetPlaybackRateRequestPigeon -> {
         stream.write(139)
         writeValue(stream, value.toList())
       }
-      is QueueLoadRequestPigeon -> {
+      is LoadMediaRequestPigeon -> {
         stream.write(140)
         writeValue(stream, value.toList())
       }
-      is QueueInsertItemsRequestPigeon -> {
+      is QueueLoadRequestPigeon -> {
         stream.write(141)
         writeValue(stream, value.toList())
       }
-      is QueueInsertItemAndPlayRequestPigeon -> {
+      is QueueInsertItemsRequestPigeon -> {
         stream.write(142)
         writeValue(stream, value.toList())
       }
-      is QueueReorderItemsRequestPigeon -> {
+      is QueueInsertItemAndPlayRequestPigeon -> {
         stream.write(143)
         writeValue(stream, value.toList())
       }
-      is PlayerPositionUpdate -> {
+      is QueueReorderItemsRequestPigeon -> {
         stream.write(144)
         writeValue(stream, value.toList())
       }
-      is TextTrackStylePigeon -> {
+      is PlayerPositionUpdate -> {
         stream.write(145)
+        writeValue(stream, value.toList())
+      }
+      is TextTrackStylePigeon -> {
+        stream.write(146)
         writeValue(stream, value.toList())
       }
       else -> super.writeValue(stream, value)
@@ -900,7 +937,7 @@ interface RemoteMediaClientHostApi {
   fun queueReorderItems(request: QueueReorderItemsRequestPigeon)
   fun seek(request: SeekOptionPigeon)
   fun setActiveTrackIds(trackIds: List<Long?>)
-  fun setPlaybackRate(rate: Double)
+  fun setPlaybackRate(request: SetPlaybackRateRequestPigeon)
   fun setTextTrackStyle(textTrackStyle: TextTrackStylePigeon)
   fun play()
   fun pause()
@@ -1114,9 +1151,9 @@ interface RemoteMediaClientHostApi {
         if (api != null) {
           channel.setMessageHandler { message, reply ->
             val args = message as List<Any?>
-            val rateArg = args[0] as Double
+            val requestArg = args[0] as SetPlaybackRateRequestPigeon
             val wrapped: List<Any?> = try {
-              api.setPlaybackRate(rateArg)
+              api.setPlaybackRate(requestArg)
               listOf(null)
             } catch (exception: Throwable) {
               RemoteMediaClientPigeonPigeonUtils.wrapError(exception)

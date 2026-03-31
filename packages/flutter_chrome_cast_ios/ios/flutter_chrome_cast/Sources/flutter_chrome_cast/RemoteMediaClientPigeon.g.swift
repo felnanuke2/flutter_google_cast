@@ -492,6 +492,31 @@ struct SeekOptionPigeon: Hashable {
 }
 
 /// Generated class from Pigeon that represents data sent in messages.
+struct SetPlaybackRateRequestPigeon: Hashable {
+  var rate: Double
+
+
+  // swift-format-ignore: AlwaysUseLowerCamelCase
+  static func fromList(_ pigeonVar_list: [Any?]) -> SetPlaybackRateRequestPigeon? {
+    let rate = pigeonVar_list[0] as! Double
+
+    return SetPlaybackRateRequestPigeon(
+      rate: rate
+    )
+  }
+  func toList() -> [Any?] {
+    return [
+      rate
+    ]
+  }
+  static func == (lhs: SetPlaybackRateRequestPigeon, rhs: SetPlaybackRateRequestPigeon) -> Bool {
+    return deepEqualsRemoteMediaClientPigeon(lhs.toList(), rhs.toList())  }
+  func hash(into hasher: inout Hasher) {
+    deepHashRemoteMediaClientPigeon(value: toList(), hasher: &hasher)
+  }
+}
+
+/// Generated class from Pigeon that represents data sent in messages.
 struct LoadMediaRequestPigeon: Hashable {
   var mediaInfo: MediaInfo
   var autoPlay: Bool
@@ -788,18 +813,20 @@ private class RemoteMediaClientPigeonPigeonCodecReader: FlutterStandardReader {
     case 138:
       return SeekOptionPigeon.fromList(self.readValue() as! [Any?])
     case 139:
-      return LoadMediaRequestPigeon.fromList(self.readValue() as! [Any?])
+      return SetPlaybackRateRequestPigeon.fromList(self.readValue() as! [Any?])
     case 140:
-      return QueueLoadRequestPigeon.fromList(self.readValue() as! [Any?])
+      return LoadMediaRequestPigeon.fromList(self.readValue() as! [Any?])
     case 141:
-      return QueueInsertItemsRequestPigeon.fromList(self.readValue() as! [Any?])
+      return QueueLoadRequestPigeon.fromList(self.readValue() as! [Any?])
     case 142:
-      return QueueInsertItemAndPlayRequestPigeon.fromList(self.readValue() as! [Any?])
+      return QueueInsertItemsRequestPigeon.fromList(self.readValue() as! [Any?])
     case 143:
-      return QueueReorderItemsRequestPigeon.fromList(self.readValue() as! [Any?])
+      return QueueInsertItemAndPlayRequestPigeon.fromList(self.readValue() as! [Any?])
     case 144:
-      return PlayerPositionUpdate.fromList(self.readValue() as! [Any?])
+      return QueueReorderItemsRequestPigeon.fromList(self.readValue() as! [Any?])
     case 145:
+      return PlayerPositionUpdate.fromList(self.readValue() as! [Any?])
+    case 146:
       return TextTrackStylePigeon.fromList(self.readValue() as! [Any?])
     default:
       return super.readValue(ofType: type)
@@ -839,26 +866,29 @@ private class RemoteMediaClientPigeonPigeonCodecWriter: FlutterStandardWriter {
     } else if let value = value as? SeekOptionPigeon {
       super.writeByte(138)
       super.writeValue(value.toList())
-    } else if let value = value as? LoadMediaRequestPigeon {
+    } else if let value = value as? SetPlaybackRateRequestPigeon {
       super.writeByte(139)
       super.writeValue(value.toList())
-    } else if let value = value as? QueueLoadRequestPigeon {
+    } else if let value = value as? LoadMediaRequestPigeon {
       super.writeByte(140)
       super.writeValue(value.toList())
-    } else if let value = value as? QueueInsertItemsRequestPigeon {
+    } else if let value = value as? QueueLoadRequestPigeon {
       super.writeByte(141)
       super.writeValue(value.toList())
-    } else if let value = value as? QueueInsertItemAndPlayRequestPigeon {
+    } else if let value = value as? QueueInsertItemsRequestPigeon {
       super.writeByte(142)
       super.writeValue(value.toList())
-    } else if let value = value as? QueueReorderItemsRequestPigeon {
+    } else if let value = value as? QueueInsertItemAndPlayRequestPigeon {
       super.writeByte(143)
       super.writeValue(value.toList())
-    } else if let value = value as? PlayerPositionUpdate {
+    } else if let value = value as? QueueReorderItemsRequestPigeon {
       super.writeByte(144)
       super.writeValue(value.toList())
-    } else if let value = value as? TextTrackStylePigeon {
+    } else if let value = value as? PlayerPositionUpdate {
       super.writeByte(145)
+      super.writeValue(value.toList())
+    } else if let value = value as? TextTrackStylePigeon {
+      super.writeByte(146)
       super.writeValue(value.toList())
     } else {
       super.writeValue(value)
@@ -893,7 +923,7 @@ protocol RemoteMediaClientHostApi {
   func queueReorderItems(request: QueueReorderItemsRequestPigeon) throws
   func seek(request: SeekOptionPigeon) throws
   func setActiveTrackIds(trackIds: [Int64?]) throws
-  func setPlaybackRate(rate: Double) throws
+  func setPlaybackRate(request: SetPlaybackRateRequestPigeon) throws
   func setTextTrackStyle(textTrackStyle: TextTrackStylePigeon) throws
   func play() throws
   func pause() throws
@@ -1071,9 +1101,9 @@ class RemoteMediaClientHostApiSetup {
     if let api = api {
       setPlaybackRateChannel.setMessageHandler { message, reply in
         let args = message as! [Any?]
-        let rateArg = args[0] as! Double
+        let requestArg = args[0] as! SetPlaybackRateRequestPigeon
         do {
-          try api.setPlaybackRate(rate: rateArg)
+          try api.setPlaybackRate(request: requestArg)
           reply(wrapResult(nil))
         } catch {
           reply(wrapError(error))

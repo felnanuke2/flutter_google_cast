@@ -29,7 +29,7 @@ import GoogleCast
 ///
 /// - Author: LUIZ FELIPE ALVES LIMA
 /// - Since: iOS 10.0+
-class RemoteMediaClienteMethodChannel :UIResponder, FlutterPlugin, GCKRemoteMediaClientListener, RemoteMediaClientHostApi{
+class RemoteMediaClientMethodChannel :UIResponder, FlutterPlugin, GCKRemoteMediaClientListener, RemoteMediaClientHostApi{
     
     // MARK: - Singleton Implementation
     
@@ -39,11 +39,11 @@ class RemoteMediaClienteMethodChannel :UIResponder, FlutterPlugin, GCKRemoteMedi
     }
     
     /// Shared singleton instance
-    static private let _instance = RemoteMediaClienteMethodChannel()
+    static private let _instance = RemoteMediaClientMethodChannel()
     
     /// Public accessor for the singleton instance
-    /// - Returns: The shared RemoteMediaClienteMethodChannel instance
-    static var instance : RemoteMediaClienteMethodChannel {
+    /// - Returns: The shared RemoteMediaClientMethodChannel instance
+    static var instance : RemoteMediaClientMethodChannel {
         _instance
     }
     
@@ -54,7 +54,7 @@ class RemoteMediaClienteMethodChannel :UIResponder, FlutterPlugin, GCKRemoteMedi
     
     /// Reference to the current Cast session's remote media client
     /// - Returns: The media client for the current session, or nil if no session
-    private var currentRemoteMediaCliente: GCKRemoteMediaClient? {
+    private var currentRemoteMediaClient: GCKRemoteMediaClient? {
         GCKCastContext.sharedInstance().sessionManager.currentSession?.remoteMediaClient
     }
     
@@ -95,7 +95,7 @@ class RemoteMediaClienteMethodChannel :UIResponder, FlutterPlugin, GCKRemoteMedi
     /// - Parameter registrar: The Flutter plugin registrar for method channel setup
     static func register(with registrar: FlutterPluginRegistrar) {
         
-        let instance = RemoteMediaClienteMethodChannel.instance
+        let instance = RemoteMediaClientMethodChannel.instance
         RemoteMediaClientHostApiSetup.setUp(binaryMessenger: registrar.messenger(), api: instance)
         instance.flutterApi = RemoteMediaClientFlutterApi(binaryMessenger: registrar.messenger())
     }
@@ -124,7 +124,7 @@ class RemoteMediaClienteMethodChannel :UIResponder, FlutterPlugin, GCKRemoteMedi
             requestDataBuilder.customData = customData as NSObject
         }
 
-        _ = currentRemoteMediaCliente?.loadMedia(with: requestDataBuilder.build())
+        _ = currentRemoteMediaClient?.loadMedia(with: requestDataBuilder.build())
     }
 
     func queueLoadItems(request: QueueLoadRequestPigeon) throws {
@@ -141,7 +141,7 @@ class RemoteMediaClienteMethodChannel :UIResponder, FlutterPlugin, GCKRemoteMedi
             options.customData = requestOptions.customData as? [String: Any]
         }
 
-        _ = currentRemoteMediaCliente?.queueLoad(items, with: options)
+        _ = currentRemoteMediaClient?.queueLoad(items, with: options)
     }
 
     func queueInsertItems(request: QueueInsertItemsRequestPigeon) throws {
@@ -150,7 +150,7 @@ class RemoteMediaClienteMethodChannel :UIResponder, FlutterPlugin, GCKRemoteMedi
             return GCKMediaQueueItem.fromMap(mediaQueueItemToMap(item))
         }
 
-        _ = currentRemoteMediaCliente?.queueInsert(
+        _ = currentRemoteMediaClient?.queueInsert(
             items,
             beforeItemWithID: request.beforeItemWithId.map { UInt($0) } ?? kGCKMediaQueueInvalidItemID
         )
@@ -165,30 +165,30 @@ class RemoteMediaClienteMethodChannel :UIResponder, FlutterPlugin, GCKRemoteMedi
             )
         }
 
-        _ = currentRemoteMediaCliente?.queueInsertAndPlay(item, beforeItemWithID: UInt(request.beforeItemWithId))
+        _ = currentRemoteMediaClient?.queueInsertAndPlay(item, beforeItemWithID: UInt(request.beforeItemWithId))
     }
 
     func queueNextItem() throws {
-        _ = currentRemoteMediaCliente?.queueNextItem()
+        _ = currentRemoteMediaClient?.queueNextItem()
     }
 
     func queuePrevItem() throws {
-        _ = currentRemoteMediaCliente?.queuePreviousItem()
+        _ = currentRemoteMediaClient?.queuePreviousItem()
     }
 
     func queueJumpToItemWithId(itemId: Int64) throws {
-        currentRemoteMediaCliente?.queueJumpToItem(withID: UInt(itemId))
+        currentRemoteMediaClient?.queueJumpToItem(withID: UInt(itemId))
     }
 
     func queueRemoveItemsWithIds(itemIds: [Int64?]) throws {
         let ids = itemIds.compactMap { $0 }.map { NSNumber(value: $0) }
-        currentRemoteMediaCliente?.queueRemoveItems(withIDs: ids)
+        currentRemoteMediaClient?.queueRemoveItems(withIDs: ids)
     }
 
     func queueReorderItems(request: QueueReorderItemsRequestPigeon) throws {
         let itemIds = request.itemsIds.compactMap { $0 }.map { NSNumber(value: $0) }
         let beforeItemId = request.beforeItemWithId.map { UInt($0) } ?? kGCKMediaQueueInvalidItemID
-        currentRemoteMediaCliente?.queueReorderItems(withIDs: itemIds, insertBeforeItemWithID: beforeItemId)
+        currentRemoteMediaClient?.queueReorderItems(withIDs: itemIds, insertBeforeItemWithID: beforeItemId)
     }
 
     func seek(request: SeekOptionPigeon) throws {
@@ -197,15 +197,16 @@ class RemoteMediaClienteMethodChannel :UIResponder, FlutterPlugin, GCKRemoteMedi
         options.relative = request.relative
         options.resumeState = GCKMediaResumeState(rawValue: mediaResumeStateToInt(request.resumeState)) ?? .play
         options.seekToInfinite = request.seekToInfinity
-        _ = currentRemoteMediaCliente?.seek(with: options)
+        _ = currentRemoteMediaClient?.seek(with: options)
     }
 
     func setActiveTrackIds(trackIds: [Int64?]) throws {
-        _ = currentRemoteMediaCliente?.setActiveTrackIDs(trackIds.compactMap { $0 }.map { NSNumber(value: $0) })
+        _ = currentRemoteMediaClient?.setActiveTrackIDs(trackIds.compactMap { $0 }.map { NSNumber(value: $0) })
     }
 
-    func setPlaybackRate(rate: Double) throws {
-        _ = currentRemoteMediaCliente?.setPlaybackRate(Float(rate))
+    func setPlaybackRate(request: SetPlaybackRateRequestPigeon) throws {
+        let playbackRate = try PlaybackRate(request.rate)
+        _ = currentRemoteMediaClient?.setPlaybackRate(playbackRate.nativeValue)
     }
 
     func setTextTrackStyle(textTrackStyle: TextTrackStylePigeon) throws {
@@ -214,15 +215,15 @@ class RemoteMediaClienteMethodChannel :UIResponder, FlutterPlugin, GCKRemoteMedi
     }
 
     func play() throws {
-        _ = currentRemoteMediaCliente?.play()
+        _ = currentRemoteMediaClient?.play()
     }
 
     func pause() throws {
-        _ = currentRemoteMediaCliente?.pause()
+        _ = currentRemoteMediaClient?.pause()
     }
 
     func stop() throws {
-        _ = currentRemoteMediaCliente?.stop()
+        _ = currentRemoteMediaClient?.stop()
     }
     
     public func startListen(){
@@ -364,6 +365,25 @@ class RemoteMediaClienteMethodChannel :UIResponder, FlutterPlugin, GCKRemoteMedi
             return 1
         case .unchanged:
             return 2
+        }
+    }
+
+    private struct PlaybackRate {
+        let value: Double
+
+        init(_ value: Double) throws {
+            guard value.isFinite else {
+                throw NSError(
+                    domain: "INVALID_ARGUMENT",
+                    code: 3,
+                    userInfo: [NSLocalizedDescriptionKey: "Playback rate must be a finite number"]
+                )
+            }
+            self.value = value
+        }
+
+        var nativeValue: Float {
+            Float(value)
         }
     }
 

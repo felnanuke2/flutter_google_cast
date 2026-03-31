@@ -29,6 +29,11 @@ bool _deepEquals(Object? a, Object? b) {
 }
 
 
+enum DiscoveryCriteriaMethodPigeon {
+  initWithApplicationID,
+  initWithNamespaces,
+}
+
 class DiscoveryCriteriaPigeon {
   DiscoveryCriteriaPigeon({
     required this.method,
@@ -36,7 +41,7 @@ class DiscoveryCriteriaPigeon {
     this.namespaces,
   });
 
-  String method;
+  DiscoveryCriteriaMethodPigeon method;
 
   String? applicationID;
 
@@ -56,7 +61,7 @@ class DiscoveryCriteriaPigeon {
   static DiscoveryCriteriaPigeon decode(Object result) {
     result as List<Object?>;
     return DiscoveryCriteriaPigeon(
-      method: result[0]! as String,
+      method: result[0]! as DiscoveryCriteriaMethodPigeon,
       applicationID: result[1] as String?,
       namespaces: (result[2] as List<Object?>?)?.cast<String?>(),
     );
@@ -210,14 +215,17 @@ class _PigeonCodec extends StandardMessageCodec {
     if (value is int) {
       buffer.putUint8(4);
       buffer.putInt64(value);
-    }    else if (value is DiscoveryCriteriaPigeon) {
+    }    else if (value is DiscoveryCriteriaMethodPigeon) {
       buffer.putUint8(129);
-      writeValue(buffer, value.encode());
-    }    else if (value is CastOptionsPigeon) {
+      writeValue(buffer, value.index);
+    }    else if (value is DiscoveryCriteriaPigeon) {
       buffer.putUint8(130);
       writeValue(buffer, value.encode());
-    }    else if (value is CastContextInitRequest) {
+    }    else if (value is CastOptionsPigeon) {
       buffer.putUint8(131);
+      writeValue(buffer, value.encode());
+    }    else if (value is CastContextInitRequest) {
+      buffer.putUint8(132);
       writeValue(buffer, value.encode());
     } else {
       super.writeValue(buffer, value);
@@ -228,10 +236,13 @@ class _PigeonCodec extends StandardMessageCodec {
   Object? readValueOfType(int type, ReadBuffer buffer) {
     switch (type) {
       case 129: 
-        return DiscoveryCriteriaPigeon.decode(readValue(buffer)!);
+        final int? value = readValue(buffer) as int?;
+        return value == null ? null : DiscoveryCriteriaMethodPigeon.values[value];
       case 130: 
-        return CastOptionsPigeon.decode(readValue(buffer)!);
+        return DiscoveryCriteriaPigeon.decode(readValue(buffer)!);
       case 131: 
+        return CastOptionsPigeon.decode(readValue(buffer)!);
+      case 132: 
         return CastContextInitRequest.decode(readValue(buffer)!);
       default:
         return super.readValueOfType(type, buffer);

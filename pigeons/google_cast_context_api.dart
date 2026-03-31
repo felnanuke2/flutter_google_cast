@@ -25,9 +25,14 @@ class DiscoveryCriteriaPigeon {
     this.namespaces,
   });
 
-  String method;
+  DiscoveryCriteriaMethodPigeon method;
   String? applicationID;
   List<String?>? namespaces;
+}
+
+enum DiscoveryCriteriaMethodPigeon {
+  initWithApplicationID,
+  initWithNamespaces,
 }
 
 class CastOptionsPigeon {

@@ -68,7 +68,7 @@ public class SwiftGoogleCastPlugin: NSObject, GCKLoggerDelegate, FlutterPlugin, 
     /// - `google_cast.session_manager`: Session management (via FGCSessionManagerMethodChannel)
     /// - `google_cast.session`: Individual session operations (via FGCSessionMethodChannel)
     /// - `google_cast.discovery_manager`: Device discovery (via FGCDiscoveryManagerMethodChannel)
-    /// - `google_cast.remote_media_client`: Media control (via RemoteMediaClienteMethodChannel)
+    /// - `google_cast.remote_media_client`: Media control (via RemoteMediaClientMethodChannel)
     ///
     /// - Parameter registrar: The Flutter plugin registrar for method channel setup
   public static func register(with registrar: FlutterPluginRegistrar) {
@@ -86,7 +86,7 @@ public class SwiftGoogleCastPlugin: NSObject, GCKLoggerDelegate, FlutterPlugin, 
       FGCSessionManagerMethodChannel.register(with: registrar)
       FGCSessionMethodChannel.register(with: registrar)
       FGCDiscoveryManagerMethodChannel.register(with: registrar)
-      RemoteMediaClienteMethodChannel.register(with: registrar)
+    RemoteMediaClientMethodChannel.register(with: registrar)
   }
 
     // MARK: - Flutter Method Call Handling

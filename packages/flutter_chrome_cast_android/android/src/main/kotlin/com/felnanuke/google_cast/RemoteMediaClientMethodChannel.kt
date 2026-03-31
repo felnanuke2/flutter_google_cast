@@ -113,82 +113,68 @@ class RemoteMediaClientMethodChannel : FlutterPlugin, RemoteMediaClientHostApi,
     }
 
     override fun loadMedia(request: LoadMediaRequestPigeon) {
-        loadMedia(
-            mapOf(
-                "mediaInfo" to request.mediaInfo.let { mediaInfoToMap(it) },
-                "autoPlay" to request.autoPlay,
-                "playPosition" to request.playPosition,
-                "playbackRate" to request.playbackRate,
-                "activeTrackIds" to request.activeTrackIds,
-                "credentials" to request.credentials,
-                "credentialsType" to request.credentialsType,
-                "customData" to request.customData,
-            )
-        )
+        val mediaInfo = GoogleCastMediaInfo.fromMap(mediaInfoToMap(request.mediaInfo)) ?: return
+        val requestData = buildMediaLoadRequestData(mediaInfo, request)
+        currentRemoteMediaClient?.load(requestData)
     }
 
     override fun queueLoadItems(request: QueueLoadRequestPigeon) {
-        queueLoadItems(
-            mapOf(
-                "queueItems" to request.items.mapNotNull { it?.let { queueItemToMap(it) } },
-                "options" to request.options?.let {
-                    mapOf(
-                        "startIndex" to it.startIndex,
-                        "repeatMode" to when (it.repeatMode) {
-                            RepeatModePigeon.OFF -> "OFF"
-                            RepeatModePigeon.ALL -> "ALL"
-                            RepeatModePigeon.SINGLE -> "SINGLE"
-                            RepeatModePigeon.ALL_AND_SHUFFLE -> "ALL_AND_SHUFFLE"
-                        },
-                        "playPosition" to it.playPosition,
-                        "customData" to it.customData,
-                    )
-                },
-            )
+        val queueItems = request.items.mapNotNull { item ->
+            item?.let { GoogleCastQueueItemBuilder.fromMap(queueItemToMap(it)) }
+        }
+        val options = request.options
+        val startIndex = options?.startIndex ?: 0
+        val playPosition = options?.playPosition ?: 0L
+        val queueCustomDataJson = options?.customData?.let { mapToJsonObject(it) } ?: JSONObject()
+
+        currentRemoteMediaClient?.queueLoad(
+            queueItems.toTypedArray(),
+            startIndex,
+            repeatModeToCast(request.options?.repeatMode),
+            playPosition * 1000,
+            queueCustomDataJson
         )
     }
 
     override fun queueInsertItems(request: QueueInsertItemsRequestPigeon) {
-        queueInsertItems(
-            mapOf(
-                "items" to request.items.mapNotNull { it?.let { queueItemToMap(it) } },
-                "beforeItemWithId" to request.beforeItemWithId?.toInt(),
-            )
-        )
+        val items = request.items.mapNotNull { item ->
+            item?.let { GoogleCastQueueItemBuilder.fromMap(queueItemToMap(it)) }
+        }
+        val beforeItemWithId = request.beforeItemWithId?.toInt() ?: MediaSession.QueueItem.UNKNOWN_ID
+        currentRemoteMediaClient?.queueInsertItems(items.toTypedArray(), beforeItemWithId, JSONObject())
     }
 
     override fun queueInsertItemAndPlay(request: QueueInsertItemAndPlayRequestPigeon) {
-        queueInsertItemAndPlay(
-            mapOf(
-                "item" to queueItemToMap(request.item),
-                "beforeItemWithId" to request.beforeItemWithId.toInt(),
-            )
-        )
+        val item = GoogleCastQueueItemBuilder.fromMap(queueItemToMap(request.item)) ?: return
+        currentRemoteMediaClient?.queueInsertAndPlayItem(item, request.beforeItemWithId.toInt(), JSONObject())
     }
 
-    override fun queueNextItem() = queueNextItemInternal()
+    override fun queueNextItem() {
+        currentRemoteMediaClient?.queueNext(JSONObject())
+    }
 
-    override fun queuePrevItem() = queuePrevItemInternal()
+    override fun queuePrevItem() {
+        currentRemoteMediaClient?.queuePrev(JSONObject())
+    }
 
-    override fun queueJumpToItemWithId(itemId: Long) = queueJumpToItemWithIdInternal(itemId.toInt())
+    override fun queueJumpToItemWithId(itemId: Long) {
+        currentRemoteMediaClient?.queueJumpToItem(itemId.toInt(), JSONObject())
+    }
 
     override fun queueRemoveItemsWithIds(itemIds: List<Long?>) {
         val ids = itemIds.mapNotNull { it?.toInt() }.toIntArray()
-        queueRemoveItemsWithIdsInternal(ids)
+        currentRemoteMediaClient?.queueRemoveItems(ids, JSONObject())
     }
 
     override fun queueReorderItems(request: QueueReorderItemsRequestPigeon) {
-        val ids = request.itemsIds.mapNotNull { it?.toInt() }.toIntArray()
-        queueReorderItemsInternal(
-            mapOf(
-                "itemsIds" to ids,
-                "beforeItemWithId" to request.beforeItemWithId?.toInt(),
-            )
-        )
+        val itemIds = request.itemsIds.mapNotNull { it?.toInt() }.toIntArray()
+        val beforeItemWithId =
+            request.beforeItemWithId?.toInt() ?: MediaSession.QueueItem.UNKNOWN_ID
+        currentRemoteMediaClient?.queueReorderItems(itemIds, beforeItemWithId, JSONObject())
     }
 
     override fun seek(request: SeekOptionPigeon) {
-        seekInternal(
+        val options = GoogleCastSeekOptionsBuilder.fromMap(
             mapOf(
                 "position" to request.position,
                 "relative" to request.relative,
@@ -200,187 +186,81 @@ class RemoteMediaClientMethodChannel : FlutterPlugin, RemoteMediaClientHostApi,
                 "seekToInfinity" to request.seekToInfinity,
             )
         )
+        currentRemoteMediaClient?.seek(options)
     }
 
     override fun setActiveTrackIds(trackIds: List<Long?>) {
-        setActiveTrackIdsInternal(ArrayList(trackIds.mapNotNull { it }))
+        val castTrackIds = trackIds.mapNotNull { it }.toLongArray()
+        currentRemoteMediaClient?.setActiveMediaTracks(castTrackIds)
+            ?.addStatusListener { status ->
+                if (status.isSuccess) {
+                    Log.w(TAG, "setActiveTrackIds success ${castTrackIds.contentToString()}")
+                } else {
+                    Log.w(TAG, "setActiveTrackIds failed ${castTrackIds.contentToString()}")
+                }
+            }
     }
 
-    override fun setPlaybackRate(rate: Double) = setPlaybackRateInternal(rate)
+    override fun setPlaybackRate(request: SetPlaybackRateRequestPigeon) {
+        currentRemoteMediaClient?.setPlaybackRate(request.rate)
+    }
 
-    override fun setTextTrackStyle(textTrackStyle: TextTrackStylePigeon) = setTextTrackStyleInternal(textTrackStyle)
+    override fun setTextTrackStyle(textTrackStyle: TextTrackStylePigeon) {
+        setTextTrackStyleInternal(textTrackStyle)
+    }
 
-    override fun play() = playInternal()
+    override fun play() {
+        currentRemoteMediaClient?.play()
+    }
 
-    override fun pause() = pauseInternal()
+    override fun pause() {
+        currentRemoteMediaClient?.pause()
+    }
 
-    override fun stop() = stopInternal()
+    override fun stop() {
+        currentRemoteMediaClient?.stop()
+    }
 
     private fun setTextTrackStyleInternal(style: TextTrackStylePigeon) {
         // TODO: apply text track style in native SDK using typed Pigeon model.
         // Kept as no-op to preserve previous behavior while removing map payloads.
     }
 
-    private fun setPlaybackRateInternal(arguments: Any?) {
-        val playbackRate = arguments as Double
-        currentRemoteMediaClient?.setPlaybackRate(playbackRate)
-    }
-
-    private fun setActiveTrackIdsInternal(arguments: Any?) {
-        arguments as ArrayList<Long>
-        val longArray = arguments.map {
-            it.toLong()
+    private fun repeatModeToCast(repeatMode: RepeatModePigeon?): Int {
+        return when (repeatMode) {
+            RepeatModePigeon.ALL -> REPEAT_MODE_REPEAT_ALL
+            RepeatModePigeon.SINGLE -> REPEAT_MODE_REPEAT_SINGLE
+            RepeatModePigeon.ALL_AND_SHUFFLE -> REPEAT_MODE_REPEAT_ALL_AND_SHUFFLE
+            RepeatModePigeon.OFF, null -> REPEAT_MODE_REPEAT_OFF
         }
-        currentRemoteMediaClient?.setActiveMediaTracks(longArray.toLongArray())
-            ?.addStatusListener { status ->
-                if (status.isSuccess) {
-
-                    Log.w(TAG, "setActiveTrackIds success $longArray")
-                } else {
-                    Log.w(TAG, "setActiveTrackIds failed $longArray")
-                }
-
-            }
-
-
-    }
-
-    private fun seekInternal(arguments: Any?) {
-        arguments as Map<String, Any?>
-        val options = GoogleCastSeekOptionsBuilder.fromMap(arguments)
-        currentRemoteMediaClient?.seek(options)
-    }
-
-    private fun queueReorderItemsInternal(arguments: Any?) {
-        arguments as Map<String, Any?>
-        val itemIds = arguments["itemsIds"] as IntArray
-        val beforeItemWithId =
-            (arguments["beforeItemWithId"] as Int?) ?: MediaSession.QueueItem.UNKNOWN_ID
-        currentRemoteMediaClient?.queueReorderItems(itemIds, beforeItemWithId, JSONObject())
-    }
-
-    private fun queueRemoveItemsWithIdsInternal(arguments: Any?) {
-        arguments as IntArray
-        currentRemoteMediaClient?.queueRemoveItems(arguments, JSONObject())
-    }
-
-    private fun queueJumpToItemWithIdInternal(itemId: Int) {
-        currentRemoteMediaClient?.queueJumpToItem(itemId, JSONObject())
-
-    }
-
-    private fun queuePrevItemInternal() {
-        currentRemoteMediaClient?.queuePrev(JSONObject())
-    }
-
-    private fun queueNextItemInternal() {
-        currentRemoteMediaClient?.queueNext(JSONObject())
-    }
-
-    private fun queueInsertItemAndPlay(arguments: Map<String, Any?>) {
-        val item =
-            GoogleCastQueueItemBuilder.fromMap(arguments["item"] as Map<String, Any?>) ?: return
-        val beforeItemWithId = arguments["beforeItemWithId"] as Int
-        var jsonObject = JSONObject()
-        currentRemoteMediaClient?.queueInsertAndPlayItem(item, beforeItemWithId, jsonObject)
-
-    }
-
-    private fun queueInsertItems(arguments: Map<String, Any?>) {
-        val items =
-            GoogleCastQueueItemBuilder.listFromMap(arguments["items"] as List<Map<String, Any?>>)
-        val beforeItemWithId =
-            (arguments["beforeItemWithId"] as Int?) ?: MediaSession.QueueItem.UNKNOWN_ID
-        var jsonObject = JSONObject()
-        currentRemoteMediaClient?.queueInsertItems(
-            items.toTypedArray(),
-            beforeItemWithId,
-            jsonObject
-        )
-
-    }
-
-    private fun pauseInternal() {
-        currentRemoteMediaClient?.pause()
-    }
-
-    private fun playInternal() {
-        currentRemoteMediaClient?.play()
-
-    }
-
-    private fun stopInternal() {
-        currentRemoteMediaClient?.stop()
-    }
-
-    private fun queueLoadItems(arguments: Map<String, Any?>) {
-        val queueItemsData = arguments["queueItems"] as List<Map<String, Any?>>
-        val optionsData = arguments["options"] as? Map<String, Any?> ?: emptyMap()
-        val startIndex = (optionsData["startIndex"] as? Number)?.toInt() ?: 0
-        val repeatMode = optionsData["repeatMode"] as String?
-        val playPosition = (optionsData["playPosition"] as? Number)?.toLong() ?: 0L
-        val queueCustomData = optionsData["customData"] as? Map<*, *>
-        val queueCustomDataJson = if (queueCustomData != null) {
-            mapToJsonObject(queueCustomData)
-        } else {
-            JSONObject()
-        }
-        val queueItems = GoogleCastQueueItemBuilder.listFromMap(queueItemsData)
-        currentRemoteMediaClient?.queueLoad(
-            queueItems.toTypedArray(),
-            startIndex,
-            when (repeatMode) {
-                "OFF" -> REPEAT_MODE_REPEAT_OFF
-                "ALL" -> REPEAT_MODE_REPEAT_ALL
-                "SINGLE" -> REPEAT_MODE_REPEAT_SINGLE
-                "ALL_AND_SHUFFLE" -> REPEAT_MODE_REPEAT_ALL_AND_SHUFFLE
-                else -> REPEAT_MODE_REPEAT_OFF
-            },
-            playPosition * 1000,
-            queueCustomDataJson
-        )
-    }
-
-    private fun loadMedia(arguments: Map<String, Any?>) {
-        val mediaInfo =
-            GoogleCastMediaInfo.fromMap(arguments["mediaInfo"] as Map<String, Any?>) ?: return
-        val customData = arguments["customData"] as? Map<*, *>
-        val requestData = buildMediaLoadRequestData(mediaInfo, arguments, customData)
-        currentRemoteMediaClient?.load(requestData)
     }
 
     private fun buildMediaLoadRequestData(
         mediaInfo: com.google.android.gms.cast.MediaInfo,
-        arguments: Map<String, Any?>,
-        customData: Map<*, *>?
+        request: LoadMediaRequestPigeon
     ): com.google.android.gms.cast.MediaLoadRequestData {
-        val autoPlay = arguments["autoPlay"] as? Boolean ?: true
-        val playPosition = arguments["playPosition"] as? Int ?: 0
-        val activeTrackIds = (arguments["activeTrackIds"] as? ArrayList<Number>)?.map { it.toLong() }?.toLongArray()
-        val credentials = arguments["credentials"] as? String
-        val credentialsType = arguments["credentialsType"] as? String
-        val playbackRate = arguments["playbackRate"] as? Double ?: 1.0
+        val activeTrackIds = request.activeTrackIds?.mapNotNull { it }?.toLongArray()
 
         val requestDataBuilder = com.google.android.gms.cast.MediaLoadRequestData.Builder()
             .setMediaInfo(mediaInfo)
-            .setAutoplay(autoPlay)
-            .setCurrentTime((playPosition * 1000).toLong())
-            .setPlaybackRate(playbackRate)
+            .setAutoplay(request.autoPlay ?: true)
+            .setCurrentTime(request.playPosition.toLong() * 1000)
+            .setPlaybackRate(request.playbackRate ?: 1.0)
 
-        if (customData != null) {
-            requestDataBuilder.setCustomData(mapToJsonObject(customData))
+        if (request.customData != null) {
+            requestDataBuilder.setCustomData(mapToJsonObject(request.customData))
         }
 
         if (activeTrackIds != null) {
             requestDataBuilder.setActiveTrackIds(activeTrackIds)
         }
 
-        if (credentials != null) {
-            requestDataBuilder.setCredentials(credentials)
+        if (request.credentials != null) {
+            requestDataBuilder.setCredentials(request.credentials)
         }
 
-        if (credentialsType != null) {
-            requestDataBuilder.setCredentialsType(credentialsType)
+        if (request.credentialsType != null) {
+            requestDataBuilder.setCredentialsType(request.credentialsType)
         }
 
         return requestDataBuilder.build()

@@ -576,6 +576,47 @@ class SeekOptionPigeon {
 ;
 }
 
+class SetPlaybackRateRequestPigeon {
+  SetPlaybackRateRequestPigeon({
+    required this.rate,
+  });
+
+  double rate;
+
+  List<Object?> _toList() {
+    return <Object?>[
+      rate,
+    ];
+  }
+
+  Object encode() {
+    return _toList();  }
+
+  static SetPlaybackRateRequestPigeon decode(Object result) {
+    result as List<Object?>;
+    return SetPlaybackRateRequestPigeon(
+      rate: result[0]! as double,
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! SetPlaybackRateRequestPigeon || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(encode(), other.encode());
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => Object.hashAll(_toList())
+;
+}
+
 class LoadMediaRequestPigeon {
   LoadMediaRequestPigeon({
     required this.mediaInfo,
@@ -1012,26 +1053,29 @@ class _PigeonCodec extends StandardMessageCodec {
     }    else if (value is SeekOptionPigeon) {
       buffer.putUint8(138);
       writeValue(buffer, value.encode());
-    }    else if (value is LoadMediaRequestPigeon) {
+    }    else if (value is SetPlaybackRateRequestPigeon) {
       buffer.putUint8(139);
       writeValue(buffer, value.encode());
-    }    else if (value is QueueLoadRequestPigeon) {
+    }    else if (value is LoadMediaRequestPigeon) {
       buffer.putUint8(140);
       writeValue(buffer, value.encode());
-    }    else if (value is QueueInsertItemsRequestPigeon) {
+    }    else if (value is QueueLoadRequestPigeon) {
       buffer.putUint8(141);
       writeValue(buffer, value.encode());
-    }    else if (value is QueueInsertItemAndPlayRequestPigeon) {
+    }    else if (value is QueueInsertItemsRequestPigeon) {
       buffer.putUint8(142);
       writeValue(buffer, value.encode());
-    }    else if (value is QueueReorderItemsRequestPigeon) {
+    }    else if (value is QueueInsertItemAndPlayRequestPigeon) {
       buffer.putUint8(143);
       writeValue(buffer, value.encode());
-    }    else if (value is PlayerPositionUpdate) {
+    }    else if (value is QueueReorderItemsRequestPigeon) {
       buffer.putUint8(144);
       writeValue(buffer, value.encode());
-    }    else if (value is TextTrackStylePigeon) {
+    }    else if (value is PlayerPositionUpdate) {
       buffer.putUint8(145);
+      writeValue(buffer, value.encode());
+    }    else if (value is TextTrackStylePigeon) {
+      buffer.putUint8(146);
       writeValue(buffer, value.encode());
     } else {
       super.writeValue(buffer, value);
@@ -1064,18 +1108,20 @@ class _PigeonCodec extends StandardMessageCodec {
       case 138: 
         return SeekOptionPigeon.decode(readValue(buffer)!);
       case 139: 
-        return LoadMediaRequestPigeon.decode(readValue(buffer)!);
+        return SetPlaybackRateRequestPigeon.decode(readValue(buffer)!);
       case 140: 
-        return QueueLoadRequestPigeon.decode(readValue(buffer)!);
+        return LoadMediaRequestPigeon.decode(readValue(buffer)!);
       case 141: 
-        return QueueInsertItemsRequestPigeon.decode(readValue(buffer)!);
+        return QueueLoadRequestPigeon.decode(readValue(buffer)!);
       case 142: 
-        return QueueInsertItemAndPlayRequestPigeon.decode(readValue(buffer)!);
+        return QueueInsertItemsRequestPigeon.decode(readValue(buffer)!);
       case 143: 
-        return QueueReorderItemsRequestPigeon.decode(readValue(buffer)!);
+        return QueueInsertItemAndPlayRequestPigeon.decode(readValue(buffer)!);
       case 144: 
-        return PlayerPositionUpdate.decode(readValue(buffer)!);
+        return QueueReorderItemsRequestPigeon.decode(readValue(buffer)!);
       case 145: 
+        return PlayerPositionUpdate.decode(readValue(buffer)!);
+      case 146: 
         return TextTrackStylePigeon.decode(readValue(buffer)!);
       default:
         return super.readValueOfType(type, buffer);
@@ -1349,14 +1395,14 @@ class RemoteMediaClientHostApi {
     }
   }
 
-  Future<void> setPlaybackRate(double rate) async {
+  Future<void> setPlaybackRate(SetPlaybackRateRequestPigeon request) async {
     final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_chrome_cast_platform_interface.RemoteMediaClientHostApi.setPlaybackRate$pigeonVar_messageChannelSuffix';
     final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
       binaryMessenger: pigeonVar_binaryMessenger,
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[rate]);
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[request]);
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_sendFuture as List<Object?>?;
     if (pigeonVar_replyList == null) {

@@ -110,16 +110,21 @@ func deepHashGoogleCastContextPigeon(value: Any?, hasher: inout Hasher) {
 
     
 
+enum DiscoveryCriteriaMethodPigeon: Int {
+  case initWithApplicationID = 0
+  case initWithNamespaces = 1
+}
+
 /// Generated class from Pigeon that represents data sent in messages.
 struct DiscoveryCriteriaPigeon: Hashable {
-  var method: String
+  var method: DiscoveryCriteriaMethodPigeon
   var applicationID: String? = nil
   var namespaces: [String?]? = nil
 
 
   // swift-format-ignore: AlwaysUseLowerCamelCase
   static func fromList(_ pigeonVar_list: [Any?]) -> DiscoveryCriteriaPigeon? {
-    let method = pigeonVar_list[0] as! String
+    let method = pigeonVar_list[0] as! DiscoveryCriteriaMethodPigeon
     let applicationID: String? = nilOrValue(pigeonVar_list[1])
     let namespaces: [String?]? = nilOrValue(pigeonVar_list[2])
 
@@ -229,10 +234,16 @@ private class GoogleCastContextPigeonPigeonCodecReader: FlutterStandardReader {
   override func readValue(ofType type: UInt8) -> Any? {
     switch type {
     case 129:
-      return DiscoveryCriteriaPigeon.fromList(self.readValue() as! [Any?])
+      let enumResultAsInt: Int? = nilOrValue(self.readValue() as! Int?)
+      if let enumResultAsInt = enumResultAsInt {
+        return DiscoveryCriteriaMethodPigeon(rawValue: enumResultAsInt)
+      }
+      return nil
     case 130:
-      return CastOptionsPigeon.fromList(self.readValue() as! [Any?])
+      return DiscoveryCriteriaPigeon.fromList(self.readValue() as! [Any?])
     case 131:
+      return CastOptionsPigeon.fromList(self.readValue() as! [Any?])
+    case 132:
       return CastContextInitRequest.fromList(self.readValue() as! [Any?])
     default:
       return super.readValue(ofType: type)
@@ -242,14 +253,17 @@ private class GoogleCastContextPigeonPigeonCodecReader: FlutterStandardReader {
 
 private class GoogleCastContextPigeonPigeonCodecWriter: FlutterStandardWriter {
   override func writeValue(_ value: Any) {
-    if let value = value as? DiscoveryCriteriaPigeon {
+    if let value = value as? DiscoveryCriteriaMethodPigeon {
       super.writeByte(129)
-      super.writeValue(value.toList())
-    } else if let value = value as? CastOptionsPigeon {
+      super.writeValue(value.rawValue)
+    } else if let value = value as? DiscoveryCriteriaPigeon {
       super.writeByte(130)
       super.writeValue(value.toList())
-    } else if let value = value as? CastContextInitRequest {
+    } else if let value = value as? CastOptionsPigeon {
       super.writeByte(131)
+      super.writeValue(value.toList())
+    } else if let value = value as? CastContextInitRequest {
+      super.writeByte(132)
       super.writeValue(value.toList())
     } else {
       super.writeValue(value)

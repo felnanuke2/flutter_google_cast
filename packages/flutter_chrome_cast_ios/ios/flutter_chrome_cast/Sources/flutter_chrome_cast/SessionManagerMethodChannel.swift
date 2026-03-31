@@ -216,7 +216,7 @@ class FGCSessionManagerMethodChannel : UIResponder, FlutterPlugin, GCKSessionMan
     ///   - session: The session that started
     public func sessionManager(_ sessionManager: GCKSessionManager, didStart session: GCKSession) {
         onSessionChanged(session)
-        RemoteMediaClienteMethodChannel.instance.startListen()
+        RemoteMediaClientMethodChannel.instance.startListen()
     }
     
     /// Called when a Cast session is about to start
@@ -267,7 +267,7 @@ class FGCSessionManagerMethodChannel : UIResponder, FlutterPlugin, GCKSessionMan
     ///   - error: Optional error if the session ended unexpectedly
     public func sessionManager(_ sessionManager: GCKSessionManager, didEnd session: GCKSession, withError error: Error?) {
         onSessionChanged(session)
-        RemoteMediaClienteMethodChannel.instance.onSessionEnd()
+        RemoteMediaClientMethodChannel.instance.onSessionEnd()
     }
     
     /// Called when a Cast session is about to end
@@ -293,7 +293,7 @@ class FGCSessionManagerMethodChannel : UIResponder, FlutterPlugin, GCKSessionMan
     ///   - error: Optional error if the session ended unexpectedly
     public func sessionManager(_ sessionManager: GCKSessionManager, didEnd session: GCKCastSession, withError error: Error?) {
         onSessionChanged(nil)
-        RemoteMediaClienteMethodChannel.instance.onSessionEnd()
+        RemoteMediaClientMethodChannel.instance.onSessionEnd()
     }
     
     /// Called when a session fails to start
@@ -357,8 +357,8 @@ class FGCSessionManagerMethodChannel : UIResponder, FlutterPlugin, GCKSessionMan
     ///   - session: The session that resumed
     public func sessionManager(_ sessionManager: GCKSessionManager, didResumeSession session: GCKSession) {
         onSessionChanged(session)
-        RemoteMediaClienteMethodChannel.instance.startListen()
-        RemoteMediaClienteMethodChannel.instance.resumeSession();
+        RemoteMediaClientMethodChannel.instance.startListen()
+        RemoteMediaClientMethodChannel.instance.resumeSession();
     }
     
     /// Called when a Cast session has resumed

@@ -28,33 +28,75 @@ abstract class GoogleCastDiscoveryCriteria {
 
 /// Provides initialization options for Google Cast discovery criteria.
 class GoogleCastDiscoveryCriteriaInitialize {
-  /// The data map containing discovery configuration.
-  final Map<String, dynamic> data;
-
-  /// Creates a new [GoogleCastDiscoveryCriteriaInitialize] with the given data.
-  GoogleCastDiscoveryCriteriaInitialize._({
-    required this.data,
+  /// Creates a new [GoogleCastDiscoveryCriteriaInitialize] with typed fields.
+  const GoogleCastDiscoveryCriteriaInitialize._({
+    required this.method,
+    this.applicationID,
+    this.namespaces,
   });
+
+  /// The initialization method that should be used on native side.
+  final GoogleCastDiscoveryCriteriaInitMethod method;
+
+  /// Optional application ID used by [GoogleCastDiscoveryCriteriaInitMethod.initWithApplicationID].
+  final String? applicationID;
+
+  /// Optional namespaces used by [GoogleCastDiscoveryCriteriaInitMethod.initWithNamespaces].
+  final Set<String>? namespaces;
+
+  /// Backward-compatible view used by existing integrations.
+  Map<String, dynamic> get data => <String, dynamic>{
+        'method': method.name,
+        'applicationID': applicationID,
+        'namespaces': namespaces,
+      };
 
   /// Initializes with an application ID.
   factory GoogleCastDiscoveryCriteriaInitialize.initWithApplicationID(
       String applicationID) {
+    _DiscoveryCriteriaAssert.requireValidApplicationId(applicationID);
     return GoogleCastDiscoveryCriteriaInitialize._(
-      data: <String, dynamic>{
-        'method': 'initWithApplicationID',
-        'applicationID': applicationID,
-      },
+      method: GoogleCastDiscoveryCriteriaInitMethod.initWithApplicationID,
+      applicationID: applicationID,
     );
   }
 
   /// Initializes with a set of namespaces.
   factory GoogleCastDiscoveryCriteriaInitialize.initWithNamespaces(
       Set<String> namespaces) {
+    _DiscoveryCriteriaAssert.requireValidNamespaces(namespaces);
     return GoogleCastDiscoveryCriteriaInitialize._(
-      data: <String, dynamic>{
-        'method': 'initWithNamespaces',
-        'namespaces': namespaces,
-      },
+      method: GoogleCastDiscoveryCriteriaInitMethod.initWithNamespaces,
+      namespaces: namespaces,
     );
   }
+}
+
+class _DiscoveryCriteriaAssert {
+  static void requireValidApplicationId(String applicationID) {
+    assert(
+      applicationID.trim().isNotEmpty,
+      'initWithApplicationID requires a non-empty applicationID.',
+    );
+  }
+
+  static void requireValidNamespaces(Set<String> namespaces) {
+    assert(
+      namespaces.isNotEmpty,
+      'initWithNamespaces requires at least one namespace.',
+    );
+    assert(
+      namespaces.every((namespace) => namespace.trim().isNotEmpty),
+      'initWithNamespaces does not allow empty namespace values.',
+    );
+  }
+}
+
+/// Supported initialization methods for Google Cast discovery criteria.
+enum GoogleCastDiscoveryCriteriaInitMethod {
+  /// Initialize discovery criteria from a single application ID.
+  initWithApplicationID,
+
+  /// Initialize discovery criteria from a set of namespaces.
+  initWithNamespaces,
 }

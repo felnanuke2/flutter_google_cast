@@ -9,7 +9,7 @@
 /// - [GoogleCastDiscoveryManagerPlatformInterface]
 /// - [GoogleCastSessionManagerPlatformInterface]
 /// - [GoogleCastRemoteMediaClientPlatformInterface]
-library flutter_chrome_cast_platform_interface;
+library;
 
 // ── Enums ───────────────────────────────────────────────────────────────────
 export 'src/enums/connection_state.dart';

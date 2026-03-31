@@ -152,7 +152,7 @@ class GoogleCastRemoteMediaClientIOSMethodChannel
 
   @override
   Future<void> setPlaybackRate(double rate) async {
-    await _hostApi.setPlaybackRate(rate);
+    await _hostApi.setPlaybackRate(SetPlaybackRateRequestPigeon(rate: rate));
   }
 
   @override

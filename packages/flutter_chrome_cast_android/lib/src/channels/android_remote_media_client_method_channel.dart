@@ -90,7 +90,14 @@ class GoogleCastRemoteMediaClientAndroidMethodChannel
   }
 
   @override
-  bool get queueHasPreviousItem => true;
+  bool get queueHasPreviousItem {
+    final currentQueueItemId = mediaStatus?.currentItemId;
+    final currentItemIndex = queueItems
+        .map((e) => e.itemId)
+        .toList()
+        .lastIndexOf(currentQueueItemId);
+    return currentItemIndex > 0;
+  }
 
   @override
   Future<void> loadMediaWithRequest(
@@ -194,7 +201,7 @@ class GoogleCastRemoteMediaClientAndroidMethodChannel
 
   @override
   Future<void> setPlaybackRate(double rate) async {
-    await _hostApi.setPlaybackRate(rate);
+    await _hostApi.setPlaybackRate(SetPlaybackRateRequestPigeon(rate: rate));
   }
 
   @override

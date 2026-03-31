@@ -36,16 +36,24 @@ class FlutterIOSGoogleCastContextMethodChannel
           castOptions.startDiscoveryAfterFirstTapOnCastButton,
       stopCastingOnAppTerminated: castOptions.stopCastingOnAppTerminated,
       appId: null,
-        discoveryCriteria: castOptions.discoveryCriteria != null
+      discoveryCriteria: castOptions.discoveryCriteria != null
           ? DiscoveryCriteriaPigeon(
-            method: castOptions.discoveryCriteria!.data['method'] as String,
-            applicationID: castOptions
-              .discoveryCriteria!.data['applicationID'] as String?,
-            namespaces: (castOptions
-                .discoveryCriteria!.data['namespaces'] as Set<String>?)
-              ?.toList(),
+              method: _toDiscoveryCriteriaMethodPigeon(
+                  castOptions.discoveryCriteria!.method),
+              applicationID: castOptions.discoveryCriteria!.applicationID,
+              namespaces: castOptions.discoveryCriteria!.namespaces?.toList(),
             )
           : null,
     );
+  }
+
+  DiscoveryCriteriaMethodPigeon _toDiscoveryCriteriaMethodPigeon(
+      GoogleCastDiscoveryCriteriaInitMethod method) {
+    switch (method) {
+      case GoogleCastDiscoveryCriteriaInitMethod.initWithApplicationID:
+        return DiscoveryCriteriaMethodPigeon.initWithApplicationID;
+      case GoogleCastDiscoveryCriteriaInitMethod.initWithNamespaces:
+        return DiscoveryCriteriaMethodPigeon.initWithNamespaces;
+    }
   }
 }

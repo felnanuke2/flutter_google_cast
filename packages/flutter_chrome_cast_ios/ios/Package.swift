@@ -47,7 +47,7 @@ let package = Package(
                 "DiscoveryManagerMethodChannel.swift",
                 "SessionManagerMethodChannel.swift",
                 "SessionMethodChannel.swift",
-                "RemoteMediaClienteMethodChannel.swift",
+                "RemoteMediaClientMethodChannel.swift",
                 "Extensions/CastDeviceExtensions.swift",
                 "Extensions/CastImageExtensions.swift",
                 "Extensions/CastOptionsExtensions.swift",

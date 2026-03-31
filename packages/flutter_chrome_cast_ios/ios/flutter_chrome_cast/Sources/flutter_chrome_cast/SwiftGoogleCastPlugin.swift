@@ -64,7 +64,7 @@ public class SwiftGoogleCastPlugin: NSObject, GCKLoggerDelegate, FlutterPlugin, 
     /// - `google_cast.session_manager`: Session management (via FGCSessionManagerMethodChannel)
     /// - `google_cast.session`: Individual session operations (via FGCSessionMethodChannel)
     /// - `google_cast.discovery_manager`: Device discovery (via FGCDiscoveryManagerMethodChannel)
-    /// - `google_cast.remote_media_client`: Media control (via RemoteMediaClienteMethodChannel)
+    /// - `google_cast.remote_media_client`: Media control (via RemoteMediaClientMethodChannel)
     ///
     /// - Parameter registrar: The Flutter plugin registrar for method channel setup
   public static func register(with registrar: FlutterPluginRegistrar) {
@@ -77,7 +77,7 @@ public class SwiftGoogleCastPlugin: NSObject, GCKLoggerDelegate, FlutterPlugin, 
       // Register all specialized method channels for Cast features
       FGCSessionManagerMethodChannel.register(with: registrar)
       FGCDiscoveryManagerMethodChannel.register(with: registrar)
-      RemoteMediaClienteMethodChannel.register(with: registrar)
+    RemoteMediaClientMethodChannel.register(with: registrar)
   }
     // MARK: - Google Cast Context Management
     
@@ -144,7 +144,7 @@ public class SwiftGoogleCastPlugin: NSObject, GCKLoggerDelegate, FlutterPlugin, 
 
         let castDiscoveryCriteria: GCKDiscoveryCriteria
         switch discoveryCriteria.method {
-        case "initWithApplicationID":
+        case .initWithApplicationID:
             guard let appId = discoveryCriteria.applicationID else {
                 throw NSError(
                     domain: "CAST_ERROR",
@@ -153,15 +153,9 @@ public class SwiftGoogleCastPlugin: NSObject, GCKLoggerDelegate, FlutterPlugin, 
                 )
             }
             castDiscoveryCriteria = GCKDiscoveryCriteria(applicationID: appId)
-        case "initWithNamespaces":
+        case .initWithNamespaces:
             let namespaces = Set(discoveryCriteria.namespaces?.compactMap { $0 } ?? [])
             castDiscoveryCriteria = GCKDiscoveryCriteria(namespaces: namespaces)
-        default:
-            throw NSError(
-                domain: "CAST_ERROR",
-                code: 3,
-                userInfo: [NSLocalizedDescriptionKey: "Unsupported discoveryCriteria.method: \(discoveryCriteria.method)"]
-            )
         }
 
         let option = GCKCastOptions(discoveryCriteria: castDiscoveryCriteria)

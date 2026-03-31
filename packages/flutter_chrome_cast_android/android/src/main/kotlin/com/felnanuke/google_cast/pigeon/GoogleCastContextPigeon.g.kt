@@ -66,16 +66,27 @@ private object GoogleCastContextPigeonPigeonUtils {
       
 }
 
+enum class DiscoveryCriteriaMethodPigeon(val raw: Int) {
+  INIT_WITH_APPLICATION_ID(0),
+  INIT_WITH_NAMESPACES(1);
+
+  companion object {
+    fun ofRaw(raw: Int): DiscoveryCriteriaMethodPigeon? {
+      return values().firstOrNull { it.raw == raw }
+    }
+  }
+}
+
 /** Generated class from Pigeon that represents data sent in messages. */
 data class DiscoveryCriteriaPigeon (
-  val method: String,
+  val method: DiscoveryCriteriaMethodPigeon,
   val applicationID: String? = null,
   val namespaces: List<String?>? = null
 )
  {
   companion object {
     fun fromList(pigeonVar_list: List<Any?>): DiscoveryCriteriaPigeon {
-      val method = pigeonVar_list[0] as String
+      val method = pigeonVar_list[0] as DiscoveryCriteriaMethodPigeon
       val applicationID = pigeonVar_list[1] as String?
       val namespaces = pigeonVar_list[2] as List<String?>?
       return DiscoveryCriteriaPigeon(method, applicationID, namespaces)
@@ -183,16 +194,21 @@ private open class GoogleCastContextPigeonPigeonCodec : StandardMessageCodec() {
   override fun readValueOfType(type: Byte, buffer: ByteBuffer): Any? {
     return when (type) {
       129.toByte() -> {
-        return (readValue(buffer) as? List<Any?>)?.let {
-          DiscoveryCriteriaPigeon.fromList(it)
+        return (readValue(buffer) as Long?)?.let {
+          DiscoveryCriteriaMethodPigeon.ofRaw(it.toInt())
         }
       }
       130.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          CastOptionsPigeon.fromList(it)
+          DiscoveryCriteriaPigeon.fromList(it)
         }
       }
       131.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          CastOptionsPigeon.fromList(it)
+        }
+      }
+      132.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
           CastContextInitRequest.fromList(it)
         }
@@ -202,16 +218,20 @@ private open class GoogleCastContextPigeonPigeonCodec : StandardMessageCodec() {
   }
   override fun writeValue(stream: ByteArrayOutputStream, value: Any?)   {
     when (value) {
-      is DiscoveryCriteriaPigeon -> {
+      is DiscoveryCriteriaMethodPigeon -> {
         stream.write(129)
-        writeValue(stream, value.toList())
+        writeValue(stream, value.raw)
       }
-      is CastOptionsPigeon -> {
+      is DiscoveryCriteriaPigeon -> {
         stream.write(130)
         writeValue(stream, value.toList())
       }
-      is CastContextInitRequest -> {
+      is CastOptionsPigeon -> {
         stream.write(131)
+        writeValue(stream, value.toList())
+      }
+      is CastContextInitRequest -> {
+        stream.write(132)
         writeValue(stream, value.toList())
       }
       else -> super.writeValue(stream, value)

@@ -3,7 +3,7 @@
 /// Exposes the iOS platform implementations selected by the facade package
 /// when `Platform.isIOS` is true.
 /// implementations at runtime when `Platform.isIOS` is true.
-library flutter_chrome_cast_ios;
+library;
 
 // ── iOS platform options ───────────────────────────────────────────────────
 export 'src/models/ios/ios_cast_options.dart';
