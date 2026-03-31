@@ -7,7 +7,7 @@
 #
 Pod::Spec.new do |s|
   s.name             = 'flutter_chrome_cast_ios'
-  s.version          = '0.0.1'
+  s.version          = '1.4.4'
   s.summary          = 'iOS implementation of the flutter_chrome_cast plugin.'
   s.description      = <<-DESC
 Flutter Google Cast iOS platform implementation.
