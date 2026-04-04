@@ -72,6 +72,12 @@ public class FGCSessionManagerMethodChannel : UIResponder, FlutterPlugin, GCKSes
     /// Used to send session events and handle method calls from Flutter
     var channel : FlutterMethodChannel?
     
+    /// Tracks the last emitted connection state to deduplicate events.
+    /// iOS Cast SDK fires multiple delegate callbacks (for both GCKSession
+    /// and GCKCastSession) with the same connection state in rapid succession,
+    /// causing event spam on the Flutter side.
+    private var _lastEmittedConnectionState: GCKConnectionState?
+    
     /// Reference to the Google Cast session manager
     /// - Returns: The session manager from the shared Cast context
     private var sessionManager : GCKSessionManager  {
@@ -165,7 +171,8 @@ public class FGCSessionManagerMethodChannel : UIResponder, FlutterPlugin, GCKSes
     ///
     /// - Parameter result: Flutter result callback for operation status
     private func endSession(_ result : FlutterResult) {
-        print(self.sessionManager.endSession())
+        let success = self.sessionManager.endSession()
+        result(success)
     }
     
     /// Ends the current session and stops casting on the receiver
@@ -181,7 +188,8 @@ public class FGCSessionManagerMethodChannel : UIResponder, FlutterPlugin, GCKSes
     ///
     /// - Parameter result: Flutter result callback for operation status
     private func endSessionAndStopCasting(_ result : FlutterResult) {
-        print(self.sessionManager.endSessionAndStopCasting(true))
+        let success = self.sessionManager.endSessionAndStopCasting(true)
+        result(success)
     }
     
     /// Sets the volume level of the connected Cast device
@@ -449,9 +457,21 @@ public class FGCSessionManagerMethodChannel : UIResponder, FlutterPlugin, GCKSes
     /// This helper method sends session updates to the Flutter side via
     /// the method channel. It converts the session object to a dictionary
     /// format suitable for Flutter consumption.
+    /// 
+    /// Deduplicates events: only emits when the connection state actually
+    /// changes, preventing the flood of identical events from multiple
+    /// GCKSessionManagerListener callbacks.
     ///
     /// - Parameter session: The session that changed, or nil if session ended
     private func onSessionChanged(_ session : GCKSession?){
+        let currentState = session?.connectionState
+        
+        // Skip if the connection state hasn't changed
+        if currentState == _lastEmittedConnectionState {
+            return
+        }
+        _lastEmittedConnectionState = currentState
+        
         channel?.invokeMethod("onCurrentSessionChanged", arguments: session?.toDict())
     }
     

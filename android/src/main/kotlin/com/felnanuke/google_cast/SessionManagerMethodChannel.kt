@@ -145,9 +145,18 @@ class SessionManagerMethodChannel(discoveryManager: DiscoveryManagerMethodChanne
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
         when (call.method) {
             "startSessionWithDeviceId" -> startSession(call.arguments, result)
-            "endSessionAndStopCasting" -> sessionManager?.endCurrentSession(true)
-            "endSession" -> sessionManager?.endCurrentSession(false)
-            "setStreamVolume" -> sessionManager?.currentCastSession?.volume = call.arguments as Double
+            "endSessionAndStopCasting" -> {
+                sessionManager?.endCurrentSession(true)
+                result.success(true)
+            }
+            "endSession" -> {
+                sessionManager?.endCurrentSession(false)
+                result.success(true)
+            }
+            "setStreamVolume" -> {
+                sessionManager?.currentCastSession?.volume = call.arguments as Double
+                result.success(true)
+            }
         }
     }
 
