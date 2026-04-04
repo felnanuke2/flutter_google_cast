@@ -406,7 +406,8 @@ public class FGCSessionManagerMethodChannel : UIResponder, FlutterPlugin, GCKSes
     ///   - session: The session containing the updated device
     ///   - device: The updated device information
     public func sessionManager(_ sessionManager: GCKSessionManager, session: GCKSession, didUpdate device: GCKDevice) {
-        onSessionChanged(session)
+        // Data-only: device info changed, connection state didn't — skip
+        // to avoid dedup oscillation between GCKSession/GCKCastSession states
     }
     
     /// Called when device volume changes
@@ -420,7 +421,8 @@ public class FGCSessionManagerMethodChannel : UIResponder, FlutterPlugin, GCKSes
     ///   - volume: The new volume level (0.0 to 1.0)
     ///   - muted: Whether the device is muted
     public func sessionManager(_ sessionManager: GCKSessionManager, session: GCKSession, didReceiveDeviceVolume volume: Float, muted: Bool) {
-        onSessionChanged(session)
+        // Data-only: volume changed, connection state didn't — skip
+        // to avoid dedup oscillation between GCKSession/GCKCastSession states
     }
     
     /// Called when Cast device volume changes
@@ -434,7 +436,8 @@ public class FGCSessionManagerMethodChannel : UIResponder, FlutterPlugin, GCKSes
     ///   - volume: The new volume level (0.0 to 1.0)
     ///   - muted: Whether the device is muted
     public func sessionManager(_ sessionManager: GCKSessionManager, castSession session: GCKCastSession, didReceiveDeviceVolume volume: Float, muted: Bool) {
-        onSessionChanged(session)
+        // Data-only: volume changed, connection state didn't — skip
+        // to avoid dedup oscillation between GCKSession/GCKCastSession states
     }
     
     /// Called when device status changes
@@ -447,7 +450,8 @@ public class FGCSessionManagerMethodChannel : UIResponder, FlutterPlugin, GCKSes
     ///   - session: The session with status changes
     ///   - statusText: The new status text from the device
     public func sessionManager(_ sessionManager: GCKSessionManager, session: GCKSession, didReceiveDeviceStatus statusText: String?) {
-        onSessionChanged(session)
+        // Data-only: device status text changed, connection state didn't — skip
+        // to avoid dedup oscillation between GCKSession/GCKCastSession states
     }
 
     // MARK: - Helper Methods
