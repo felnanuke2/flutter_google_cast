@@ -1,3 +1,11 @@
+## 1.4.5 - iOS Session Stability and Method Channel Fixes
+### 🐛 Bug Fixes
+- **iOS session state transitions**: Fixed `disconnecting` state being skipped on the Dart side when a Cast session ends.
+- **iOS session event deduplication**: Fixed duplicate session state events firing in rapid succession.
+- **iOS data-only callbacks**: Fixed spurious session state events triggered by device info, volume, and status updates.
+- **Method channel results**: Fixed `endSession`, `endSessionAndStopCasting`, and `setStreamVolume` not completing their Flutter result callbacks on iOS and Android.
+- **iOS media status fields**: Fixed missing `volume` and `isMuted` fields in `GCKMediaStatus` serialization.
+
 ## 1.4.4 - Custom Data for Media Load and Queue Load
 ### ✨ New Features
 - Added support for passing `customData` in `loadMedia` requests on Android and iOS native load request builders.
