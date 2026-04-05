@@ -258,13 +258,15 @@ public class FGCSessionManagerMethodChannel : UIResponder, FlutterPlugin, GCKSes
     /// Called when a session is about to end
     /// 
     /// This delegate method is invoked just before a session terminates.
-    /// Updates Flutter with the changing session state.
+    /// Forces `disconnecting` state emission because iOS GCK SDK may set
+    /// `session.connectionState` to `.disconnected` before calling `willEnd`,
+    /// causing the Dart side to never see the `disconnecting` transition.
     ///
     /// - Parameters:
     ///   - sessionManager: The session manager instance
     ///   - session: The session that will end
     public func sessionManager(_ sessionManager: GCKSessionManager, willEnd session: GCKSession) {
-        onSessionChanged(session)
+        emitDisconnecting(session)
     }
     
     /// Called when a session has ended
@@ -284,13 +286,14 @@ public class FGCSessionManagerMethodChannel : UIResponder, FlutterPlugin, GCKSes
     /// Called when a Cast session is about to end
     /// 
     /// This delegate method is invoked just before a Cast session terminates.
-    /// This is the Cast-specific version of willEnd for GCKSession.
+    /// Forces `disconnecting` state emission — same rationale as `willEnd`
+    /// for `GCKSession`.
     ///
     /// - Parameters:
     ///   - sessionManager: The session manager instance
     ///   - session: The Cast session that will end
     public func sessionManager(_ sessionManager: GCKSessionManager, willEnd session: GCKCastSession) {
-        onSessionChanged(session)
+        emitDisconnecting(session)
     }
     
     /// Called when a Cast session has ended
@@ -455,6 +458,26 @@ public class FGCSessionManagerMethodChannel : UIResponder, FlutterPlugin, GCKSes
     }
 
     // MARK: - Helper Methods
+    
+    /// Emits a `disconnecting` state to Flutter for `willEnd` callbacks.
+    ///
+    /// iOS GCK SDK may set `session.connectionState` to `.disconnected`
+    /// before firing `willEnd`, so reading the property directly would skip
+    /// the `disconnecting` transition entirely. This method overrides the
+    /// serialized `connectionState` in the dictionary to `.disconnecting`,
+    /// ensuring the Dart side receives the proper state sequence:
+    /// `connected` → `disconnecting` → `disconnected` → `nil`.
+    ///
+    /// - Parameter session: The session that is about to end
+    private func emitDisconnecting(_ session: GCKSession) {
+        let disconnecting: GCKConnectionState = .disconnecting
+        if disconnecting == _lastEmittedConnectionState { return }
+        _lastEmittedConnectionState = disconnecting
+        
+        var dict = session.toDict()
+        dict["connectionState"] = GCKConnectionState.disconnecting.rawValue
+        channel?.invokeMethod("onCurrentSessionChanged", arguments: dict)
+    }
     
     /// Notifies Flutter of session state changes
     /// 
