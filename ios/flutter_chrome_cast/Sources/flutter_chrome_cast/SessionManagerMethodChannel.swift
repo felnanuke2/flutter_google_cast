@@ -72,6 +72,12 @@ public class FGCSessionManagerMethodChannel : UIResponder, FlutterPlugin, GCKSes
     /// Used to send session events and handle method calls from Flutter
     var channel : FlutterMethodChannel?
     
+    /// Tracks the last emitted connection state to deduplicate events.
+    /// iOS Cast SDK fires multiple delegate callbacks (for both GCKSession
+    /// and GCKCastSession) with the same connection state in rapid succession,
+    /// causing event spam on the Flutter side.
+    private var _lastEmittedConnectionState: GCKConnectionState?
+    
     /// Reference to the Google Cast session manager
     /// - Returns: The session manager from the shared Cast context
     private var sessionManager : GCKSessionManager  {
@@ -165,7 +171,8 @@ public class FGCSessionManagerMethodChannel : UIResponder, FlutterPlugin, GCKSes
     ///
     /// - Parameter result: Flutter result callback for operation status
     private func endSession(_ result : FlutterResult) {
-        print(self.sessionManager.endSession())
+        let success = self.sessionManager.endSession()
+        result(success)
     }
     
     /// Ends the current session and stops casting on the receiver
@@ -181,7 +188,8 @@ public class FGCSessionManagerMethodChannel : UIResponder, FlutterPlugin, GCKSes
     ///
     /// - Parameter result: Flutter result callback for operation status
     private func endSessionAndStopCasting(_ result : FlutterResult) {
-        print(self.sessionManager.endSessionAndStopCasting(true))
+        let success = self.sessionManager.endSessionAndStopCasting(true)
+        result(success)
     }
     
     /// Sets the volume level of the connected Cast device
@@ -250,13 +258,15 @@ public class FGCSessionManagerMethodChannel : UIResponder, FlutterPlugin, GCKSes
     /// Called when a session is about to end
     /// 
     /// This delegate method is invoked just before a session terminates.
-    /// Updates Flutter with the changing session state.
+    /// Forces `disconnecting` state emission because iOS GCK SDK may set
+    /// `session.connectionState` to `.disconnected` before calling `willEnd`,
+    /// causing the Dart side to never see the `disconnecting` transition.
     ///
     /// - Parameters:
     ///   - sessionManager: The session manager instance
     ///   - session: The session that will end
     public func sessionManager(_ sessionManager: GCKSessionManager, willEnd session: GCKSession) {
-        onSessionChanged(session)
+        emitDisconnecting(session)
     }
     
     /// Called when a session has ended
@@ -276,13 +286,14 @@ public class FGCSessionManagerMethodChannel : UIResponder, FlutterPlugin, GCKSes
     /// Called when a Cast session is about to end
     /// 
     /// This delegate method is invoked just before a Cast session terminates.
-    /// This is the Cast-specific version of willEnd for GCKSession.
+    /// Forces `disconnecting` state emission — same rationale as `willEnd`
+    /// for `GCKSession`.
     ///
     /// - Parameters:
     ///   - sessionManager: The session manager instance
     ///   - session: The Cast session that will end
     public func sessionManager(_ sessionManager: GCKSessionManager, willEnd session: GCKCastSession) {
-        onSessionChanged(session)
+        emitDisconnecting(session)
     }
     
     /// Called when a Cast session has ended
@@ -398,7 +409,8 @@ public class FGCSessionManagerMethodChannel : UIResponder, FlutterPlugin, GCKSes
     ///   - session: The session containing the updated device
     ///   - device: The updated device information
     public func sessionManager(_ sessionManager: GCKSessionManager, session: GCKSession, didUpdate device: GCKDevice) {
-        onSessionChanged(session)
+        // Data-only: device info changed, connection state didn't — skip
+        // to avoid dedup oscillation between GCKSession/GCKCastSession states
     }
     
     /// Called when device volume changes
@@ -412,7 +424,8 @@ public class FGCSessionManagerMethodChannel : UIResponder, FlutterPlugin, GCKSes
     ///   - volume: The new volume level (0.0 to 1.0)
     ///   - muted: Whether the device is muted
     public func sessionManager(_ sessionManager: GCKSessionManager, session: GCKSession, didReceiveDeviceVolume volume: Float, muted: Bool) {
-        onSessionChanged(session)
+        // Data-only: volume changed, connection state didn't — skip
+        // to avoid dedup oscillation between GCKSession/GCKCastSession states
     }
     
     /// Called when Cast device volume changes
@@ -426,7 +439,8 @@ public class FGCSessionManagerMethodChannel : UIResponder, FlutterPlugin, GCKSes
     ///   - volume: The new volume level (0.0 to 1.0)
     ///   - muted: Whether the device is muted
     public func sessionManager(_ sessionManager: GCKSessionManager, castSession session: GCKCastSession, didReceiveDeviceVolume volume: Float, muted: Bool) {
-        onSessionChanged(session)
+        // Data-only: volume changed, connection state didn't — skip
+        // to avoid dedup oscillation between GCKSession/GCKCastSession states
     }
     
     /// Called when device status changes
@@ -439,19 +453,52 @@ public class FGCSessionManagerMethodChannel : UIResponder, FlutterPlugin, GCKSes
     ///   - session: The session with status changes
     ///   - statusText: The new status text from the device
     public func sessionManager(_ sessionManager: GCKSessionManager, session: GCKSession, didReceiveDeviceStatus statusText: String?) {
-        onSessionChanged(session)
+        // Data-only: device status text changed, connection state didn't — skip
+        // to avoid dedup oscillation between GCKSession/GCKCastSession states
     }
 
     // MARK: - Helper Methods
+    
+    /// Emits a `disconnecting` state to Flutter for `willEnd` callbacks.
+    ///
+    /// iOS GCK SDK may set `session.connectionState` to `.disconnected`
+    /// before firing `willEnd`, so reading the property directly would skip
+    /// the `disconnecting` transition entirely. This method overrides the
+    /// serialized `connectionState` in the dictionary to `.disconnecting`,
+    /// ensuring the Dart side receives the proper state sequence:
+    /// `connected` → `disconnecting` → `disconnected` → `nil`.
+    ///
+    /// - Parameter session: The session that is about to end
+    private func emitDisconnecting(_ session: GCKSession) {
+        let disconnecting: GCKConnectionState = .disconnecting
+        if disconnecting == _lastEmittedConnectionState { return }
+        _lastEmittedConnectionState = disconnecting
+        
+        var dict = session.toDict()
+        dict["connectionState"] = GCKConnectionState.disconnecting.rawValue
+        channel?.invokeMethod("onCurrentSessionChanged", arguments: dict)
+    }
     
     /// Notifies Flutter of session state changes
     /// 
     /// This helper method sends session updates to the Flutter side via
     /// the method channel. It converts the session object to a dictionary
     /// format suitable for Flutter consumption.
+    /// 
+    /// Deduplicates events: only emits when the connection state actually
+    /// changes, preventing the flood of identical events from multiple
+    /// GCKSessionManagerListener callbacks.
     ///
     /// - Parameter session: The session that changed, or nil if session ended
     private func onSessionChanged(_ session : GCKSession?){
+        let currentState = session?.connectionState
+        
+        // Skip if the connection state hasn't changed
+        if currentState == _lastEmittedConnectionState {
+            return
+        }
+        _lastEmittedConnectionState = currentState
+        
         channel?.invokeMethod("onCurrentSessionChanged", arguments: session?.toDict())
     }
     
