@@ -1,10 +1,14 @@
-## 1.4.5 - iOS Session Stability and Method Channel Fixes
+## 1.4.5 - iOS Session Stability and Playback Rate fix
 ### 🐛 Bug Fixes
+- **iOS playback rate**: Fixed `setPlaybackRate` having no effect on iOS — the method channel handler was missing, so calls from Dart were silently ignored.
 - **iOS session state transitions**: Fixed `disconnecting` state being skipped on the Dart side when a Cast session ends.
 - **iOS session event deduplication**: Fixed duplicate session state events firing in rapid succession.
 - **iOS data-only callbacks**: Fixed spurious session state events triggered by device info, volume, and status updates.
 - **Method channel results**: Fixed `endSession`, `endSessionAndStopCasting`, and `setStreamVolume` not completing their Flutter result callbacks on iOS and Android.
 - **iOS media status fields**: Fixed missing `volume` and `isMuted` fields in `GCKMediaStatus` serialization.
+
+### 🔧 Notes
+- No public API changes
 
 ## 1.4.4 - Custom Data for Media Load and Queue Load
 ### ✨ New Features
