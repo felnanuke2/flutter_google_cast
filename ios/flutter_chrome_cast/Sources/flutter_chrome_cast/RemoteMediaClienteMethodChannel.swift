@@ -164,7 +164,9 @@ class RemoteMediaClienteMethodChannel :UIResponder, FlutterPlugin, GCKRemoteMedi
         case "queueReorderItems":
             queueReorderItems(call.arguments as! Dictionary<String,Any?>, result: result)
             break;
-       
+        case "setPlaybackRate":
+            setPlaybackRate(result, call.arguments as! Double)
+            break       
         default:
             break
         }
@@ -305,6 +307,12 @@ class RemoteMediaClienteMethodChannel :UIResponder, FlutterPlugin, GCKRemoteMedi
         print("[GoogleCast] seek() options - interval: \(seekOptions.interval), relative: \(seekOptions.relative)")
         let request =  currentRemoteMediaCliente?.seek(with: seekOptions)
         print("[GoogleCast] seek() request: \(String(describing: request))")
+        result(request?.toMap())
+    }
+    
+    private func setPlaybackRate(_ result: FlutterResult, _ rate: Double) {
+        print("[GoogleCast] setPlaybackRate() called with rate: \(rate)")
+        let request = currentRemoteMediaCliente?.setPlaybackRate(Float(rate))
         result(request?.toMap())
     }
     
