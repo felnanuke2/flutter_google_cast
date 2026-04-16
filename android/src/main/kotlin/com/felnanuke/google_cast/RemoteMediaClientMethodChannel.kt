@@ -432,8 +432,10 @@ class RemoteMediaClientMethodChannel : FlutterPlugin, MethodChannel.MethodCallHa
     }
 
     fun startListen() {
-        currentRemoteMediaClient?.registerCallback(this)
-        currentRemoteMediaClient?.addProgressListener(this, 500)
+        val client = currentRemoteMediaClient
+        Log.d(TAG, "startListen() — remoteMediaClient=${if (client != null) "non-null" else "NULL"}")
+        client?.registerCallback(this)
+        client?.addProgressListener(this, 500)
     }
 
     fun endListen() {

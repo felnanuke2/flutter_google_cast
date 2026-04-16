@@ -168,19 +168,41 @@ class CastContextMethodChannel : FlutterPlugin, MethodChannel.MethodCallHandler 
         try {
             val map = arguments as HashMap<*, *>
             val optionsBuilder = CastOptions.Builder()
-            optionsBuilder.setReceiverApplicationId(map["appId"] as String)
+            val appId = map["appId"] as String
+            optionsBuilder.setReceiverApplicationId(appId)
             val launcherOptions = LaunchOptions.Builder().setAndroidReceiverCompatible(true).build()
             optionsBuilder.setLaunchOptions(launcherOptions)
             optionsBuilder.setResumeSavedSession(true)
             optionsBuilder.setEnableReconnectionService(true)
             GoogleCastOptionsProvider.options = optionsBuilder.build()
-            
+            GoogleCastOptionsProvider.castAppId = appId
+
             // Store the stopCastingOnAppTerminated option
             val stopCastingOnAppTerminated = map["stopCastingOnAppTerminated"] as? Boolean ?: false
             GoogleCastOptionsProvider.stopCastingOnAppTerminated = stopCastingOnAppTerminated
             Log.d(TAG, "stopCastingOnAppTerminated set to: $stopCastingOnAppTerminated")
             
-            CastContext.getSharedInstance(appContext).sessionManager.addSessionManagerListener(sessionManagerMethodChannel)
+            // Prefer the no-arg overload so we don't try to re-initialise a
+            // CastContext that is already running (e.g. when the app uses the
+            // manifest OPTIONS_PROVIDER_CLASS_NAME for auto-init).  Only fall
+            // back to the context overload when the SDK isn't initialised yet.
+            val castContext = try {
+                CastContext.getSharedInstance()
+            } catch (_: IllegalStateException) {
+                CastContext.getSharedInstance(appContext)
+            }
+            castContext?.sessionManager?.addSessionManagerListener(sessionManagerMethodChannel)
+
+            // If a Cast session is already active when the listener is registered
+            // (e.g. reconnecting to a previously established session), onSessionStarted
+            // will never fire. Call startListen() directly so the RemoteMediaClient
+            // callback chain is wired up regardless.
+            if (castContext?.sessionManager?.currentCastSession != null) {
+                Log.d(TAG, "setSharedInstance: active session found — wiring up listeners and notifying Dart")
+                sessionManagerMethodChannel.startListenIfNeeded()
+                sessionManagerMethodChannel.notifyCurrentSession()
+            }
+
             result.success(true)
         } catch (e: Exception) {
             Log.e(TAG, "Failed to set shared instance", e)

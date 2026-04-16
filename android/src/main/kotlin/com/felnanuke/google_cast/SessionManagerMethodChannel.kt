@@ -1,5 +1,7 @@
 package com.felnanuke.google_cast
 
+import android.util.Log
+import com.felnanuke.google_cast.extensions.connectState
 import com.felnanuke.google_cast.extensions.toMap
 import com.google.android.gms.cast.framework.*
 import io.flutter.embedding.engine.plugins.FlutterPlugin
@@ -193,6 +195,7 @@ class SessionManagerMethodChannel(discoveryManager: DiscoveryManagerMethodChanne
     }
 
     override fun onSessionResumed(p0: Session, p1: Boolean) {
+        Log.d(TAG, "onSessionResumed — calling startListen()")
         remoteMediaClientMethodChannel.startListen()
         onSessionChanged()
     }
@@ -206,6 +209,7 @@ class SessionManagerMethodChannel(discoveryManager: DiscoveryManagerMethodChanne
     }
 
     override fun onSessionStarted(session: Session, p1: String) {
+        Log.d(TAG, "onSessionStarted — calling startListen()")
         remoteMediaClientMethodChannel.startListen()
         onSessionChanged()
     }
@@ -221,9 +225,25 @@ class SessionManagerMethodChannel(discoveryManager: DiscoveryManagerMethodChanne
 
     private fun onSessionChanged() {
         val session = sessionManager?.currentCastSession
+        val state = session?.connectState() ?: -1
+        Log.d(TAG, "onSessionChanged: sessionId=${session?.sessionId} connectState=$state isConnected=${session?.isConnected}")
         val map = session?.toMap()
         channel.invokeMethod("onSessionChanged", map)
     }
 
+    /** Called from CastContextMethodChannel when setSharedInstance finds an
+     *  already-active session so onSessionStarted/Resumed will not fire. */
+    fun startListenIfNeeded() {
+        Log.d(TAG, "startListenIfNeeded() — delegating to remoteMediaClientMethodChannel")
+        remoteMediaClientMethodChannel.startListen()
+    }
+
+    /** Push the current session state to the Dart stream immediately.
+     *  Called when an already-active session is detected at setSharedInstance
+     *  time, so the Dart side's BehaviorSubject reflects the real state. */
+    fun notifyCurrentSession() {
+        Log.d(TAG, "notifyCurrentSession() — pushing current session state to Dart")
+        onSessionChanged()
+    }
 
 }

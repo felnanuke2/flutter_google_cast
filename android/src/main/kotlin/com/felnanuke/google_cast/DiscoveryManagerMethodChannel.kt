@@ -161,8 +161,17 @@ class DiscoveryManagerMethodChannel : FlutterPlugin, MethodChannel.MethodCallHan
 
     private fun startDiscovery() {
         router.removeCallback(routerCallBack)
+
+        // Include the app-specific Cast category alongside the generic one.
+        // The Cast SDK's internal MediaRouter callback only starts a session
+        // for routes that match categoryForCast(appId) — using only
+        // categoryForRemotePlayback() discovers devices but router.selectRoute()
+        // silently fails because the SDK doesn't recognise the route type.
+        val categories = mutableListOf(CastMediaControlIntent.categoryForRemotePlayback())
+        categories.add(CastMediaControlIntent.categoryForCast(GoogleCastOptionsProvider.castAppId))
+
         val selector = MediaRouteSelector.Builder()
-            .addControlCategories(listOf(CastMediaControlIntent.categoryForRemotePlayback()))
+            .addControlCategories(categories)
             .build()
         router.addCallback(
             selector, routerCallBack, MediaRouter.CALLBACK_FLAG_REQUEST_DISCOVERY
@@ -261,12 +270,18 @@ class DiscoveryManagerMethodChannel : FlutterPlugin, MethodChannel.MethodCallHan
 
     fun selectRoute(id: String) {
         val routes = router?.routes
+        Log.d(TAG, "selectRoute: looking for deviceId=$id in ${routes?.size ?: 0} routes")
         val selectedRoute = routes?.find {
             val device = CastDevice.getFromBundle(it.extras)
-            device?.deviceId == id
+            val match = device?.deviceId == id
+            Log.d(TAG, "  route=${it.name} deviceId=${device?.deviceId} match=$match")
+            match
         }
         if (selectedRoute != null) {
+            Log.d(TAG, "selectRoute: selecting route '${selectedRoute.name}'")
             this.router?.selectRoute(selectedRoute)
+        } else {
+            Log.w(TAG, "selectRoute: no matching route found for deviceId=$id")
         }
     }
 

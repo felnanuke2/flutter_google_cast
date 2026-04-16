@@ -38,6 +38,14 @@ class GoogleCastOptionsProvider : OptionsProvider {
          * Default is false (casting continues after app is closed).
          */
         var stopCastingOnAppTerminated: Boolean = false
+
+        /**
+         * The configured receiver application ID, stored separately because
+         * CastOptions does not expose a getter for it after construction.
+         * Used by DiscoveryManagerMethodChannel to build the Cast-specific
+         * MediaRouteSelector category needed for router.selectRoute() to work.
+         */
+        var castAppId: String = "CC1AD845"
     }
     
     /**
