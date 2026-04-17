@@ -24,6 +24,8 @@ extension GCKMediaStatus {
         dict["queueHasNextItem"] = self.queueHasNextItem
         dict["queueHasPreviousItem"] =  self.queueHasPreviousItem
         dict["currentItemId"] = self.currentItemID
+        dict["volume"] = self.volume
+        dict["isMuted"] = self.isMuted
 
         // Live seekable range
         if let liveSeekableRange = self.liveSeekableRange {

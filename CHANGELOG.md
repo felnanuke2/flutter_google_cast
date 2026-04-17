@@ -1,18 +1,13 @@
-## 1.5.0 - Federated Plugin Architecture Migration
-### 🏗️ Architecture
+## 1.4.5 - iOS Stability Improvements & Federated Plugin Architecture
+
+### 🏗️ Architecture - Federated Plugin Migration
 - **Migrated to federated plugin architecture** following Flutter best practices
   - Split into separate packages: `flutter_chrome_cast_platform_interface`, `flutter_chrome_cast_android`, `flutter_chrome_cast_ios`
   - Improved maintainability and platform-specific development
   - Pigeon-based type-safe communication between Flutter and native platforms
   - Automatic platform registration via `dartPluginClass`
   - Proper workspace configuration with shared dependency resolution
-
-### ✅ Improvements
-- **Better separation of concerns** with clear platform interface boundaries
-- **Type-safe platform communication** using Pigeon code generation
-- **Enhanced testability** with improved platform mocking capabilities
-- **Streamlined CI/CD** with separate publish workflows for each package
-- **Zero breaking changes** - full backward compatibility maintained
+  - **Zero breaking changes** - full backward compatibility maintained
 
 ### 🔧 Technical Changes
 - Moved all shared types and entities to `flutter_chrome_cast_platform_interface`
@@ -21,6 +16,29 @@
 - Deprecated methods preserved with clear deprecation warnings
 - Improved error messages for unimplemented features
 
+### 🐛 Bug Fixes - iOS Stability
+- **Fix session event deduplication**: Prevents 7+ spurious connecting events during connection setup
+  - Added connection state tracking to eliminate duplicate events from iOS GCK SDK
+  - iOS SDK fires multiple delegate callbacks (GCKSession and GCKCastSession) with the same state
+  - Resolved UI flicker and unstable connection state display
+
+- **Fix disconnecting state emission**: Ensures proper session termination sequence
+  - iOS GCK SDK may set connectionState to .disconnected before calling willEnd callbacks
+  - Added `emitDisconnecting()` helper to force disconnecting state emission
+  - Ensures proper state sequence: connected → disconnecting → disconnected → nil
+  - Prevents abrupt disconnection UI and missing transition states
+
+- **Remove spurious session events from data-only callbacks**:
+  - `didReceiveDeviceVolume` now correctly handled (data-only, not connection state)
+  - `didUpdate device` now correctly handled (data-only, not connection state)
+  - `didReceiveDeviceStatus` now correctly handled (data-only, not connection state)
+  - Prevents state oscillation between GCKSession and GCKCastSession
+
+- **Add volume and mute status to media status**:
+  - Added `volume` field to `MediaStatusExtensions.swift`
+  - Added `isMuted` field to `MediaStatusExtensions.swift`
+  - Fixes volume control UI functionality
+
 ### ⚠️ Known Limitations
 The following methods are marked as deprecated and will throw `UnimplementedError` if called:
 - `GoogleCastSessionManager.setDefaultSessionOptions()` - iOS-specific, not currently implemented
@@ -28,6 +46,18 @@ The following methods are marked as deprecated and will throw `UnimplementedErro
 - `GoogleCastSessionManager.suspendSessionWithReason()` - Not currently implemented
 
 These methods were also unimplemented in the previous version. This is not a regression, but they are now properly documented and marked as deprecated.
+
+### 📦 Package Structure
+- `flutter_chrome_cast` - App-facing package (unchanged public API)
+- `flutter_chrome_cast_platform_interface` - Shared platform interfaces and types
+- `flutter_chrome_cast_android` - Android implementation
+- `flutter_chrome_cast_ios` - iOS implementation
+
+### 🔄 Migration Notes
+- **No action required** for existing users - all existing code will continue to work
+- Import paths remain unchanged
+- All deprecated methods are clearly marked with `@Deprecated` annotations
+- New projects can use modular imports for better performance
 
 ### 📦 Package Structure
 - `flutter_chrome_cast` - App-facing package (unchanged public API)
