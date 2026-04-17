@@ -1,0 +1,20 @@
+{
+  "worktrees": {
+    "wt-1776394729636-1": {
+      "branch": "probable-snipe",
+      "path": "/Users/luizfelipealveslima/Documents/workana/telegram_truco/.kilo/worktrees/probable-snipe",
+      "parentBranch": "main",
+      "createdAt": "2026-04-17T02:58:49.636Z",
+      "remote": "origin"
+    }
+  },
+  "sessions": {
+    "ses_2669f8684ffe0uRdRMrnbJaLB3": {
+      "worktreeId": "wt-1776394729636-1",
+      "createdAt": "2026-04-17T02:58:50.242Z"
+    }
+  },
+  "worktreeOrder": [
+    "wt-1776394729636-1"
+  ]
+}
