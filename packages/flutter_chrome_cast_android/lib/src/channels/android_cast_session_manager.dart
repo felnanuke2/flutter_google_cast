@@ -67,7 +67,10 @@ class GoogleCastSessionManagerAndroidMethodChannel
 
   @override
   Future<void> setDefaultSessionOptions() {
-    throw UnimplementedError('Only works in IOS');
+    throw UnimplementedError(
+      'setDefaultSessionOptions is not currently implemented. '
+      'This iOS-specific feature is not available on Android.',
+    );
   }
 
   @override
@@ -78,15 +81,21 @@ class GoogleCastSessionManagerAndroidMethodChannel
   }
 
   @override
+  @Deprecated('This method is not currently implemented.')
   Future<bool> startSessionWithOpenURLOptions() {
-    // TODO: implement startSessionWithOpenURLOptions
-    throw UnimplementedError();
+    throw UnimplementedError(
+      'startSessionWithOpenURLOptions is not currently implemented. '
+      'This feature requires additional native implementation.',
+    );
   }
 
   @override
+  @Deprecated('This method is not currently implemented.')
   Future<bool> suspendSessionWithReason() {
-    // TODO: implement suspendSessionWithReason
-    throw UnimplementedError();
+    throw UnimplementedError(
+      'suspendSessionWithReason is not currently implemented. '
+      'This feature requires additional native implementation.',
+    );
   }
 
   void _onSessionChanged(CastSessionPigeon? arguments) {

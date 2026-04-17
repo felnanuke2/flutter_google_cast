@@ -72,21 +72,30 @@ class GoogleCastSessionManagerIOSMethodChannel
       connectionState == GoogleCastConnectState.connected;
 
   @override
+  @Deprecated('This method is not currently implemented.')
   Future<void> setDefaultSessionOptions() {
-    // TODO: implement setDefaultSessionOptions
-    throw UnimplementedError();
+    throw UnimplementedError(
+      'setDefaultSessionOptions is not currently implemented. '
+      'This feature requires additional native implementation.',
+    );
   }
 
   @override
+  @Deprecated('This method is not currently implemented.')
   Future<bool> startSessionWithOpenURLOptions() {
-    // TODO: implement startSessionWithOpenURLOptions
-    throw UnimplementedError();
+    throw UnimplementedError(
+      'startSessionWithOpenURLOptions is not currently implemented. '
+      'This feature requires additional native implementation.',
+    );
   }
 
   @override
+  @Deprecated('This method is not currently implemented.')
   Future<bool> suspendSessionWithReason() {
-    // TODO: implement suspendSessionWithReason
-    throw UnimplementedError();
+    throw UnimplementedError(
+      'suspendSessionWithReason is not currently implemented. '
+      'This feature requires additional native implementation.',
+    );
   }
 
   void _onCurrentSessionChanged(CastSessionPigeon? arguments) async {

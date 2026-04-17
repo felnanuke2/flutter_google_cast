@@ -81,7 +81,9 @@ abstract class GoogleCastSessionManagerPlatformInterface
 
   // Since
   //     4.0
-
+  @Deprecated(
+    'This method is not currently implemented. It will throw UnimplementedError if called.',
+  )
   Future<bool> startSessionWithOpenURLOptions();
 
   /// Suspends the current session.
@@ -94,7 +96,9 @@ abstract class GoogleCastSessionManagerPlatformInterface
 
   /// Returns
   ///     YES if the operation has been started successfully, NO if there is no session currently established or if the operation could not be started.
-
+  @Deprecated(
+    'This method is not currently implemented. It will throw UnimplementedError if called.',
+  )
   Future<bool> suspendSessionWithReason();
 
   ///Ends the current session.
@@ -131,6 +135,9 @@ abstract class GoogleCastSessionManagerPlatformInterface
   /// For native iOS, this maps to:
   /// - sessionOptions: nullable GCKSessionOptions
   /// - forDeviceCategory: (NSString *) category
+  @Deprecated(
+    'This method is not currently implemented. It will throw UnimplementedError if called.',
+  )
   Future<void> setDefaultSessionOptions(
     // nullable GCKSessionOptions *\tsessionOptions
     // forDeviceCategory: \t\t(NSString *)  \tcategory

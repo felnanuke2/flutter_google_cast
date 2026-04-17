@@ -1,3 +1,46 @@
+## 1.5.0 - Federated Plugin Architecture Migration
+### 🏗️ Architecture
+- **Migrated to federated plugin architecture** following Flutter best practices
+  - Split into separate packages: `flutter_chrome_cast_platform_interface`, `flutter_chrome_cast_android`, `flutter_chrome_cast_ios`
+  - Improved maintainability and platform-specific development
+  - Pigeon-based type-safe communication between Flutter and native platforms
+  - Automatic platform registration via `dartPluginClass`
+  - Proper workspace configuration with shared dependency resolution
+
+### ✅ Improvements
+- **Better separation of concerns** with clear platform interface boundaries
+- **Type-safe platform communication** using Pigeon code generation
+- **Enhanced testability** with improved platform mocking capabilities
+- **Streamlined CI/CD** with separate publish workflows for each package
+- **Zero breaking changes** - full backward compatibility maintained
+
+### 🔧 Technical Changes
+- Moved all shared types and entities to `flutter_chrome_cast_platform_interface`
+- Platform-specific implementations now in dedicated packages
+- Re-exports maintain all existing import paths
+- Deprecated methods preserved with clear deprecation warnings
+- Improved error messages for unimplemented features
+
+### ⚠️ Known Limitations
+The following methods are marked as deprecated and will throw `UnimplementedError` if called:
+- `GoogleCastSessionManager.setDefaultSessionOptions()` - iOS-specific, not currently implemented
+- `GoogleCastSessionManager.startSessionWithOpenURLOptions()` - Not currently implemented
+- `GoogleCastSessionManager.suspendSessionWithReason()` - Not currently implemented
+
+These methods were also unimplemented in the previous version. This is not a regression, but they are now properly documented and marked as deprecated.
+
+### 📦 Package Structure
+- `flutter_chrome_cast` - App-facing package (unchanged public API)
+- `flutter_chrome_cast_platform_interface` - Shared platform interfaces and types
+- `flutter_chrome_cast_android` - Android implementation
+- `flutter_chrome_cast_ios` - iOS implementation
+
+### 🔄 Migration Notes
+- **No action required** for existing users - all existing code will continue to work
+- Import paths remain unchanged
+- All deprecated methods are clearly marked with `@Deprecated` annotations
+- New projects can use modular imports for better performance
+
 ## 1.4.4 - Custom Data for Media Load and Queue Load
 ### ✨ New Features
 - Added support for passing `customData` in `loadMedia` requests on Android and iOS native load request builders.
