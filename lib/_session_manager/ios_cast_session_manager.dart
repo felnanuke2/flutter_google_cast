@@ -97,4 +97,9 @@ class GoogleCastSessionManagerIOSMethodChannel
   void setDeviceVolume(double value) {
     _channel.invokeMethod('setDeviceVolume', value);
   }
+
+  @override
+  Future<bool> resetSession() async {
+    return await _channel.invokeMethod('resetSession');
+  }
 }

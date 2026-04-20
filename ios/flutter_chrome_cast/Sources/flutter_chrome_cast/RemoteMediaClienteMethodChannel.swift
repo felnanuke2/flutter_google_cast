@@ -416,6 +416,17 @@ class RemoteMediaClienteMethodChannel :UIResponder, FlutterPlugin, GCKRemoteMedi
         updateQueueItems()
     }
     
+    /// Full state cleanup: removes the listener from the media client,
+    /// stops the position timer, and clears the queue.
+    /// Used when forcefully resetting a stuck session.
+    public func cleanUp() {
+        currentRemoteMediaCliente?.remove(self)
+        positionTimer?.invalidate()
+        positionTimer = nil
+        queueItems.removeAll()
+        queueOrder.removeAll()
+    }
+    
     
     public func resumeSession(){
         currentRemoteMediaCliente?.queueFetchItemIDs();

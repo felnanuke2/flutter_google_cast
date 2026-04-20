@@ -135,6 +135,9 @@ public class FGCSessionManagerMethodChannel : UIResponder, FlutterPlugin, GCKSes
         case "endSessionAndStopCasting":
             endSessionAndStopCasting(result)
             break
+        case "resetSession":
+            resetSession(result)
+            break
         case "setDeviceVolume":
             setDeviceVolume(call.arguments as! NSNumber)
             break
@@ -458,6 +461,41 @@ public class FGCSessionManagerMethodChannel : UIResponder, FlutterPlugin, GCKSes
     }
 
     // MARK: - Helper Methods
+    
+    /// Forcefully resets a stuck session.
+    ///
+    /// 1. Removes the session manager listener so `endSessionAndStopCasting`
+    ///    does not generate spurious callbacks on the Flutter side.
+    /// 2. Cleans up the media client (listener, position timer, queue).
+    /// 3. Force-ends any existing session via `endSessionAndStopCasting(true)`.
+    /// 4. Resets the dedup state (`_lastEmittedConnectionState`).
+    /// 5. Re-adds the session manager listener.
+    /// 6. Emits a `null` session to Flutter.
+    ///
+    /// - Parameter result: Flutter result callback
+    private func resetSession(_ result: FlutterResult) {
+        print("[GoogleCast] resetSession: force-ending session and cleaning up all state")
+        
+        // Remove listener so endSessionAndStopCasting does not fire
+        // willEnd/didEnd and produce stale events on the Flutter side
+        sessionManager.remove(self)
+        
+        // Clean up media client
+        RemoteMediaClienteMethodChannel.instance.cleanUp()
+        
+        // Force-end any existing session
+        if sessionManager.currentSession != nil {
+            sessionManager.endSessionAndStopCasting(true)
+        }
+        
+        // Reset dedup state — the next session will be tracked from scratch
+        _lastEmittedConnectionState = nil
+        
+        // Re-add listener
+        sessionManager.add(self)
+        
+        result(true)
+    }
     
     /// Emits a `disconnecting` state to Flutter for `willEnd` callbacks.
     ///
