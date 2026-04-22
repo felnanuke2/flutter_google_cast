@@ -96,8 +96,7 @@ void main() {
       expect(methodCalls.first.arguments, isNull);
     });
 
-    test('resetSession propagates false returned by the native side',
-        () async {
+    test('resetSession propagates false returned by the native side', () async {
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
           .setMockMethodCallHandler(channel, (MethodCall call) async {
         methodCalls.add(call);

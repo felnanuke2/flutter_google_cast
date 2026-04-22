@@ -8,8 +8,7 @@ void main() {
   group('GoogleCastSessionManagerAndroidMethodChannel', () {
     late GoogleCastSessionManagerAndroidMethodChannel manager;
     late List<MethodCall> methodCalls;
-    const channel =
-        MethodChannel('com.felnanuke.google_cast.session_manager');
+    const channel = MethodChannel('com.felnanuke.google_cast.session_manager');
 
     setUp(() {
       TestWidgetsFlutterBinding.ensureInitialized();
