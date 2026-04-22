@@ -464,36 +464,50 @@ public class FGCSessionManagerMethodChannel : UIResponder, FlutterPlugin, GCKSes
     
     /// Forcefully resets a stuck session.
     ///
-    /// 1. Removes the session manager listener so `endSessionAndStopCasting`
-    ///    does not generate spurious callbacks on the Flutter side.
-    /// 2. Cleans up the media client (listener, position timer, queue).
-    /// 3. Force-ends any existing session via `endSessionAndStopCasting(true)`.
-    /// 4. Resets the dedup state (`_lastEmittedConnectionState`).
-    /// 5. Re-adds the session manager listener.
-    /// 6. Emits a `null` session to Flutter.
+    /// 1. Early-returns when there is no current session — nothing to reset.
+    /// 2. Removes the session manager listener so `endSessionAndStopCasting`
+    ///    does not generate spurious `willEnd`/`didEnd` callbacks on the
+    ///    Flutter side.
+    /// 3. Cleans up the media client (listener, position timer, queue).
+    /// 4. Force-ends the existing session via `endSessionAndStopCasting(true)`.
+    /// 5. Resets the dedup state (`_lastEmittedConnectionState`) so the next
+    ///    session is tracked from scratch.
+    /// 6. Explicitly emits a `null` session to Flutter. `onSessionChanged(nil)`
+    ///    is intentionally bypassed here because its dedup check (`nil == nil`)
+    ///    would silently drop the emission.
+    /// 7. Re-adds the session manager listener.
     ///
     /// - Parameter result: Flutter result callback
     private func resetSession(_ result: FlutterResult) {
         print("[GoogleCast] resetSession: force-ending session and cleaning up all state")
-        
+
+        // Nothing to reset — avoid unnecessary listener churn and media cleanup
+        guard sessionManager.currentSession != nil else {
+            result(true)
+            return
+        }
+
         // Remove listener so endSessionAndStopCasting does not fire
         // willEnd/didEnd and produce stale events on the Flutter side
         sessionManager.remove(self)
-        
+
         // Clean up media client
         RemoteMediaClienteMethodChannel.instance.cleanUp()
-        
-        // Force-end any existing session
-        if sessionManager.currentSession != nil {
-            sessionManager.endSessionAndStopCasting(true)
-        }
-        
+
+        // Force-end the existing session
+        sessionManager.endSessionAndStopCasting(true)
+
         // Reset dedup state — the next session will be tracked from scratch
         _lastEmittedConnectionState = nil
-        
+
+        // Explicitly notify Flutter that the session is gone. We bypass
+        // onSessionChanged(nil) because its dedup check would silently skip
+        // the emission when no previous null has been tracked.
+        channel?.invokeMethod("onCurrentSessionChanged", arguments: nil)
+
         // Re-add listener
         sessionManager.add(self)
-        
+
         result(true)
     }
     

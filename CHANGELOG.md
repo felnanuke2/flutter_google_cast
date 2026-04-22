@@ -3,7 +3,6 @@
 - **`resetSession()` API**: Added a new `resetSession()` method to `GoogleCastSessionManager` that forcefully clears all session and media client state on iOS, enabling a clean reconnect after a stuck or interrupted Cast session.
 
 ### 🔧 Notes
-- On Android, `resetSession()` delegates to the existing `endSessionAndStopCasting()` as stale-session issues are not observed on that platform.
 - No other public API changes.
 
 ## 1.4.5 - iOS Session Stability and Playback Rate fix
