@@ -159,10 +159,23 @@ public class FGCSessionManagerMethodChannel : UIResponder, FlutterPlugin, GCKSes
     ///
     /// - Parameter deviceIndex: The index of the device in the discovery list
     /// - Returns: `true` if session initiation was successful, `false` otherwise
-    /// - Note: This method only initiates the session; actual connection status 
+    /// - Note: This method only initiates the session; actual connection status
     ///         is reported through session manager listener callbacks
+    ///
+    /// The index is bounds-checked against `GCKDiscoveryManager.deviceCount`
+    /// before accessing the underlying device. `GCKDiscoveryManager.device(at:)`
+    /// is backed by an `NSArray` and throws `NSRangeException` for out-of-bounds
+    /// access, which crashes the process (Swift cannot catch Obj-C exceptions).
+    /// The index comes from the Dart side, which holds a snapshot of the device
+    /// list received via `onDevicesChanged`; between that snapshot and this
+    /// call a device may disappear from the live discovery list (flaky
+    /// receivers, network hiccups), making the snapshot index stale.
     private func startSessionWithDevice(deviceIndex : Int ) -> Bool {
-        
+        let deviceCount = discoveryManager.deviceCount
+        guard deviceIndex >= 0, UInt(deviceIndex) < deviceCount else {
+            print("[GoogleCast] startSessionWithDevice: index \(deviceIndex) is out of bounds (deviceCount=\(deviceCount)); the Dart-side snapshot is stale")
+            return false
+        }
         let device = discoveryManager.device(at: UInt(deviceIndex))
         return sessionManager.startSession(with: device)
     }

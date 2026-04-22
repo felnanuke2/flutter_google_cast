@@ -1,8 +1,11 @@
 ## 1.4.6 - iOS Force Session Reset
-### ✨ New Features
-- **`resetSession()` API**: Added a new `resetSession()` method to `GoogleCastSessionManager` that forcefully clears all session and media client state on iOS, enabling a clean reconnect after a stuck or interrupted Cast session.
+### New Features
+- Added `resetSession()` to force a clean iOS Cast session reset after interrupted or stuck connections.
 
-### 🔧 Notes
+### Bug Fixes
+- Fixed an iOS crash when the discovered device list changed during connection.
+
+### Notes
 - No other public API changes.
 
 ## 1.4.5 - iOS Session Stability and Playback Rate fix
