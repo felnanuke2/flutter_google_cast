@@ -70,6 +70,17 @@ class RemoteMediaClienteMethodChannel :UIResponder, FlutterPlugin, GCKRemoteMedi
     /// Dictionary storing queue items by their ID
     /// Maps queue item IDs to their corresponding GCKMediaQueueItem objects
     private var queueItems  : Dictionary<UInt, GCKMediaQueueItem> = [:]
+
+    /// The last `contentID` that the Flutter side passed when loading media.
+    ///
+    /// The Google Cast Default Media Receiver does not always echo the
+    /// `contentID` we sent back in the first `mediaStatus` update — in that
+    /// case `GCKMediaInformation.contentID` is nil/empty. To match Android
+    /// behaviour (where the originally provided `contentID` is delivered from
+    /// the very first update), we cache the value sent from Flutter and
+    /// substitute it into the media status map whenever the receiver reports
+    /// an empty `contentID`.
+    private var lastLoadedContentID: String?
     
     /// Computed property returning queue items in proper order
     /// - Returns: Array of queue items sorted according to queueOrder
@@ -234,6 +245,15 @@ class RemoteMediaClienteMethodChannel :UIResponder, FlutterPlugin, GCKRemoteMedi
             return
             
         }
+
+        // Cache the contentID that Flutter passed so we can inject it into
+        // subsequent media status updates where the receiver reports no
+        // contentID back (see `applyContentIDFallback`).
+        if let contentID = arguments["contentID"] as? String, !contentID.isEmpty {
+            self.lastLoadedContentID = contentID
+        } else {
+            self.lastLoadedContentID = nil
+        }
         
         print("[GoogleCast] loadMedia() mediaInfo created - contentID: \(mediaInfo.contentID ?? "nil"), contentType: \(mediaInfo.contentType ?? "nil"), streamType: \(mediaInfo.streamType.rawValue)")
         
@@ -339,11 +359,38 @@ class RemoteMediaClienteMethodChannel :UIResponder, FlutterPlugin, GCKRemoteMedi
         print("[GoogleCast] didUpdate mediaStatus - playerState: \(mediaStatus?.playerState.rawValue ?? -1), idleReason: \(mediaStatus?.idleReason.rawValue ?? -1)")
         print("[GoogleCast] mediaStatus contentID: \(mediaStatus?.mediaInformation?.contentID ?? "nil")")
         startListenPlayerPosition()
-     let data = mediaStatus?.toMap()
-       
+        var data = mediaStatus?.toMap()
+        applyContentIDFallback(&data)
+
         channel?.invokeMethod("onUpdateMediaStatus", arguments:data)
         if client.mediaStatus?.idleReason == .finished {
          onSessionEnd()
+        }
+    }
+
+    /// Ensures the media status map forwarded to Flutter always contains a
+    /// usable `contentID` inside `mediaInformation`.
+    ///
+    /// Priority:
+    ///   1. `contentID` already populated by the receiver (kept as-is).
+    ///   2. The `contentID` originally passed from Flutter in `loadMedia`
+    ///      (cached in `lastLoadedContentID`).
+    ///   3. `contentURL` as a last-resort fallback.
+    private func applyContentIDFallback(_ data: inout Dictionary<String, Any>?) {
+        guard var status = data,
+              var mediaInformation = status["mediaInformation"] as? Dictionary<String, Any> else {
+            return
+        }
+
+        let existing = mediaInformation["contentID"] as? String
+        if existing == nil || existing?.isEmpty == true {
+            if let cached = lastLoadedContentID, !cached.isEmpty {
+                mediaInformation["contentID"] = cached
+            } else if let contentURL = mediaInformation["contentURL"] as? String, !contentURL.isEmpty {
+                mediaInformation["contentID"] = contentURL
+            }
+            status["mediaInformation"] = mediaInformation
+            data = status
         }
     }
     
@@ -413,6 +460,7 @@ class RemoteMediaClienteMethodChannel :UIResponder, FlutterPlugin, GCKRemoteMedi
     public func onSessionEnd(){
         queueItems.removeAll()
         queueOrder.removeAll()
+        lastLoadedContentID = nil
         updateQueueItems()
     }
     

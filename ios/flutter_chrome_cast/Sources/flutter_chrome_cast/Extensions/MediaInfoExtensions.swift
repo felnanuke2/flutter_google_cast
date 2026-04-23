@@ -91,14 +91,16 @@ extension GCKMediaInformation{
     
     func toMap() -> Dictionary<String, Any> {
         var dict = Dictionary<String, Any>()
-        // GCKMediaInformation may return an empty/nil contentID when media was
-        // loaded via contentURL (the iOS SDK does not derive contentID from the
-        // URL automatically). Fall back to contentURL so the Dart layer always
-        // receives a non-empty identifier, matching Android behaviour.
+        // Only return the receiver-reported contentID here. The plugin layer
+        // (RemoteMediaClienteMethodChannel) is responsible for substituting
+        // the contentID that the Flutter side originally passed when loading
+        // media, because the Default Media Receiver does not always echo it
+        // back in the first media status update. A contentURL fallback is
+        // applied by the plugin layer only when no contentID is available at
+        // all. This keeps iOS behaviour consistent with Android, where the
+        // originally provided contentID is always delivered first.
         if let contentID = self.contentID, !contentID.isEmpty {
             dict["contentID"] = contentID
-        } else {
-            dict["contentID"] = self.contentURL?.absoluteString ?? ""
         }
         dict["contentType"] = self.contentType
         dict["streamType"] = self.streamType.rawValue
