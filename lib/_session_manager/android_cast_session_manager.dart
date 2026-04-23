@@ -103,4 +103,11 @@ class GoogleCastSessionManagerAndroidMethodChannel
   void setDeviceVolume(double value) {
     _channel.invokeMethod('setStreamVolume', value);
   }
+
+  @override
+  Future<bool> resetSession() async {
+    // Stale sessions are not observed on Android;
+    // delegate to the standard endSessionAndStopCasting
+    return endSessionAndStopCasting();
+  }
 }

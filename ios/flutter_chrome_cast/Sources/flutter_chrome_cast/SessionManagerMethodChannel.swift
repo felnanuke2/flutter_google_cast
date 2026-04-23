@@ -135,6 +135,9 @@ public class FGCSessionManagerMethodChannel : UIResponder, FlutterPlugin, GCKSes
         case "endSessionAndStopCasting":
             endSessionAndStopCasting(result)
             break
+        case "resetSession":
+            resetSession(result)
+            break
         case "setDeviceVolume":
             setDeviceVolume(call.arguments as! NSNumber)
             break
@@ -156,10 +159,23 @@ public class FGCSessionManagerMethodChannel : UIResponder, FlutterPlugin, GCKSes
     ///
     /// - Parameter deviceIndex: The index of the device in the discovery list
     /// - Returns: `true` if session initiation was successful, `false` otherwise
-    /// - Note: This method only initiates the session; actual connection status 
+    /// - Note: This method only initiates the session; actual connection status
     ///         is reported through session manager listener callbacks
+    ///
+    /// The index is bounds-checked against `GCKDiscoveryManager.deviceCount`
+    /// before accessing the underlying device. `GCKDiscoveryManager.device(at:)`
+    /// is backed by an `NSArray` and throws `NSRangeException` for out-of-bounds
+    /// access, which crashes the process (Swift cannot catch Obj-C exceptions).
+    /// The index comes from the Dart side, which holds a snapshot of the device
+    /// list received via `onDevicesChanged`; between that snapshot and this
+    /// call a device may disappear from the live discovery list (flaky
+    /// receivers, network hiccups), making the snapshot index stale.
     private func startSessionWithDevice(deviceIndex : Int ) -> Bool {
-        
+        let deviceCount = discoveryManager.deviceCount
+        guard deviceIndex >= 0, UInt(deviceIndex) < deviceCount else {
+            print("[GoogleCast] startSessionWithDevice: index \(deviceIndex) is out of bounds (deviceCount=\(deviceCount)); the Dart-side snapshot is stale")
+            return false
+        }
         let device = discoveryManager.device(at: UInt(deviceIndex))
         return sessionManager.startSession(with: device)
     }
@@ -458,6 +474,55 @@ public class FGCSessionManagerMethodChannel : UIResponder, FlutterPlugin, GCKSes
     }
 
     // MARK: - Helper Methods
+    
+    /// Forcefully resets a stuck session.
+    ///
+    /// 1. Early-returns when there is no current session — nothing to reset.
+    /// 2. Removes the session manager listener so `endSessionAndStopCasting`
+    ///    does not generate spurious `willEnd`/`didEnd` callbacks on the
+    ///    Flutter side.
+    /// 3. Cleans up the media client (listener, position timer, queue).
+    /// 4. Force-ends the existing session via `endSessionAndStopCasting(true)`.
+    /// 5. Resets the dedup state (`_lastEmittedConnectionState`) so the next
+    ///    session is tracked from scratch.
+    /// 6. Explicitly emits a `null` session to Flutter. `onSessionChanged(nil)`
+    ///    is intentionally bypassed here because its dedup check (`nil == nil`)
+    ///    would silently drop the emission.
+    /// 7. Re-adds the session manager listener.
+    ///
+    /// - Parameter result: Flutter result callback
+    private func resetSession(_ result: FlutterResult) {
+        print("[GoogleCast] resetSession: force-ending session and cleaning up all state")
+
+        // Nothing to reset — avoid unnecessary listener churn and media cleanup
+        guard sessionManager.currentSession != nil else {
+            result(true)
+            return
+        }
+
+        // Remove listener so endSessionAndStopCasting does not fire
+        // willEnd/didEnd and produce stale events on the Flutter side
+        sessionManager.remove(self)
+
+        // Clean up media client
+        RemoteMediaClienteMethodChannel.instance.cleanUp()
+
+        // Force-end the existing session
+        sessionManager.endSessionAndStopCasting(true)
+
+        // Reset dedup state — the next session will be tracked from scratch
+        _lastEmittedConnectionState = nil
+
+        // Explicitly notify Flutter that the session is gone. We bypass
+        // onSessionChanged(nil) because its dedup check would silently skip
+        // the emission when no previous null has been tracked.
+        channel?.invokeMethod("onCurrentSessionChanged", arguments: nil)
+
+        // Re-add listener
+        sessionManager.add(self)
+
+        result(true)
+    }
     
     /// Emits a `disconnecting` state to Flutter for `willEnd` callbacks.
     ///

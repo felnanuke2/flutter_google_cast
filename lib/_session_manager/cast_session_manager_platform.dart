@@ -113,4 +113,17 @@ abstract class GoogleCastSessionManagerPlatformInterface
 
   /// Sets the device volume.
   void setDeviceVolume(double value);
+
+  /// Forcefully resets a stuck session.
+  ///
+  /// On iOS this performs a full teardown: it removes the session manager
+  /// listener, cleans up the remote media client (listener, position timer,
+  /// queue), force-ends the current session, resets internal dedup state,
+  /// re-adds the listener, and emits a `null` session to Flutter so that
+  /// [currentSessionStream], [currentSession] and [connectionState] are
+  /// cleared.
+  ///
+  /// On Android this delegates to [endSessionAndStopCasting] because
+  /// stale-session issues are not observed on that platform.
+  Future<bool> resetSession();
 }

@@ -1,3 +1,13 @@
+## 1.4.6 - iOS Force Session Reset
+### New Features
+- Added `resetSession()` to force a clean iOS Cast session reset after interrupted or stuck connections.
+
+### Bug Fixes
+- Fixed an iOS crash when the discovered device list changed during connection.
+
+### Notes
+- No other public API changes.
+
 ## 1.4.5 - iOS Session Stability and Playback Rate fix
 ### 🐛 Bug Fixes
 - **iOS playback rate**: Fixed `setPlaybackRate` having no effect on iOS — the method channel handler was missing, so calls from Dart were silently ignored.
