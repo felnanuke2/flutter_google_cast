@@ -27,6 +27,9 @@ extension GCKMediaInformation{
         
         let builder =  GCKMediaInformationBuilder.init(contentURL: contentUrl)
         builder.streamType = streamType
+        if let contentID = arguments["contentID"] as? String, !contentID.isEmpty {
+            builder.contentID = contentID
+        }
         if let contentType = arguments["contentType"] as? String {
              builder.contentType = contentType
         }
@@ -88,7 +91,15 @@ extension GCKMediaInformation{
     
     func toMap() -> Dictionary<String, Any> {
         var dict = Dictionary<String, Any>()
-        dict["contentID"] = self.contentID
+        // GCKMediaInformation may return an empty/nil contentID when media was
+        // loaded via contentURL (the iOS SDK does not derive contentID from the
+        // URL automatically). Fall back to contentURL so the Dart layer always
+        // receives a non-empty identifier, matching Android behaviour.
+        if let contentID = self.contentID, !contentID.isEmpty {
+            dict["contentID"] = contentID
+        } else {
+            dict["contentID"] = self.contentURL?.absoluteString ?? ""
+        }
         dict["contentType"] = self.contentType
         dict["streamType"] = self.streamType.rawValue
         dict["contentURL"] = self.contentURL?.absoluteString
