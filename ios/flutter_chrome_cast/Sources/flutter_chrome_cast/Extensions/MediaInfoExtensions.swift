@@ -27,6 +27,9 @@ extension GCKMediaInformation{
         
         let builder =  GCKMediaInformationBuilder.init(contentURL: contentUrl)
         builder.streamType = streamType
+        if let contentID = arguments["contentID"] as? String, !contentID.isEmpty {
+            builder.contentID = contentID
+        }
         if let contentType = arguments["contentType"] as? String {
              builder.contentType = contentType
         }
@@ -88,7 +91,17 @@ extension GCKMediaInformation{
     
     func toMap() -> Dictionary<String, Any> {
         var dict = Dictionary<String, Any>()
-        dict["contentID"] = self.contentID
+        // Only return the receiver-reported contentID here. The plugin layer
+        // (RemoteMediaClienteMethodChannel) is responsible for substituting
+        // the contentID that the Flutter side originally passed when loading
+        // media, because the Default Media Receiver does not always echo it
+        // back in the first media status update. A contentURL fallback is
+        // applied by the plugin layer only when no contentID is available at
+        // all. This keeps iOS behaviour consistent with Android, where the
+        // originally provided contentID is always delivered first.
+        if let contentID = self.contentID, !contentID.isEmpty {
+            dict["contentID"] = contentID
+        }
         dict["contentType"] = self.contentType
         dict["streamType"] = self.streamType.rawValue
         dict["contentURL"] = self.contentURL?.absoluteString
