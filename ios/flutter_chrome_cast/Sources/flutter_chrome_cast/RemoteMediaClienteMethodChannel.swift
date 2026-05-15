@@ -82,56 +82,6 @@ class RemoteMediaClienteMethodChannel :UIResponder, FlutterPlugin, GCKRemoteMedi
     /// an empty `contentID`.
     private var lastLoadedContentID: String?
 
-    // MARK: - Post-load position guard
-    //
-    // After `loadMedia(with:)`, `GCKRemoteMediaClient.approximateStreamPosition()`
-    // keeps returning a stale extrapolation based on the *previous* content's
-    // last known `mediaStatus.streamPosition` until the SDK actually applies
-    // the first `mediaStatus` of the new media session to its internal
-    // baseline. Empirically this lag is ~0.3–1.5s on iOS even though both
-    // `mediaSessionID` and `contentID` are already reported as new in the
-    // listener callback. Android does not suffer from this because there we
-    // use `addProgressListener(_, 500)` which is push-based from the SDK —
-    // the SDK only notifies once it has applied the new baseline.
-    //
-    // To match Android behaviour we filter the polled value here: while a
-    // load is pending we know the expected start position (the `startTime`
-    // we just asked for), and any value that is far from it must still be
-    // stale extrapolation of the previous content. We drop such ticks until
-    // the value converges to the expected start position, then release the
-    // guard. A safety timeout protects against edge cases (e.g. receiver
-    // started playback far away from the requested position) so the guard
-    // is not stuck forever.
-
-    /// Expected stream position (seconds) of the media that is currently
-    /// being loaded. `nil` when no load is in flight.
-    private var pendingLoadExpectedPosition: TimeInterval?
-
-    /// `mediaSessionID` observed at the moment the guard was armed. The guard
-    /// stays armed until the SDK reports a *different* session ID — this
-    /// protects against the case when the previous content's stale position
-    /// happens to be within `pendingLoadGuardTolerance` of the requested
-    /// `startTime` (e.g. user reloads at roughly the same offset), which
-    /// otherwise would let a stale tick through purely by numerical
-    /// coincidence.
-    private var pendingLoadPreviousMediaSessionID: Int?
-
-    /// Safety work item that releases `pendingLoadExpectedPosition` after
-    /// `pendingLoadGuardTimeout` if convergence never happens.
-    private var pendingLoadGuardWorkItem: DispatchWorkItem?
-
-    /// Maximum time the guard stays armed. After this it is released even
-    /// if `approximateStreamPosition()` never converged to the expected
-    /// start position — we'd rather emit a possibly-imprecise value than
-    /// hang the position stream indefinitely.
-    private let pendingLoadGuardTimeout: TimeInterval = 10
-
-    /// Tolerance (seconds) within which `approximateStreamPosition()` is
-    /// considered to have caught up with the new media session. Receivers
-    /// may start playback slightly off the requested `startTime` due to
-    /// keyframe alignment / buffering, so a few seconds of slack is fine.
-    private let pendingLoadGuardTolerance: TimeInterval = 5
-
     /// Computed property returning queue items in proper order
     /// - Returns: Array of queue items sorted according to queueOrder
     private var orderedQueueItems : Array<GCKMediaQueueItem> {
@@ -331,27 +281,8 @@ class RemoteMediaClienteMethodChannel :UIResponder, FlutterPlugin, GCKRemoteMedi
             requestDataBuilder.customData = customData as NSObject
         }
         let requestData = requestDataBuilder.build()
-        print("[GoogleCast] loadMedia() options: autoplay=\(String(describing: requestData.autoplay)), playPosition=\(requestData.startTime)")
-        print("[GoogleCast] loadMedia() remoteMediaClient: \(String(describing: currentRemoteMediaCliente))")
-
-        // Capture the *current* media session ID before dispatching the load
-        // so the guard can detect when the SDK has switched to the new media
-        // session (see `pendingLoadPreviousMediaSessionID`).
-        let previousSessionID = currentRemoteMediaCliente?.mediaStatus?.mediaSessionID
 
         let request = currentRemoteMediaCliente?.loadMedia(with: requestData)
-        print("[GoogleCast] loadMedia() request: \(String(describing: request))")
-
-        // Only arm the position guard once we know the load was actually
-        // accepted by the SDK. Arming unconditionally would suppress valid
-        // ticks for up to `pendingLoadGuardTimeout` seconds whenever there is
-        // no current remote media client / the request could not be created.
-        if request != nil {
-            armPendingLoadGuard(
-                expectedPosition: requestData.startTime,
-                previousMediaSessionID: previousSessionID
-            )
-        }
 
         result(request?.toMap())
         
@@ -529,7 +460,6 @@ class RemoteMediaClienteMethodChannel :UIResponder, FlutterPlugin, GCKRemoteMedi
         queueItems.removeAll()
         queueOrder.removeAll()
         lastLoadedContentID = nil
-        releasePendingLoadGuard()
         updateQueueItems()
     }
     
@@ -540,7 +470,6 @@ class RemoteMediaClienteMethodChannel :UIResponder, FlutterPlugin, GCKRemoteMedi
         currentRemoteMediaCliente?.remove(self)
         positionTimer?.invalidate()
         positionTimer = nil
-        releasePendingLoadGuard()
         queueItems.removeAll()
         queueOrder.removeAll()
     }
@@ -557,63 +486,8 @@ class RemoteMediaClienteMethodChannel :UIResponder, FlutterPlugin, GCKRemoteMedi
         self.positionTimer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true){ [weak self] _ in
             guard let self = self else { return }
             let position = self.currentRemoteMediaCliente?.approximateStreamPosition() ?? 0
-
-            // Post-load guard: while a media load is in flight,
-            // `approximateStreamPosition()` extrapolates from the previous
-            // content's baseline and would leak its stale position into
-            // the Flutter stream. Drop ticks until BOTH:
-            //   1. the SDK has switched to a new `mediaSessionID` (so we
-            //      know the new media status has been applied — guards
-            //      against stale values that happen to be numerically
-            //      close to the requested `startTime`);
-            //   2. `approximateStreamPosition()` has converged to the
-            //      requested `startTime` within tolerance (the SDK reports
-            //      the new session id slightly before the position
-            //      baseline catches up).
-            if let expected = self.pendingLoadExpectedPosition {
-                let currentSessionID = self.currentRemoteMediaCliente?.mediaStatus?.mediaSessionID
-                let sessionChanged = currentSessionID != nil
-                    && currentSessionID != self.pendingLoadPreviousMediaSessionID
-                if !sessionChanged || abs(position - expected) > self.pendingLoadGuardTolerance {
-                    return
-                }
-                self.releasePendingLoadGuard()
-            }
-
             self.channel?.invokeMethod("onUpdatePlayerPosition", arguments: Int(position))
         }
     }
 
-    /// Arms the post-load position guard with the expected start position
-    /// of the media being loaded and the `mediaSessionID` observed right
-    /// before the load was dispatched. Also schedules the safety timeout
-    /// that releases the guard unconditionally after
-    /// [pendingLoadGuardTimeout] seconds.
-    private func armPendingLoadGuard(
-        expectedPosition: TimeInterval,
-        previousMediaSessionID: Int?
-    ) {
-        self.pendingLoadExpectedPosition = expectedPosition
-        self.pendingLoadPreviousMediaSessionID = previousMediaSessionID
-        self.pendingLoadGuardWorkItem?.cancel()
-        let workItem = DispatchWorkItem { [weak self] in
-            self?.pendingLoadExpectedPosition = nil
-            self?.pendingLoadPreviousMediaSessionID = nil
-            self?.pendingLoadGuardWorkItem = nil
-        }
-        self.pendingLoadGuardWorkItem = workItem
-        DispatchQueue.main.asyncAfter(
-            deadline: .now() + pendingLoadGuardTimeout,
-            execute: workItem
-        )
-    }
-
-    /// Releases the post-load position guard and cancels the safety timer.
-    private func releasePendingLoadGuard() {
-        self.pendingLoadExpectedPosition = nil
-        self.pendingLoadPreviousMediaSessionID = nil
-        self.pendingLoadGuardWorkItem?.cancel()
-        self.pendingLoadGuardWorkItem = nil
-    }
-   
 }

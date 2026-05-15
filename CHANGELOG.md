@@ -1,3 +1,10 @@
+## 1.4.7 - iOS Stale Position After Content Switch
+### 🐛 Bug Fixes
+- **iOS stale playback position after `loadMedia`**: Fixed `playerPosition` briefly showing the previous content's offset right after switching media. Position ticks are now suppressed until the SDK reports a new `mediaSessionID` and `approximateStreamPosition()` converges to the requested start time (±5 s tolerance), with a 10 s safety timeout.
+
+### 🔧 Notes
+- No public API changes.
+
 ## 1.4.6 - iOS Force Session Reset
 ### New Features
 - Added `resetSession()` to force a clean iOS Cast session reset after interrupted or stuck connections.
