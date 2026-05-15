@@ -201,6 +201,13 @@ class GoogleCastRemoteMediaClientIOSMethodChannel
     _pendingLoadExpectedPosition = expectedPosition;
     _pendingLoadPreviousMediaSessionId =
         _mediaStatusStreamController.value?.mediaSessionID;
+    // Overwrite the BehaviorSubject's cached value so that any consumer that
+    // reads `playerPosition` synchronously (e.g. polls it via a periodic
+    // timer) sees the expected start of the new content instead of the
+    // previous content's last reported position. Without this, even though
+    // `onUpdatePlayerPosition` ticks are filtered, the stale cached value
+    // leaks into the app right after `loadMedia`.
+    _playerPositionStreamController.add(expectedPosition);
     _pendingLoadGuardTimer?.cancel();
     _pendingLoadGuardTimer = Timer(_pendingLoadGuardTimeout, () {
       debugPrint(
