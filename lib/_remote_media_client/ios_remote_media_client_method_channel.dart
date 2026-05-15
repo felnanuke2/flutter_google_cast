@@ -29,6 +29,25 @@ class GoogleCastRemoteMediaClientIOSMethodChannel
   final _playerPositionStreamController = BehaviorSubject<Duration>()
     ..add(Duration.zero);
 
+  // After `loadMedia`, the native `GCKRemoteMediaClient.approximateStreamPosition()`
+  // keeps returning the previous content's last known position until the SDK
+  // applies the new mediaStatus on the device. As a result, the first few
+  // `onUpdatePlayerPosition` ticks emitted by the iOS side leak stale values
+  // from the previous content (e.g. 0:01:10 right after loading a new content
+  // whose intended start is 0:02:07). We block such stale ticks at the Dart
+  // boundary until BOTH conditions are met:
+  //   1. The mediaSessionID has changed compared to the one observed at the
+  //      moment of `loadMedia` (the SDK applied the new stream).
+  //   2. The reported position has converged to the expected start position
+  //      within a small tolerance.
+  // A safety timeout releases the guard if convergence never happens (e.g.
+  // playback was stopped/seeked before reaching the expected position).
+  Duration? _pendingLoadExpectedPosition;
+  int? _pendingLoadPreviousMediaSessionId;
+  Timer? _pendingLoadGuardTimer;
+  static const _pendingLoadGuardTimeout = Duration(seconds: 10);
+  static const _pendingLoadGuardTolerance = Duration(seconds: 5);
+
   final _queueItemsStreamController =
       BehaviorSubject<List<GoogleCastQueueItem>>()..add([]);
 
@@ -76,6 +95,9 @@ class GoogleCastRemoteMediaClientIOSMethodChannel
     String? credentialsType,
     Map<String, dynamic>? customData,
   }) async {
+    // Arm the stale-position guard BEFORE invoking the platform channel so
+    // that any position tick emitted right after `loadMedia` is filtered out.
+    _armPendingLoadGuard(playPosition);
     _channel.invokeMethod(
         'loadMedia',
         mediaInfo.toMap()
@@ -152,7 +174,53 @@ class GoogleCastRemoteMediaClientIOSMethodChannel
 
   Future _onUpdatePlayerPosition(int seconds) async {
     final duration = Duration(seconds: seconds);
+    final expected = _pendingLoadExpectedPosition;
+    if (expected != null) {
+      final currentSessionId =
+          _mediaStatusStreamController.value?.mediaSessionID;
+      // `mediaSessionID` is non-null `int` (defaults to 0 when no status yet).
+      // Treat 0 and the previously observed id as "not changed yet".
+      final sessionChanged = currentSessionId != null &&
+          currentSessionId != 0 &&
+          currentSessionId != _pendingLoadPreviousMediaSessionId;
+      final converged =
+          (duration - expected).abs() <= _pendingLoadGuardTolerance;
+      if (!sessionChanged || !converged) {
+        debugPrint(
+            '[Flutter] onUpdatePlayerPosition blocked: pos=$duration expected=$expected sessionChanged=$sessionChanged');
+        return;
+      }
+      debugPrint(
+          '[Flutter] onUpdatePlayerPosition guard released at pos=$duration');
+      _releasePendingLoadGuard();
+    }
     _playerPositionStreamController.add(duration);
+  }
+
+  void _armPendingLoadGuard(Duration expectedPosition) {
+    _pendingLoadExpectedPosition = expectedPosition;
+    _pendingLoadPreviousMediaSessionId =
+        _mediaStatusStreamController.value?.mediaSessionID;
+    // Overwrite the BehaviorSubject's cached value so that any consumer that
+    // reads `playerPosition` synchronously (e.g. polls it via a periodic
+    // timer) sees the expected start of the new content instead of the
+    // previous content's last reported position. Without this, even though
+    // `onUpdatePlayerPosition` ticks are filtered, the stale cached value
+    // leaks into the app right after `loadMedia`.
+    _playerPositionStreamController.add(expectedPosition);
+    _pendingLoadGuardTimer?.cancel();
+    _pendingLoadGuardTimer = Timer(_pendingLoadGuardTimeout, () {
+      debugPrint(
+          '[Flutter] onUpdatePlayerPosition guard timed out, releasing');
+      _releasePendingLoadGuard();
+    });
+  }
+
+  void _releasePendingLoadGuard() {
+    _pendingLoadExpectedPosition = null;
+    _pendingLoadPreviousMediaSessionId = null;
+    _pendingLoadGuardTimer?.cancel();
+    _pendingLoadGuardTimer = null;
   }
 
   /// Recursively converts a `Map<Object?, Object?>` to `Map<String, dynamic>`.

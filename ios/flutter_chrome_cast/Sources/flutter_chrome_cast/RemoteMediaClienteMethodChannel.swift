@@ -81,7 +81,7 @@ class RemoteMediaClienteMethodChannel :UIResponder, FlutterPlugin, GCKRemoteMedi
     /// substitute it into the media status map whenever the receiver reports
     /// an empty `contentID`.
     private var lastLoadedContentID: String?
-    
+
     /// Computed property returning queue items in proper order
     /// - Returns: Array of queue items sorted according to queueOrder
     private var orderedQueueItems : Array<GCKMediaQueueItem> {
@@ -281,10 +281,9 @@ class RemoteMediaClienteMethodChannel :UIResponder, FlutterPlugin, GCKRemoteMedi
             requestDataBuilder.customData = customData as NSObject
         }
         let requestData = requestDataBuilder.build()
-        print("[GoogleCast] loadMedia() options: autoplay=\(String(describing: requestData.autoplay)), playPosition=\(requestData.startTime)")
-        print("[GoogleCast] loadMedia() remoteMediaClient: \(String(describing: currentRemoteMediaCliente))")
+
         let request = currentRemoteMediaCliente?.loadMedia(with: requestData)
-        print("[GoogleCast] loadMedia() request: \(String(describing: request))")
+
         result(request?.toMap())
         
         
@@ -484,11 +483,11 @@ class RemoteMediaClienteMethodChannel :UIResponder, FlutterPlugin, GCKRemoteMedi
         self.positionTimer?.invalidate()
         self.positionTimer = nil
         
-        self.positionTimer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true){_ in
-            self.channel?.invokeMethod("onUpdatePlayerPosition", arguments: Int(self.currentRemoteMediaCliente?.approximateStreamPosition() ?? 0))
-
-            
+        self.positionTimer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true){ [weak self] _ in
+            guard let self = self else { return }
+            let position = self.currentRemoteMediaCliente?.approximateStreamPosition() ?? 0
+            self.channel?.invokeMethod("onUpdatePlayerPosition", arguments: Int(position))
         }
     }
-   
+
 }
