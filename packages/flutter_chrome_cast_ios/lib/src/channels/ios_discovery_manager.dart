@@ -19,16 +19,23 @@ class _DiscoveryFlutterApiHandler extends DiscoveryManagerFlutterApi {
 /// using method channels to communicate with the native iOS implementation.
 class GoogleCastDiscoveryManagerMethodChannelIOS
     extends GoogleCastDiscoveryManagerPlatformInterface {
-  /// Creates a new instance of the iOS discovery manager.
-  ///
-  /// Sets up the method call handler to receive updates from the native side.
-  GoogleCastDiscoveryManagerMethodChannelIOS() {
+  GoogleCastDiscoveryManagerMethodChannelIOS();
+
+  final DiscoveryManagerHostApi _hostApi = DiscoveryManagerHostApi();
+  bool _flutterApiSetUp = false;
+
+  void _ensureFlutterApiSetUp() {
+    if (_flutterApiSetUp) return;
+    _flutterApiSetUp = true;
     DiscoveryManagerFlutterApi.setUp(
       _DiscoveryFlutterApiHandler(_onDevicesChanged),
     );
   }
 
-  final _hostApi = DiscoveryManagerHostApi();
+  DiscoveryManagerHostApi get _api {
+    _ensureFlutterApiSetUp();
+    return _hostApi;
+  }
 
   final _devicesStreamController = BehaviorSubject<List<GoogleCastDevice>>()
     ..add([]);
@@ -42,17 +49,17 @@ class GoogleCastDiscoveryManagerMethodChannelIOS
 
   @override
   Future<bool> isDiscoveryActiveForDeviceCategory(String deviceCategory) async {
-    return _hostApi.isDiscoveryActiveForDeviceCategory(deviceCategory);
+    return _api.isDiscoveryActiveForDeviceCategory(deviceCategory);
   }
 
   @override
   Future<void> startDiscovery() {
-    return _hostApi.startDiscovery();
+    return _api.startDiscovery();
   }
 
   @override
   Future<void> stopDiscovery() {
-    return _hostApi.stopDiscovery();
+    return _api.stopDiscovery();
   }
 
   /// Handles device changes for testing purposes.

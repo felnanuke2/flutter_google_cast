@@ -34,7 +34,14 @@ class _RemoteMediaFlutterApiHandler extends RemoteMediaClientFlutterApi {
 class GoogleCastRemoteMediaClientAndroidMethodChannel
     extends GoogleCastRemoteMediaClientPlatformInterface {
   /// Creates a new Android remote media client method channel.
-  GoogleCastRemoteMediaClientAndroidMethodChannel() {
+  GoogleCastRemoteMediaClientAndroidMethodChannel();
+
+  final RemoteMediaClientHostApi _hostApi = RemoteMediaClientHostApi();
+  bool _flutterApiSetUp = false;
+
+  void _ensureFlutterApiSetUp() {
+    if (_flutterApiSetUp) return;
+    _flutterApiSetUp = true;
     RemoteMediaClientFlutterApi.setUp(
       _RemoteMediaFlutterApiHandler(
         onMediaStatusChangedCallback: _onMediaStatusChanged,
@@ -44,7 +51,10 @@ class GoogleCastRemoteMediaClientAndroidMethodChannel
     );
   }
 
-  final _hostApi = RemoteMediaClientHostApi();
+  RemoteMediaClientHostApi get _api {
+    _ensureFlutterApiSetUp();
+    return _hostApi;
+  }
 
   // Media Status
   final _mediaStatusStreamController = BehaviorSubject<GoggleCastMediaStatus?>()
@@ -101,7 +111,7 @@ class GoogleCastRemoteMediaClientAndroidMethodChannel
 
   @override
   Future<void> loadMediaWithRequest(GoogleCastLoadMediaRequest request) async {
-    await _hostApi.loadMedia(
+    await _api.loadMedia(
       LoadMediaRequestPigeon(
         mediaInfo: _toMediaInfo(request.mediaInfo),
         autoPlay: request.autoPlay,
@@ -142,12 +152,12 @@ class GoogleCastRemoteMediaClientAndroidMethodChannel
 
   @override
   Future<void> pause() async {
-    await _hostApi.pause();
+    await _api.pause();
   }
 
   @override
   Future<void> play() async {
-    await _hostApi.play();
+    await _api.play();
   }
 
   @override
@@ -155,7 +165,7 @@ class GoogleCastRemoteMediaClientAndroidMethodChannel
     List<GoogleCastQueueItem> queueItems, {
     GoogleCastQueueLoadOptions? options,
   }) async {
-    await _hostApi.queueLoadItems(
+    await _api.queueLoadItems(
       QueueLoadRequestPigeon(
         items: queueItems.map(_toMediaQueueItem).toList(),
         options: options == null
@@ -172,17 +182,17 @@ class GoogleCastRemoteMediaClientAndroidMethodChannel
 
   @override
   Future<void> queueNextItem() async {
-    await _hostApi.queueNextItem();
+    await _api.queueNextItem();
   }
 
   @override
   Future<void> queuePrevItem() async {
-    await _hostApi.queuePrevItem();
+    await _api.queuePrevItem();
   }
 
   @override
   Future<void> seek(GoogleCastMediaSeekOption option) async {
-    await _hostApi.seek(
+    await _api.seek(
       SeekOptionPigeon(
         position: option.position.inSeconds,
         relative: option.relative,
@@ -194,39 +204,39 @@ class GoogleCastRemoteMediaClientAndroidMethodChannel
 
   @override
   Future<void> setActiveTrackIDs(List<int> activeTrackIDs) async {
-    await _hostApi.setActiveTrackIds(activeTrackIDs);
+    await _api.setActiveTrackIds(activeTrackIDs);
   }
 
   @override
   Future<void> setPlaybackRate(double rate) async {
-    await _hostApi.setPlaybackRate(SetPlaybackRateRequestPigeon(rate: rate));
+    await _api.setPlaybackRate(SetPlaybackRateRequestPigeon(rate: rate));
   }
 
   @override
   Future<void> setTextTrackStyle(TextTrackStyle textTrackStyle) async {
-    await _hostApi.setTextTrackStyle(_toTextTrackStylePigeon(textTrackStyle));
+    await _api.setTextTrackStyle(_toTextTrackStylePigeon(textTrackStyle));
   }
 
   @override
   Future<void> stop() async {
-    await _hostApi.stop();
+    await _api.stop();
   }
 
   @override
   Future<void> queueJumpToItemWithId(int itemId) async {
-    await _hostApi.queueJumpToItemWithId(itemId);
+    await _api.queueJumpToItemWithId(itemId);
   }
 
   @override
   Future<void> queueRemoveItemsWithIds(List<int> itemIds) async {
-    await _hostApi.queueRemoveItemsWithIds(itemIds);
+    await _api.queueRemoveItemsWithIds(itemIds);
   }
 
   @override
   Future<void> queueInsertItemAndPlayWithRequest(
     GoogleCastQueueInsertItemAndPlayRequest request,
   ) async {
-    await _hostApi.queueInsertItemAndPlay(
+    await _api.queueInsertItemAndPlay(
       QueueInsertItemAndPlayRequestPigeon(
         item: _toMediaQueueItem(request.item),
         beforeItemWithId: request.beforeItemWithId,
@@ -251,7 +261,7 @@ class GoogleCastRemoteMediaClientAndroidMethodChannel
   Future<void> queueInsertItemsWithRequest(
     GoogleCastQueueInsertItemsRequest request,
   ) async {
-    await _hostApi.queueInsertItems(
+    await _api.queueInsertItems(
       QueueInsertItemsRequestPigeon(
         items: request.items.map(_toMediaQueueItem).toList(),
         beforeItemWithId: request.beforeItemWithId,
@@ -299,7 +309,7 @@ class GoogleCastRemoteMediaClientAndroidMethodChannel
   Future<void> queueReorderItemsWithRequest(
     GoogleCastQueueReorderItemsRequest request,
   ) {
-    return _hostApi.queueReorderItems(
+    return _api.queueReorderItems(
       QueueReorderItemsRequestPigeon(
         itemsIds: request.itemsIds,
         beforeItemWithId: request.beforeItemWithId,

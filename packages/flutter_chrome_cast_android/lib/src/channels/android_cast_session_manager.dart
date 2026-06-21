@@ -27,12 +27,23 @@ class _SessionFlutterApiHandler extends SessionManagerFlutterApi {
 class GoogleCastSessionManagerAndroidMethodChannel
     extends GoogleCastSessionManagerPlatformInterface {
   /// Creates a new Android session manager method channel.
-  GoogleCastSessionManagerAndroidMethodChannel() {
+  GoogleCastSessionManagerAndroidMethodChannel();
+
+  final SessionManagerHostApi _hostApi = SessionManagerHostApi();
+  bool _flutterApiSetUp = false;
+
+  void _ensureFlutterApiSetUp() {
+    if (_flutterApiSetUp) return;
+    _flutterApiSetUp = true;
     SessionManagerFlutterApi.setUp(
       _SessionFlutterApiHandler(_onSessionChanged),
     );
   }
-  final _hostApi = SessionManagerHostApi();
+
+  SessionManagerHostApi get _api {
+    _ensureFlutterApiSetUp();
+    return _hostApi;
+  }
 
   final _currentSessionStreamController = BehaviorSubject<GoogleCastSession?>()
     ..add(null);
@@ -52,12 +63,12 @@ class GoogleCastSessionManagerAndroidMethodChannel
 
   @override
   Future<bool> endSession() async {
-    return _hostApi.endSession();
+    return _api.endSession();
   }
 
   @override
   Future<bool> endSessionAndStopCasting() async {
-    return _hostApi.endSessionAndStopCasting();
+    return _api.endSessionAndStopCasting();
   }
 
   @override
@@ -75,7 +86,7 @@ class GoogleCastSessionManagerAndroidMethodChannel
 
   @override
   Future<bool> startSessionWithDevice(GoogleCastDevice device) async {
-    return _hostApi.startSessionWithDevice(
+    return _api.startSessionWithDevice(
       StartSessionRequest(deviceId: device.deviceID),
     );
   }
@@ -132,7 +143,7 @@ class GoogleCastSessionManagerAndroidMethodChannel
 
   @override
   void setDeviceVolumeLevel(CastDeviceVolume volume) {
-    _hostApi.setDeviceVolume(volume.value);
+    _api.setDeviceVolume(volume.value);
   }
 
   @override

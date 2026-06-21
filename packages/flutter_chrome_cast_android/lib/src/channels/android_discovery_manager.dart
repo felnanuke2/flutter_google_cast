@@ -19,19 +19,26 @@ class _DiscoveryFlutterApiHandler extends DiscoveryManagerFlutterApi {
 /// using method channels to communicate with the native Android implementation.
 class GoogleCastDiscoveryManagerMethodChannelAndroid
     extends GoogleCastDiscoveryManagerPlatformInterface {
-  /// Creates a new instance of the Android discovery manager.
-  ///
-  /// Sets up the method call handler to receive updates from the native side.
-  GoogleCastDiscoveryManagerMethodChannelAndroid() {
+  GoogleCastDiscoveryManagerMethodChannelAndroid();
+
+  final DiscoveryManagerHostApi _hostApi = DiscoveryManagerHostApi();
+
+  final _devicesStreamController = BehaviorSubject<List<GoogleCastDevice>>()
+    ..add([]);
+  bool _flutterApiSetUp = false;
+
+  void _ensureFlutterApiSetUp() {
+    if (_flutterApiSetUp) return;
+    _flutterApiSetUp = true;
     DiscoveryManagerFlutterApi.setUp(
       _DiscoveryFlutterApiHandler(_onDevicesChangedFromPigeon),
     );
   }
 
-  final _hostApi = DiscoveryManagerHostApi();
-
-  final _devicesStreamController = BehaviorSubject<List<GoogleCastDevice>>()
-    ..add([]);
+  DiscoveryManagerHostApi get _api {
+    _ensureFlutterApiSetUp();
+    return _hostApi;
+  }
 
   @override
   List<GoogleCastDevice> get devices => _devicesStreamController.value;
@@ -42,17 +49,17 @@ class GoogleCastDiscoveryManagerMethodChannelAndroid
 
   @override
   Future<bool> isDiscoveryActiveForDeviceCategory(String deviceCategory) {
-    return _hostApi.isDiscoveryActiveForDeviceCategory(deviceCategory);
+    return _api.isDiscoveryActiveForDeviceCategory(deviceCategory);
   }
 
   @override
   Future<void> startDiscovery() async {
-    await _hostApi.startDiscovery();
+    await _api.startDiscovery();
   }
 
   @override
   Future<void> stopDiscovery() async {
-    await _hostApi.stopDiscovery();
+    await _api.stopDiscovery();
   }
 
   void _onDevicesChangedFromPigeon(List<CastDevicePigeon> arguments) {
