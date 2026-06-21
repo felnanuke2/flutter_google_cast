@@ -3,10 +3,7 @@ name: Publish to pub.dev
 on:
   push:
     tags:
-      - 'flutter_chrome_cast_platform_interface-v*'
-      - 'flutter_chrome_cast_android-v*'
-      - 'flutter_chrome_cast_ios-v*'
-      - 'flutter_chrome_cast-v*'
+      - 'v*'
   workflow_dispatch:
     inputs:
       package:
@@ -14,6 +11,7 @@ on:
         required: true
         type: choice
         options:
+          - all
           - flutter_chrome_cast_platform_interface
           - flutter_chrome_cast_android
           - flutter_chrome_cast_ios
@@ -25,62 +23,42 @@ permissions:
 jobs:
   publish-platform-interface:
     if: >-
-      (github.event_name == 'push' && startsWith(github.ref_name, 'flutter_chrome_cast_platform_interface-v')) ||
-      (github.event_name == 'workflow_dispatch' && github.event.inputs.package == 'flutter_chrome_cast_platform_interface')
+      github.event_name == 'push' ||
+      github.event.inputs.package == 'all' ||
+      github.event.inputs.package == 'flutter_chrome_cast_platform_interface'
     uses: dart-lang/setup-dart/.github/workflows/publish.yml@v1
     with:
       working-directory: packages/flutter_chrome_cast_platform_interface
 
-
-
-
-
-
-
-
-
-
-
   publish-android:
+    needs: publish-platform-interface
     if: >-
-      (github.event_name == 'push' && startsWith(github.ref_name, 'flutter_chrome_cast_android-v')) ||
-      (github.event_name == 'workflow_dispatch' && github.event.inputs.package == 'flutter_chrome_cast_android')
+      always() &&
+      (github.event_name == 'push' ||
+       github.event.inputs.package == 'all' ||
+       github.event.inputs.package == 'flutter_chrome_cast_android')
     uses: dart-lang/setup-dart/.github/workflows/publish.yml@v1
     with:
       working-directory: packages/flutter_chrome_cast_android
 
-
-
-
-
-
-
-
-
-
-
   publish-ios:
+    needs: publish-platform-interface
     if: >-
-      (github.event_name == 'push' && startsWith(github.ref_name, 'flutter_chrome_cast_ios-v')) ||
-      (github.event_name == 'workflow_dispatch' && github.event.inputs.package == 'flutter_chrome_cast_ios')
+      always() &&
+      (github.event_name == 'push' ||
+       github.event.inputs.package == 'all' ||
+       github.event.inputs.package == 'flutter_chrome_cast_ios')
     uses: dart-lang/setup-dart/.github/workflows/publish.yml@v1
     with:
       working-directory: packages/flutter_chrome_cast_ios
 
-
-
-
-
-
-
-
-
-
-
   publish-root:
+    needs: [publish-android, publish-ios]
     if: >-
-      (github.event_name == 'push' && startsWith(github.ref_name, 'flutter_chrome_cast-v')) ||
-      (github.event_name == 'workflow_dispatch' && github.event.inputs.package == 'flutter_chrome_cast')
+      always() &&
+      (github.event_name == 'push' ||
+       github.event.inputs.package == 'all' ||
+       github.event.inputs.package == 'flutter_chrome_cast')
     uses: dart-lang/setup-dart/.github/workflows/publish.yml@v1
     with:
       working-directory: .
