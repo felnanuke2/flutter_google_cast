@@ -7,6 +7,21 @@
 
 > **📱 Alternative for Non-Cast Devices**: If you need to integrate with devices that don't have Google Cast built-in or are not Chromecast devices, you may be interested in https://github.com/felnanuke2/media_cast_dlna - take a look!
 
+> **🔄 Migration Notice**: This plugin is currently migrating from a legacy monolithic architecture to a [federated plugin](https://docs.flutter.dev/packages-and-plugins/developing-packages#federated-plugins) architecture. The platform-specific implementations are being split into separate packages. See the [Packages](#packages) section for details.
+
+## Packages
+
+This plugin is migrating to a [federated plugin](https://docs.flutter.dev/packages-and-plugins/developing-packages#federated-plugins) architecture:
+
+| Package | Description |
+|---------|-------------|
+| [`flutter_chrome_cast`](packages/flutter_chrome_cast) | App-facing API — this is what most users depend on |
+| [`flutter_chrome_cast_platform_interface`](packages/flutter_chrome_cast_platform_interface) | Platform interface shared by all implementations |
+| [`flutter_chrome_cast_android`](packages/flutter_chrome_cast_android) | Android implementation |
+| [`flutter_chrome_cast_ios`](packages/flutter_chrome_cast_ios) | iOS implementation |
+
+Most users only need to depend on `flutter_chrome_cast`, which re-exports the platform packages automatically.
+
 ## Demo Video
 
 <video src="https://raw.githubusercontent.com/felnanuke2/flutter_google_cast/refs/heads/master/Screen_Recording_20250618_125333.mp4" controls width="600" poster="https://raw.githubusercontent.com/felnanuke2/flutter_google_cast/refs/heads/master/Screenshot_20250618_130514.jpg">
