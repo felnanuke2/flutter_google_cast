@@ -19,160 +19,126 @@ import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
 import com.google.android.gms.cast.LaunchOptions
 import java.util.concurrent.Executors
 
-/**
- * Tag for logging Cast context operations
- */
 private const val TAG = "CastContext"
 
-/**
- * Flutter method channel for Google Cast context management
- * 
- * This class handles all Google Cast context-related operations, including SDK initialization,
- * configuration management, and Cast framework setup. It serves as the primary interface
- * between Flutter and the Google Cast SDK for Android context operations.
- *
- * Key responsibilities:
- * - Google Cast SDK initialization and configuration
- * - Cast context lifecycle management
- * - Permission handling for device discovery (Android 13+)
- * - Integration with other Cast method channels
- * - Activity lifecycle awareness for proper context management
- *
- * Architecture:
- * The class coordinates multiple Cast SDK components:
- * - DiscoveryManagerMethodChannel: Handles device discovery operations
- * - SessionManagerMethodChannel: Manages Cast session lifecycle
- * - CastContext: Core Google Cast SDK context for all operations
- *
- * The class implements ActivityAware to properly handle Android activity lifecycle
- * events and ensure Cast SDK operations work correctly with the host application.
- *
- * @author LUIZ FELIPE ALVES LIMA
- * @since Android API 21 (Android 5.0)
- */
 class CastContextMethodChannel : FlutterPlugin, GoogleCastContextHostApi {
 
-    /**
-     * Android application context for Cast SDK operations
-     * 
-     * Required for Google Cast SDK initialization and provides access
-     * to system services and application-level resources needed for
-     * Cast functionality.
-     */
     private lateinit var appContext: Context
-    
-    /**
-     * Discovery manager method channel for device discovery operations
-     * 
-     * Handles all Cast device discovery functionality including starting/stopping
-     * discovery, managing discovered devices, and notifying Flutter of device changes.
-     */
+
     private val discoveryManager = DiscoveryManagerMethodChannel()
-    
-    /**
-     * Session manager method channel for Cast session management
-     * 
-     * Manages Cast session lifecycle including session creation, connection,
-     * disconnection, and session state monitoring. Initialized with discovery manager
-     * reference for device selection during session creation.
-     */
+
     private lateinit var sessionManagerMethodChannel: SessionManagerMethodChannel
-    
-    /**
-     * Permission launcher for nearby WiFi devices (Android 13+)
-     * 
-     * Handles runtime permission requests for accessing nearby WiFi devices,
-     * which is required for Cast device discovery on Android 13 and higher.
-     * Uses the new runtime permission system for enhanced privacy.
-     */
+
     private lateinit var nearbyWifiDevicesPermissionLauncher: ActivityResultLauncher<String>
-    
-    /**
-     * Executor for Cast context operations
-     * 
-     * Single-threaded executor used for Cast SDK operations that need to be
-     * performed off the main thread to avoid blocking the UI.
-     */
+
     private val executor = Executors.newSingleThreadExecutor()
 
     // MARK: - Flutter Plugin Lifecycle
 
-
-    /**
-     * Called when the Flutter plugin is attached to the Flutter engine
-     * 
-     * Initializes the Cast context method channel and sets up all necessary
-     * components for Cast SDK operations. This method prepares the plugin
-     * for Cast functionality by establishing communication channels and
-     * initializing dependent components.
-     *
-     * Setup operations:
-     * - Stores application context for Cast SDK operations
-     * - Creates and configures the Cast context method channel
-     * - Initializes the discovery manager for device discovery
-     * - Sets up the session manager with discovery manager reference
-     * - Prepares all components for Cast operations
-     *
-     * @param binding Flutter plugin binding providing access to engine resources
-     */
     override fun onAttachedToEngine(binding: FlutterPlugin.FlutterPluginBinding) {
+        CastDebugLog.d(TAG, "onAttachedToEngine: Initializing Cast context method channel")
+        CastDebugLog.d(TAG, "onAttachedToEngine: application context=${binding.applicationContext}")
 
         appContext = binding.applicationContext
-        discoveryManager.onAttachedToEngine(binding)
-        sessionManagerMethodChannel = SessionManagerMethodChannel(discoveryManager)
-        sessionManagerMethodChannel.onAttachedToEngine(binding)
-        GoogleCastContextHostApi.setUp(binding.binaryMessenger, this)
 
+        CastDebugLog.d(TAG, "onAttachedToEngine: Attaching DiscoveryManagerMethodChannel")
+        discoveryManager.onAttachedToEngine(binding)
+
+        CastDebugLog.d(TAG, "onAttachedToEngine: Creating SessionManagerMethodChannel")
+        sessionManagerMethodChannel = SessionManagerMethodChannel(discoveryManager)
+
+        CastDebugLog.d(TAG, "onAttachedToEngine: Attaching SessionManagerMethodChannel")
+        sessionManagerMethodChannel.onAttachedToEngine(binding)
+
+        GoogleCastContextHostApi.setUp(binding.binaryMessenger, this)
+        CastDebugLog.d(TAG, "onAttachedToEngine: GoogleCastContextHostApi setUp complete")
     }
 
     override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
+        CastDebugLog.d(TAG, "onDetachedFromEngine: Cleaning up Cast context method channel")
         GoogleCastContextHostApi.setUp(binding.binaryMessenger, null)
-        // Clean up session manager listener to prevent memory leaks
         try {
-            CastContext.getSharedInstance(appContext)?.sessionManager?.removeSessionManagerListener(sessionManagerMethodChannel)
+            val sessionManager = CastContext.getSharedInstance(appContext)?.sessionManager
+            if (sessionManager != null) {
+                sessionManager.removeSessionManagerListener(sessionManagerMethodChannel)
+                CastDebugLog.d(TAG, "onDetachedFromEngine: SessionManagerListener removed successfully")
+            } else {
+                CastDebugLog.w(TAG, "onDetachedFromEngine: SessionManager was null, nothing to remove")
+            }
         } catch (e: Exception) {
-            Log.w(TAG, "Failed to remove session manager listener", e)
+            CastDebugLog.castError(TAG, "onDetachedFromEngine - failed to remove session manager listener", e)
         }
     }
 
     private fun setupActivityResult(activity: ComponentActivity) {
+        CastDebugLog.d(TAG, "setupActivityResult: Registering permission launcher for NearbyWifiDevices (Android 13+)")
         nearbyWifiDevicesPermissionLauncher =
             activity.registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
                 if (isGranted) {
-                    Log.d(TAG, "Nearby WiFi devices permission granted")
+                    CastDebugLog.d(TAG, "Nearby WiFi devices permission GRANTED - device discovery enabled")
                 } else {
-                    Log.w(TAG, "Nearby WiFi devices permission denied")
+                    CastDebugLog.w(TAG, "Nearby WiFi devices permission DENIED - device discovery may not work on Android 13+")
                 }
             }
     }
 
-
     override fun setSharedInstanceWithOptions(request: CastContextInitRequest): Boolean {
+        CastDebugLog.d(TAG, "setSharedInstanceWithOptions: Received Cast context init request")
+        CastDebugLog.castOperation(TAG, "setSharedInstanceWithOptions", mapOf(
+            "appId" to request.options.appId,
+            "stopCastingOnAppTerminated" to request.options.stopCastingOnAppTerminated
+        ))
+
         try {
-            return setSharedInstance(request.options)
+            val result = setSharedInstance(request.options)
+            CastDebugLog.castResult(TAG, "setSharedInstanceWithOptions", result, "appId=${request.options.appId}")
+            return result
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to set shared instance via Pigeon", e)
-            throw FlutterError("CAST_ERROR", "Failed to initialize Cast context: ${e.message}", null)
+            val errorMsg = CastDebugLog.castError(TAG, "setSharedInstanceWithOptions", e)
+            throw FlutterError("CAST_INIT_ERROR", "Failed to initialize Cast context: ${e.message}. ${e.cause?.let { "Cause: ${it.message}" } ?: ""}", null)
         }
     }
 
     private fun setSharedInstance(options: CastOptionsPigeon): Boolean {
         val appId = options.appId
-            ?: throw IllegalArgumentException("Missing required Cast appId")
+        if (appId == null) {
+            CastDebugLog.e(TAG, "setSharedInstance: Missing required Cast appId")
+            throw IllegalArgumentException("Missing required Cast appId - cannot initialize Cast context without a receiver app ID")
+        }
+
+        CastDebugLog.d(TAG, "setSharedInstance: Building CastOptions with appId=$appId")
 
         val optionsBuilder = CastOptions.Builder()
         optionsBuilder.setReceiverApplicationId(appId)
+
         val launcherOptions = LaunchOptions.Builder().setAndroidReceiverCompatible(true).build()
         optionsBuilder.setLaunchOptions(launcherOptions)
+        CastDebugLog.d(TAG, "setSharedInstance: LaunchOptions set - androidReceiverCompatible=true")
+
         optionsBuilder.setResumeSavedSession(true)
+        CastDebugLog.d(TAG, "setSharedInstance: ResumeSavedSession=true")
+
         optionsBuilder.setEnableReconnectionService(true)
-        GoogleCastOptionsProvider.options = optionsBuilder.build()
+        CastDebugLog.d(TAG, "setSharedInstance: EnableReconnectionService=true")
+
+        val castOptions = optionsBuilder.build()
+        GoogleCastOptionsProvider.options = castOptions
+        CastDebugLog.d(TAG, "setSharedInstance: CastOptions stored in GoogleCastOptionsProvider")
 
         GoogleCastOptionsProvider.stopCastingOnAppTerminated = options.stopCastingOnAppTerminated
-        Log.d(TAG, "stopCastingOnAppTerminated set to: ${options.stopCastingOnAppTerminated}")
+        CastDebugLog.d(TAG, "setSharedInstance: stopCastingOnAppTerminated=${options.stopCastingOnAppTerminated}")
 
-        CastContext.getSharedInstance(appContext).sessionManager.addSessionManagerListener(sessionManagerMethodChannel)
+        try {
+            val castContext = CastContext.getSharedInstance(appContext)
+            val sessionManager = castContext.sessionManager
+            sessionManager.addSessionManagerListener(sessionManagerMethodChannel)
+            CastDebugLog.d(TAG, "setSharedInstance: SessionManagerListener added to session manager")
+            CastDebugLog.d(TAG, "setSharedInstance: Cast SDK initialized successfully with appId=$appId")
+        } catch (e: Exception) {
+            CastDebugLog.castError(TAG, "setSharedInstance - failed to get CastContext shared instance or add listener", e)
+            throw e
+        }
+
         return true
     }
-
 }

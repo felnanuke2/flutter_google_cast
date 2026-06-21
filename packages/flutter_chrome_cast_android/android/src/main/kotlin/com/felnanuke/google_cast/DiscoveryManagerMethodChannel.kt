@@ -13,138 +13,63 @@ import com.google.android.gms.cast.CastDevice
 import com.google.android.gms.cast.CastMediaControlIntent
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 
-/**
- * Tag for logging discovery manager operations
- */
 private const val TAG = "DiscoveryManager"
 
-/**
- * Flutter method channel for Google Cast device discovery operations
- * 
- * This class manages the discovery of Google Cast devices on the local network using
- * Android's MediaRouter framework. It handles device discovery lifecycle, maintains
- * discovered device state, and communicates device availability changes to Flutter.
- *
- * Key responsibilities:
- * - Cast device discovery management (start/stop)
- * - Real-time device availability monitoring
- * - Device state synchronization with Flutter
- * - Integration with Android MediaRouter framework
- * - Device selection and routing preparation
- *
- * Architecture:
- * The class uses Android's MediaRouter system to discover Cast devices:
- * - MediaRouter: Core Android component for device discovery
- * - MediaRouteSelector: Defines criteria for Cast device discovery
- * - DiscoveryRouterCallback: Handles device discovery events
- * - Device state management for Flutter communication
- *
- * Discovery Process:
- * 1. Creates MediaRouteSelector for Cast devices
- * 2. Registers callback with MediaRouter for device events
- * 3. Monitors device availability changes in real-time
- * 4. Notifies Flutter of discovered/removed devices
- * 5. Maintains device list for session creation
- *
- * @author LUIZ FELIPE ALVES LIMA
- * @since Android API 21 (Android 5.0)
- */
 class DiscoveryManagerMethodChannel : FlutterPlugin, DiscoveryManagerHostApi {
 
-    /**
-     * Flutter method channel for discovery communication
-     * 
-     * Handles method calls related to device discovery operations and sends
-     * device availability updates to Flutter. Channel name: 
-     * "com.felnanuke.google_cast.discovery_manager"
-     */
     private lateinit var flutterApi: DiscoveryManagerFlutterApi
-    
-    /**
-     * Media router callback for device discovery events
-     * 
-     * Receives callbacks from Android's MediaRouter when Cast devices are
-     * discovered, updated, or removed from the network. Implements the
-     * callback interface to handle real-time device state changes.
-     */
+
     val routerCallBack: DiscoveryRouterCallback = DiscoveryRouterCallback()
-    
-    /**
-     * Android MediaRouter instance for device discovery
-     * 
-     * Core Android component that handles media device discovery and routing.
-     * Provides access to available Cast devices on the local network and
-     * manages the discovery process lifecycle.
-     */
+
     val router: MediaRouter
         get() = MediaRouter.getInstance(context)
-        
-    /**
-     * Android application context for system services
-     * 
-     * Required for accessing MediaRouter instance and other system services
-     * needed for Cast device discovery operations.
-     */
+
     private lateinit var context: Context
 
     // MARK: - Flutter Plugin Lifecycle
 
-
-    /**
-     * Called when the Flutter plugin is attached to the Flutter engine
-     * 
-     * Initializes the discovery manager method channel and prepares the
-     * component for Cast device discovery operations.
-     *
-     * Setup operations:
-     * - Creates the discovery manager method channel
-     * - Registers this class as the method call handler
-     * - Stores application context for MediaRouter access
-     * - Prepares discovery infrastructure
-     *
-     * @param binding Flutter plugin binding providing access to engine resources
-     */
     override fun onAttachedToEngine(binding: FlutterPlugin.FlutterPluginBinding) {
+        CastDebugLog.d(TAG, "onAttachedToEngine: Initializing DiscoveryManager method channel")
         DiscoveryManagerHostApi.setUp(binding.binaryMessenger, this)
         flutterApi = DiscoveryManagerFlutterApi(binding.binaryMessenger)
         context = binding.applicationContext
+        CastDebugLog.d(TAG, "onAttachedToEngine: DiscoveryManager ready, context=${context}")
     }
 
-    /**
-     * Called when the Flutter plugin is detached from the Flutter engine
-     * 
-     * Performs cleanup of discovery manager resources to prevent memory leaks.
-     *
-     * Cleanup operations:
-     * - Removes method call handler from the channel
-     * - Stops any active discovery operations
-     * - Releases discovery-related resources
-     *
-     * @param binding Flutter plugin binding being detached
-     */
     override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
+        CastDebugLog.d(TAG, "onDetachedFromEngine: Cleaning up DiscoveryManager")
         DiscoveryManagerHostApi.setUp(binding.binaryMessenger, null)
+        CastDebugLog.d(TAG, "onDetachedFromEngine: DiscoveryManager cleaned up")
     }
 
     override fun stopDiscovery() {
-
+        CastDebugLog.d(TAG, "stopDiscovery: Removing router callback")
         router.removeCallback(routerCallBack)
+        CastDebugLog.discoveryEvent(TAG, "Discovery STOPPED")
     }
 
     override fun startDiscovery() {
+        CastDebugLog.d(TAG, "startDiscovery: Starting Cast device discovery")
         router.removeCallback(routerCallBack)
         val selector = MediaRouteSelector.Builder()
             .addControlCategories(listOf(CastMediaControlIntent.categoryForRemotePlayback()))
             .build()
+        CastDebugLog.d(TAG, "startDiscovery: MediaRouteSelector built with categoryForRemotePlayback")
         router.addCallback(
             selector, routerCallBack, MediaRouter.CALLBACK_FLAG_REQUEST_DISCOVERY
         )
+        CastDebugLog.d(TAG, "startDiscovery: Router callback registered with CALLBACK_FLAG_REQUEST_DISCOVERY")
+        CastDebugLog.discoveryEvent(TAG, "Discovery STARTED", mapOf(
+            "totalRoutes" to router.routes.size
+        ))
 
         routerCallBack.getCastDevicesMap()
     }
 
     override fun isDiscoveryActiveForDeviceCategory(deviceCategory: String): Boolean {
-        return router.routes.isNotEmpty()
+        val isActive = router.routes.isNotEmpty()
+        CastDebugLog.d(TAG, "isDiscoveryActiveForDeviceCategory: category=$deviceCategory, isActive=$isActive, routes=${router.routes.size}")
+        return isActive
     }
 
     inner class DiscoveryRouterCallback : MediaRouter.Callback() {
@@ -153,43 +78,75 @@ class DiscoveryManagerMethodChannel : FlutterPlugin, DiscoveryManagerHostApi {
             router: MediaRouter, route: MediaRouter.RouteInfo, reason: Int
         ) {
             super.onRouteUnselected(router, route, reason)
-            Log.d(TAG, "Route unselected, total routes: ${router.routes.size}")
+            CastDebugLog.discoveryEvent(TAG, "Route UNSELECTED", mapOf(
+                "routeName" to route.name,
+                "reason" to reason,
+                "totalRoutes" to router.routes.size
+            ))
         }
 
         override fun onRouteAdded(router: MediaRouter, route: MediaRouter.RouteInfo) {
             super.onRouteAdded(router, route)
+            val device = CastDevice.getFromBundle(route.extras)
+            CastDebugLog.discoveryEvent(TAG, "Route ADDED", mapOf(
+                "routeName" to route.name,
+                "deviceId" to device?.deviceId,
+                "deviceModel" to device?.modelName,
+                "totalRoutes" to router.routes.size
+            ))
             getCastDevicesMap()
         }
 
         override fun onRouteRemoved(router: MediaRouter, route: MediaRouter.RouteInfo) {
             super.onRouteRemoved(router, route)
+            val device = CastDevice.getFromBundle(route.extras)
+            CastDebugLog.discoveryEvent(TAG, "Route REMOVED", mapOf(
+                "routeName" to route.name,
+                "deviceId" to device?.deviceId,
+                "totalRoutes" to router.routes.size
+            ))
             getCastDevicesMap()
         }
 
         override fun onRouteChanged(router: MediaRouter, route: MediaRouter.RouteInfo) {
             super.onRouteChanged(router, route)
+            val device = CastDevice.getFromBundle(route.extras)
+            CastDebugLog.discoveryEvent(TAG, "Route CHANGED", mapOf(
+                "routeName" to route.name,
+                "deviceId" to device?.deviceId,
+                "totalRoutes" to router.routes.size
+            ))
             getCastDevicesMap()
         }
 
         override fun onRouteVolumeChanged(router: MediaRouter, route: MediaRouter.RouteInfo) {
             super.onRouteVolumeChanged(router, route)
+            CastDebugLog.d(TAG, "onRouteVolumeChanged: route=${route.name}, volume=${route.volume}")
             getCastDevicesMap()
         }
 
-
         override fun onProviderAdded(router: MediaRouter, provider: MediaRouter.ProviderInfo) {
             super.onProviderAdded(router, provider)
-            Log.d(TAG, "Provider added, total routes: ${router.routes.size}")
+            CastDebugLog.discoveryEvent(TAG, "Provider ADDED", mapOf(
+                "providerName" to provider.componentName?.flattenToShortString(),
+                "totalRoutes" to router.routes.size
+            ))
         }
 
         override fun onProviderRemoved(router: MediaRouter, provider: MediaRouter.ProviderInfo) {
             super.onProviderRemoved(router, provider)
-            Log.d(TAG, "Provider removed, total routes: ${router.routes.size}")
+            CastDebugLog.discoveryEvent(TAG, "Provider REMOVED", mapOf(
+                "providerName" to provider.componentName?.flattenToShortString(),
+                "totalRoutes" to router.routes.size
+            ))
         }
 
         override fun onProviderChanged(router: MediaRouter, provider: MediaRouter.ProviderInfo) {
             super.onProviderChanged(router, provider)
-            Log.d(TAG, "Provider changed, total routes: ${router.routes.size}")
+            CastDebugLog.discoveryEvent(TAG, "Provider CHANGED", mapOf(
+                "providerName" to provider.componentName?.flattenToShortString(),
+                "totalRoutes" to router.routes.size
+            ))
         }
 
         private fun getCastDevice(routeInfo: MediaRouter.RouteInfo): Map<*, *>? {
@@ -197,15 +154,15 @@ class DiscoveryManagerMethodChannel : FlutterPlugin, DiscoveryManagerHostApi {
             return device?.let {
                 device.toMap()
             }
-
-
         }
 
         fun getCastDevicesMap() {
             val devices = mutableListOf<CastDevicePigeon>()
             val seenDeviceIds = mutableSetOf<String>()
             val seenDeviceSignatures = mutableSetOf<String>()
-            
+
+            CastDebugLog.d(TAG, "getCastDevicesMap: Scanning ${router.routes.size} routes for Cast devices")
+
             for (route in router.routes) {
                 val device = getCastDevice(route)
                 if (device != null) {
@@ -213,12 +170,11 @@ class DiscoveryManagerMethodChannel : FlutterPlugin, DiscoveryManagerHostApi {
                     val deviceName = device["name"] as? String
                     val deviceModel = device["model_name"] as? String
                     val deviceSignature = "${deviceName}_${deviceModel}"
-                    
-                    Log.d(TAG, "Found route with device ID: $deviceId, name: $deviceName, model: $deviceModel")
-                    
-                    // Skip devices we've already seen by ID or by name+model combination
+
+                    CastDebugLog.d(TAG, "getCastDevicesMap: Found Cast device - id=$deviceId, name=$deviceName, model=$deviceModel, signature=$deviceSignature")
+
                     if (deviceId != null &&
-                        !seenDeviceIds.contains(deviceId) && 
+                        !seenDeviceIds.contains(deviceId) &&
                         !seenDeviceSignatures.contains(deviceSignature)) {
                         seenDeviceIds.add(deviceId)
                         seenDeviceSignatures.add(deviceSignature)
@@ -235,27 +191,38 @@ class DiscoveryManagerMethodChannel : FlutterPlugin, DiscoveryManagerHostApi {
                                 index = null,
                             )
                         )
-                        Log.d(TAG, "Added unique device: $deviceId ($deviceSignature)")
+                        CastDebugLog.d(TAG, "getCastDevicesMap: Added unique device: $deviceId ($deviceSignature)")
                     } else {
-                        Log.w(TAG, "Skipping duplicate device - ID: $deviceId, signature: $deviceSignature")
+                        CastDebugLog.d(TAG, "getCastDevicesMap: Skipping duplicate device - ID: $deviceId, signature: $deviceSignature")
                     }
+                } else {
+                    CastDebugLog.d(TAG, "getCastDevicesMap: Route '${route.name}' has no Cast device, skipping")
                 }
             }
+
+            CastDebugLog.d(TAG, "getCastDevicesMap: Sending ${devices.size} unique devices to Flutter")
             flutterApi.onDevicesChanged(devices) { }
-            Log.w(TAG, "onDevicesChanged devices=${devices.size}")
         }
     }
 
     fun selectRoute(id: String) {
+        CastDebugLog.d(TAG, "selectRoute: Attempting to select route with deviceId=$id")
         val routes = router?.routes
+        CastDebugLog.d(TAG, "selectRoute: Searching among ${routes?.size ?: 0} available routes")
+
         val selectedRoute = routes?.find {
             val device = CastDevice.getFromBundle(it.extras)
-            device?.deviceId == id
+            val match = device?.deviceId == id
+            CastDebugLog.d(TAG, "selectRoute: Checking route '${it.name}' - deviceId=${device?.deviceId}, match=$match")
+            match
         }
+
         if (selectedRoute != null) {
+            CastDebugLog.d(TAG, "selectRoute: Found route '${selectedRoute.name}' for deviceId=$id, selecting it now")
             this.router?.selectRoute(selectedRoute)
+            CastDebugLog.d(TAG, "selectRoute: Route selected successfully")
+        } else {
+            CastDebugLog.w(TAG, "selectRoute: No route found for deviceId=$id among ${routes?.size ?: 0} routes. Device may have disconnected or discovery is not active.")
         }
     }
-
-
 }

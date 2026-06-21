@@ -473,18 +473,18 @@ Future<void> _loadSingleMedia(GoogleCastDevice device) async {
       contentId: 'elephants_dream',
       streamType: CastMediaStreamType.BUFFERED,
       contentUrl: Uri.parse(
-        'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4'
+        'https://download.blender.org/durian/trailer/sintel_trailer-480p.mp4'
       ),
       contentType: 'video/mp4',
       metadata: GoogleCastTvShowMediaMetadata(
         episode: 1,
         season: 1,
-        seriesTitle: 'Elephants Dream',
+        seriesTitle: 'Sintel Trailer',
         originalAirDate: DateTime.now(),
         images: [
           GoogleCastImage(
             url: Uri.parse(
-              'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/images/ElephantsDream.jpg'
+              'https://upload.wikimedia.org/wikipedia/commons/9/90/Elephants_Dream_s1_proog.jpg'
             ),
             height: 480,
             width: 854,
@@ -527,17 +527,17 @@ Future<void> _loadMediaQueue(GoogleCastDevice device) async {
           contentId: 'elephants_dream',
           streamType: CastMediaStreamType.BUFFERED,
           contentUrl: Uri.parse(
-            'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4'
+            'https://download.blender.org/durian/trailer/sintel_trailer-480p.mp4'
           ),
           contentType: 'video/mp4',
           metadata: GoogleCastMovieMediaMetadata(
-            title: 'Elephants Dream',
+            title: 'Sintel Trailer',
             studio: 'Blender Foundation',
-            releaseDate: DateTime(2006),
+            releaseDate: DateTime(2010),
             images: [
               GoogleCastImage(
                 url: Uri.parse(
-                  'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/images/ElephantsDream.jpg'
+                  'https://upload.wikimedia.org/wikipedia/commons/9/90/Elephants_Dream_s1_proog.jpg'
                 ),
                 height: 480,
                 width: 854,
@@ -565,7 +565,7 @@ Future<void> _loadMediaQueue(GoogleCastDevice device) async {
           contentId: 'big_buck_bunny',
           streamType: CastMediaStreamType.BUFFERED,
           contentUrl: Uri.parse(
-            'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4'
+            'https://download.blender.org/peach/bigbuckbunny_movies/BigBuckBunny_320x180.mp4'
           ),
           contentType: 'video/mp4',
           metadata: GoogleCastMovieMediaMetadata(
@@ -575,7 +575,7 @@ Future<void> _loadMediaQueue(GoogleCastDevice device) async {
             images: [
               GoogleCastImage(
                 url: Uri.parse(
-                  'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/images/BigBuckBunny.jpg'
+                  'https://peach.blender.org/wp-content/uploads/bbb-splash.png'
                 ),
                 height: 480,
                 width: 854,

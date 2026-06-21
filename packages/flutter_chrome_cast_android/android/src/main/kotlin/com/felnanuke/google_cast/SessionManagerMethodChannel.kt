@@ -9,83 +9,17 @@ import com.felnanuke.google_cast.pigeon.StartSessionRequest
 import com.google.android.gms.cast.framework.*
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 
-/**
- * Tag for logging session manager operations
- */
 private const val TAG = "SessionManager"
 
-/**
- * Flutter method channel for Google Cast session management
- * 
- * This class manages the complete lifecycle of Google Cast sessions, including session
- * creation, connection, monitoring, and termination. It implements the Google Cast
- * SessionManagerListener to receive session events and communicates session state
- * changes to Flutter in real-time.
- *
- * Key responsibilities:
- * - Cast session lifecycle management (creation, connection, termination)
- * - Session state monitoring and event handling
- * - Device volume control during active sessions
- * - Integration with discovery manager for device selection
- * - Coordination with remote media client for media operations
- * - Real-time session updates to Flutter
- *
- * Architecture:
- * The class integrates with multiple Cast SDK components:
- * - SessionManager: Core Google Cast SDK session management
- * - DiscoveryManagerMethodChannel: For device selection during session creation
- * - RemoteMediaClientMethodChannel: For media operations during active sessions
- * - Session events are propagated to Flutter for UI updates
- *
- * Session Lifecycle:
- * 1. Session creation request from Flutter with device ID
- * 2. Device selection via discovery manager
- * 3. Session connection and status monitoring
- * 4. Session state synchronization with Flutter
- * 5. Session termination and cleanup
- *
- * @param discoveryManager Reference to discovery manager for device operations
- * @author LUIZ FELIPE ALVES LIMA
- * @since Android API 21 (Android 5.0)
- */
 class SessionManagerMethodChannel(discoveryManager: DiscoveryManagerMethodChannel) : FlutterPlugin,
     SessionManagerHostApi, SessionManagerListener<Session> {
 
-    /**
-     * Flutter method channel for session management communication
-     * 
-     * Handles method calls related to Cast session operations and sends
-     * session state updates to Flutter. Channel name:
-     * "com.felnanuke.google_cast.session_manager"
-     */
     private lateinit var flutterApi: SessionManagerFlutterApi
-    
-    /**
-     * Reference to discovery manager for device selection
-     * 
-     * Used during session creation to select and connect to specific Cast
-     * devices identified by their device ID. Provides the bridge between
-     * device discovery and session establishment.
-     */
+
     private val discoveryManagerMethodChannel: DiscoveryManagerMethodChannel = discoveryManager
-    
-    /**
-     * Remote media client method channel for media operations
-     * 
-     * Handles all media-related operations during active Cast sessions,
-     * including media loading, playback control, and media state monitoring.
-     * Automatically initialized and managed by the session manager.
-     */
+
     private val remoteMediaClientMethodChannel = RemoteMediaClientMethodChannel()
 
-    /**
-     * Google Cast session manager instance
-     * 
-     * Provides access to the current Cast session manager from the Google Cast
-     * SDK. Used for all session lifecycle operations and state queries.
-     * 
-     * @return The current session manager instance, or null if Cast context not initialized
-     */
     private val sessionManager: SessionManager?
         get() {
             return CastContext.getSharedInstance()?.sessionManager
@@ -93,118 +27,131 @@ class SessionManagerMethodChannel(discoveryManager: DiscoveryManagerMethodChanne
 
     // MARK: - Flutter Plugin Lifecycle
 
-    /**
-     * Called when the Flutter plugin is attached to the Flutter engine
-     * 
-     * Initializes the session manager method channel and sets up the remote
-     * media client for media operations during Cast sessions.
-     *
-     * Setup operations:
-     * - Creates the session manager method channel
-     * - Registers this class as the method call handler
-     * - Initializes the remote media client method channel
-     * - Prepares session management infrastructure
-     *
-     * @param binding Flutter plugin binding providing access to engine resources
-     */
     override fun onAttachedToEngine(binding: FlutterPlugin.FlutterPluginBinding) {
+        CastDebugLog.d(TAG, "onAttachedToEngine: Initializing SessionManager method channel")
         SessionManagerHostApi.setUp(binding.binaryMessenger, this)
         flutterApi = SessionManagerFlutterApi(binding.binaryMessenger)
         remoteMediaClientMethodChannel.onAttachedToEngine(binding)
+        CastDebugLog.d(TAG, "onAttachedToEngine: SessionManager ready, RemoteMediaClient attached")
     }
 
-    /**
-     * Called when the Flutter plugin is detached from the Flutter engine
-     * 
-     * Performs cleanup of session manager resources to prevent memory leaks.
-     *
-     * Cleanup operations:
-     * - Removes method call handler from the channel
-     * - Stops session monitoring
-     * - Releases session-related resources
-     *
-     * @param binding Flutter plugin binding being detached
-     */
     override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
+        CastDebugLog.d(TAG, "onDetachedFromEngine: Cleaning up SessionManager")
         SessionManagerHostApi.setUp(binding.binaryMessenger, null)
+        CastDebugLog.d(TAG, "onDetachedFromEngine: SessionManager cleaned up")
     }
 
     override fun startSessionWithDevice(request: StartSessionRequest): Boolean {
         val deviceId = request.deviceId
-        if (deviceId.isNullOrBlank()) return false
+        CastDebugLog.d(TAG, "startSessionWithDevice: Request received for deviceId=$deviceId")
+
+        if (deviceId.isNullOrBlank()) {
+            CastDebugLog.w(TAG, "startSessionWithDevice: deviceId is null or blank, cannot start session")
+            return false
+        }
+
+        CastDebugLog.d(TAG, "startSessionWithDevice: Selecting route for deviceId=$deviceId via DiscoveryManager")
         discoveryManagerMethodChannel.selectRoute(deviceId)
+        CastDebugLog.d(TAG, "startSessionWithDevice: Route selection initiated for deviceId=$deviceId")
         return true
     }
 
     override fun endSession(): Boolean {
+        CastDebugLog.d(TAG, "endSession: Ending current session (without stopping receiver)")
+        val currentSession = sessionManager?.currentCastSession
+        CastDebugLog.d(TAG, "endSession: currentSession=${currentSession?.sessionId}, device=${currentSession?.castDevice?.friendlyName}")
         sessionManager?.endCurrentSession(false)
+        CastDebugLog.d(TAG, "endSession: endCurrentSession(false) called")
         return true
     }
 
     override fun endSessionAndStopCasting(): Boolean {
+        CastDebugLog.d(TAG, "endSessionAndStopCasting: Ending session AND stopping receiver")
+        val currentSession = sessionManager?.currentCastSession
+        CastDebugLog.d(TAG, "endSessionAndStopCasting: currentSession=${currentSession?.sessionId}, device=${currentSession?.castDevice?.friendlyName}")
         sessionManager?.endCurrentSession(true)
+        CastDebugLog.d(TAG, "endSessionAndStopCasting: endCurrentSession(true) called")
         return true
     }
 
     override fun setDeviceVolume(value: Double) {
-        sessionManager?.currentCastSession?.volume = value
+        CastDebugLog.d(TAG, "setDeviceVolume: Setting volume to $value")
+        try {
+            sessionManager?.currentCastSession?.volume = value
+            CastDebugLog.d(TAG, "setDeviceVolume: Volume set successfully to $value")
+        } catch (e: Exception) {
+            CastDebugLog.castError(TAG, "setDeviceVolume(value=$value)", e)
+        }
     }
 
-    /**
-     * Initiates a Cast session with the specified device
-     * 
-     * Starts a new Cast session by selecting the target device through the
-     * discovery manager and initiating the connection process. The actual
-     * session connection status is reported through session manager listener
-     * callbacks.
-     *
-     * @param arguments The device ID as a String for the target Cast device
-     * @param result Flutter result callback to indicate session initiation status
-     */
     //SessionManagerLister
-    override fun onSessionEnded(session: Session, p1: Int) {
+    override fun onSessionEnded(session: Session, errorCode: Int) {
+        CastDebugLog.sessionEvent(TAG, "onSessionEnded", session.sessionId, (session as? CastSession)?.castDevice?.deviceId, "errorCode=$errorCode")
+        CastDebugLog.d(TAG, "onSessionEnded: Session ended cleanly, errorCode=$errorCode")
         onSessionChanged()
     }
 
-    override fun onSessionEnding(p0: Session) {
+    override fun onSessionEnding(session: Session) {
+        CastDebugLog.sessionEvent(TAG, "onSessionEnding", session.sessionId, (session as? CastSession)?.castDevice?.deviceId)
         onSessionChanged()
     }
 
-    override fun onSessionResumeFailed(p0: Session, p1: Int) {
-
+    override fun onSessionResumeFailed(session: Session, errorCode: Int) {
+        CastDebugLog.e(TAG, "[SESSION FAILURE] onSessionResumeFailed: errorCode=$errorCode, sessionId=${session.sessionId}")
+        CastDebugLog.e(TAG, "[SESSION FAILURE] Device: ${(session as? CastSession)?.castDevice?.friendlyName} (${(session as? CastSession)?.castDevice?.deviceId})")
+        CastDebugLog.e(TAG, "[SESSION FAILURE] Error code $errorCode means: ${describeSessionError(errorCode)}")
+        CastDebugLog.castError(TAG, "onSessionResumeFailed(errorCode=$errorCode)", null)
         onSessionChanged()
     }
 
-    override fun onSessionResumed(p0: Session, p1: Boolean) {
+    override fun onSessionResumed(session: Session, wasSuspended: Boolean) {
+        CastDebugLog.sessionEvent(TAG, "onSessionResumed", session.sessionId, (session as? CastSession)?.castDevice?.deviceId, "wasSuspended=$wasSuspended")
+        CastDebugLog.d(TAG, "onSessionResumed: Starting RemoteMediaClient listener")
         remoteMediaClientMethodChannel.startListen()
         onSessionChanged()
     }
 
-    override fun onSessionResuming(p0: Session, p1: String) {
+    override fun onSessionResuming(session: Session, sessionId: String) {
+        CastDebugLog.sessionEvent(TAG, "onSessionResuming", sessionId, (session as? CastSession)?.castDevice?.deviceId)
         onSessionChanged()
     }
 
-    override fun onSessionStartFailed(p0: Session, p1: Int) {
+    override fun onSessionStartFailed(session: Session, errorCode: Int) {
+        CastDebugLog.e(TAG, "[SESSION FAILURE] onSessionStartFailed: errorCode=$errorCode, sessionId=${session.sessionId}")
+        CastDebugLog.e(TAG, "[SESSION FAILURE] Device: ${(session as? CastSession)?.castDevice?.friendlyName} (${(session as? CastSession)?.castDevice?.deviceId})")
+        CastDebugLog.e(TAG, "[SESSION FAILURE] Error code $errorCode means: ${describeSessionError(errorCode)}")
+        CastDebugLog.castError(TAG, "onSessionStartFailed(errorCode=$errorCode)", null)
         onSessionChanged()
     }
 
-    override fun onSessionStarted(session: Session, p1: String) {
+    override fun onSessionStarted(session: Session, sessionId: String) {
+        CastDebugLog.sessionEvent(TAG, "onSessionStarted", sessionId, (session as? CastSession)?.castDevice?.deviceId)
+        CastDebugLog.d(TAG, "onSessionStarted: Starting RemoteMediaClient listener")
         remoteMediaClientMethodChannel.startListen()
         onSessionChanged()
     }
 
-    override fun onSessionStarting(p0: Session) {
+    override fun onSessionStarting(session: Session) {
+        CastDebugLog.sessionEvent(TAG, "onSessionStarting", session.sessionId, (session as? CastSession)?.castDevice?.deviceId)
         onSessionChanged()
     }
 
-    override fun onSessionSuspended(p0: Session, p1: Int) {
+    override fun onSessionSuspended(session: Session, reason: Int) {
+        CastDebugLog.sessionEvent(TAG, "onSessionSuspended", session.sessionId, (session as? CastSession)?.castDevice?.deviceId, "reason=$reason")
+        CastDebugLog.d(TAG, "onSessionSuspended: Reason: ${describeSessionSuspendReason(reason)}")
         onSessionChanged()
     }
-
 
     private fun onSessionChanged() {
         val session = sessionManager?.currentCastSession
-        flutterApi.onSessionChanged(session?.let { toSessionPigeon(it) }) { }
+        val pigeonSession = session?.let { toSessionPigeon(it) }
+        CastDebugLog.d(TAG, "onSessionChanged: Sending session state to Flutter - " +
+                "hasSession=${session != null}, " +
+                "sessionId=${session?.sessionId}, " +
+                "isConnected=${session?.isConnected}, " +
+                "isConnecting=${session?.isConnecting}, " +
+                "device=${session?.castDevice?.friendlyName}")
+        flutterApi.onSessionChanged(pigeonSession) { }
     }
 
     private fun toSessionPigeon(session: CastSession): CastSessionPigeon {
@@ -215,8 +162,11 @@ class SessionManagerMethodChannel(discoveryManager: DiscoveryManagerMethodChanne
             else -> ConnectionStatePigeon.DISCONNECTED
         }
 
+        CastDebugLog.d(TAG, "toSessionPigeon: state=$state, sessionId=${session.sessionId}")
+
         val castDevice = session.castDevice
         val devicePigeon = castDevice?.let {
+            CastDebugLog.d(TAG, "toSessionPigeon: device=${it.friendlyName}, id=${it.deviceId}, model=${it.modelName}, volume=${session.volume}, mute=${session.isMute}")
             CastDevicePigeon(
                 deviceId = it.deviceId ?: "",
                 friendlyName = it.friendlyName ?: "",
@@ -240,5 +190,49 @@ class SessionManagerMethodChannel(discoveryManager: DiscoveryManagerMethodChanne
         )
     }
 
+    private fun describeSessionError(errorCode: Int): String {
+        return when (errorCode) {
+            0 -> "Success"
+            1 -> "Operation was canceled"
+            2 -> "Connection timed out - device may be unreachable or busy"
+            3 -> "General failure - check network connectivity and device availability"
+            4 -> "Not connected to Cast device"
+            5 -> "Application not found on device - verify receiver app ID is correct"
+            6 -> "Invalid request sent to Cast device"
+            7 -> "Authentication failed"
+            8 -> "Session was replaced by another session"
+            9 -> "Authentication error - credentials may be invalid"
+            10 -> "Unknown error from Cast SDK"
+            11 -> "Network error - device may have lost connectivity"
+            13 -> "Remote cast service failed to start"
+            14 -> "Cast service creation timed out"
+            15 -> "Service connection lost unexpectedly"
+            16 -> "API version too old for this operation"
+            17 -> "Timeout waiting for device response"
+            18 -> "Cast session disconnected unexpectedly"
+            19 -> "Application not running on receiver"
+            20 -> "Message send failed - session may have ended"
+            21 -> "Message send failed due to invalid message"
+            22 -> "Device is not on local network"
+            23 -> "Operation failed - no active media session"
+            24 -> "Remote media client not available"
+            else -> "Unknown error code: $errorCode"
+        }
+    }
 
+    private fun describeSessionSuspendReason(reason: Int): String {
+        return when (reason) {
+            0 -> "Normal suspension"
+            1 -> "Canceled"
+            2 -> "Timed out"
+            4 -> "Not connected - device may have gone to sleep"
+            5 -> "Application not found"
+            6 -> "Invalid request"
+            7 -> "Authentication failed"
+            8 -> "Session replaced by another"
+            9 -> "Authentication error"
+            11 -> "Network error - device lost connectivity"
+            else -> "Unknown suspend reason: $reason"
+        }
+    }
 }

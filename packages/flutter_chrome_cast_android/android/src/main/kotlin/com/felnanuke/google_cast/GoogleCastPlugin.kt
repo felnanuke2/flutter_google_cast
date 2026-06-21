@@ -11,167 +11,116 @@ import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
 
-/**
- * Main Google Cast plugin for Android implementation
- * 
- * This class serves as the primary entry point for the Flutter Google Cast plugin on Android.
- * It implements the FlutterPlugin interface to integrate with the Flutter framework and
- * coordinates the initialization of all Cast-related method channels.
- *
- * The plugin manages:
- * - Flutter plugin lifecycle (attachment/detachment)
- * - Registration of specialized method channels for Cast features
- * - Integration with the Google Cast SDK for Android
- * - Coordination between different Cast functionality components
- * - Automatic cast session termination when the app is killed
- *
- * Architecture:
- * The main plugin acts as a coordinator, delegating specific Cast operations to
- * specialized method channels:
- * - CastContextMethodChannel: Handles Cast context initialization and configuration
- * - DiscoveryManagerMethodChannel: Manages device discovery operations
- * - SessionManagerMethodChannel: Controls Cast session lifecycle
- * - RemoteMediaClientMethodChannel: Handles media playback operations
- *
- * The plugin follows Android's component lifecycle patterns and ensures proper
- * resource management when the Flutter engine is attached or detached.
- *
- * @author LUIZ FELIPE ALVES LIMA
- * @since Android API 21 (Android 5.0)
- */
 class GoogleCastPlugin : FlutterPlugin, ActivityAware, Application.ActivityLifecycleCallbacks {
-    
+
     companion object {
         private const val TAG = "GoogleCastPlugin"
     }
-    
-    /**
-     * Cast context method channel for Google Cast SDK operations
-     * 
-     * This specialized channel handles all Cast context-related operations,
-     * including SDK initialization, configuration, and context management.
-     * It's automatically initialized and managed by this main plugin class.
-     */
+
     private val castContextMethodChannel = CastContextMethodChannel()
-    
-    /**
-     * Reference to the current activity for lifecycle management
-     */
+
     private var activity: Activity? = null
-    
-    /**
-     * Application context for Cast SDK operations
-     */
+
     private var applicationContext: android.content.Context? = null
 
-    /**
-     * Called when the Flutter plugin is attached to the Flutter engine
-     * 
-     * This method is invoked by the Flutter framework when the plugin is being
-     * initialized. It sets up all necessary method channels and prepares the
-     * plugin for communication with the Flutter side.
-     *
-     * Setup operations performed:
-     * - Creates the main method channel for plugin communication
-     * - Registers this class as the method call handler
-     * - Initializes and attaches the Cast context method channel
-     * - Prepares all Cast SDK integration components
-     *
-     * @param flutterPluginBinding The binding that provides access to Flutter engine resources
-     */
     override fun onAttachedToEngine(@NonNull flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
+        CastDebugLog.d(TAG, "onAttachedToEngine: Initializing Google Cast plugin")
+        CastDebugLog.d(TAG, "onAttachedToEngine: application context=${flutterPluginBinding.applicationContext}")
+        CastDebugLog.d(TAG, "onAttachedToEngine: isDebug=${CastDebugLog.isDebug}")
         applicationContext = flutterPluginBinding.applicationContext
-        castContextMethodChannel.onAttachedToEngine(flutterPluginBinding)
+        try {
+            castContextMethodChannel.onAttachedToEngine(flutterPluginBinding)
+            CastDebugLog.d(TAG, "onAttachedToEngine: CastContextMethodChannel attached successfully")
+        } catch (e: Exception) {
+            CastDebugLog.castError(TAG, "onAttachedToEngine", e)
+        }
     }
 
-    /**
-     * Called when the Flutter plugin is detached from the Flutter engine
-     * 
-     * This method is invoked by the Flutter framework when the plugin is being
-     * cleaned up. It ensures proper resource cleanup and prevents memory leaks
-     * by removing method call handlers and releasing resources.
-     *
-     * Cleanup operations performed:
-     * - Removes the method call handler from the main channel
-     * - Allows garbage collection of plugin resources
-     * - Ensures no lingering references that could cause memory leaks
-     *
-     * @param binding The Flutter plugin binding being detached
-     */
     override fun onDetachedFromEngine(@NonNull binding: FlutterPlugin.FlutterPluginBinding) {
-        castContextMethodChannel.onDetachedFromEngine(binding)
+        CastDebugLog.d(TAG, "onDetachedFromEngine: Cleaning up Google Cast plugin")
+        try {
+            castContextMethodChannel.onDetachedFromEngine(binding)
+            CastDebugLog.d(TAG, "onDetachedFromEngine: CastContextMethodChannel detached successfully")
+        } catch (e: Exception) {
+            CastDebugLog.castError(TAG, "onDetachedFromEngine", e)
+        }
     }
-    
+
     // MARK: - ActivityAware Implementation
-    
-    /**
-     * Called when the plugin is attached to an Activity
-     * 
-     * Registers this plugin as an Activity lifecycle callback to monitor
-     * when the activity is destroyed and end the cast session accordingly.
-     *
-     * @param binding The activity plugin binding
-     */
+
     override fun onAttachedToActivity(binding: ActivityPluginBinding) {
         activity = binding.activity
+        CastDebugLog.d(TAG, "onAttachedToActivity: activity=${activity?.javaClass?.simpleName}, taskId=${activity?.taskId}")
         activity?.application?.registerActivityLifecycleCallbacks(this)
+        CastDebugLog.d(TAG, "onAttachedToActivity: Activity lifecycle callbacks registered")
     }
-    
+
     override fun onDetachedFromActivityForConfigChanges() {
-        // Don't unregister on config changes (e.g., rotation)
+        CastDebugLog.d(TAG, "onDetachedFromActivityForConfigChanges: Activity detached for config change (e.g., rotation)")
     }
-    
+
     override fun onReattachedToActivityForConfigChanges(binding: ActivityPluginBinding) {
         activity = binding.activity
+        CastDebugLog.d(TAG, "onReattachedToActivityForConfigChanges: activity=${activity?.javaClass?.simpleName}")
     }
-    
+
     override fun onDetachedFromActivity() {
+        CastDebugLog.d(TAG, "onDetachedFromActivity: Unregistering lifecycle callbacks, activity=${activity?.javaClass?.simpleName}")
         activity?.application?.unregisterActivityLifecycleCallbacks(this)
         activity = null
     }
-    
+
     // MARK: - Application.ActivityLifecycleCallbacks Implementation
-    
-    override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {}
-    
-    override fun onActivityStarted(activity: Activity) {}
-    
-    override fun onActivityResumed(activity: Activity) {}
-    
-    override fun onActivityPaused(activity: Activity) {}
-    
-    override fun onActivityStopped(activity: Activity) {}
-    
-    override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) {}
-    
-    /**
-     * Called when the activity is destroyed
-     * 
-     * When the activity is destroyed (app killed) and stopCastingOnAppTerminated is enabled,
-     * this method ends the cast session and stops casting on the receiver device.
-     * This ensures that casting stops when the user closes or kills the app.
-     *
-     * @param activity The activity being destroyed
-     */
+
+    override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {
+        CastDebugLog.d(TAG, "onActivityCreated: ${activity.javaClass.simpleName}")
+    }
+
+    override fun onActivityStarted(activity: Activity) {
+        CastDebugLog.d(TAG, "onActivityStarted: ${activity.javaClass.simpleName}")
+    }
+
+    override fun onActivityResumed(activity: Activity) {
+        CastDebugLog.d(TAG, "onActivityResumed: ${activity.javaClass.simpleName}")
+    }
+
+    override fun onActivityPaused(activity: Activity) {
+        CastDebugLog.d(TAG, "onActivityPaused: ${activity.javaClass.simpleName}")
+    }
+
+    override fun onActivityStopped(activity: Activity) {
+        CastDebugLog.d(TAG, "onActivityStopped: ${activity.javaClass.simpleName}")
+    }
+
+    override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) {
+        CastDebugLog.d(TAG, "onActivitySaveInstanceState: ${activity.javaClass.simpleName}")
+    }
+
     override fun onActivityDestroyed(activity: Activity) {
+        CastDebugLog.d(TAG, "onActivityDestroyed: ${activity.javaClass.simpleName}, isFinishing=${activity.isFinishing}, isSameActivity=${activity == this.activity}")
         if (activity == this.activity && activity.isFinishing) {
-            // Only end the cast session if stopCastingOnAppTerminated option is enabled
             if (!GoogleCastOptionsProvider.stopCastingOnAppTerminated) {
-                Log.d(TAG, "App destroyed - stopCastingOnAppTerminated is false, keeping cast session alive")
+                CastDebugLog.d(TAG, "onActivityDestroyed: stopCastingOnAppTerminated=false, keeping cast session alive on receiver")
                 return
             }
-            
-            // End the cast session and stop casting when app is killed
+
             try {
-                val context = applicationContext ?: return
+                val context = applicationContext ?: run {
+                    CastDebugLog.w(TAG, "onActivityDestroyed: applicationContext is null, cannot end session")
+                    return
+                }
                 val castContext = CastContext.getSharedInstance(context)
                 val sessionManager = castContext?.sessionManager
-                if (sessionManager?.currentCastSession != null) {
-                    Log.d(TAG, "App destroyed - ending cast session and stopping casting (stopCastingOnAppTerminated=true)")
+                val currentSession = sessionManager?.currentCastSession
+                if (currentSession != null) {
+                    CastDebugLog.d(TAG, "onActivityDestroyed: Ending cast session - sessionId=${currentSession.sessionId}, device=${currentSession.castDevice?.friendlyName}, stopCastingOnAppTerminated=true")
                     sessionManager.endCurrentSession(true)
+                    CastDebugLog.d(TAG, "onActivityDestroyed: endCurrentSession(true) called successfully")
+                } else {
+                    CastDebugLog.d(TAG, "onActivityDestroyed: No active cast session to end")
                 }
             } catch (e: Exception) {
-                Log.w(TAG, "Failed to end cast session on app destroy", e)
+                CastDebugLog.castError(TAG, "onActivityDestroyed - failed to end cast session", e)
             }
         }
     }

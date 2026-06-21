@@ -1,5 +1,6 @@
 package com.felnanuke.google_cast.extensions
 
+import com.felnanuke.google_cast.CastDebugLog
 import com.felnanuke.google_cast.pigeon.LiveSeekableRange
 import com.felnanuke.google_cast.pigeon.LoadMediaRequestPigeon
 import com.felnanuke.google_cast.pigeon.MediaInfo
@@ -20,7 +21,10 @@ import com.google.android.gms.cast.MediaTrack as CastMediaTrack
 import org.json.JSONArray
 import org.json.JSONObject
 
+private const val TAG = "ModelExtensions"
+
 fun MediaTrack.toCastMediaTrack(): CastMediaTrack {
+    CastDebugLog.d(TAG, "toCastMediaTrack: trackId=$trackId, type=$type, contentId=$trackContentId, language=$language")
     val builder = CastMediaTrack.Builder(trackId, type.toInt())
         .setContentId(trackContentId)
         .setSubtype(subtype.toInt())
@@ -36,8 +40,12 @@ fun MediaTrack.toCastMediaTrack(): CastMediaTrack {
 
 fun MediaInfo.toCastMediaInfo(): CastMediaInfo? {
     if (contentId.isBlank()) {
+        CastDebugLog.e(TAG, "[CONVERSION ERROR] toCastMediaInfo: contentId is BLANK - cannot create CastMediaInfo without a content ID")
+        CastDebugLog.e(TAG, "[CONVERSION ERROR] toCastMediaInfo: Received contentUrl=$contentUrl, contentType=$contentType, streamType=$streamType")
         return null
     }
+
+    CastDebugLog.d(TAG, "toCastMediaInfo: contentId=$contentId, contentUrl=$contentUrl, contentType=$contentType, streamType=$streamType")
 
     val builder = CastMediaInfo.Builder(contentId)
 
@@ -53,22 +61,34 @@ fun MediaInfo.toCastMediaInfo(): CastMediaInfo? {
             "BUFFERED" -> CastMediaInfo.STREAM_TYPE_BUFFERED
             "LIVE" -> CastMediaInfo.STREAM_TYPE_LIVE
             "NONE" -> CastMediaInfo.STREAM_TYPE_NONE
-            else -> CastMediaInfo.STREAM_TYPE_INVALID
+            else -> {
+                CastDebugLog.w(TAG, "toCastMediaInfo: Unknown streamType='$streamType', using STREAM_TYPE_INVALID")
+                CastMediaInfo.STREAM_TYPE_INVALID
+            }
         }
     )
 
     val castTracks = tracks?.mapNotNull { it?.toCastMediaTrack() }.orEmpty()
     if (castTracks.isNotEmpty()) {
         builder.setMediaTracks(castTracks)
+        CastDebugLog.d(TAG, "toCastMediaInfo: Added ${castTracks.size} media tracks")
     }
 
-    customData?.let { builder.setCustomData(it.toJsonObject()) }
+    customData?.let {
+        CastDebugLog.d(TAG, "toCastMediaInfo: Setting customData")
+        builder.setCustomData(it.toJsonObject())
+    }
 
     return builder.build()
 }
 
 fun MediaQueueItem.toCastMediaQueueItem(): CastMediaQueueItem? {
-    val castMedia = media?.toCastMediaInfo() ?: return null
+    val castMedia = media?.toCastMediaInfo()
+    if (castMedia == null) {
+        CastDebugLog.e(TAG, "[CONVERSION ERROR] toCastMediaQueueItem: media is null or invalid for itemId=$itemId")
+        return null
+    }
+    CastDebugLog.d(TAG, "toCastMediaQueueItem: itemId=$itemId, startTime=$startTime, autoplay=$autoplay")
     val builder = CastMediaQueueItem.Builder(castMedia)
         .setItemId(itemId.toInt())
         .setPreloadTime(preLoadTime.toDouble())
@@ -88,6 +108,7 @@ fun SeekOptionPigeon.toCastSeekOptions(): MediaSeekOptions {
         MediaResumeStatePigeon.PAUSE -> 1
         MediaResumeStatePigeon.UNCHANGED -> 2
     }
+    CastDebugLog.d(TAG, "toCastSeekOptions: position=${position}s, resumeState=$resumeState, seekToInfinity=$seekToInfinity")
 
     return MediaSeekOptions.Builder()
         .setPosition(position * 1000)
@@ -110,15 +131,25 @@ fun QueueLoadOptionsPigeon?.toQueueCustomDataJson(): JSONObject {
 }
 
 fun LoadMediaRequestPigeon.toCastMediaLoadRequestData(mediaInfo: CastMediaInfo): MediaLoadRequestData {
+    CastDebugLog.d(TAG, "toCastMediaLoadRequestData: autoPlay=$autoPlay, playPosition=${playPosition}s, playbackRate=$playbackRate, hasCredentials=${credentials != null}")
     val builder = MediaLoadRequestData.Builder()
         .setMediaInfo(mediaInfo)
         .setAutoplay(autoPlay)
         .setCurrentTime(playPosition * 1000)
         .setPlaybackRate(playbackRate)
 
-    customData?.let { builder.setCustomData(it.toJsonObject()) }
-    activeTrackIds?.mapNotNull { it }?.toLongArray()?.let { builder.setActiveTrackIds(it) }
-    credentials?.let { builder.setCredentials(it) }
+    customData?.let {
+        CastDebugLog.d(TAG, "toCastMediaLoadRequestData: Setting customData")
+        builder.setCustomData(it.toJsonObject())
+    }
+    activeTrackIds?.mapNotNull { it }?.toLongArray()?.let {
+        CastDebugLog.d(TAG, "toCastMediaLoadRequestData: Setting activeTrackIds=${it.contentToString()}")
+        builder.setActiveTrackIds(it)
+    }
+    credentials?.let {
+        CastDebugLog.d(TAG, "toCastMediaLoadRequestData: Setting credentials (type=$credentialsType)")
+        builder.setCredentials(it)
+    }
     credentialsType?.let { builder.setCredentialsType(it) }
 
     return builder.build()
@@ -143,6 +174,7 @@ fun CastMediaInfo.toPigeonMediaInfo(): MediaInfo {
         CastMediaInfo.STREAM_TYPE_NONE -> "NONE"
         else -> "NONE"
     }
+    CastDebugLog.d(TAG, "toPigeonMediaInfo: contentId=$contentId, streamType=$stream, duration=$streamDuration")
 
     return MediaInfo(
         contentId = contentId ?: "",
@@ -190,6 +222,14 @@ fun CastMediaStatus.toPigeonMediaStatus(): MediaStatus {
         CastMediaStatus.REPEAT_MODE_REPEAT_SINGLE -> "SINGLE"
         CastMediaStatus.REPEAT_MODE_REPEAT_ALL_AND_SHUFFLE -> "ALL_AND_SHUFFLE"
         else -> "OFF"
+    }
+
+    CastDebugLog.d(TAG, "toPigeonMediaStatus: playerState=$player, idleReason=$idle, repeatMode=$repeat, playbackRate=$playbackRate, currentItemId=$currentItemId")
+
+    if (idleReason == CastMediaStatus.IDLE_REASON_ERROR) {
+        CastDebugLog.e(TAG, "[MEDIA ERROR] MediaStatus has IDLE_REASON_ERROR - playback failed!")
+        CastDebugLog.e(TAG, "[MEDIA ERROR] Player state: $player, idle reason: $idle")
+        CastDebugLog.e(TAG, "[MEDIA ERROR] Media info: contentId=${mediaInfo?.contentId}, contentType=${mediaInfo?.contentType}")
     }
 
     val range = liveSeekableRange?.let {

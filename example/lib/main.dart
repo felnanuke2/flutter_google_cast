@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-// New modular import structure - import only what you need
 import 'package:flutter_chrome_cast/cast_context.dart';
 import 'package:flutter_chrome_cast/discovery.dart';
 import 'package:flutter_chrome_cast/session.dart';
@@ -11,10 +10,8 @@ import 'package:flutter_chrome_cast/entities.dart';
 import 'package:flutter_chrome_cast/enums.dart';
 import 'package:flutter_chrome_cast/models.dart';
 import 'package:flutter_chrome_cast/common.dart';
-// For ExpandedGoogleCastPlayerController and customizable texts
-// Alternative: import everything at once
-// import 'package:flutter_chrome_cast/flutter_chrome_cast.dart';
 import 'dart:async';
+import 'media_urls.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -22,7 +19,7 @@ void main() {
 }
 
 class MyApp extends StatefulWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   @override
   State<MyApp> createState() => _MyAppState();
@@ -45,7 +42,6 @@ class _MyAppState extends State<MyApp> {
     super.dispose();
   }
 
-  // Platform messages are asynchronous, so we initialize in an async method.
   Future<void> initPlatformState() async {
     const appId = GoogleCastDiscoveryCriteria.kDefaultApplicationId;
     final options = GoogleCastOptions(
@@ -53,7 +49,6 @@ class _MyAppState extends State<MyApp> {
       discoveryCriteria: Platform.isIOS
           ? GoogleCastDiscoveryCriteriaInitialize.initWithApplicationID(appId)
           : null,
-      // Set to true to automatically stop casting when the app is killed
       stopCastingOnAppTerminated: false,
     );
     GoogleCastContext.instance.setSharedInstanceWithOptions(options);
@@ -68,7 +63,6 @@ class _MyAppState extends State<MyApp> {
           );
         });
 
-    // Check initial discovery state for iOS
     if (Platform.isIOS) {
       try {
         final isActive = await GoogleCastDiscoveryManager.instance
@@ -77,7 +71,6 @@ class _MyAppState extends State<MyApp> {
           _isDiscoveryActive = isActive;
         });
       } catch (e) {
-        // Handle error silently or log it
         debugPrint('Error checking discovery state: $e');
       }
     }
@@ -85,46 +78,39 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return MaterialApp(
+      theme: ThemeData(
+        colorSchemeSeed: colorScheme.primary,
+        useMaterial3: true,
+        brightness: Brightness.light,
+      ),
       home: Stack(
         children: [
           Scaffold(
             key: _scaffoldKey,
-            floatingActionButton: Container(
-              margin: const EdgeInsets.only(bottom: 40),
-              child: StreamBuilder(
-                stream: GoogleCastSessionManager.instance.currentSessionStream,
-                builder: (context, snapshot) {
-                  final isConnected =
-                      GoogleCastSessionManager.instance.connectionState ==
-                      GoogleCastConnectState.connected;
-                  return Visibility(
-                    visible: isConnected,
-                    child: FloatingActionButton(
-                      onPressed: _insertQueueItemAndPlay,
-                      child: const Icon(Icons.add),
-                    ),
-                  );
-                },
-              ),
-            ),
             appBar: AppBar(
-              title: const Text('Plugin example app'),
+              title: const Text('Google Cast'),
+              centerTitle: false,
               actions: [
                 StreamBuilder<GoogleCastSession?>(
                   stream:
                       GoogleCastSessionManager.instance.currentSessionStream,
                   builder: (context, snapshot) {
-                    final bool isConnected =
+                    final isConnected =
                         GoogleCastSessionManager.instance.connectionState ==
                         GoogleCastConnectState.connected;
                     return IconButton(
-                      onPressed: GoogleCastSessionManager
-                          .instance
-                          .endSessionAndStopCasting,
+                      onPressed: isConnected
+                          ? GoogleCastSessionManager
+                                .instance
+                                .endSessionAndStopCasting
+                          : null,
                       icon: Icon(
                         isConnected ? Icons.cast_connected : Icons.cast,
                       ),
+                      tooltip: isConnected ? 'Disconnect' : 'Not connected',
                     );
                   },
                 ),
@@ -134,374 +120,71 @@ class _MyAppState extends State<MyApp> {
               stream: GoogleCastDiscoveryManager.instance.devicesStream,
               builder: (context, snapshot) {
                 final devices = snapshot.data ?? [];
-                return Column(
-                  children: [
-                    // Discovery Control Section
-                    Container(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        children: [
-                          // Discovery Status Indicator
-                          Container(
-                            padding: const EdgeInsets.all(12.0),
-                            decoration: BoxDecoration(
-                              color: _isDiscoveryActive
-                                  ? Colors.green.withValues(alpha: 0.1)
-                                  : Colors.grey.withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(8.0),
-                              border: Border.all(
-                                color: _isDiscoveryActive
-                                    ? Colors.green
-                                    : Colors.grey,
-                                width: 2.0,
-                              ),
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Container(
-                                  width: 12.0,
-                                  height: 12.0,
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    color: _isDiscoveryActive
-                                        ? Colors.green
-                                        : Colors.grey,
-                                  ),
-                                ),
-                                const SizedBox(width: 8.0),
-                                Expanded(
-                                  child: Text(
-                                    _isDiscoveryActive
-                                        ? devices.isEmpty
-                                              ? 'Discovery Active - Searching for devices...'
-                                              : 'Discovery Active - Found ${devices.length} device${devices.length == 1 ? '' : 's'}'
-                                        : 'Discovery Stopped',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      color: _isDiscoveryActive
-                                          ? Colors.green.shade700
-                                          : Colors.grey.shade700,
-                                    ),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                ),
-                                if (_isDiscoveryActive) ...[
-                                  const SizedBox(width: 8.0),
-                                  SizedBox(
-                                    width: 16.0,
-                                    height: 16.0,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2.0,
-                                      valueColor: AlwaysStoppedAnimation<Color>(
-                                        Colors.green.shade700,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ],
-                            ),
-                          ),
-                          const SizedBox(height: 16.0),
-                          // Discovery Control Buttons
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              ElevatedButton(
-                                onPressed: _isDiscoveryActive
-                                    ? null
-                                    : _startDiscovery,
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: _isDiscoveryActive
-                                      ? Colors.grey
-                                      : Colors.green,
-                                  foregroundColor: Colors.white,
-                                ),
-                                child: const Text('Start Discovery'),
-                              ),
-                              ElevatedButton(
-                                onPressed: !_isDiscoveryActive
-                                    ? null
-                                    : _stopDiscovery,
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: !_isDiscoveryActive
-                                      ? Colors.grey
-                                      : Colors.red,
-                                  foregroundColor: Colors.white,
-                                ),
-                                child: const Text('Stop Discovery'),
-                              ),
-                            ],
-                          ),
-                        ],
+                return CustomScrollView(
+                  slivers: [
+                    SliverToBoxAdapter(
+                      child: _DiscoverySection(
+                        isActive: _isDiscoveryActive,
+                        deviceCount: devices.length,
+                        onStart: _startDiscovery,
+                        onStop: _stopDiscovery,
                       ),
                     ),
-                    const Divider(),
-
-                    // Examples Section
-                    Container(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Player Examples',
-                            style: Theme.of(context).textTheme.titleMedium,
-                          ),
-                          const SizedBox(height: 12),
-                          Wrap(
-                            spacing: 8,
-                            runSpacing: 8,
-                            children: [
-                              // Customizable Texts Examples
-                              ElevatedButton(
-                                onPressed: () => _showPlayerWithTexts(
-                                  context,
-                                  _englishTexts,
-                                  'English',
-                                ),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.blue,
-                                ),
-                                child: const Text(
-                                  'English Player',
-                                  style: TextStyle(color: Colors.white),
-                                ),
-                              ),
-                              ElevatedButton(
-                                onPressed: () => _showPlayerWithTexts(
-                                  context,
-                                  _spanishTexts,
-                                  'Spanish',
-                                ),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.orange,
-                                ),
-                                child: const Text(
-                                  'Spanish Player',
-                                  style: TextStyle(color: Colors.white),
-                                ),
-                              ),
-                              ElevatedButton(
-                                onPressed: () => _showPlayerWithTexts(
-                                  context,
-                                  _frenchTexts,
-                                  'French',
-                                ),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.purple,
-                                ),
-                                child: const Text(
-                                  'French Player',
-                                  style: TextStyle(color: Colors.white),
-                                ),
-                              ),
-                              ElevatedButton(
-                                onPressed: () => _showPlayerWithTexts(
-                                  context,
-                                  _customBrandingTexts,
-                                  'Custom Branding',
-                                ),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.green,
-                                ),
-                                child: const Text(
-                                  'Custom Player',
-                                  style: TextStyle(color: Colors.white),
-                                ),
-                              ),
-
-                              // Theme Examples
-                              ElevatedButton(
-                                onPressed: () => _showPlayerWithTheme(
-                                  context,
-                                  _darkTheme,
-                                  'Dark Theme',
-                                ),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.black87,
-                                ),
-                                child: const Text(
-                                  'Dark Theme',
-                                  style: TextStyle(color: Colors.white),
-                                ),
-                              ),
-                              ElevatedButton(
-                                onPressed: () => _showPlayerWithTheme(
-                                  context,
-                                  _colorfulTheme,
-                                  'Colorful Theme',
-                                ),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.pink,
-                                ),
-                                child: const Text(
-                                  'Colorful Theme',
-                                  style: TextStyle(color: Colors.white),
-                                ),
-                              ),
-                              ElevatedButton(
-                                onPressed: () => _showPlayerWithTheme(
-                                  context,
-                                  _minimalistTheme,
-                                  'Minimal Theme',
-                                ),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.grey[300],
-                                ),
-                                child: const Text(
-                                  'Minimal Theme',
-                                  style: TextStyle(color: Colors.black),
-                                ),
-                              ),
-                              ElevatedButton(
-                                onPressed: _loadQueueRemoveReproItems,
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.teal,
-                                ),
-                                child: const Text(
-                                  'Load Queue Repro',
-                                  style: TextStyle(color: Colors.white),
-                                ),
-                              ),
-                              ElevatedButton(
-                                onPressed: _runQueueRemoveRepro,
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.redAccent,
-                                ),
-                                child: const Text(
-                                  'Run Remove Repro',
-                                  style: TextStyle(color: Colors.white),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
+                    SliverToBoxAdapter(
+                      child: _ActionsSection(
+                        isConnected:
+                            GoogleCastSessionManager.instance.connectionState ==
+                            GoogleCastConnectState.connected,
+                        onLoadQueue: _loadAndPlayMedia,
+                        onLoadSingle: _loadSingleMedia,
+                        onLoadHls: _loadHlsMedia,
+                        onLoadHlsCustom: _loadHlsMediaWithCustomData,
+                        onLoadRepro: _loadQueueRemoveReproItems,
+                        onRunRepro: _runQueueRemoveRepro,
+                        onInsertItem: _insertQueueItemAndPlay,
                       ),
                     ),
-                    const Divider(),
-
-                    // Device List Section
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      child: Text(
-                        'Available Cast Devices (${devices.length})',
-                        style: Theme.of(context).textTheme.titleMedium,
+                    SliverToBoxAdapter(
+                      child: _ThemeShowcaseSection(
+                        onShowPlayer: _showPlayerWithTexts,
+                        onShowTheme: _showPlayerWithTheme,
                       ),
                     ),
-                    const SizedBox(height: 8),
-                    Expanded(
-                      child: ListView(
-                        children: [
-                          ...devices.map((device) {
-                            return StreamBuilder<GoogleCastSession?>(
-                              stream: GoogleCastSessionManager
-                                  .instance
-                                  .currentSessionStream,
-                              builder: (context, sessionSnapshot) {
-                                final currentSession = sessionSnapshot.data;
-                                final isConnectedToThisDevice =
-                                    currentSession?.device?.deviceID ==
-                                    device.deviceID;
-
-                                return Card(
-                                  margin: const EdgeInsets.symmetric(
-                                    horizontal: 8,
-                                    vertical: 4,
-                                  ),
-                                  elevation: isConnectedToThisDevice ? 4 : 1,
-                                  color: isConnectedToThisDevice
-                                      ? Colors.blue.shade50
-                                      : null,
-                                  child: ListTile(
-                                    title: Text(
-                                      device.friendlyName,
-                                      style: TextStyle(
-                                        fontWeight: isConnectedToThisDevice
-                                            ? FontWeight.bold
-                                            : FontWeight.normal,
-                                      ),
-                                    ),
-                                    subtitle: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(device.modelName ?? ''),
-                                        if (isConnectedToThisDevice)
-                                          Text(
-                                            'Connected',
-                                            style: TextStyle(
-                                              color: Colors.green.shade600,
-                                              fontWeight: FontWeight.w500,
-                                            ),
-                                          ),
-                                      ],
-                                    ),
-                                    leading: Icon(
-                                      isConnectedToThisDevice
-                                          ? Icons.cast_connected
-                                          : Icons.cast,
-                                      color: isConnectedToThisDevice
-                                          ? Colors.blue
-                                          : null,
-                                    ),
-                                    trailing: isConnectedToThisDevice
-                                        ? Row(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              IconButton(
-                                                icon: const Icon(
-                                                  Icons.file_download,
-                                                ),
-                                                onPressed: () =>
-                                                    _loadSingleMedia(),
-                                                tooltip: 'Load Media',
-                                                color: Colors.blue,
-                                              ),
-                                              IconButton(
-                                                icon: const Icon(Icons.live_tv),
-                                                onPressed: () =>
-                                                    _loadHlsMedia(),
-                                                tooltip: 'Load HLS Media',
-                                                color: Colors.orange,
-                                              ),
-                                              IconButton(
-                                                icon: const Icon(Icons.http),
-                                                onPressed: () =>
-                                                    _loadHlsMediaWithCustomData(),
-                                                tooltip:
-                                                    'Load HLS + customData',
-                                                color: Colors.deepPurple,
-                                              ),
-                                              IconButton(
-                                                icon: const Icon(
-                                                  Icons.play_arrow,
-                                                ),
-                                                onPressed: () =>
-                                                    _loadAndPlayMedia(),
-                                                tooltip: 'Play Media',
-                                                color: Colors.green,
-                                              ),
-                                              IconButton(
-                                                icon: const Icon(Icons.stop),
-                                                onPressed: () =>
-                                                    _disconnectFromDevice(),
-                                                tooltip: 'Disconnect',
-                                                color: Colors.red,
-                                              ),
-                                            ],
-                                          )
-                                        : const Icon(Icons.chevron_right),
-                                    onTap: isConnectedToThisDevice
-                                        ? null
-                                        : () => _connectToDevice(device),
-                                  ),
-                                );
-                              },
-                            );
-                          }),
-                        ],
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
+                        child: Text(
+                          'Devices',
+                          style: Theme.of(context).textTheme.titleSmall
+                              ?.copyWith(
+                                color: colorScheme.onSurfaceVariant,
+                                fontWeight: FontWeight.w600,
+                              ),
+                        ),
                       ),
+                    ),
+                    if (devices.isEmpty)
+                      const SliverFillRemaining(
+                        hasScrollBody: false,
+                        child: _EmptyDevicesState(),
+                      )
+                    else
+                      SliverList(
+                        delegate: SliverChildBuilderDelegate(
+                          (context, index) => _DeviceCard(
+                            device: devices[index],
+                            onConnect: () => _connectToDevice(devices[index]),
+                            onDisconnect: _disconnectFromDevice,
+                            onLoadSingle: _loadSingleMedia,
+                            onLoadHls: _loadHlsMedia,
+                            onLoadHlsCustom: _loadHlsMediaWithCustomData,
+                            onPlay: _loadAndPlayMedia,
+                          ),
+                          childCount: devices.length,
+                        ),
+                      ),
+                    const SliverPadding(
+                      padding: EdgeInsets.only(bottom: 100),
                     ),
                   ],
                 );
@@ -510,30 +193,30 @@ class _MyAppState extends State<MyApp> {
           ),
           GoogleCastMiniController(
             theme: GoogleCastPlayerTheme(
-              backgroundColor: Colors.white,
-              titleTextStyle: const TextStyle(
-                fontSize: 16,
+              backgroundColor: colorScheme.surface,
+              titleTextStyle: TextStyle(
+                fontSize: 14,
                 fontWeight: FontWeight.w600,
-                color: Colors.black87,
+                color: colorScheme.onSurface,
               ),
               deviceTextStyle: TextStyle(
                 fontSize: 12,
-                color: Colors.grey[600],
+                color: colorScheme.onSurfaceVariant,
                 fontWeight: FontWeight.w400,
               ),
-              iconColor: Colors.blue,
-              iconSize: 28,
-              imageBorderRadius: BorderRadius.circular(12),
+              iconColor: colorScheme.primary,
+              iconSize: 24,
+              imageBorderRadius: BorderRadius.circular(8),
               imageShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.2),
+                  color: Colors.black.withValues(alpha: 0.15),
                   blurRadius: 8,
                   offset: const Offset(0, 2),
                 ),
               ],
             ),
-            margin: const EdgeInsets.all(16),
-            borderRadius: BorderRadius.circular(16),
+            margin: const EdgeInsets.all(12),
+            borderRadius: BorderRadius.circular(12),
             showDeviceName: true,
           ),
         ],
@@ -544,17 +227,19 @@ class _MyAppState extends State<MyApp> {
   void _connectToDevice(GoogleCastDevice device) async {
     try {
       await GoogleCastSessionManager.instance.startSessionWithDevice(device);
+      if (!mounted) return;
       ScaffoldMessenger.of(_scaffoldKey.currentContext!).showSnackBar(
         SnackBar(
           content: Text('Connected to ${device.friendlyName}'),
-          backgroundColor: Colors.green,
+          behavior: SnackBarBehavior.floating,
         ),
       );
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(_scaffoldKey.currentContext!).showSnackBar(
         SnackBar(
-          content: Text('Failed to connect to ${device.friendlyName}'),
-          backgroundColor: Colors.red,
+          content: Text('Failed to connect: $e'),
+          behavior: SnackBarBehavior.floating,
         ),
       );
     }
@@ -563,17 +248,19 @@ class _MyAppState extends State<MyApp> {
   void _disconnectFromDevice() async {
     try {
       await GoogleCastSessionManager.instance.endSessionAndStopCasting();
+      if (!mounted) return;
       ScaffoldMessenger.of(_scaffoldKey.currentContext!).showSnackBar(
         const SnackBar(
-          content: Text('Disconnected from Cast device'),
-          backgroundColor: Colors.orange,
+          content: Text('Disconnected'),
+          behavior: SnackBarBehavior.floating,
         ),
       );
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(_scaffoldKey.currentContext!).showSnackBar(
-        const SnackBar(
-          content: Text('Failed to disconnect'),
-          backgroundColor: Colors.red,
+        SnackBar(
+          content: Text('Failed to disconnect: $e'),
+          behavior: SnackBarBehavior.floating,
         ),
       );
     }
@@ -588,21 +275,15 @@ class _MyAppState extends State<MyApp> {
             mediaInformation: GoogleCastMediaInformation(
               contentId: '0',
               streamType: CastMediaStreamType.buffered,
-              contentUrl: Uri.parse(
-                'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
-              ),
+              contentUrl: Uri.parse(MediaUrls.sintelTrailerVideo),
               contentType: 'video/mp4',
               metadata: GoogleCastMovieMediaMetadata(
-                title: 'The first Blender Open Movie from 2006',
-                studio: 'Blender Inc',
-                releaseDate: DateTime(2011),
-                subtitle:
-                    'Song : Raja Raja Kareja Mein Samaja\nAlbum : Raja Kareja Mein Samaja\nArtist : Radhe Shyam Rasia\nSinger : Radhe Shyam Rasia\nMusic Director : Sohan Lal, Dinesh Kumar\nLyricist : Vinay Bihari, Shailesh Sagar, Parmeshwar Premi\nMusic Label : T-Series',
+                title: 'Sintel Trailer',
+                studio: 'Blender Foundation',
+                releaseDate: DateTime(2010),
                 images: [
                   GoogleCastImage(
-                    url: Uri.parse(
-                      'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/images/BigBuckBunny.jpg',
-                    ),
+                    url: Uri.parse(MediaUrls.elephantsDreamPoster),
                     height: 480,
                     width: 854,
                   ),
@@ -612,9 +293,7 @@ class _MyAppState extends State<MyApp> {
                 GoogleCastMediaTrack(
                   trackId: 0,
                   type: TrackType.text,
-                  trackContentId: Uri.parse(
-                    'https://raw.githubusercontent.com/felnanuke2/flutter_cast/master/example/assets/VEED-subtitles_Blender_Foundation_-_Elephants_Dream_1024.vtt',
-                  ).toString(),
+                  trackContentId: Uri.parse(MediaUrls.elephantsDreamSubtitles).toString(),
                   trackContentType: 'text/vtt',
                   name: 'English',
                   language: Rfc5646Language.portugueseBrazil,
@@ -628,19 +307,15 @@ class _MyAppState extends State<MyApp> {
             mediaInformation: GoogleCastMediaInformation(
               contentId: '1',
               streamType: CastMediaStreamType.buffered,
-              contentUrl: Uri.parse(
-                'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
-              ),
+              contentUrl: Uri.parse(MediaUrls.bigBuckBunnyVideo),
               contentType: 'video/mp4',
               metadata: GoogleCastMovieMediaMetadata(
                 title: 'Big Buck Bunny',
-                releaseDate: DateTime(2011),
-                studio: 'Vlc Media Player',
+                releaseDate: DateTime(2008),
+                studio: 'Blender Foundation',
                 images: [
                   GoogleCastImage(
-                    url: Uri.parse(
-                      'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/images/BigBuckBunny.jpg',
-                    ),
+                    url: Uri.parse(MediaUrls.bigBuckBunnySplash),
                     height: 480,
                     width: 854,
                   ),
@@ -654,19 +329,9 @@ class _MyAppState extends State<MyApp> {
           playPosition: const Duration(seconds: 30),
         ),
       );
-      ScaffoldMessenger.of(_scaffoldKey.currentContext!).showSnackBar(
-        const SnackBar(
-          content: Text('Media loaded and playing'),
-          backgroundColor: Colors.green,
-        ),
-      );
+      _showSuccess('Queue loaded');
     } catch (e) {
-      ScaffoldMessenger.of(_scaffoldKey.currentContext!).showSnackBar(
-        const SnackBar(
-          content: Text('Failed to load media'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      _showError('Failed to load queue: $e');
     }
   }
 
@@ -677,21 +342,15 @@ class _MyAppState extends State<MyApp> {
         mediaInformation: GoogleCastMediaInformation(
           contentId: '3',
           streamType: CastMediaStreamType.buffered,
-          contentUrl: Uri.parse(
-            'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
-          ),
+          contentUrl: Uri.parse(MediaUrls.bigBuckBunnyShortClip),
           contentType: 'video/mp4',
           metadata: GoogleCastMovieMediaMetadata(
-            title: 'For Bigger Blazes',
-            subtitle:
-                'Song : Raja Raja Kareja Mein Samaja\nAlbum : Raja Kareja Mein Samaja\nArtist : Radhe Shyam Rasia\nSinger : Radhe Shyam Rasia\nMusic Director : Sohan Lal, Dinesh Kumar\nLyricist : Vinay Bihari, Shailesh Sagar, Parmeshwar Premi\nMusic Label : T-Series',
-            releaseDate: DateTime(2011),
-            studio: 'T-Series Regional',
+            title: 'Big Buck Bunny (Short Clip)',
+            releaseDate: DateTime(2008),
+            studio: 'Blender Foundation',
             images: [
               GoogleCastImage(
-                url: Uri.parse(
-                  'https://i.ytimg.com/vi/Dr9C2oswZfA/maxresdefault.jpg',
-                ),
+                url: Uri.parse(MediaUrls.bigBuckBunnyOpeningScreen),
                 height: 480,
                 width: 854,
               ),
@@ -708,41 +367,24 @@ class _MyAppState extends State<MyApp> {
       final mediaInfo = GoogleCastMediaInformation(
         contentId: 'single_0',
         streamType: CastMediaStreamType.buffered,
-        contentUrl: Uri.parse(
-          'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
-        ),
+        contentUrl: Uri.parse(MediaUrls.bigBuckBunnyVideo),
         contentType: 'video/mp4',
         metadata: GoogleCastMovieMediaMetadata(
-          title: 'Big Buck Bunny (single load)',
-          releaseDate: DateTime(2011),
+          title: 'Big Buck Bunny',
+          releaseDate: DateTime(2008),
           images: [
             GoogleCastImage(
-              url: Uri.parse(
-                'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/images/BigBuckBunny.jpg',
-              ),
+              url: Uri.parse(MediaUrls.bigBuckBunnySplash),
               height: 480,
               width: 854,
             ),
           ],
         ),
       );
-
       await GoogleCastRemoteMediaClient.instance.loadMedia(mediaInfo);
-
-      ScaffoldMessenger.of(_scaffoldKey.currentContext!).showSnackBar(
-        const SnackBar(
-          content: Text('Single media loaded successfully'),
-          backgroundColor: Colors.green,
-        ),
-      );
-    } catch (e, st) {
-      debugPrint('Error loading single media: $e\n$st');
-      ScaffoldMessenger.of(_scaffoldKey.currentContext!).showSnackBar(
-        SnackBar(
-          content: Text('Failed to load media: $e'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      _showSuccess('Media loaded');
+    } catch (e) {
+      _showError('Failed to load media: $e');
     }
   }
 
@@ -750,8 +392,6 @@ class _MyAppState extends State<MyApp> {
     try {
       final mediaInfo = GoogleCastMediaInformation(
         contentId: 'hls_sample',
-        // Note: Use 'buffered' for VOD HLS streams that have a finite duration
-        // Use 'live' only for true live streams without a known duration
         streamType: CastMediaStreamType.buffered,
         contentUrl: Uri.parse(
           'https://devstreaming-cdn.apple.com/videos/streaming/examples/img_bipbop_adv_example_ts/master.m3u8',
@@ -759,35 +399,19 @@ class _MyAppState extends State<MyApp> {
         contentType: 'application/x-mpegURL',
         metadata: GoogleCastMovieMediaMetadata(
           title: 'Apple HLS Sample',
-          subtitle: 'HLS Stream Test',
           images: [
             GoogleCastImage(
-              url: Uri.parse(
-                'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/images/BigBuckBunny.jpg',
-              ),
+              url: Uri.parse(MediaUrls.bigBuckBunnySplash),
               height: 480,
               width: 854,
             ),
           ],
         ),
       );
-
       await GoogleCastRemoteMediaClient.instance.loadMedia(mediaInfo);
-
-      ScaffoldMessenger.of(_scaffoldKey.currentContext!).showSnackBar(
-        const SnackBar(
-          content: Text('HLS media loaded successfully'),
-          backgroundColor: Colors.green,
-        ),
-      );
-    } catch (e, st) {
-      debugPrint('Error loading HLS media: $e\n$st');
-      ScaffoldMessenger.of(_scaffoldKey.currentContext!).showSnackBar(
-        SnackBar(
-          content: Text('Failed to load HLS media: $e'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      _showSuccess('HLS media loaded');
+    } catch (e) {
+      _showError('Failed to load HLS: $e');
     }
   }
 
@@ -801,13 +425,10 @@ class _MyAppState extends State<MyApp> {
         ),
         contentType: 'application/x-mpegURL',
         metadata: GoogleCastMovieMediaMetadata(
-          title: 'Apple HLS Sample (customData)',
-          subtitle: 'HLS Stream with customData',
+          title: 'Apple HLS (customData)',
           images: [
             GoogleCastImage(
-              url: Uri.parse(
-                'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/images/BigBuckBunny.jpg',
-              ),
+              url: Uri.parse(MediaUrls.bigBuckBunnySplash),
               height: 480,
               width: 854,
             ),
@@ -819,33 +440,17 @@ class _MyAppState extends State<MyApp> {
         'headers': {
           'Authorization': 'Bearer demo-token-123',
           'X-Client': 'flutter_google_cast_example',
-          'X-Feature': 'custom-data-validation',
         },
         'options': {'retry': true, 'timeoutSeconds': 20},
-        'tags': ['hls', 'customData', 'native-log-check'],
       };
-
-      debugPrint('[Example] loadMedia customData payload: $customData');
 
       await GoogleCastRemoteMediaClient.instance.loadMedia(
         mediaInfo,
         customData: customData,
       );
-
-      ScaffoldMessenger.of(_scaffoldKey.currentContext!).showSnackBar(
-        const SnackBar(
-          content: Text('HLS with customData sent to native side'),
-          backgroundColor: Colors.green,
-        ),
-      );
-    } catch (e, st) {
-      debugPrint('Error loading HLS media with customData: $e\n$st');
-      ScaffoldMessenger.of(_scaffoldKey.currentContext!).showSnackBar(
-        SnackBar(
-          content: Text('Failed to load HLS with customData: $e'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      _showSuccess('HLS with customData loaded');
+    } catch (e) {
+      _showError('Failed to load HLS with customData: $e');
     }
   }
 
@@ -857,13 +462,10 @@ class _MyAppState extends State<MyApp> {
           mediaInformation: GoogleCastMediaInformation(
             contentId: 'repro_$index',
             streamType: CastMediaStreamType.buffered,
-            contentUrl: Uri.parse(
-              'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
-            ),
+            contentUrl: Uri.parse(MediaUrls.bigBuckBunnyVideo),
             contentType: 'video/mp4',
             metadata: GoogleCastMovieMediaMetadata(
-              title: 'Queue Repro Item $index',
-              subtitle: 'Used to reproduce queueRemoveItemsWithIds',
+              title: 'Queue Item ${index + 1}',
             ),
           ),
         ),
@@ -875,21 +477,9 @@ class _MyAppState extends State<MyApp> {
       );
 
       if (!mounted) return;
-      ScaffoldMessenger.of(_scaffoldKey.currentContext!).showSnackBar(
-        const SnackBar(
-          content: Text('Repro queue loaded. Now tap "Run Remove Repro".'),
-          backgroundColor: Colors.teal,
-        ),
-      );
-    } catch (e, st) {
-      debugPrint('Error loading repro queue: $e\n$st');
-      if (!mounted) return;
-      ScaffoldMessenger.of(_scaffoldKey.currentContext!).showSnackBar(
-        SnackBar(
-          content: Text('Failed to load repro queue: $e'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      _showSuccess('Repro queue loaded. Tap "Remove Items" to test.');
+    } catch (e) {
+      _showError('Failed to load repro queue: $e');
     }
   }
 
@@ -908,38 +498,18 @@ class _MyAppState extends State<MyApp> {
 
       if (removableIds.length < 2) {
         if (!mounted) return;
-        ScaffoldMessenger.of(_scaffoldKey.currentContext!).showSnackBar(
-          const SnackBar(
-            content: Text('Load repro queue first and wait queue updates.'),
-            backgroundColor: Colors.orange,
-          ),
-        );
+        _showError('Load repro queue first.');
         return;
       }
 
-      debugPrint(
-        '[Example][Queue] invoking queueRemoveItemsWithIds: $removableIds',
-      );
       await GoogleCastRemoteMediaClient.instance.queueRemoveItemsWithIds(
         removableIds,
       );
 
       if (!mounted) return;
-      ScaffoldMessenger.of(_scaffoldKey.currentContext!).showSnackBar(
-        SnackBar(
-          content: Text('Remove request sent for ids: $removableIds'),
-          backgroundColor: Colors.green,
-        ),
-      );
-    } catch (e, st) {
-      debugPrint('[Example][Queue] queueRemoveItemsWithIds failed: $e\n$st');
-      if (!mounted) return;
-      ScaffoldMessenger.of(_scaffoldKey.currentContext!).showSnackBar(
-        SnackBar(
-          content: Text('queueRemoveItemsWithIds error: $e'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      _showSuccess('Removed items: $removableIds');
+    } catch (e) {
+      _showError('Remove failed: $e');
     }
   }
 
@@ -948,12 +518,6 @@ class _MyAppState extends State<MyApp> {
       _isDiscoveryActive = true;
     });
     GoogleCastDiscoveryManager.instance.startDiscovery();
-    ScaffoldMessenger.of(_scaffoldKey.currentContext!).showSnackBar(
-      const SnackBar(
-        content: Text('Discovery started - searching for Cast devices...'),
-        backgroundColor: Colors.green,
-      ),
-    );
   }
 
   void _stopDiscovery() {
@@ -961,20 +525,32 @@ class _MyAppState extends State<MyApp> {
       _isDiscoveryActive = false;
     });
     GoogleCastDiscoveryManager.instance.stopDiscovery();
+  }
+
+  void _showSuccess(String message) {
+    if (!mounted) return;
     ScaffoldMessenger.of(_scaffoldKey.currentContext!).showSnackBar(
-      const SnackBar(
-        content: Text('Discovery stopped'),
-        backgroundColor: Colors.red,
+      SnackBar(
+        content: Text(message),
+        behavior: SnackBarBehavior.floating,
       ),
     );
   }
 
-  // === CUSTOMIZABLE TEXTS EXAMPLES ===
+  void _showError(String message) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(_scaffoldKey.currentContext!).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
 
-  // Default English texts
+  // Theme examples
+
   static const _englishTexts = GoogleCastPlayerTexts();
 
-  // Spanish localization
   static const _spanishTexts = GoogleCastPlayerTexts(
     unknownTitle: 'Título desconocido',
     castingToDevice: _spanishCastingToDevice,
@@ -987,7 +563,6 @@ class _MyAppState extends State<MyApp> {
       'Transmitiendo a $deviceName';
   static String _spanishTrackFallback(int trackId) => 'Pista $trackId';
 
-  // French localization
   static const _frenchTexts = GoogleCastPlayerTexts(
     unknownTitle: 'Titre inconnu',
     castingToDevice: _frenchCastingToDevice,
@@ -1000,7 +575,6 @@ class _MyAppState extends State<MyApp> {
       'Diffusion vers $deviceName';
   static String _frenchTrackFallback(int trackId) => 'Piste $trackId';
 
-  // Custom branding example
   static const _customBrandingTexts = GoogleCastPlayerTexts(
     unknownTitle: 'No media selected',
     castingToDevice: _customCastingToDevice,
@@ -1011,11 +585,9 @@ class _MyAppState extends State<MyApp> {
 
   static String _customCastingToDevice(String deviceName) =>
       'Streaming to your $deviceName';
-  static String _customTrackFallback(int trackId) => 'Subtitle option $trackId';
+  static String _customTrackFallback(int trackId) =>
+      'Subtitle option $trackId';
 
-  // === THEME EXAMPLES ===
-
-  // Dark theme
   static final _darkTheme = GoogleCastPlayerTheme(
     backgroundColor: Colors.black,
     titleTextStyle: const TextStyle(
@@ -1031,16 +603,8 @@ class _MyAppState extends State<MyApp> {
     iconColor: Colors.white,
     iconSize: 32,
     imageBorderRadius: BorderRadius.circular(8),
-    imageShadow: [
-      BoxShadow(
-        color: Colors.white.withValues(alpha: 0.2),
-        blurRadius: 6,
-        offset: const Offset(0, 2),
-      ),
-    ],
   );
 
-  // Colorful theme
   static final _colorfulTheme = GoogleCastPlayerTheme(
     backgroundColor: Colors.pink[50],
     titleTextStyle: const TextStyle(
@@ -1056,16 +620,8 @@ class _MyAppState extends State<MyApp> {
     iconColor: Colors.pink,
     iconSize: 36,
     imageBorderRadius: BorderRadius.circular(20),
-    imageShadow: [
-      BoxShadow(
-        color: Colors.pink.withValues(alpha: 0.3),
-        blurRadius: 10,
-        offset: const Offset(0, 4),
-      ),
-    ],
   );
 
-  // Minimalist theme
   static final _minimalistTheme = GoogleCastPlayerTheme(
     backgroundColor: Colors.grey[100],
     titleTextStyle: const TextStyle(
@@ -1084,8 +640,6 @@ class _MyAppState extends State<MyApp> {
     imageShadow: [],
   );
 
-  // === EXAMPLE HELPER METHODS ===
-
   void _showPlayerWithTexts(
     BuildContext context,
     GoogleCastPlayerTexts texts,
@@ -1094,6 +648,7 @@ class _MyAppState extends State<MyApp> {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => Scaffold(
+          appBar: AppBar(title: Text(title)),
           body: ExpandedGoogleCastPlayerController(
             texts: texts,
             toggleExpand: () => Navigator.of(context).pop(),
@@ -1111,10 +666,653 @@ class _MyAppState extends State<MyApp> {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => Scaffold(
+          appBar: AppBar(title: Text(title)),
           body: ExpandedGoogleCastPlayerController(
             theme: theme,
             toggleExpand: () => Navigator.of(context).pop(),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Discovery Section
+// ---------------------------------------------------------------------------
+
+class _DiscoverySection extends StatelessWidget {
+  const _DiscoverySection({
+    required this.isActive,
+    required this.deviceCount,
+    required this.onStart,
+    required this.onStop,
+  });
+
+  final bool isActive;
+  final int deviceCount;
+  final VoidCallback onStart;
+  final VoidCallback onStop;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+      child: Card(
+        clipBehavior: Clip.antiAlias,
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(
+                    isActive ? Icons.radar : Icons.radar_outlined,
+                    color: isActive
+                        ? colorScheme.primary
+                        : colorScheme.onSurfaceVariant,
+                    size: 20,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Discovery',
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const Spacer(),
+                  if (isActive) ...[
+                    SizedBox(
+                      width: 14,
+                      height: 14,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: colorScheme.primary,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                  ],
+                  Text(
+                    isActive
+                        ? deviceCount > 0
+                              ? '$deviceCount found'
+                              : 'Searching…'
+                        : 'Stopped',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: isActive
+                          ? colorScheme.primary
+                          : colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                    child: FilledButton.tonalIcon(
+                      onPressed: isActive ? null : onStart,
+                      icon: const Icon(Icons.play_arrow_rounded, size: 18),
+                      label: const Text('Start'),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: !isActive ? null : onStop,
+                      icon: const Icon(Icons.stop_rounded, size: 18),
+                      label: const Text('Stop'),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Actions Section
+// ---------------------------------------------------------------------------
+
+class _ActionsSection extends StatelessWidget {
+  const _ActionsSection({
+    required this.isConnected,
+    required this.onLoadQueue,
+    required this.onLoadSingle,
+    required this.onLoadHls,
+    required this.onLoadHlsCustom,
+    required this.onLoadRepro,
+    required this.onRunRepro,
+    required this.onInsertItem,
+  });
+
+  final bool isConnected;
+  final VoidCallback onLoadQueue;
+  final VoidCallback onLoadSingle;
+  final VoidCallback onLoadHls;
+  final VoidCallback onLoadHlsCustom;
+  final VoidCallback onLoadRepro;
+  final VoidCallback onRunRepro;
+  final VoidCallback onInsertItem;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+      child: Card(
+        clipBehavior: Clip.antiAlias,
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Media Actions',
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'Connect to a device first, then load media.',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(height: 12),
+              _ActionTile(
+                icon: Icons.playlist_play,
+                title: 'Load Queue',
+                subtitle: '2 items with subtitles',
+                onTap: isConnected ? onLoadQueue : null,
+              ),
+              _ActionTile(
+                icon: Icons.play_circle_outline,
+                title: 'Load Single Media',
+                subtitle: 'Big Buck Bunny',
+                onTap: isConnected ? onLoadSingle : null,
+              ),
+              _ActionTile(
+                icon: Icons.live_tv_outlined,
+                title: 'Load HLS Stream',
+                subtitle: 'Apple HLS sample',
+                onTap: isConnected ? onLoadHls : null,
+              ),
+              _ActionTile(
+                icon: Icons.data_object,
+                title: 'HLS + Custom Data',
+                subtitle: 'With authorization headers',
+                onTap: isConnected ? onLoadHlsCustom : null,
+              ),
+              const Divider(height: 24),
+              _ActionTile(
+                icon: Icons.playlist_add,
+                title: 'Load Repro Queue',
+                subtitle: '5 items for removal test',
+                onTap: isConnected ? onLoadRepro : null,
+              ),
+              _ActionTile(
+                icon: Icons.playlist_remove,
+                title: 'Remove Items',
+                subtitle: 'Remove 2 non-current items',
+                onTap: isConnected ? onRunRepro : null,
+              ),
+              _ActionTile(
+                icon: Icons.add_circle_outline,
+                title: 'Insert & Play',
+                subtitle: 'Insert item before current',
+                onTap: isConnected ? onInsertItem : null,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ActionTile extends StatelessWidget {
+  const _ActionTile({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final enabled = onTap != null;
+
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(8),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
+        child: Row(
+          children: [
+            Icon(
+              icon,
+              size: 20,
+              color: enabled
+                  ? colorScheme.primary
+                  : colorScheme.onSurface.withValues(alpha: 0.38),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w500,
+                      color: enabled
+                          ? null
+                          : colorScheme.onSurface.withValues(alpha: 0.38),
+                    ),
+                  ),
+                  Text(
+                    subtitle,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: enabled
+                          ? colorScheme.onSurfaceVariant
+                          : colorScheme.onSurface.withValues(alpha: 0.38),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Icon(
+              Icons.chevron_right,
+              size: 18,
+              color: enabled
+                  ? colorScheme.onSurfaceVariant
+                  : colorScheme.onSurface.withValues(alpha: 0.38),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Theme Showcase Section
+// ---------------------------------------------------------------------------
+
+class _ThemeShowcaseSection extends StatelessWidget {
+  const _ThemeShowcaseSection({
+    required this.onShowPlayer,
+    required this.onShowTheme,
+  });
+
+  final void Function(
+    BuildContext context,
+    GoogleCastPlayerTexts texts,
+    String title,
+  )
+  onShowPlayer;
+
+  final void Function(
+    BuildContext context,
+    GoogleCastPlayerTheme theme,
+    String title,
+  )
+  onShowTheme;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+      child: Card(
+        clipBehavior: Clip.antiAlias,
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Player Themes',
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  _ThemeChip(
+                    label: 'English',
+                    color: Colors.blue,
+                    onTap: () => onShowPlayer(
+                      context,
+                      const GoogleCastPlayerTexts(),
+                      'English',
+                    ),
+                  ),
+                  _ThemeChip(
+                    label: 'Spanish',
+                    color: Colors.orange,
+                    onTap: () => onShowPlayer(
+                      context,
+                      _MyAppState._spanishTexts,
+                      'Spanish',
+                    ),
+                  ),
+                  _ThemeChip(
+                    label: 'French',
+                    color: Colors.purple,
+                    onTap: () => onShowPlayer(
+                      context,
+                      _MyAppState._frenchTexts,
+                      'French',
+                    ),
+                  ),
+                  _ThemeChip(
+                    label: 'Custom',
+                    color: Colors.teal,
+                    onTap: () => onShowPlayer(
+                      context,
+                      _MyAppState._customBrandingTexts,
+                      'Custom Branding',
+                    ),
+                  ),
+                  _ThemeChip(
+                    label: 'Dark',
+                    color: Colors.grey.shade800,
+                    onTap: () => onShowTheme(
+                      context,
+                      _MyAppState._darkTheme,
+                      'Dark Theme',
+                    ),
+                  ),
+                  _ThemeChip(
+                    label: 'Colorful',
+                    color: Colors.pink,
+                    onTap: () => onShowTheme(
+                      context,
+                      _MyAppState._colorfulTheme,
+                      'Colorful Theme',
+                    ),
+                  ),
+                  _ThemeChip(
+                    label: 'Minimal',
+                    color: Colors.grey,
+                    onTap: () => onShowTheme(
+                      context,
+                      _MyAppState._minimalistTheme,
+                      'Minimal Theme',
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ThemeChip extends StatelessWidget {
+  const _ThemeChip({
+    required this.label,
+    required this.color,
+    required this.onTap,
+  });
+
+  final String label;
+  final Color color;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return ActionChip(
+      avatar: CircleAvatar(
+        backgroundColor: color,
+        radius: 6,
+      ),
+      label: Text(label),
+      onPressed: onTap,
+      side: BorderSide.none,
+      backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Device Card
+// ---------------------------------------------------------------------------
+
+class _DeviceCard extends StatelessWidget {
+  const _DeviceCard({
+    required this.device,
+    required this.onConnect,
+    required this.onDisconnect,
+    required this.onLoadSingle,
+    required this.onLoadHls,
+    required this.onLoadHlsCustom,
+    required this.onPlay,
+  });
+
+  final GoogleCastDevice device;
+  final VoidCallback onConnect;
+  final VoidCallback onDisconnect;
+  final VoidCallback onLoadSingle;
+  final VoidCallback onLoadHls;
+  final VoidCallback onLoadHlsCustom;
+  final VoidCallback onPlay;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return StreamBuilder<GoogleCastSession?>(
+      stream: GoogleCastSessionManager.instance.currentSessionStream,
+      builder: (context, sessionSnapshot) {
+        final currentSession = sessionSnapshot.data;
+        final isConnected =
+            currentSession?.device?.deviceID == device.deviceID;
+
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+          child: Card(
+            elevation: isConnected ? 2 : 0,
+            color: isConnected
+                ? colorScheme.primaryContainer
+                : colorScheme.surfaceContainerLow,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+              side: isConnected
+                  ? BorderSide.none
+                  : BorderSide(
+                      color: colorScheme.outlineVariant,
+                      width: 1,
+                    ),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                children: [
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: CircleAvatar(
+                      backgroundColor: isConnected
+                          ? colorScheme.primary
+                          : colorScheme.surfaceContainerHigh,
+                      child: Icon(
+                        isConnected ? Icons.cast_connected : Icons.cast,
+                        color: isConnected
+                            ? colorScheme.onPrimary
+                            : colorScheme.onSurfaceVariant,
+                        size: 20,
+                      ),
+                    ),
+                    title: Text(
+                      device.friendlyName,
+                      style: TextStyle(
+                        fontWeight: isConnected
+                            ? FontWeight.w600
+                            : FontWeight.w500,
+                      ),
+                    ),
+                    subtitle: Text(
+                      isConnected
+                          ? '${device.modelName ?? ''} · Connected'
+                          : device.modelName ?? '',
+                      style: TextStyle(
+                        color: isConnected
+                            ? colorScheme.onPrimaryContainer
+                            : colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                    trailing: isConnected
+                        ? null
+                        : FilledButton.tonal(
+                            onPressed: onConnect,
+                            child: const Text('Connect'),
+                          ),
+                  ),
+                  if (isConnected) ...[
+                    const Divider(height: 16),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        _DeviceAction(
+                          icon: Icons.play_circle_fill,
+                          label: 'Queue',
+                          color: colorScheme.primary,
+                          onTap: onPlay,
+                        ),
+                        _DeviceAction(
+                          icon: Icons.movie_outlined,
+                          label: 'Single',
+                          color: colorScheme.primary,
+                          onTap: onLoadSingle,
+                        ),
+                        _DeviceAction(
+                          icon: Icons.live_tv_outlined,
+                          label: 'HLS',
+                          color: colorScheme.primary,
+                          onTap: onLoadHls,
+                        ),
+                        _DeviceAction(
+                          icon: Icons.data_object,
+                          label: 'Custom',
+                          color: colorScheme.primary,
+                          onTap: onLoadHlsCustom,
+                        ),
+                        _DeviceAction(
+                          icon: Icons.logout,
+                          label: 'Disconnect',
+                          color: colorScheme.error,
+                          onTap: onDisconnect,
+                        ),
+                      ],
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _DeviceAction extends StatelessWidget {
+  const _DeviceAction({
+    required this.icon,
+    required this.label,
+    required this.color,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String label;
+  final Color color;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(8),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, color: color, size: 22),
+            const SizedBox(height: 2),
+            Text(
+              label,
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                color: color,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Empty State
+// ---------------------------------------------------------------------------
+
+class _EmptyDevicesState extends StatelessWidget {
+  const _EmptyDevicesState();
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(48),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.cast_outlined,
+              size: 48,
+              color: colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'No devices found',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Start discovery to find Chromecast devices on your network.',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
         ),
       ),
     );
