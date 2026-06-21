@@ -17,6 +17,7 @@ import 'package:flutter_chrome_cast/common.dart';
 import 'dart:async';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(const MyApp());
 }
 
@@ -35,15 +36,6 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    _queueItemsSubscription = GoogleCastRemoteMediaClient
-        .instance
-        .queueItemsStream
-        .listen((items) {
-          final ids = items.map((e) => e.itemId).toList();
-          debugPrint(
-            '[Example][Queue] stream update - count=${items.length}, ids=$ids',
-          );
-        });
     initPlatformState();
   }
 
@@ -65,6 +57,16 @@ class _MyAppState extends State<MyApp> {
       stopCastingOnAppTerminated: false,
     );
     GoogleCastContext.instance.setSharedInstanceWithOptions(options);
+
+    _queueItemsSubscription = GoogleCastRemoteMediaClient
+        .instance
+        .queueItemsStream
+        .listen((items) {
+          final ids = items.map((e) => e.itemId).toList();
+          debugPrint(
+            '[Example][Queue] stream update - count=${items.length}, ids=$ids',
+          );
+        });
 
     // Check initial discovery state for iOS
     if (Platform.isIOS) {
