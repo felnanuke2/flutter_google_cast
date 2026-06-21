@@ -56,6 +56,42 @@ class LiveSeekableRange {
   bool isLiveDone;
 }
 
+class MediaImagePigeon {
+  MediaImagePigeon({required this.url, this.width, this.height});
+
+  String url;
+  int? width;
+  int? height;
+}
+
+class MediaMetadataPigeon {
+  MediaMetadataPigeon({
+    required this.metadataType,
+    this.title,
+    this.subtitle,
+    this.studio,
+    this.artist,
+    this.albumName,
+    this.seriesTitle,
+    this.season,
+    this.episode,
+    this.releaseDate,
+    this.images,
+  });
+
+  int metadataType;
+  String? title;
+  String? subtitle;
+  String? studio;
+  String? artist;
+  String? albumName;
+  String? seriesTitle;
+  int? season;
+  int? episode;
+  String? releaseDate;
+  List<MediaImagePigeon?>? images;
+}
+
 /// Media information including content and track details
 class MediaInfo {
   MediaInfo({
@@ -66,6 +102,7 @@ class MediaInfo {
     required this.duration,
     this.customData,
     this.tracks,
+    this.metadata,
   });
 
   String contentId;
@@ -75,6 +112,7 @@ class MediaInfo {
   int duration;
   Map<String, Object?>? customData;
   List<MediaTrack?>? tracks;
+  MediaMetadataPigeon? metadata;
 }
 
 /// Volume information

@@ -175,6 +175,148 @@ class LiveSeekableRange {
   int get hashCode => Object.hashAll(_toList());
 }
 
+class MediaImagePigeon {
+  MediaImagePigeon({
+    required this.url,
+    this.width,
+    this.height,
+  });
+
+  String url;
+
+  int? width;
+
+  int? height;
+
+  List<Object?> _toList() {
+    return <Object?>[
+      url,
+      width,
+      height,
+    ];
+  }
+
+  Object encode() {
+    return _toList();
+  }
+
+  static MediaImagePigeon decode(Object result) {
+    result as List<Object?>;
+    return MediaImagePigeon(
+      url: result[0]! as String,
+      width: result[1] as int?,
+      height: result[2] as int?,
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! MediaImagePigeon || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(encode(), other.encode());
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => Object.hashAll(_toList());
+}
+
+class MediaMetadataPigeon {
+  MediaMetadataPigeon({
+    required this.metadataType,
+    this.title,
+    this.subtitle,
+    this.studio,
+    this.artist,
+    this.albumName,
+    this.seriesTitle,
+    this.season,
+    this.episode,
+    this.releaseDate,
+    this.images,
+  });
+
+  int metadataType;
+
+  String? title;
+
+  String? subtitle;
+
+  String? studio;
+
+  String? artist;
+
+  String? albumName;
+
+  String? seriesTitle;
+
+  int? season;
+
+  int? episode;
+
+  String? releaseDate;
+
+  List<MediaImagePigeon?>? images;
+
+  List<Object?> _toList() {
+    return <Object?>[
+      metadataType,
+      title,
+      subtitle,
+      studio,
+      artist,
+      albumName,
+      seriesTitle,
+      season,
+      episode,
+      releaseDate,
+      images,
+    ];
+  }
+
+  Object encode() {
+    return _toList();
+  }
+
+  static MediaMetadataPigeon decode(Object result) {
+    result as List<Object?>;
+    return MediaMetadataPigeon(
+      metadataType: result[0]! as int,
+      title: result[1] as String?,
+      subtitle: result[2] as String?,
+      studio: result[3] as String?,
+      artist: result[4] as String?,
+      albumName: result[5] as String?,
+      seriesTitle: result[6] as String?,
+      season: result[7] as int?,
+      episode: result[8] as int?,
+      releaseDate: result[9] as String?,
+      images: (result[10] as List<Object?>?)?.cast<MediaImagePigeon?>(),
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! MediaMetadataPigeon || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(encode(), other.encode());
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => Object.hashAll(_toList());
+}
+
 /// Media information including content and track details
 class MediaInfo {
   MediaInfo({
@@ -185,6 +327,7 @@ class MediaInfo {
     required this.duration,
     this.customData,
     this.tracks,
+    this.metadata,
   });
 
   String contentId;
@@ -201,6 +344,8 @@ class MediaInfo {
 
   List<MediaTrack?>? tracks;
 
+  MediaMetadataPigeon? metadata;
+
   List<Object?> _toList() {
     return <Object?>[
       contentId,
@@ -210,6 +355,7 @@ class MediaInfo {
       duration,
       customData,
       tracks,
+      metadata,
     ];
   }
 
@@ -228,6 +374,7 @@ class MediaInfo {
       customData: (result[5] as Map<Object?, Object?>?)
           ?.cast<String, Object?>(),
       tracks: (result[6] as List<Object?>?)?.cast<MediaTrack?>(),
+      metadata: result[7] as MediaMetadataPigeon?,
     );
   }
 
@@ -1030,6 +1177,12 @@ class _PigeonCodec extends StandardMessageCodec {
     } else if (value is TextTrackStylePigeon) {
       buffer.putUint8(146);
       writeValue(buffer, value.encode());
+    } else if (value is MediaImagePigeon) {
+      buffer.putUint8(147);
+      writeValue(buffer, value.encode());
+    } else if (value is MediaMetadataPigeon) {
+      buffer.putUint8(148);
+      writeValue(buffer, value.encode());
     } else {
       super.writeValue(buffer, value);
     }
@@ -1076,6 +1229,10 @@ class _PigeonCodec extends StandardMessageCodec {
         return PlayerPositionUpdate.decode(readValue(buffer)!);
       case 146:
         return TextTrackStylePigeon.decode(readValue(buffer)!);
+      case 147:
+        return MediaImagePigeon.decode(readValue(buffer)!);
+      case 148:
+        return MediaMetadataPigeon.decode(readValue(buffer)!);
       default:
         return super.readValueOfType(type, buffer);
     }

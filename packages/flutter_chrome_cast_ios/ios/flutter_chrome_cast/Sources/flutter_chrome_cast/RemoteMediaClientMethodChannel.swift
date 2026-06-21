@@ -542,7 +542,62 @@ class RemoteMediaClientMethodChannel :UIResponder, FlutterPlugin, GCKRemoteMedia
                     name: track.name ?? "",
                     language: track.languageCode ?? ""
                 )
-            }
+            },
+            metadata: toPigeonMetadata(info.metadata)
+        )
+    }
+
+    private func toPigeonMetadata(_ metadata: GCKMediaMetadata?) -> MediaMetadataPigeon? {
+        guard let metadata = metadata else { return nil }
+
+        let images = metadata.images()?.compactMap { image -> MediaImagePigeon? in
+            guard let url = image.url else { return nil }
+            return MediaImagePigeon(
+                url: url.absoluteString,
+                width: image.width > 0 ? Int64(image.width) : nil,
+                height: image.height > 0 ? Int64(image.height) : nil
+            )
+        }
+
+        let title = metadata.string(forKey: kGCKMetadataKeyTitle)
+        let subtitle = metadata.string(forKey: kGCKMetadataKeySubtitle)
+        let studio = metadata.string(forKey: kGCKMetadataKeyStudio)
+        let artist = metadata.string(forKey: kGCKMetadataKeyArtist)
+        let albumName = metadata.string(forKey: kGCKMetadataKeyAlbumTitle)
+        let seriesTitle = metadata.string(forKey: kGCKMetadataKeySeriesTitle)
+
+        var season: Int64? = nil
+        if metadata.isKey(kGCKMetadataKeySeasonNumber) {
+            let val = metadata.integer(forKey: kGCKMetadataKeySeasonNumber)
+            if val != NSNotFound { season = Int64(val) }
+        }
+
+        var episode: Int64? = nil
+        if metadata.isKey(kGCKMetadataKeyEpisodeNumber) {
+            let val = metadata.integer(forKey: kGCKMetadataKeyEpisodeNumber)
+            if val != NSNotFound { episode = Int64(val) }
+        }
+
+        var releaseDate: String? = nil
+        if let date = metadata.date(forKey: kGCKMetadataKeyReleaseDate) {
+            let formatter = DateFormatter()
+            formatter.dateFormat = "yyyy-MM-dd"
+            formatter.locale = Locale(identifier: "en_US_POSIX")
+            releaseDate = formatter.string(from: date)
+        }
+
+        return MediaMetadataPigeon(
+            metadataType: Int64(metadata.metadataType),
+            title: title,
+            subtitle: subtitle,
+            studio: studio,
+            artist: artist,
+            albumName: albumName,
+            seriesTitle: seriesTitle,
+            season: season,
+            episode: episode,
+            releaseDate: releaseDate,
+            images: images
         )
     }
 

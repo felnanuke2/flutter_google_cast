@@ -14,10 +14,14 @@ import com.felnanuke.google_cast.pigeon.SeekOptionPigeon
 import com.felnanuke.google_cast.pigeon.Volume
 import com.google.android.gms.cast.MediaInfo as CastMediaInfo
 import com.google.android.gms.cast.MediaLoadRequestData
+import com.google.android.gms.cast.MediaMetadata
 import com.google.android.gms.cast.MediaQueueItem as CastMediaQueueItem
 import com.google.android.gms.cast.MediaSeekOptions
 import com.google.android.gms.cast.MediaStatus as CastMediaStatus
 import com.google.android.gms.cast.MediaTrack as CastMediaTrack
+import com.google.android.gms.cast.images.WebImage
+import com.felnanuke.google_cast.pigeon.MediaImagePigeon
+import com.felnanuke.google_cast.pigeon.MediaMetadataPigeon
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -183,7 +187,51 @@ fun CastMediaInfo.toPigeonMediaInfo(): MediaInfo {
         contentUrl = contentUrl ?: "",
         duration = streamDuration,
         customData = customData?.toMapRecursive(),
-        tracks = mediaTracks?.map { it.toPigeonMediaTrack() }
+        tracks = mediaTracks?.map { it.toPigeonMediaTrack() },
+        metadata = metadata?.toPigeonMetadata()
+    )
+}
+
+fun MediaMetadata.toPigeonMetadata(): MediaMetadataPigeon {
+    val images = images?.map { webImage: WebImage ->
+        MediaImagePigeon(
+            url = webImage.url?.toString() ?: "",
+            width = if (webImage.width > 0) webImage.width.toLong() else null,
+            height = if (webImage.height > 0) webImage.height.toLong() else null
+        )
+    }
+
+    val title = getString(MediaMetadata.KEY_TITLE)
+    val subtitle = getString(MediaMetadata.KEY_SUBTITLE)
+    val studio = getString(MediaMetadata.KEY_STUDIO)
+    val artist = getString(MediaMetadata.KEY_ARTIST)
+    val albumName = getString(MediaMetadata.KEY_ALBUM_TITLE)
+    val seriesTitle = getString(MediaMetadata.KEY_SERIES_TITLE)
+
+    val season = if (containsKey(MediaMetadata.KEY_SEASON_NUMBER)) {
+        getInt(MediaMetadata.KEY_SEASON_NUMBER)?.toLong()
+    } else null
+
+    val episode = if (containsKey(MediaMetadata.KEY_EPISODE_NUMBER)) {
+        getInt(MediaMetadata.KEY_EPISODE_NUMBER)?.toLong()
+    } else null
+
+    val releaseDate = getDate(MediaMetadata.KEY_RELEASE_DATE)?.let {
+        java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US).format(it)
+    }
+
+    return MediaMetadataPigeon(
+        metadataType = metadataType.toLong(),
+        title = title,
+        subtitle = subtitle,
+        studio = studio,
+        artist = artist,
+        albumName = albumName,
+        seriesTitle = seriesTitle,
+        season = season,
+        episode = episode,
+        releaseDate = releaseDate,
+        images = images
     )
 }
 

@@ -185,6 +185,96 @@ data class LiveSeekableRange (
   override fun hashCode(): Int = toList().hashCode()
 }
 
+data class MediaImagePigeon (
+  val url: String,
+  val width: Long? = null,
+  val height: Long? = null
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): MediaImagePigeon {
+      val url = pigeonVar_list[0] as String
+      val width = pigeonVar_list[1] as Long?
+      val height = pigeonVar_list[2] as Long?
+      return MediaImagePigeon(url, width, height)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      url,
+      width,
+      height,
+    )
+  }
+  override fun equals(other: Any?): Boolean {
+    if (other !is MediaImagePigeon) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    return RemoteMediaClientPigeonPigeonUtils.deepEquals(toList(), other.toList())  }
+
+  override fun hashCode(): Int = toList().hashCode()
+}
+
+data class MediaMetadataPigeon (
+  val metadataType: Long,
+  val title: String? = null,
+  val subtitle: String? = null,
+  val studio: String? = null,
+  val artist: String? = null,
+  val albumName: String? = null,
+  val seriesTitle: String? = null,
+  val season: Long? = null,
+  val episode: Long? = null,
+  val releaseDate: String? = null,
+  val images: List<MediaImagePigeon?>? = null
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): MediaMetadataPigeon {
+      val metadataType = pigeonVar_list[0] as Long
+      val title = pigeonVar_list[1] as String?
+      val subtitle = pigeonVar_list[2] as String?
+      val studio = pigeonVar_list[3] as String?
+      val artist = pigeonVar_list[4] as String?
+      val albumName = pigeonVar_list[5] as String?
+      val seriesTitle = pigeonVar_list[6] as String?
+      val season = pigeonVar_list[7] as Long?
+      val episode = pigeonVar_list[8] as Long?
+      val releaseDate = pigeonVar_list[9] as String?
+      val images = pigeonVar_list[10] as List<MediaImagePigeon?>?
+      return MediaMetadataPigeon(metadataType, title, subtitle, studio, artist, albumName, seriesTitle, season, episode, releaseDate, images)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      metadataType,
+      title,
+      subtitle,
+      studio,
+      artist,
+      albumName,
+      seriesTitle,
+      season,
+      episode,
+      releaseDate,
+      images,
+    )
+  }
+  override fun equals(other: Any?): Boolean {
+    if (other !is MediaMetadataPigeon) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    return RemoteMediaClientPigeonPigeonUtils.deepEquals(toList(), other.toList())  }
+
+  override fun hashCode(): Int = toList().hashCode()
+}
+
 /**
  * Media information including content and track details
  *
@@ -197,7 +287,8 @@ data class MediaInfo (
   val contentUrl: String,
   val duration: Long,
   val customData: Map<String, Any?>? = null,
-  val tracks: List<MediaTrack?>? = null
+  val tracks: List<MediaTrack?>? = null,
+  val metadata: MediaMetadataPigeon? = null
 )
  {
   companion object {
@@ -209,7 +300,8 @@ data class MediaInfo (
       val duration = pigeonVar_list[4] as Long
       val customData = pigeonVar_list[5] as Map<String, Any?>?
       val tracks = pigeonVar_list[6] as List<MediaTrack?>?
-      return MediaInfo(contentId, contentType, streamType, contentUrl, duration, customData, tracks)
+      val metadata = pigeonVar_list[7] as MediaMetadataPigeon?
+      return MediaInfo(contentId, contentType, streamType, contentUrl, duration, customData, tracks, metadata)
     }
   }
   fun toList(): List<Any?> {
@@ -221,6 +313,7 @@ data class MediaInfo (
       duration,
       customData,
       tracks,
+      metadata,
     )
   }
   override fun equals(other: Any?): Boolean {
@@ -842,6 +935,16 @@ private open class RemoteMediaClientPigeonPigeonCodec : StandardMessageCodec() {
           TextTrackStylePigeon.fromList(it)
         }
       }
+      147.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          MediaImagePigeon.fromList(it)
+        }
+      }
+      148.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          MediaMetadataPigeon.fromList(it)
+        }
+      }
       else -> super.readValueOfType(type, buffer)
     }
   }
@@ -917,6 +1020,14 @@ private open class RemoteMediaClientPigeonPigeonCodec : StandardMessageCodec() {
       }
       is TextTrackStylePigeon -> {
         stream.write(146)
+        writeValue(stream, value.toList())
+      }
+      is MediaImagePigeon -> {
+        stream.write(147)
+        writeValue(stream, value.toList())
+      }
+      is MediaMetadataPigeon -> {
+        stream.write(148)
         writeValue(stream, value.toList())
       }
       else -> super.writeValue(stream, value)

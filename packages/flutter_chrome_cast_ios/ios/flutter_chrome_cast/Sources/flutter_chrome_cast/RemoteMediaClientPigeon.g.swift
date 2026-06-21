@@ -217,6 +217,102 @@ struct LiveSeekableRange: Hashable {
   }
 }
 
+struct MediaImagePigeon: Hashable {
+  var url: String
+  var width: Int64? = nil
+  var height: Int64? = nil
+
+
+  // swift-format-ignore: AlwaysUseLowerCamelCase
+  static func fromList(_ pigeonVar_list: [Any?]) -> MediaImagePigeon? {
+    let url = pigeonVar_list[0] as! String
+    let width: Int64? = nilOrValue(pigeonVar_list[1])
+    let height: Int64? = nilOrValue(pigeonVar_list[2])
+
+    return MediaImagePigeon(
+      url: url,
+      width: width,
+      height: height
+    )
+  }
+  func toList() -> [Any?] {
+    return [
+      url,
+      width,
+      height,
+    ]
+  }
+  static func == (lhs: MediaImagePigeon, rhs: MediaImagePigeon) -> Bool {
+    return deepEqualsRemoteMediaClientPigeon(lhs.toList(), rhs.toList())  }
+  func hash(into hasher: inout Hasher) {
+    deepHashRemoteMediaClientPigeon(value: toList(), hasher: &hasher)
+  }
+}
+
+struct MediaMetadataPigeon: Hashable {
+  var metadataType: Int64
+  var title: String? = nil
+  var subtitle: String? = nil
+  var studio: String? = nil
+  var artist: String? = nil
+  var albumName: String? = nil
+  var seriesTitle: String? = nil
+  var season: Int64? = nil
+  var episode: Int64? = nil
+  var releaseDate: String? = nil
+  var images: [MediaImagePigeon?]? = nil
+
+
+  // swift-format-ignore: AlwaysUseLowerCamelCase
+  static func fromList(_ pigeonVar_list: [Any?]) -> MediaMetadataPigeon? {
+    let metadataType = pigeonVar_list[0] as! Int64
+    let title: String? = nilOrValue(pigeonVar_list[1])
+    let subtitle: String? = nilOrValue(pigeonVar_list[2])
+    let studio: String? = nilOrValue(pigeonVar_list[3])
+    let artist: String? = nilOrValue(pigeonVar_list[4])
+    let albumName: String? = nilOrValue(pigeonVar_list[5])
+    let seriesTitle: String? = nilOrValue(pigeonVar_list[6])
+    let season: Int64? = nilOrValue(pigeonVar_list[7])
+    let episode: Int64? = nilOrValue(pigeonVar_list[8])
+    let releaseDate: String? = nilOrValue(pigeonVar_list[9])
+    let images: [MediaImagePigeon?]? = nilOrValue(pigeonVar_list[10])
+
+    return MediaMetadataPigeon(
+      metadataType: metadataType,
+      title: title,
+      subtitle: subtitle,
+      studio: studio,
+      artist: artist,
+      albumName: albumName,
+      seriesTitle: seriesTitle,
+      season: season,
+      episode: episode,
+      releaseDate: releaseDate,
+      images: images
+    )
+  }
+  func toList() -> [Any?] {
+    return [
+      metadataType,
+      title,
+      subtitle,
+      studio,
+      artist,
+      albumName,
+      seriesTitle,
+      season,
+      episode,
+      releaseDate,
+      images,
+    ]
+  }
+  static func == (lhs: MediaMetadataPigeon, rhs: MediaMetadataPigeon) -> Bool {
+    return deepEqualsRemoteMediaClientPigeon(lhs.toList(), rhs.toList())  }
+  func hash(into hasher: inout Hasher) {
+    deepHashRemoteMediaClientPigeon(value: toList(), hasher: &hasher)
+  }
+}
+
 /// Media information including content and track details
 ///
 /// Generated class from Pigeon that represents data sent in messages.
@@ -228,6 +324,7 @@ struct MediaInfo: Hashable {
   var duration: Int64
   var customData: [String: Any?]? = nil
   var tracks: [MediaTrack?]? = nil
+  var metadata: MediaMetadataPigeon? = nil
 
 
   // swift-format-ignore: AlwaysUseLowerCamelCase
@@ -239,6 +336,7 @@ struct MediaInfo: Hashable {
     let duration = pigeonVar_list[4] as! Int64
     let customData: [String: Any?]? = nilOrValue(pigeonVar_list[5])
     let tracks: [MediaTrack?]? = nilOrValue(pigeonVar_list[6])
+    let metadata: MediaMetadataPigeon? = nilOrValue(pigeonVar_list[7])
 
     return MediaInfo(
       contentId: contentId,
@@ -247,7 +345,8 @@ struct MediaInfo: Hashable {
       contentUrl: contentUrl,
       duration: duration,
       customData: customData,
-      tracks: tracks
+      tracks: tracks,
+      metadata: metadata
     )
   }
   func toList() -> [Any?] {
@@ -259,6 +358,7 @@ struct MediaInfo: Hashable {
       duration,
       customData,
       tracks,
+      metadata,
     ]
   }
   static func == (lhs: MediaInfo, rhs: MediaInfo) -> Bool {
@@ -828,6 +928,10 @@ private class RemoteMediaClientPigeonPigeonCodecReader: FlutterStandardReader {
       return PlayerPositionUpdate.fromList(self.readValue() as! [Any?])
     case 146:
       return TextTrackStylePigeon.fromList(self.readValue() as! [Any?])
+    case 147:
+      return MediaImagePigeon.fromList(self.readValue() as! [Any?])
+    case 148:
+      return MediaMetadataPigeon.fromList(self.readValue() as! [Any?])
     default:
       return super.readValue(ofType: type)
     }
@@ -889,6 +993,12 @@ private class RemoteMediaClientPigeonPigeonCodecWriter: FlutterStandardWriter {
       super.writeValue(value.toList())
     } else if let value = value as? TextTrackStylePigeon {
       super.writeByte(146)
+      super.writeValue(value.toList())
+    } else if let value = value as? MediaImagePigeon {
+      super.writeByte(147)
+      super.writeValue(value.toList())
+    } else if let value = value as? MediaMetadataPigeon {
+      super.writeByte(148)
       super.writeValue(value.toList())
     } else {
       super.writeValue(value)

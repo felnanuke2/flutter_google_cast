@@ -467,7 +467,72 @@ class GoogleCastRemoteMediaClientIOSMethodChannel
             ),
           )
           .toList(),
+      metadata: _toMediaMetadata(media.metadata),
     );
+  }
+
+  GoogleCastMediaMetadata? _toMediaMetadata(MediaMetadataPigeon? meta) {
+    if (meta == null) return null;
+
+    final images = meta.images
+        ?.whereType<MediaImagePigeon>()
+        .map(
+          (img) => GoogleCastImage(
+            url: Uri.parse(img.url),
+            width: img.width?.toInt(),
+            height: img.height?.toInt(),
+          ),
+        )
+        .toList();
+
+    final type = GoogleCastMediaMetadataType.fromMap(meta.metadataType.toInt());
+
+    switch (type) {
+      case GoogleCastMediaMetadataType.movieMediaMetadata:
+        return GoogleCastMovieMediaMetadata(
+          title: meta.title,
+          subtitle: meta.subtitle,
+          studio: meta.studio,
+          images: images,
+          releaseDate: meta.releaseDate != null
+              ? DateTime.tryParse(meta.releaseDate!)
+              : null,
+        );
+      case GoogleCastMediaMetadataType.tvShowMediaMetadata:
+        return GoogleCastTvShowMediaMetadata(
+          seriesTitle: meta.seriesTitle,
+          season: meta.season?.toInt(),
+          episode: meta.episode?.toInt(),
+          images: images,
+          originalAirDate: meta.releaseDate != null
+              ? DateTime.tryParse(meta.releaseDate!)
+              : null,
+        );
+      case GoogleCastMediaMetadataType.musicTrackMediaMetadata:
+        return GoogleCastMusicMediaMetadata(
+          title: meta.title,
+          albumName: meta.albumName,
+          artist: meta.artist,
+          images: images,
+          releaseDate: meta.releaseDate != null
+              ? DateTime.tryParse(meta.releaseDate!)
+              : null,
+        );
+      case GoogleCastMediaMetadataType.photoMediaMetadata:
+        return GoogleCastPhotoMediaMetadata(
+          title: meta.title,
+          artist: meta.artist,
+        );
+      case GoogleCastMediaMetadataType.genericMediaMetadata:
+        return GoogleCastGenericMediaMetadata(
+          title: meta.title,
+          subtitle: meta.subtitle,
+          images: images,
+          releaseDate: meta.releaseDate != null
+              ? DateTime.tryParse(meta.releaseDate!)
+              : null,
+        );
+    }
   }
 
   CastMediaPlayerState _playerStateFromString(String value) {
