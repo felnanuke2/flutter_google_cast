@@ -56,8 +56,53 @@ class GoogleCastMediaInfo {
                 builder.setCustomData(JSONObject(customData))
             }
 
+            // Stream duration: Flutter sends seconds, the SDK expects milliseconds.
+            (map["duration"] as? Number)?.let {
+                builder.setStreamDuration((it.toDouble() * 1000).toLong())
+            }
+
+            // HLS segment formats. Required for fragmented-MP4 HLS (e.g. PeerTube
+            // VOD) to play on the Default Media Receiver: without the hint the
+            // receiver cannot demux fMP4 segments and stays stuck in LOADING.
+            (map["hlsSegmentFormat"] as? String)?.let { name ->
+                hlsSegmentFormatFromName(name)?.let { builder.setHlsSegmentFormat(it) }
+            }
+            (map["hlsVideoSegmentFormat"] as? String)?.let { name ->
+                hlsVideoSegmentFormatFromName(name)?.let {
+                    builder.setHlsVideoSegmentFormat(it)
+                }
+            }
+
             return builder.build()
         }
+
+        /**
+         * Maps the Flutter `CastHlsSegmentFormat` enum name to the string the
+         * Cast SDK / receiver expects (`MediaInfo.Builder.setHlsSegmentFormat`
+         * takes a String in play-services-cast). Returns null for unknown /
+         * `none` so the field is simply left unset.
+         */
+        private fun hlsSegmentFormatFromName(name: String): String? = when (name) {
+            "aac" -> "aac"
+            "ac3" -> "ac3"
+            "mp3" -> "mp3"
+            "ts" -> "ts"
+            "tsAac" -> "ts_aac"
+            "eAc3" -> "e-ac3"
+            "fmp4" -> "fmp4"
+            else -> null
+        }
+
+        /**
+         * Maps the Flutter `HlsVideoSegmentFormat` enum name to the string the
+         * Cast SDK / receiver expects.
+         */
+        private fun hlsVideoSegmentFormatFromName(name: String): String? =
+            when (name) {
+                "mpeg2Ts" -> "mpeg2_ts"
+                "fmp4" -> "fmp4"
+                else -> null
+            }
     }
 }
 
