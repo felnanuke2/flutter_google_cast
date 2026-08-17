@@ -5,9 +5,14 @@
 # This plugin supports both CocoaPods (this file) and Swift Package Manager (Package.swift).
 # For SPM support, see flutter_chrome_cast/Package.swift.
 #
+# arm64 iOS Simulator:
+# - Do NOT set EXCLUDED_ARCHS for iphonesimulator (required for Apple Silicon / iOS 26+ sims).
+# - Depend on google-cast-sdk >= 4.8.4, which ships an XCFramework with ios-arm64 simulator slices.
+# - Do NOT use google-cast-sdk-no-bluetooth; that pod excludes arm64 simulator architectures.
+#
 Pod::Spec.new do |s|
   s.name             = 'flutter_chrome_cast'
-  s.version          = '1.4.1'
+  s.version          = '1.4.7'
   s.summary          = 'A comprehensive Flutter plugin for Google Cast SDK integration on iOS and Android.'
   s.description      = <<-DESC
 FlutterGoogleCast provides seamless integration with the Google Cast SDK for Flutter applications.
@@ -25,15 +30,18 @@ This plugin supports both CocoaPods and Swift Package Manager (SPM) for iOS depe
   s.dependency 'Flutter'
   s.platform = :ios, '15.0'
   s.ios.deployment_target  = '15.0'
-  s.dependency 'google-cast-sdk', '~> 4.8'
+  # 4.8.4+ XCFramework includes arm64 simulator; required for Apple Silicon iOS 26+ simulators.
+  s.dependency 'google-cast-sdk', '~> 4.8.4'
   s.dependency 'Protobuf'
   s.static_framework = true
 
-  s.pod_target_xcconfig = { 
+  # Intentionally no EXCLUDED_ARCHS — arm64 simulator must remain enabled.
+  s.pod_target_xcconfig = {
     'ENABLE_TESTING_SEARCH_PATHS' => 'YES',
-    'DEFINES_MODULE' => 'YES'
+    'DEFINES_MODULE' => 'YES',
+    'ONLY_ACTIVE_ARCH[sdk=iphonesimulator*]' => 'YES'
   }
-  s.user_target_xcconfig = { 
+  s.user_target_xcconfig = {
     'ENABLE_TESTING_SEARCH_PATHS' => 'YES'
   }
 

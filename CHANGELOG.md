@@ -1,3 +1,13 @@
+## 1.4.7 - iOS arm64 Simulator Support
+### 🔧 Platform Improvements
+- **Apple Silicon / iOS 26+ simulators**: Ensured the plugin no longer excludes `arm64` for `iphonesimulator`.
+  - CocoaPods dependency pinned to `google-cast-sdk` `~> 4.8.4` (XCFramework with arm64 simulator slices).
+  - Removed reliance on `google-cast-sdk-no-bluetooth`, which forces `EXCLUDED_ARCHS[sdk=iphonesimulator*]=arm64`.
+  - SPM Google Cast wrapper bumped to `4.8.4+` for the same XCFramework slices.
+
+### 🔧 Notes
+- Apps that previously cached CocoaPods artifacts for `google-cast-sdk-no-bluetooth` should clean `ios/Pods` and re-run `flutter pub get` / `pod install` so Flutter stops writing `EXCLUDED_ARCHS=arm64` into `Generated.xcconfig`.
+
 ## 1.4.6 - iOS Force Session Reset
 ### New Features
 - Added `resetSession()` to force a clean iOS Cast session reset after interrupted or stuck connections.
