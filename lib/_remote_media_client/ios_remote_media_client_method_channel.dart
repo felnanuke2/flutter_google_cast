@@ -186,12 +186,8 @@ class GoogleCastRemoteMediaClientIOSMethodChannel
       final converged =
           (duration - expected).abs() <= _pendingLoadGuardTolerance;
       if (!sessionChanged || !converged) {
-        debugPrint(
-            '[Flutter] onUpdatePlayerPosition blocked: pos=$duration expected=$expected sessionChanged=$sessionChanged');
         return;
       }
-      debugPrint(
-          '[Flutter] onUpdatePlayerPosition guard released at pos=$duration');
       _releasePendingLoadGuard();
     }
     _playerPositionStreamController.add(duration);
@@ -210,8 +206,6 @@ class GoogleCastRemoteMediaClientIOSMethodChannel
     _playerPositionStreamController.add(expectedPosition);
     _pendingLoadGuardTimer?.cancel();
     _pendingLoadGuardTimer = Timer(_pendingLoadGuardTimeout, () {
-      debugPrint(
-          '[Flutter] onUpdatePlayerPosition guard timed out, releasing');
       _releasePendingLoadGuard();
     });
   }
