@@ -94,7 +94,18 @@ extension GCKMediaMetadata {
         for mapValue in mutableDict{
             switch mapValue.value {
             case let stringValue as String:
-                metadata.setString(stringValue, forKey: mapValue.key)
+                // Standard fields must use Google's metadata keys — a raw
+                // "title" is stored as a custom field and the receiver, which
+                // reads kGCKMetadataKeyTitle, never displays it. Anything not
+                // recognised keeps its own key so custom metadata still works.
+                switch mapValue.key {
+                case "title":
+                    metadata.setString(stringValue, forKey: kGCKMetadataKeyTitle)
+                case "subtitle":
+                    metadata.setString(stringValue, forKey: kGCKMetadataKeySubtitle)
+                default:
+                    metadata.setString(stringValue, forKey: mapValue.key)
+                }
             case let intValue as Int:
                 metadata.setInteger(intValue, forKey: mapValue.key)
             case let doubleValue as Double:
