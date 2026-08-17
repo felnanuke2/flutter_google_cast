@@ -1,6 +1,10 @@
-## 1.4.8 - iOS Stale Position After Content Switch
+## 1.4.8 - Media Metadata, HLS and Content ID Fixes
 ### 🐛 Bug Fixes
 - **iOS stale playback position after `loadMedia`**: Fixed `playerPosition` briefly showing the previous content's offset right after switching media. Position ticks are now suppressed until the SDK reports a new `mediaSessionID` and `approximateStreamPosition()` converges to the requested start time (±5 s tolerance), with a 10 s safety timeout.
+- **iOS media metadata not shown on receiver (#83)**: `GCKMediaMetadata` entries were written under the raw Dart key names (e.g. `title`) instead of the canonical Cast keys (e.g. `com.google.cast.metadata.TITLE`), so the receiver displayed no title/subtitle. Metadata is now stored under the canonical keys; unrecognized keys keep their own name so custom metadata is unaffected.
+- **iOS standard metadata keys mapped to canonical Cast keys (#84)**: Extended the canonical key mapping to all standard fields — artist, albumArtist, albumName, composer, studio, seriesTitle, season, episode, trackNumber, discNumber, location, latitude, longitude, width and height — and accept `creationDateTime` so photo metadata creation dates are no longer dropped.
+- **Android HLS streams stuck in LOADING (#78)**: Android ignored `hlsSegmentFormat`/`hlsVideoSegmentFormat` (already handled on iOS), leaving fragmented-MP4 HLS streams stuck loading on the Default Media Receiver. Both fields are now forwarded to `MediaInfo`, and stream duration is converted from seconds to milliseconds.
+- **iOS empty `contentID` in media status**: The contentID passed from Flutter is now applied to `GCKMediaInformationBuilder` on load, and cached so it can be substituted into media status updates when the Default Media Receiver does not echo it back. Falls back to `contentURL` when no contentID is available at all, matching Android behaviour.
 
 ### 🔧 Notes
 - No public API changes.
