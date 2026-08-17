@@ -11,6 +11,30 @@ import GoogleCast
 
 
 extension GCKMediaMetadata {
+    /// Maps raw Dart keys to Google Cast canonical metadata keys. Standard
+    /// fields sent under their JSON names would be stored as custom fields,
+    /// which receivers never display. Unrecognised keys keep their own name
+    /// so custom metadata still works.
+    private static let canonicalKeys: [String: String] = [
+        "title": kGCKMetadataKeyTitle,
+        "subtitle": kGCKMetadataKeySubtitle,
+        "artist": kGCKMetadataKeyArtist,
+        "albumArtist": kGCKMetadataKeyAlbumArtist,
+        "albumName": kGCKMetadataKeyAlbumTitle,
+        "composer": kGCKMetadataKeyComposer,
+        "studio": kGCKMetadataKeyStudio,
+        "seriesTitle": kGCKMetadataKeySeriesTitle,
+        "season": kGCKMetadataKeySeasonNumber,
+        "episode": kGCKMetadataKeyEpisodeNumber,
+        "trackNumber": kGCKMetadataKeyTrackNumber,
+        "discNumber": kGCKMetadataKeyDiscNumber,
+        "location": kGCKMetadataKeyLocationName,
+        "latitude": kGCKMetadataKeyLocationLatitude,
+        "longitude": kGCKMetadataKeyLocationLongitude,
+        "width": kGCKMetadataKeyWidth,
+        "height": kGCKMetadataKeyHeight,
+    ]
+
     func toMap() -> Dictionary<String,Any?> {
         var dict = Dictionary<String,Any?>()
         dict["type"] = self.metadataType.rawValue
@@ -92,24 +116,14 @@ extension GCKMediaMetadata {
         
       
         for mapValue in mutableDict{
+            let key = GCKMediaMetadata.canonicalKeys[mapValue.key] ?? mapValue.key
             switch mapValue.value {
             case let stringValue as String:
-                // Standard fields must use Google's metadata keys — a raw
-                // "title" is stored as a custom field and the receiver, which
-                // reads kGCKMetadataKeyTitle, never displays it. Anything not
-                // recognised keeps its own key so custom metadata still works.
-                switch mapValue.key {
-                case "title":
-                    metadata.setString(stringValue, forKey: kGCKMetadataKeyTitle)
-                case "subtitle":
-                    metadata.setString(stringValue, forKey: kGCKMetadataKeySubtitle)
-                default:
-                    metadata.setString(stringValue, forKey: mapValue.key)
-                }
+                metadata.setString(stringValue, forKey: key)
             case let intValue as Int:
-                metadata.setInteger(intValue, forKey: mapValue.key)
+                metadata.setInteger(intValue, forKey: key)
             case let doubleValue as Double:
-                 metadata.setDouble(doubleValue, forKey: mapValue.key)
+                 metadata.setDouble(doubleValue, forKey: key)
             default:
                 break
             }
@@ -121,7 +135,7 @@ extension GCKMediaMetadata {
                     metadata.setDate(date, forKey: kGCKMetadataKeyBroadcastDate)
                 case "releaseDate":
                     metadata.setDate(date, forKey: kGCKMetadataKeyReleaseDate)
-                case "creationDate":
+                case "creationDate", "creationDateTime":
                     metadata.setDate(date, forKey: kGCKMetadataKeyCreationDate)
                 default:
                     break
