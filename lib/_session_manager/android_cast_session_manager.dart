@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/services.dart';
 import 'package:flutter_chrome_cast/enums/connection_state.dart';
 import 'package:flutter_chrome_cast/entities/cast_session.dart';
 import 'package:flutter_chrome_cast/entities/cast_device.dart';
+import 'package:flutter_chrome_cast/entities/cast_message.dart';
 import 'package:flutter_chrome_cast/models/android/cast_device.dart';
 import 'package:flutter_chrome_cast/models/android/cast_session.dart';
 import 'package:rxdart/subjects.dart';
@@ -21,6 +24,9 @@ class GoogleCastSessionManagerAndroidMethodChannel
   final _currentSessionStreamController = BehaviorSubject<GoogleCastSession?>()
     ..add(null);
 
+  final _messageStreamController =
+      StreamController<GoogleCastMessage>.broadcast();
+
   @override
   GoogleCastConnectState get connectionState =>
       _currentSessionStreamController.value?.connectionState ??
@@ -33,6 +39,40 @@ class GoogleCastSessionManagerAndroidMethodChannel
   @override
   Stream<GoogleCastSession?> get currentSessionStream =>
       _currentSessionStreamController.stream;
+
+  @override
+  Stream<GoogleCastMessage> get messageStream =>
+      _messageStreamController.stream;
+
+  @override
+  Future<bool> addMessageChannel(String namespace) async {
+    return await _channel.invokeMethod<bool>(
+          'addMessageChannel',
+          <String, dynamic>{'namespace': namespace},
+        ) ??
+        false;
+  }
+
+  @override
+  Future<bool> removeMessageChannel(String namespace) async {
+    return await _channel.invokeMethod<bool>(
+          'removeMessageChannel',
+          <String, dynamic>{'namespace': namespace},
+        ) ??
+        false;
+  }
+
+  @override
+  Future<bool> sendMessage(String namespace, String message) async {
+    return await _channel.invokeMethod<bool>(
+          'sendMessage',
+          <String, dynamic>{
+            'namespace': namespace,
+            'message': message,
+          },
+        ) ??
+        false;
+  }
 
   @override
   Future<bool> endSession() async {
@@ -81,7 +121,22 @@ class GoogleCastSessionManagerAndroidMethodChannel
       case "onSessionChanged":
         _onSessionChanged(call.arguments);
         return;
+      case 'onMessageReceived':
+        _onMessageReceived(call.arguments);
+        return;
       default:
+    }
+  }
+
+  void _onMessageReceived(dynamic arguments) {
+    if (arguments is! Map) return;
+    final map = Map<String, dynamic>.from(arguments);
+    final namespace = map['namespace'];
+    final message = map['message'];
+    if (namespace is String && message is String) {
+      _messageStreamController.add(
+        GoogleCastMessage(namespace: namespace, message: message),
+      );
     }
   }
 

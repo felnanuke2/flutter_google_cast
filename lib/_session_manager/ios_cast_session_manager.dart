@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/services.dart';
 import 'package:flutter_chrome_cast/lib.dart';
 import 'package:rxdart/subjects.dart';
@@ -20,6 +22,43 @@ class GoogleCastSessionManagerIOSMethodChannel
 
   final _currentSessionStreamController = BehaviorSubject<GoogleCastSession?>()
     ..add(null);
+
+  final _messageStreamController =
+      StreamController<GoogleCastMessage>.broadcast();
+
+  @override
+  Stream<GoogleCastMessage> get messageStream =>
+      _messageStreamController.stream;
+
+  @override
+  Future<bool> addMessageChannel(String namespace) async {
+    return await _channel.invokeMethod<bool>(
+          'addMessageChannel',
+          <String, dynamic>{'namespace': namespace},
+        ) ??
+        false;
+  }
+
+  @override
+  Future<bool> removeMessageChannel(String namespace) async {
+    return await _channel.invokeMethod<bool>(
+          'removeMessageChannel',
+          <String, dynamic>{'namespace': namespace},
+        ) ??
+        false;
+  }
+
+  @override
+  Future<bool> sendMessage(String namespace, String message) async {
+    return await _channel.invokeMethod<bool>(
+          'sendMessage',
+          <String, dynamic>{
+            'namespace': namespace,
+            'message': message,
+          },
+        ) ??
+        false;
+  }
 
   @override
   Future<bool> startSessionWithDevice(GoogleCastDevice device) async {
@@ -80,6 +119,20 @@ class GoogleCastSessionManagerIOSMethodChannel
     switch (call.method) {
       case 'onCurrentSessionChanged':
         return _onCurrentSessionChanged(call.arguments);
+      case 'onMessageReceived':
+        return _onMessageReceived(call.arguments);
+    }
+  }
+
+  void _onMessageReceived(dynamic arguments) {
+    if (arguments is! Map) return;
+    final map = Map<String, dynamic>.from(arguments);
+    final namespace = map['namespace'];
+    final message = map['message'];
+    if (namespace is String && message is String) {
+      _messageStreamController.add(
+        GoogleCastMessage(namespace: namespace, message: message),
+      );
     }
   }
 

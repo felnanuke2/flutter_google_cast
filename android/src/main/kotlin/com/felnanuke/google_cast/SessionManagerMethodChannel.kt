@@ -1,6 +1,7 @@
 package com.felnanuke.google_cast
 
 import com.felnanuke.google_cast.extensions.toMap
+import com.google.android.gms.cast.Cast
 import com.google.android.gms.cast.framework.*
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.plugin.common.MethodCall
@@ -75,6 +76,17 @@ class SessionManagerMethodChannel(discoveryManager: DiscoveryManagerMethodChanne
      */
     private val remoteMediaClientMethodChannel = RemoteMediaClientMethodChannel()
 
+    /** Namespaces requested by Flutter. They survive Cast session changes. */
+    private val requestedMessageNamespaces = mutableSetOf<String>()
+
+    /** Forwards receiver text messages to the Dart message stream. */
+    private val messageReceivedCallback = Cast.MessageReceivedCallback { _, namespace, message ->
+        channel.invokeMethod(
+            "onMessageReceived",
+            mapOf("namespace" to namespace, "message" to message)
+        )
+    }
+
     /**
      * Google Cast session manager instance
      * 
@@ -124,6 +136,15 @@ class SessionManagerMethodChannel(discoveryManager: DiscoveryManagerMethodChanne
      * @param binding Flutter plugin binding being detached
      */
     override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
+        sessionManager?.currentCastSession?.let { session ->
+            requestedMessageNamespaces.forEach { namespace ->
+                try {
+                    session.removeMessageReceivedCallbacks(namespace)
+                } catch (_: Exception) {
+                    // The Cast session may already be disconnected.
+                }
+            }
+        }
         channel.setMethodCallHandler(null)
     }
 
@@ -157,6 +178,74 @@ class SessionManagerMethodChannel(discoveryManager: DiscoveryManagerMethodChanne
                 sessionManager?.currentCastSession?.volume = call.arguments as Double
                 result.success(true)
             }
+            "addMessageChannel" -> addMessageChannel(call.arguments, result)
+            "removeMessageChannel" -> removeMessageChannel(call.arguments, result)
+            "sendMessage" -> sendMessage(call.arguments, result)
+            else -> result.notImplemented()
+        }
+    }
+
+    private fun messageArguments(arguments: Any?): Pair<String, String?>? {
+        val map = arguments as? Map<*, *> ?: return null
+        val namespace = map["namespace"] as? String ?: return null
+        if (!namespace.startsWith("urn:x-cast:") || namespace.length > 128) return null
+        return namespace to (map["message"] as? String)
+    }
+
+    private fun registerMessageChannel(namespace: String): Boolean {
+        val session = sessionManager?.currentCastSession ?: return true
+        return try {
+            session.removeMessageReceivedCallbacks(namespace)
+            session.setMessageReceivedCallbacks(namespace, messageReceivedCallback)
+            true
+        } catch (_: Exception) {
+            false
+        }
+    }
+
+    private fun registerRequestedMessageChannels() {
+        requestedMessageNamespaces.forEach(::registerMessageChannel)
+    }
+
+    private fun addMessageChannel(arguments: Any?, result: MethodChannel.Result) {
+        val parsed = messageArguments(arguments)
+        if (parsed == null) {
+            result.error("INVALID_ARGUMENT", "A valid Cast namespace is required.", null)
+            return
+        }
+        requestedMessageNamespaces.add(parsed.first)
+        result.success(registerMessageChannel(parsed.first))
+    }
+
+    private fun removeMessageChannel(arguments: Any?, result: MethodChannel.Result) {
+        val parsed = messageArguments(arguments)
+        if (parsed == null) {
+            result.error("INVALID_ARGUMENT", "A valid Cast namespace is required.", null)
+            return
+        }
+        requestedMessageNamespaces.remove(parsed.first)
+        try {
+            sessionManager?.currentCastSession?.removeMessageReceivedCallbacks(parsed.first)
+            result.success(true)
+        } catch (_: Exception) {
+            result.success(false)
+        }
+    }
+
+    private fun sendMessage(arguments: Any?, result: MethodChannel.Result) {
+        val parsed = messageArguments(arguments)
+        val message = parsed?.second
+        val session = sessionManager?.currentCastSession
+        if (parsed == null || message == null || session == null) {
+            result.success(false)
+            return
+        }
+        try {
+            session.sendMessage(parsed.first, message).setResultCallback { status ->
+                result.success(status.isSuccess)
+            }
+        } catch (_: Exception) {
+            result.success(false)
         }
     }
 
@@ -194,6 +283,7 @@ class SessionManagerMethodChannel(discoveryManager: DiscoveryManagerMethodChanne
 
     override fun onSessionResumed(p0: Session, p1: Boolean) {
         remoteMediaClientMethodChannel.startListen()
+        registerRequestedMessageChannels()
         onSessionChanged()
     }
 
@@ -207,6 +297,7 @@ class SessionManagerMethodChannel(discoveryManager: DiscoveryManagerMethodChanne
 
     override fun onSessionStarted(session: Session, p1: String) {
         remoteMediaClientMethodChannel.startListen()
+        registerRequestedMessageChannels()
         onSessionChanged()
     }
 
