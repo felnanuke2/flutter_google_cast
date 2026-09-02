@@ -4,3 +4,4 @@
 library cast_context;
 
 export '_google_cast_context/_google_cast_context.dart';
+export 'logging.dart';

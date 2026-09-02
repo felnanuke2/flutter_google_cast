@@ -24,10 +24,6 @@ public class SwiftGoogleCastPlugin: NSObject, GCKLoggerDelegate, FlutterPlugin, 
     
     // MARK: - Properties
     
-    /// Debug logging flag for Google Cast SDK
-    /// Set to `true` to enable verbose logging for debugging Cast operations
-    let kDebugLoggingEnabled = true
-    
     /// Whether to stop casting when the app is terminated
     /// This is set from Flutter via GoogleCastOptions.stopCastingOnAppTerminated
     private var stopCastingOnAppTerminated = false
@@ -129,33 +125,38 @@ public class SwiftGoogleCastPlugin: NSObject, GCKLoggerDelegate, FlutterPlugin, 
     ///   - arguments: Dictionary containing Cast configuration options from Flutter
     ///   - result: Flutter result callback (currently unused)
     /// - Note: This method should be called once during app initialization
-    private func setSharedInstanceWithOption(arguments: Dictionary<String, Any> ,result: @escaping FlutterResult){
-      
-            // Parse Cast options from Flutter arguments
-        let option =  GCKCastOptions.fromMap(arguments)
+    private func setSharedInstanceWithOption(
+        arguments: [String: Any],
+        result: @escaping FlutterResult
+    ) {
+        FlutterGoogleCastLogger.configure(arguments["logLevel"] as? String)
+
+        // Opt-in levels are installed before Cast context initialization so
+        // initialization logs are filtered as well. With no level configured,
+        // the legacy logger setup below remains unchanged.
+        if let configuredLevel = FlutterGoogleCastLogger.configuredLevel {
+            configureCastSDKLogger(level: configuredLevel)
+        }
+
+        // Parse Cast options from Flutter arguments
+        let option = GCKCastOptions.fromMap(arguments)
         
         // Store the stopCastingOnAppTerminated option
         if let stopOnTerminated = arguments["stopCastingOnAppTerminated"] as? Bool {
             stopCastingOnAppTerminated = stopOnTerminated
-            if kDebugLoggingEnabled {
-                print("stopCastingOnAppTerminated set to: \(stopOnTerminated)")
-            }
+            FlutterGoogleCastLogger.verbose("stopCastingOnAppTerminated set to: \(stopOnTerminated)")
         }
         
         // Initialize the shared Cast context with parsed options
-       GCKCastContext.setSharedInstanceWith(option)
+        GCKCastContext.setSharedInstanceWith(option)
         
-        // Enable console logging for debugging
-        GCKLogger.sharedInstance().consoleLoggingEnabled = true
-        GCKLogger.sharedInstance().delegate = self
-
-        let filter = GCKLoggerFilter.init()
-        filter.minimumLevel = GCKLoggerLevel.verbose
-        GCKLogger.sharedInstance().filter = filter
+        if FlutterGoogleCastLogger.configuredLevel == nil {
+            configureLegacyCastSDKLogger()
+        }
         
         // Register listeners for Cast events
-        discoveryManager.add(FGCDiscoveryManagerMethodChannel.instance)   
-        sessionManager.add(FGCSessionManagerMethodChannel.instance )
+        discoveryManager.add(FGCDiscoveryManagerMethodChannel.instance)
+        sessionManager.add(FGCSessionManagerMethodChannel.instance)
 
         // Start discovering Cast devices automatically
         // Return to Flutter immediately before starting potentially expensive operations
@@ -165,12 +166,52 @@ public class SwiftGoogleCastPlugin: NSObject, GCKLoggerDelegate, FlutterPlugin, 
         shouldResumeDiscoveryOnForeground = true
         discoveryManager.startDiscovery()
 
-        if kDebugLoggingEnabled {
-            print("Cast context initialized")
-        }
+        FlutterGoogleCastLogger.info("Cast context initialized")
 
         // Observe application lifecycle to stop discovery and remove listeners when app closes
         addLifecycleObserversIfNeeded()
+    }
+
+    /// Retains the logger behavior used before opt-in log filtering existed.
+    private func configureLegacyCastSDKLogger() {
+        let logger = GCKLogger.sharedInstance()
+        logger.consoleLoggingEnabled = true
+        logger.delegate = self
+
+        let filter = GCKLoggerFilter()
+        filter.minimumLevel = .verbose
+        logger.filter = filter
+    }
+
+    /// Applies an explicitly selected level to the Google Cast SDK logger.
+    private func configureCastSDKLogger(level: FlutterGoogleCastLogLevel) {
+        let logger = GCKLogger.sharedInstance()
+
+        guard level != .none else {
+            logger.delegate = nil
+            logger.consoleLoggingEnabled = false
+            logger.loggingEnabled = false
+            return
+        }
+
+        logger.loggingEnabled = true
+        logger.consoleLoggingEnabled = false
+
+        let filter = GCKLoggerFilter()
+        switch level {
+        case .none:
+            return
+        case .error:
+            filter.minimumLevel = .error
+        case .warning:
+            filter.minimumLevel = .warning
+        case .info:
+            filter.minimumLevel = .info
+        case .verbose:
+            filter.minimumLevel = .verbose
+        }
+        logger.filter = filter
+        logger.delegate = self
     }
 
     // MARK: - Teardown / Lifecycle handlers
@@ -178,9 +219,9 @@ public class SwiftGoogleCastPlugin: NSObject, GCKLoggerDelegate, FlutterPlugin, 
     /// Cleanly stops discovery and removes registered listeners to avoid callbacks after deallocation.
     private func tearDown() {
         // Stop discovery if it's running
-        if kDebugLoggingEnabled {
-            print("SwiftGoogleCastPlugin: tearing down - stopping discovery and removing listeners")
-        }
+        FlutterGoogleCastLogger.verbose(
+            "SwiftGoogleCastPlugin: tearing down - stopping discovery and removing listeners"
+        )
         discoveryManager.stopDiscovery()
 
         // Remove any previously registered listeners (safe to call even if not registered)
@@ -195,9 +236,9 @@ public class SwiftGoogleCastPlugin: NSObject, GCKLoggerDelegate, FlutterPlugin, 
         // End the cast session and stop casting when app is terminated (if option is enabled)
         // This ensures the receiver stops casting when the app is killed
         if stopCastingOnAppTerminated && sessionManager.hasConnectedSession() {
-            if kDebugLoggingEnabled {
-                print("SwiftGoogleCastPlugin: App terminating - ending cast session and stopping casting (stopCastingOnAppTerminated=true)")
-            }
+            FlutterGoogleCastLogger.info(
+                "SwiftGoogleCastPlugin: App terminating - ending cast session and stopping casting (stopCastingOnAppTerminated=true)"
+            )
             sessionManager.endSessionAndStopCasting(true)
         }
         tearDown()
@@ -234,9 +275,7 @@ public class SwiftGoogleCastPlugin: NSObject, GCKLoggerDelegate, FlutterPlugin, 
         guard !lifecycleObserversAdded else { return }
         lifecycleObserversAdded = true
 
-        if kDebugLoggingEnabled {
-            print("SwiftGoogleCastPlugin: adding lifecycle observers")
-        }
+        FlutterGoogleCastLogger.verbose("SwiftGoogleCastPlugin: adding lifecycle observers")
 
         NotificationCenter.default.addObserver(self,
                                                selector: #selector(applicationWillTerminateNotification(_:)),
@@ -267,22 +306,34 @@ public class SwiftGoogleCastPlugin: NSObject, GCKLoggerDelegate, FlutterPlugin, 
     /// Handles log messages from the Google Cast SDK
     /// 
     /// This delegate method is called by the Cast SDK to report log messages
-    /// at various levels (verbose, debug, info, warning, error). Currently
-    /// prints all messages to the console for debugging purposes.
+    /// at various levels (verbose, debug, info, warning, error). Messages are
+    /// routed through the plugin logger so an opted-in level is respected.
     ///
     /// - Parameters:
     ///   - message: The log message content
     ///   - level: The severity level of the log message
     ///   - function: The function name where the log originated
     ///   - location: The file and line number information
-    public func logMessage(_ message: String,
-                      at level: GCKLoggerLevel,
-                      fromFunction function: String,
-                      location: String) {
-          // Print formatted log message with function name for easier debugging
-          if kDebugLoggingEnabled {
-              print(function + " - " + message)
-          }
+    public func logMessage(
+        _ message: String,
+        at level: GCKLoggerLevel,
+        fromFunction function: String,
+        location: String
+    ) {
+        let pluginLevel: FlutterGoogleCastLogLevel
+        switch level {
+        case .none, .verbose, .debug:
+            pluginLevel = .verbose
+        case .info:
+            pluginLevel = .info
+        case .warning:
+            pluginLevel = .warning
+        case .error, .assert:
+            pluginLevel = .error
+        @unknown default:
+            pluginLevel = .error
+        }
+        FlutterGoogleCastLogger.log(pluginLevel, function + " - " + message)
     }
     
   

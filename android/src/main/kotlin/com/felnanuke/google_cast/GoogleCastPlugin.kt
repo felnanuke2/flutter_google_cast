@@ -3,7 +3,6 @@ package com.felnanuke.google_cast
 import android.app.Activity
 import android.app.Application
 import android.os.Bundle
-import android.util.Log
 import androidx.annotation.NonNull
 import com.google.android.gms.cast.framework.CastContext
 
@@ -196,7 +195,9 @@ class GoogleCastPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, Applic
         if (activity == this.activity && activity.isFinishing) {
             // Only end the cast session if stopCastingOnAppTerminated option is enabled
             if (!GoogleCastOptionsProvider.stopCastingOnAppTerminated) {
-                Log.d(TAG, "App destroyed - stopCastingOnAppTerminated is false, keeping cast session alive")
+                GoogleCastLogger.verbose(TAG) {
+                    "App destroyed - stopCastingOnAppTerminated is false, keeping cast session alive"
+                }
                 return
             }
             
@@ -206,11 +207,15 @@ class GoogleCastPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, Applic
                 val castContext = CastContext.getSharedInstance(context)
                 val sessionManager = castContext?.sessionManager
                 if (sessionManager?.currentCastSession != null) {
-                    Log.d(TAG, "App destroyed - ending cast session and stopping casting (stopCastingOnAppTerminated=true)")
+                    GoogleCastLogger.verbose(TAG) {
+                        "App destroyed - ending cast session and stopping casting (stopCastingOnAppTerminated=true)"
+                    }
                     sessionManager.endCurrentSession(true)
                 }
             } catch (e: Exception) {
-                Log.w(TAG, "Failed to end cast session on app destroy", e)
+                GoogleCastLogger.warning(TAG, throwable = e) {
+                    "Failed to end cast session on app destroy"
+                }
             }
         }
     }

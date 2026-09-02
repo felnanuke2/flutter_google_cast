@@ -17,6 +17,7 @@ import 'package:flutter_chrome_cast/cast_context.dart';
 import 'package:flutter_chrome_cast/discovery.dart';    // Device discovery
 import 'package:flutter_chrome_cast/session.dart';      // Session management  
 import 'package:flutter_chrome_cast/media.dart';        // Media control
+import 'package:flutter_chrome_cast/logging.dart';      // Optional log filtering
 import 'package:flutter_chrome_cast/widgets.dart';      // UI components
 import 'package:flutter_chrome_cast/entities.dart';     // Data models
 import 'package:flutter_chrome_cast/enums.dart';        // Constants
@@ -30,6 +31,7 @@ import 'package:flutter_chrome_cast/enums.dart';        // Constants
 | `discovery.dart` | Device discovery | `GoogleCastDiscoveryManager`, `CastDevice` |
 | `session.dart` | Session management | `GoogleCastSessionManager`, `CastSession` |
 | `media.dart` | Media control | `GoogleCastRemoteMediaClient`, `MediaInformation` |
+| `logging.dart` | Optional logging control | `GoogleCastLogger`, `CastLogLevel` |
 | `widgets.dart` | UI components | `MiniController`, `ExpandedPlayer`, `CastVolume` |
 | `entities.dart` | Data models | `CastDevice`, `MediaInformation`, `CastSession` |
 | `enums.dart` | Constants & enums | `PlayerState`, `RepeatMode`, `StreamType` |

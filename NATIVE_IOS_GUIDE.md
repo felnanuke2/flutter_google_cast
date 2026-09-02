@@ -192,17 +192,16 @@ public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
 
 ## 🐛 Debugging
 
-### Enabling Cast SDK Logging
+### Controlling Plugin and Cast SDK Logging
 
-```swift
-let kDebugLoggingEnabled = true  // Set to true for debugging
-
-// In initialization
-if kDebugLoggingEnabled {
-    GCKLogger.sharedInstance().delegate = self
-    GCKLogger.sharedInstance().loggingLevel = .verbose
-}
+```dart
+GoogleCastLogger.level = CastLogLevel.error;
+await GoogleCastContext.instance.setSharedInstanceWithOptions(options);
 ```
+
+When explicitly configured, the level is forwarded to `GCKLogger` before the
+Cast context is initialized. If no level is selected, legacy logging behavior
+is retained.
 
 ### Common Issues
 

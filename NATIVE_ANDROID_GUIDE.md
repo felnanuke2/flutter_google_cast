@@ -266,12 +266,16 @@ class GoogleCastPlugin : FlutterPlugin {
 
 ## 🐛 Debugging
 
-### Enabling Cast SDK Logging
+### Controlling Plugin Logging
 
-```kotlin
-// In Application class or plugin initialization
-CastContext.getSharedInstance(context).logger.setDebugLoggingEnabled(true)
+```dart
+GoogleCastLogger.level = CastLogLevel.error;
+await GoogleCastContext.instance.setSharedInstanceWithOptions(options);
 ```
+
+This filters Dart and Android-native logs emitted by this plugin. The Android
+Cast Application Framework does not expose a public API for controlling its
+own SDK-internal Logcat output.
 
 ### Common Issues
 

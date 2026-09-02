@@ -146,9 +146,10 @@ Ensure both platforms provide:
 
 ### Cross-Platform Debugging
 
-1. **Enable Cast SDK Logging**:
-   - iOS: Set `kDebugLoggingEnabled = true`
-   - Android: Enable debug logging in Cast context
+1. **Configure Cast Logging Before Context Initialization**:
+   - Set `GoogleCastLogger.level` before `setSharedInstanceWithOptions(...)`.
+   - iOS: The selected level also configures `GCKLogger`.
+   - Android: The level controls plugin-owned Dart/Kotlin logs; CAF exposes no public control for SDK-internal Logcat output.
 
 2. **Method Channel Debugging**:
    - Log all method calls and results

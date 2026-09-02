@@ -1,3 +1,10 @@
+## Unreleased
+### ✨ New Features
+- Added opt-in `GoogleCastLogger.level` filtering with `none`, `error`, `warning`, `info`, and `verbose` levels.
+- Routed Dart, Android, and iOS plugin-owned logs through centralized level-aware loggers.
+- Applied explicitly selected levels to the iOS Google Cast SDK `GCKLogger`; Android Cast SDK-internal logs remain outside app control because CAF exposes no public logger configuration API.
+- Preserved legacy logging behavior when no level is explicitly configured.
+
 ## 1.4.8 - Media Metadata, HLS and Content ID Fixes
 ### 🐛 Bug Fixes
 - **iOS stale playback position after `loadMedia`**: Fixed `playerPosition` briefly showing the previous content's offset right after switching media. Position ticks are now suppressed until the SDK reports a new `mediaSessionID` and `approximateStreamPosition()` converges to the requested start time (±5 s tolerance), with a 10 s safety timeout.

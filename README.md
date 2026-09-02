@@ -286,6 +286,7 @@ import 'package:flutter_chrome_cast/cast_context.dart';  // Google Cast initiali
 import 'package:flutter_chrome_cast/discovery.dart';    // Device discovery
 import 'package:flutter_chrome_cast/session.dart';      // Session management
 import 'package:flutter_chrome_cast/media.dart';        // Media control
+import 'package:flutter_chrome_cast/logging.dart';      // Optional log filtering
 
 // UI widgets (if needed)
 import 'package:flutter_chrome_cast/widgets.dart';      // Cast UI widgets
@@ -332,6 +333,27 @@ Future<void> initPlatformState() async {
   GoogleCastContext.instance.setSharedInstanceWithOptions(options!);
 }
 ```
+
+### Optional Log Filtering
+
+Logging keeps its existing behavior unless the app explicitly selects a level.
+Set the level before initializing `GoogleCastContext`:
+
+```dart
+GoogleCastLogger.level = CastLogLevel.error;
+
+await GoogleCastContext.instance.setSharedInstanceWithOptions(options!);
+```
+
+Available levels are `none`, `error`, `warning`, `info`, and `verbose`.
+`none` suppresses every log owned by the plugin, while `error` keeps only
+errors. On iOS the level is also applied to the Google Cast SDK's `GCKLogger`.
+The Android Cast Application Framework does not expose a public SDK logging
+control, so Android filtering covers Dart and Android-native logs emitted by
+this plugin; Google Play services may still emit its own Logcat messages.
+
+If `GoogleCastLogger.level` is not assigned, the plugin does not send any
+logging configuration to the native side and retains the previous behavior.
 
 ### Configuration Options
 
@@ -833,6 +855,10 @@ The usage snippets above cover the most common integration patterns. For advance
 #### GoogleCastContext
 Main entry point for Google Cast functionality.
 - `setSharedInstanceWithOptions(GoogleCastOptions options)`: Initialize Cast context
+
+#### GoogleCastLogger
+Opt-in control for Dart, native plugin, and supported Cast SDK log output.
+- `level`: Set a `CastLogLevel` before initializing the Cast context
 
 #### GoogleCastDiscoveryManager
 Manages device discovery.

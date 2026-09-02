@@ -16,6 +16,7 @@
 /// import 'package:flutter_chrome_cast/discovery.dart';
 /// import 'package:flutter_chrome_cast/session.dart';
 /// import 'package:flutter_chrome_cast/media.dart';
+/// import 'package:flutter_chrome_cast/logging.dart';
 ///
 /// // UI Widgets
 /// import 'package:flutter_chrome_cast/widgets.dart';
@@ -34,6 +35,7 @@ export 'cast_context.dart';
 export 'discovery.dart';
 export 'session.dart';
 export 'media.dart';
+export 'logging.dart';
 
 // UI Components
 export 'widgets.dart';

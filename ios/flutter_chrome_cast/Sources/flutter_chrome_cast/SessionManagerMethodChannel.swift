@@ -173,7 +173,9 @@ public class FGCSessionManagerMethodChannel : UIResponder, FlutterPlugin, GCKSes
     private func startSessionWithDevice(deviceIndex : Int ) -> Bool {
         let deviceCount = discoveryManager.deviceCount
         guard deviceIndex >= 0, UInt(deviceIndex) < deviceCount else {
-            print("[GoogleCast] startSessionWithDevice: index \(deviceIndex) is out of bounds (deviceCount=\(deviceCount)); the Dart-side snapshot is stale")
+            FlutterGoogleCastLogger.warning(
+                "[GoogleCast] startSessionWithDevice: index \(deviceIndex) is out of bounds (deviceCount=\(deviceCount)); the Dart-side snapshot is stale"
+            )
             return false
         }
         let device = discoveryManager.device(at: UInt(deviceIndex))
@@ -492,7 +494,9 @@ public class FGCSessionManagerMethodChannel : UIResponder, FlutterPlugin, GCKSes
     ///
     /// - Parameter result: Flutter result callback
     private func resetSession(_ result: FlutterResult) {
-        print("[GoogleCast] resetSession: force-ending session and cleaning up all state")
+        FlutterGoogleCastLogger.info(
+            "[GoogleCast] resetSession: force-ending session and cleaning up all state"
+        )
 
         // Nothing to reset — avoid unnecessary listener churn and media cleanup
         guard sessionManager.currentSession != nil else {

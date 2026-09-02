@@ -1,5 +1,7 @@
 import 'package:flutter/services.dart';
 import 'package:flutter_chrome_cast/entities/cast_options.dart';
+import 'package:flutter_chrome_cast/src/logging/google_cast_logger_configuration.dart';
+
 import 'google_cast_context_platform_interface.dart';
 
 /// iOS-specific implementation of Google Cast context functionality.
@@ -12,11 +14,14 @@ class FlutterIOSGoogleCastContextMethodChannel
 
   @override
   Future<bool> setSharedInstanceWithOptions(
-      GoogleCastOptions castOptions) async {
+    GoogleCastOptions castOptions,
+  ) async {
     try {
+      final arguments = castOptions.toMap();
+      GoogleCastLoggerConfiguration.addToChannelArguments(arguments);
       final result = await _methodChannel.invokeMethod(
         'setSharedInstanceWithOptions',
-        castOptions.toMap(),
+        arguments,
       );
       return result == true;
     } catch (e) {
