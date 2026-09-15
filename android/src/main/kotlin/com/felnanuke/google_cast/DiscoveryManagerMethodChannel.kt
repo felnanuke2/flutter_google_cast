@@ -143,7 +143,8 @@ class DiscoveryManagerMethodChannel : FlutterPlugin, MethodChannel.MethodCallHan
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
         when (call.method) {
             "startDiscovery" -> {
-                startDiscovery()
+                val arguments = call.arguments as? Map<*, *>
+                startDiscovery(activeScan = arguments?.get("activeScan") == true)
                 result.success(true)
             }
             "stopDiscovery" -> {
@@ -159,14 +160,16 @@ class DiscoveryManagerMethodChannel : FlutterPlugin, MethodChannel.MethodCallHan
         router.removeCallback(routerCallBack)
     }
 
-    private fun startDiscovery() {
+    private fun startDiscovery(activeScan: Boolean = false) {
         router.removeCallback(routerCallBack)
         val selector = MediaRouteSelector.Builder()
             .addControlCategories(listOf(CastMediaControlIntent.categoryForRemotePlayback()))
             .build()
-        router.addCallback(
-            selector, routerCallBack, MediaRouter.CALLBACK_FLAG_REQUEST_DISCOVERY
-        )
+        var flags = MediaRouter.CALLBACK_FLAG_REQUEST_DISCOVERY
+        if (activeScan) {
+            flags = flags or MediaRouter.CALLBACK_FLAG_PERFORM_ACTIVE_SCAN
+        }
+        router.addCallback(selector, routerCallBack, flags)
 
         routerCallBack.getCastDevicesMap()
     }

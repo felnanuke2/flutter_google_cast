@@ -1,3 +1,7 @@
+## Unreleased
+### ✨ Features
+- **Active scan on Android**: `startDiscovery` accepts `activeScan: true`, which registers the MediaRouter callback with `CALLBACK_FLAG_PERFORM_ACTIVE_SCAN` in addition to `CALLBACK_FLAG_REQUEST_DISCOVERY`. The default passive discovery only lists receivers Google Play services already knows about, so a picker could stay empty until another app scanned; request an active scan while your device picker is visible and fall back to passive when it closes, as the Cast SDK's own button does. No-op on iOS, which already scans actively while discovery runs.
+
 ## 1.4.8 - Media Metadata, HLS and Content ID Fixes
 ### 🐛 Bug Fixes
 - **iOS stale playback position after `loadMedia`**: Fixed `playerPosition` briefly showing the previous content's offset right after switching media. Position ticks are now suppressed until the SDK reports a new `mediaSessionID` and `approximateStreamPosition()` converges to the requested start time (±5 s tolerance), with a 10 s safety timeout.
