@@ -19,7 +19,7 @@ import GoogleCast
          dict["sessionID"] = self.sessionID
          dict["connectionState"] = self.connectionState.rawValue
          dict["currentDeviceMuted"] = self.currentDeviceMuted
-         dict["currentDeviceVolume"] = self.currentDeviceVolume
+         dict["currentDeviceVolume"] = Double(self.currentDeviceVolume)
          dict["deviceStatusText"] = self.deviceStatusText
         
          

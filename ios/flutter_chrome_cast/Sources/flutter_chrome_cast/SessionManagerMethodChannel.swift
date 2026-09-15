@@ -141,6 +141,12 @@ public class FGCSessionManagerMethodChannel : UIResponder, FlutterPlugin, GCKSes
         case "setDeviceVolume":
             setDeviceVolume(call.arguments as! NSNumber)
             break
+        case "setDeviceMuted":
+            setDeviceMuted(call.arguments as! Bool)
+            break
+        case "getCurrentSession":
+            result(sessionManager.currentCastSession?.toDict() ?? sessionManager.currentSession?.toDict())
+            break
             
         default:
             result(FlutterError(code: "METHOD_NOT_IMPLEMENTED", 
@@ -176,8 +182,28 @@ public class FGCSessionManagerMethodChannel : UIResponder, FlutterPlugin, GCKSes
             print("[GoogleCast] startSessionWithDevice: index \(deviceIndex) is out of bounds (deviceCount=\(deviceCount)); the Dart-side snapshot is stale")
             return false
         }
-        let device = discoveryManager.device(at: UInt(deviceIndex))
-        return sessionManager.startSession(with: device)
+        let targetDevice = discoveryManager.device(at: UInt(deviceIndex))
+
+        if let currentSession = sessionManager.currentCastSession ?? sessionManager.currentSession {
+            let currentDev = currentSession.device
+            let isSameDevice = currentDev.deviceID == targetDevice.deviceID ||
+                               (currentDev.friendlyName != nil && currentDev.friendlyName == targetDevice.friendlyName)
+
+            if isSameDevice && currentSession.connectionState == .connected {
+                var dict = currentSession.toDict()
+                dict["connectionState"] = GCKConnectionState.connected.rawValue
+                channel?.invokeMethod("onCurrentSessionChanged", arguments: dict)
+                RemoteMediaClienteMethodChannel.instance.startListen()
+                return true
+            } else if isSameDevice && currentSession.connectionState == .connecting {
+                return true
+            } else {
+                sessionManager.endSessionAndStopCasting(true)
+            }
+        }
+
+        _lastEmittedConnectionState = nil
+        return sessionManager.startSession(with: targetDevice)
     }
     
     /// Ends the current Cast session
@@ -219,6 +245,10 @@ public class FGCSessionManagerMethodChannel : UIResponder, FlutterPlugin, GCKSes
         sessionManager.currentCastSession?.setDeviceVolume(Float(truncating: volume))
     }
     
+    func setDeviceMuted(_ muted: Bool){
+        sessionManager.currentCastSession?.setDeviceMuted(muted)
+    }
+    
     // MARK: - Google Cast Session Manager Listener
     
     /// Called when a session is about to start
@@ -246,6 +276,19 @@ public class FGCSessionManagerMethodChannel : UIResponder, FlutterPlugin, GCKSes
         RemoteMediaClienteMethodChannel.instance.startListen()
     }
     
+    /// Called when a Cast session has successfully started
+    /// 
+    /// This delegate method is invoked after a Cast session has been established.
+    /// This is the Cast-specific version of didStart for GCKSession.
+    ///
+    /// - Parameters:
+    ///   - sessionManager: The session manager instance
+    ///   - session: The Cast session that started
+    public func sessionManager(_ sessionManager: GCKSessionManager, didStart session: GCKCastSession) {
+        onSessionChanged(session)
+        RemoteMediaClienteMethodChannel.instance.startListen()
+    }
+    
     /// Called when a Cast session is about to start
     /// 
     /// This delegate method is invoked just before a Cast session begins.
@@ -268,7 +311,7 @@ public class FGCSessionManagerMethodChannel : UIResponder, FlutterPlugin, GCKSes
     ///   - session: The Cast session that failed to start
     ///   - error: The error that caused the failure
     public func sessionManager(_ sessionManager: GCKSessionManager, didFailToStart session: GCKCastSession, withError error: Error) {
-        onSessionChanged(session)
+        onSessionChanged(nil)
     }
     
     /// Called when a session is about to end
@@ -295,7 +338,7 @@ public class FGCSessionManagerMethodChannel : UIResponder, FlutterPlugin, GCKSes
     ///   - session: The session that ended
     ///   - error: Optional error if the session ended unexpectedly
     public func sessionManager(_ sessionManager: GCKSessionManager, didEnd session: GCKSession, withError error: Error?) {
-        onSessionChanged(session)
+        onSessionChanged(nil)
         RemoteMediaClienteMethodChannel.instance.onSessionEnd()
     }
     
@@ -336,7 +379,7 @@ public class FGCSessionManagerMethodChannel : UIResponder, FlutterPlugin, GCKSes
     ///   - session: The session that failed to start
     ///   - error: The error that caused the failure
     public func sessionManager(_ sessionManager: GCKSessionManager, didFailToStart session: GCKSession, withError error: Error) {
-        onSessionChanged(session)
+        onSessionChanged(nil)
     }
     
     /// Called when a session is suspended
@@ -401,6 +444,8 @@ public class FGCSessionManagerMethodChannel : UIResponder, FlutterPlugin, GCKSes
     ///   - session: The Cast session that resumed
     public func sessionManager(_ sessionManager: GCKSessionManager, didResumeCastSession session: GCKCastSession) {
         onSessionChanged(session)
+        RemoteMediaClienteMethodChannel.instance.startListen()
+        RemoteMediaClienteMethodChannel.instance.resumeSession()
     }
     
     /// Called when a Cast session is about to resume

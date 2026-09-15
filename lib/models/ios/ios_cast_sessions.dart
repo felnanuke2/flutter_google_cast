@@ -27,12 +27,15 @@ class IOSGoogleCastSessions extends GoogleCastSession {
   static IOSGoogleCastSessions? fromMap(Map<String, dynamic>? json) {
     if (json == null) return null;
     return IOSGoogleCastSessions(
-      device: GoogleCastIosDevice.fromMap(
-          Map<String, dynamic>.from(json['device'])),
+      device: json['device'] == null
+          ? null
+          : GoogleCastIosDevice.fromMap(
+              Map<String, dynamic>.from(json['device'])),
       sessionID: json['sessionID'],
       connectionState: GoogleCastConnectState.values[json['connectionState']],
-      currentDeviceMuted: json['currentDeviceMuted'],
-      currentDeviceVolume: json['currentDeviceVolume'],
+      currentDeviceMuted: json['currentDeviceMuted'] ?? false,
+      currentDeviceVolume:
+          (json['currentDeviceVolume'] as num?)?.toDouble() ?? 1.0,
       deviceStatusText: json['deviceStatusText'] ?? '',
     );
   }

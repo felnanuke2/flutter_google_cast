@@ -56,7 +56,8 @@ class RemoteMediaClienteMethodChannel :UIResponder, FlutterPlugin, GCKRemoteMedi
     /// Reference to the current Cast session's remote media client
     /// - Returns: The media client for the current session, or nil if no session
     private var currentRemoteMediaCliente: GCKRemoteMediaClient? {
-        GCKCastContext.sharedInstance().sessionManager.currentSession?.remoteMediaClient
+        let sm = GCKCastContext.sharedInstance().sessionManager
+        return sm.currentCastSession?.remoteMediaClient ?? sm.currentSession?.remoteMediaClient
     }
     
     /// Timer for tracking media position updates
@@ -262,7 +263,7 @@ class RemoteMediaClienteMethodChannel :UIResponder, FlutterPlugin, GCKRemoteMedi
         if let autoPlay = arguments["autoPlay"] as? Bool {
             requestDataBuilder.autoplay = NSNumber(value: autoPlay)
         }
-        if let playPosition = arguments["playPosition"] as? TimeInterval {
+        if let playPosition = (arguments["playPosition"] as? NSNumber)?.doubleValue ?? (arguments["playPosition"] as? TimeInterval) {
             requestDataBuilder.startTime = playPosition
         }
         if let playbackRate = arguments["playbackRate"] as? Float {

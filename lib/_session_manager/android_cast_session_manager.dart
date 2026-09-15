@@ -105,9 +105,19 @@ class GoogleCastSessionManagerAndroidMethodChannel
   }
 
   @override
+  void setDeviceMuted(bool value) {
+    _channel.invokeMethod('setStreamMuted', value);
+  }
+
+  @override
   Future<bool> resetSession() async {
     // Stale sessions are not observed on Android;
     // delegate to the standard endSessionAndStopCasting
     return endSessionAndStopCasting();
+  }
+
+  @override
+  Future<GoogleCastSession?> getCurrentSession() async {
+    return currentSession;
   }
 }

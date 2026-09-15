@@ -130,6 +130,10 @@ public class SwiftGoogleCastPlugin: NSObject, GCKLoggerDelegate, FlutterPlugin, 
     ///   - result: Flutter result callback (currently unused)
     /// - Note: This method should be called once during app initialization
     private func setSharedInstanceWithOption(arguments: Dictionary<String, Any> ,result: @escaping FlutterResult){
+        guard !GCKCastContext.isSharedInstanceInitialized() else {
+            result(true)
+            return
+        }
       
             // Parse Cast options from Flutter arguments
         let option =  GCKCastOptions.fromMap(arguments)

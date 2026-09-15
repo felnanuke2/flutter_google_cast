@@ -104,7 +104,7 @@ class GoogleCastRemoteMediaClientIOSMethodChannel
           ..addAll(
             {
               'autoPlay': autoPlay,
-              'playPosition': playPosition.inSeconds,
+              'playPosition': playPosition.inMilliseconds / 1000.0,
               'playbackRate': playbackRate,
               'activeTrackIds': activeTrackIds,
               'credentials': credentials,

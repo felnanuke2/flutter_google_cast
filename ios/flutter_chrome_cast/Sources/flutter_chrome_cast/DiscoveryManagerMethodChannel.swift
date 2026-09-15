@@ -111,7 +111,7 @@ class FGCDiscoveryManagerMethodChannel : UIResponder, GCKDiscoveryManagerListene
             case "startDiscovery":
                 SwiftGoogleCastPlugin.instance?.shouldResumeDiscoveryOnForeground = true
                 discoveryManager.passiveScan = false
-                if discoveryManager.discoveryState == .stopped {
+                if discoveryManager.discoveryState != .running {
                     discoveryManager.startDiscovery()
                 }
                 // Re-send current device list so Flutter gets immediate state
@@ -153,8 +153,16 @@ class FGCDiscoveryManagerMethodChannel : UIResponder, GCKDiscoveryManagerListene
     public func didUpdate(_ device: GCKDevice, at index: UInt) {
         devices[index] = device
         print("didUpdateDevice at index: \(index)")
+        didUpdateDeviceList()
     }
     
+    /// Called when a Cast device is updated and moved to a new index
+    public func didUpdate(_ device: GCKDevice, at index: UInt, andMoveTo newIndex: UInt) {
+        devices.removeValue(forKey: index)
+        devices[newIndex] = device
+        didUpdateDeviceList()
+    }
+
     /// Called when a new Cast device is discovered
     /// 
     /// This method is invoked when a new Cast device becomes available
@@ -166,6 +174,7 @@ class FGCDiscoveryManagerMethodChannel : UIResponder, GCKDiscoveryManagerListene
     public func didInsert(_ device: GCKDevice, at index: UInt) {
         devices[index] = device
         print("didInsertDevice at index: \(index)")
+        didUpdateDeviceList()
     }
     
     /// Called when a Cast device is removed from discovery
@@ -180,6 +189,13 @@ class FGCDiscoveryManagerMethodChannel : UIResponder, GCKDiscoveryManagerListene
     public func didRemove(_ device: GCKDevice, at index: UInt) {
         devices.removeValue(forKey: index)
         print("didRemoveDevice at index: \(index)")
+        didUpdateDeviceList()
+    }
+
+    /// Called when a Cast device index is removed from discovery
+    public func didRemoveDevice(at index: UInt) {
+        devices.removeValue(forKey: index)
+        didUpdateDeviceList()
     }
     
     /// Called when the device list changes
@@ -192,16 +208,27 @@ class FGCDiscoveryManagerMethodChannel : UIResponder, GCKDiscoveryManagerListene
     /// for Flutter consumption, with each device represented as a dictionary
     /// containing device information and its discovery index.
     public func didUpdateDeviceList() {
+        if GCKCastContext.isSharedInstanceInitialized() {
+            let dm = GCKCastContext.sharedInstance().discoveryManager
+            let count = dm.deviceCount
+            for i in 0..<count {
+                devices[UInt(i)] = dm.device(at: i)
+            }
+        }
         
-        channel!.invokeMethod("onDevicesChanged" , arguments: devices.sorted{
+        let deviceList = devices.sorted{
             a,b in
-            return a.key > b.key
+            return a.key < b.key
         }.map{
             device in
             var dict =  device.value.toDict()
             dict["index"] = device.key
             return dict
-        })
+        }
+
+        DispatchQueue.main.async { [weak self] in
+            self?.channel?.invokeMethod("onDevicesChanged", arguments: deviceList)
+        }
     }
     
 }
