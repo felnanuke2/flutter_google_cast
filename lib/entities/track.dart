@@ -23,7 +23,7 @@ class GoogleCastMediaTrack {
   final String? trackContentId;
 
   /// Content type of the track.
-  final String trackContentType;
+  final String? trackContentType;
 
   /// Unique identifier of the track within the context of a MediaInfo object.
   final int trackId;
@@ -38,7 +38,7 @@ class GoogleCastMediaTrack {
     this.name,
     this.subtype,
     this.trackContentId,
-    required this.trackContentType,
+    this.trackContentType,
     required this.trackId,
     required this.type,
   });
