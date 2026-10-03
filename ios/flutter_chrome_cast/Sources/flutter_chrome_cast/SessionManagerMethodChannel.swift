@@ -230,8 +230,11 @@ public class FGCSessionManagerMethodChannel : UIResponder, FlutterPlugin, GCKSes
     }
 
     private func sendMessage(_ arguments: Any?, result: FlutterResult) {
-        guard let parsed = messageArguments(arguments),
-              let message = parsed.message,
+        guard let parsed = messageArguments(arguments) else {
+            result(FlutterError(code: "INVALID_ARGUMENT", message: "A valid Cast namespace is required.", details: nil))
+            return
+        }
+        guard let message = parsed.message,
               let channel = messageChannels[parsed.namespace],
               messageChannelSession != nil else {
             result(false)
@@ -239,6 +242,9 @@ public class FGCSessionManagerMethodChannel : UIResponder, FlutterPlugin, GCKSes
         }
         var error: GCKError?
         let sent = channel.sendTextMessage(message, error: &error)
+        if !sent {
+            print("[GoogleCast] sendMessage failed on \(parsed.namespace): \(String(describing: error))")
+        }
         result(sent)
     }
 

@@ -18,4 +18,8 @@ class GoogleCastMessage {
 
   @override
   int get hashCode => Object.hash(namespace, message);
+
+  @override
+  String toString() => 'GoogleCastMessage(namespace: $namespace, '
+      'message: $message)';
 }
