@@ -1,6 +1,17 @@
 ## Unreleased
-### ✨ Features
-- **Active scan on Android**: `startDiscovery` accepts `activeScan: true`, which registers the MediaRouter callback with `CALLBACK_FLAG_PERFORM_ACTIVE_SCAN` in addition to `CALLBACK_FLAG_REQUEST_DISCOVERY`. The default passive discovery only lists receivers Google Play services already knows about, so a picker could stay empty until another app scanned; request an active scan while your device picker is visible and fall back to passive when it closes, as the Cast SDK's own button does. No-op on iOS, which already scans actively while discovery runs.
+### ✨ New Features
+- Added cross-platform custom Cast message channels for registering namespaces, sending text messages, and receiving receiver messages on Android and iOS.
+
+### 🐛 Bug Fixes
+- Safely parse in-band Cast media tracks when the receiver omits `trackContentType`.
+
+### 🔧 Improvements
+- Added `dispose()` to the session manager platform interface (and both platform implementations) so stream controllers and the method-channel handler can be released in custom lifecycles; late native message events are safely dropped after disposal.
+- `sendMessage` now returns an `INVALID_ARGUMENT` platform error for malformed namespaces on Android (consistent with `addMessageChannel`/`removeMessageChannel`) and requires the namespace to be registered on Android, matching the existing iOS behavior.
+- iOS `sendMessage` now also returns an `INVALID_ARGUMENT` platform error for malformed namespaces, matching Android; runtime failures (no session, unregistered namespace, missing message) still resolve to `false` on both platforms.
+- After `dispose()`, `currentSession` returns `null` and `connectionState` reports `disconnected` instead of surfacing the last cached session, and late native session-change events are safely dropped on both platforms.
+- iOS logs the underlying `GCKError` when a custom-channel send fails instead of silently returning `false`.
+- Android clears requested custom namespaces when the Flutter engine detaches, preventing stale registrations from silently reattaching on a future session.
 
 ## 1.4.8 - Media Metadata, HLS and Content ID Fixes
 ### 🐛 Bug Fixes
