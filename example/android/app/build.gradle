@@ -29,7 +29,7 @@ if (flutterVersionName == null) {
 
 android {
     namespace = "com.felnanuke.google_cast_example"
-    compileSdk = 35
+    compileSdk = 37
     ndkVersion flutter.ndkVersion
 
     compileOptions {

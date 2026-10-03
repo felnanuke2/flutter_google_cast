@@ -17,7 +17,7 @@ jobs:
     - name: Setup Flutter
       uses: subosito/flutter-action@v2
       with:
-        flutter-version: '3.41.6'
+        flutter-version: '3.44.2'
         channel: 'stable'
     
     - name: Install dependencies
@@ -64,7 +64,7 @@ jobs:
     - name: Setup Flutter
       uses: subosito/flutter-action@v2
       with:
-        flutter-version: '3.41.6'
+        flutter-version: '3.44.2'
         channel: 'stable'
     
     - name: Install dependencies
@@ -75,6 +75,12 @@ jobs:
         echo "Checking for outdated dependencies..."
         flutter pub outdated || true
         echo "Note: Some dependencies may have newer versions. Consider updating when compatible."
+    
+    - name: Install Android SDK Platform 37
+      run: |
+        SDKMANAGER="${ANDROID_HOME}/cmdline-tools/latest/bin/sdkmanager"
+        yes | "$SDKMANAGER" --licenses > /dev/null || true
+        yes | "$SDKMANAGER" "platforms;android-37.0" "build-tools;37.0.0" > /dev/null
     
     
     - name: Build Android (ARM64 and ARM only)
@@ -93,7 +99,7 @@ jobs:
     - name: Setup Flutter
       uses: subosito/flutter-action@v2
       with:
-        flutter-version: '3.41.6'
+        flutter-version: '3.44.2'
         channel: 'stable'
     
     - name: Install dependencies
