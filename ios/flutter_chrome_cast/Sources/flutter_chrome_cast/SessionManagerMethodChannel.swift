@@ -28,7 +28,7 @@ import GoogleCast
 ///
 /// - Author: LUIZ FELIPE ALVES LIMA
 /// - Since: iOS 10.0+
-public class FGCSessionManagerMethodChannel : UIResponder, FlutterPlugin, GCKSessionManagerListener {
+public class FGCSessionManagerMethodChannel : UIResponder, FlutterPlugin, GCKSessionManagerListener, GCKGenericChannelDelegate {
     
     // MARK: - Singleton Implementation
     
@@ -77,6 +77,12 @@ public class FGCSessionManagerMethodChannel : UIResponder, FlutterPlugin, GCKSes
     /// and GCKCastSession) with the same connection state in rapid succession,
     /// causing event spam on the Flutter side.
     private var _lastEmittedConnectionState: GCKConnectionState?
+
+    /// Generic channels requested by Flutter, keyed by Cast namespace.
+    private var messageChannels: [String: GCKGenericChannel] = [:]
+
+    /// The Cast session to which the generic channels are currently attached.
+    private weak var messageChannelSession: GCKCastSession?
     
     /// Reference to the Google Cast session manager
     /// - Returns: The session manager from the shared Cast context
@@ -141,6 +147,15 @@ public class FGCSessionManagerMethodChannel : UIResponder, FlutterPlugin, GCKSes
         case "setDeviceVolume":
             setDeviceVolume(call.arguments as! NSNumber)
             break
+        case "addMessageChannel":
+            addMessageChannel(call.arguments, result: result)
+            break
+        case "removeMessageChannel":
+            removeMessageChannel(call.arguments, result: result)
+            break
+        case "sendMessage":
+            sendMessage(call.arguments, result: result)
+            break
             
         default:
             result(FlutterError(code: "METHOD_NOT_IMPLEMENTED", 
@@ -148,6 +163,90 @@ public class FGCSessionManagerMethodChannel : UIResponder, FlutterPlugin, GCKSes
                                details: nil))
             break
         }
+    }
+
+    private func messageArguments(_ arguments: Any?) -> (namespace: String, message: String?)? {
+        guard let map = arguments as? [String: Any],
+              let namespace = map["namespace"] as? String,
+              namespace.hasPrefix("urn:x-cast:"),
+              namespace.count <= 128 else {
+            return nil
+        }
+        return (namespace, map["message"] as? String)
+    }
+
+    private func attachMessageChannels(to session: GCKCastSession) {
+        if messageChannelSession !== session {
+            if let previousSession = messageChannelSession {
+                for channel in messageChannels.values {
+                    previousSession.remove(channel)
+                }
+            }
+            messageChannelSession = session
+            for channel in messageChannels.values {
+                session.add(channel)
+            }
+        }
+    }
+
+    private func detachMessageChannels(from session: GCKCastSession) {
+        guard messageChannelSession === session else { return }
+        for channel in messageChannels.values {
+            session.remove(channel)
+        }
+        messageChannelSession = nil
+    }
+
+    private func addMessageChannel(_ arguments: Any?, result: FlutterResult) {
+        guard let parsed = messageArguments(arguments) else {
+            result(FlutterError(code: "INVALID_ARGUMENT", message: "A valid Cast namespace is required.", details: nil))
+            return
+        }
+        if messageChannels[parsed.namespace] == nil {
+            let channel = GCKGenericChannel(namespace: parsed.namespace)
+            channel.delegate = self
+            messageChannels[parsed.namespace] = channel
+            if let session = currentCastSession {
+                if messageChannelSession !== session {
+                    attachMessageChannels(to: session)
+                } else {
+                    session.add(channel)
+                }
+            }
+        }
+        result(true)
+    }
+
+    private func removeMessageChannel(_ arguments: Any?, result: FlutterResult) {
+        guard let parsed = messageArguments(arguments) else {
+            result(FlutterError(code: "INVALID_ARGUMENT", message: "A valid Cast namespace is required.", details: nil))
+            return
+        }
+        if let channel = messageChannels.removeValue(forKey: parsed.namespace) {
+            messageChannelSession?.remove(channel)
+            channel.delegate = nil
+        }
+        result(true)
+    }
+
+    private func sendMessage(_ arguments: Any?, result: FlutterResult) {
+        guard let parsed = messageArguments(arguments),
+              let message = parsed.message,
+              let channel = messageChannels[parsed.namespace],
+              messageChannelSession != nil else {
+            result(false)
+            return
+        }
+        var error: GCKError?
+        let sent = channel.sendTextMessage(message, error: &error)
+        result(sent)
+    }
+
+    public func cast(_ channel: GCKGenericChannel, didReceiveTextMessage message: String, withNamespace protocolNamespace: String) {
+        self.channel?.invokeMethod(
+            "onMessageReceived",
+            arguments: ["namespace": protocolNamespace, "message": message]
+        )
     }
     
     // MARK: - Cast Session Management Methods
@@ -242,6 +341,9 @@ public class FGCSessionManagerMethodChannel : UIResponder, FlutterPlugin, GCKSes
     ///   - sessionManager: The session manager instance
     ///   - session: The session that started
     public func sessionManager(_ sessionManager: GCKSessionManager, didStart session: GCKSession) {
+        if let castSession = session as? GCKCastSession {
+            attachMessageChannels(to: castSession)
+        }
         onSessionChanged(session)
         RemoteMediaClienteMethodChannel.instance.startListen()
     }
@@ -322,6 +424,7 @@ public class FGCSessionManagerMethodChannel : UIResponder, FlutterPlugin, GCKSes
     ///   - session: The Cast session that ended
     ///   - error: Optional error if the session ended unexpectedly
     public func sessionManager(_ sessionManager: GCKSessionManager, didEnd session: GCKCastSession, withError error: Error?) {
+        detachMessageChannels(from: session)
         onSessionChanged(nil)
         RemoteMediaClienteMethodChannel.instance.onSessionEnd()
     }
@@ -400,6 +503,7 @@ public class FGCSessionManagerMethodChannel : UIResponder, FlutterPlugin, GCKSes
     ///   - sessionManager: The session manager instance
     ///   - session: The Cast session that resumed
     public func sessionManager(_ sessionManager: GCKSessionManager, didResumeCastSession session: GCKCastSession) {
+        attachMessageChannels(to: session)
         onSessionChanged(session)
     }
     
@@ -506,6 +610,10 @@ public class FGCSessionManagerMethodChannel : UIResponder, FlutterPlugin, GCKSes
 
         // Clean up media client
         RemoteMediaClienteMethodChannel.instance.cleanUp()
+
+        if let castSession = sessionManager.currentCastSession {
+            detachMessageChannels(from: castSession)
+        }
 
         // Force-end the existing session
         sessionManager.endSessionAndStopCasting(true)

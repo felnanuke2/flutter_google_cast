@@ -1,5 +1,6 @@
 import 'package:flutter_chrome_cast/entities/cast_session.dart';
 import 'package:flutter_chrome_cast/entities/cast_device.dart';
+import 'package:flutter_chrome_cast/entities/cast_message.dart';
 import 'package:flutter_chrome_cast/enums/connection_state.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
@@ -25,6 +26,18 @@ abstract class GoogleCastSessionManagerPlatformInterface
 
   /// Stream of current session changes.
   Stream<GoogleCastSession?> get currentSessionStream;
+
+  /// Messages received from registered custom Cast namespaces.
+  Stream<GoogleCastMessage> get messageStream;
+
+  /// Registers a custom Cast namespace for the current and future sessions.
+  Future<bool> addMessageChannel(String namespace);
+
+  /// Stops listening to a previously registered custom Cast namespace.
+  Future<bool> removeMessageChannel(String namespace);
+
+  /// Sends a UTF-8 text message through a registered Cast namespace.
+  Future<bool> sendMessage(String namespace, String message);
 
   /// 	readnonatomicassign
 

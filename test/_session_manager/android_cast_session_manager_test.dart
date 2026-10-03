@@ -108,5 +108,59 @@ void main() {
       expect(result, isFalse);
       expect(methodCalls.single.method, equals('endSessionAndStopCasting'));
     });
+
+    test('custom message methods forward namespace and payload', () async {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(channel, (MethodCall call) async {
+        methodCalls.add(call);
+        return true;
+      });
+
+      expect(
+        await manager.addMessageChannel('urn:x-cast:example.channel'),
+        isTrue,
+      );
+      expect(
+        await manager.sendMessage(
+          'urn:x-cast:example.channel',
+          '{"command":"ping"}',
+        ),
+        isTrue,
+      );
+      expect(
+        await manager.removeMessageChannel('urn:x-cast:example.channel'),
+        isTrue,
+      );
+
+      expect(methodCalls.map((call) => call.method), <String>[
+        'addMessageChannel',
+        'sendMessage',
+        'removeMessageChannel',
+      ]);
+      expect(methodCalls[1].arguments, <String, dynamic>{
+        'namespace': 'urn:x-cast:example.channel',
+        'message': '{"command":"ping"}',
+      });
+    });
+
+    test('emits receiver messages with their namespace', () async {
+      final messageFuture = manager.messageStream.first;
+
+      await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .handlePlatformMessage(
+        channel.name,
+        const StandardMethodCodec().encodeMethodCall(
+          const MethodCall('onMessageReceived', <String, dynamic>{
+            'namespace': 'urn:x-cast:example.channel',
+            'message': '{"status":"ready"}',
+          }),
+        ),
+        (_) {},
+      );
+
+      final message = await messageFuture;
+      expect(message.namespace, 'urn:x-cast:example.channel');
+      expect(message.message, '{"status":"ready"}');
+    });
   });
 }
