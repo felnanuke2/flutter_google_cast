@@ -191,8 +191,7 @@ void main() {
       await subscription.cancel();
     });
 
-    test('dispose closes the message stream and drops later events',
-        () async {
+    test('dispose closes the message stream and drops later events', () async {
       manager.dispose();
 
       // A closed broadcast stream emits done to new listeners immediately.
