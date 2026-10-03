@@ -38,8 +38,11 @@ class GoogleCastDiscoveryManagerMethodChannelAndroid
   }
 
   @override
-  Future<void> startDiscovery() async {
-    _channel.invokeMethod('startDiscovery');
+  Future<void> startDiscovery({bool activeScan = false}) async {
+    _channel.invokeMethod(
+      'startDiscovery',
+      activeScan ? {'activeScan': true} : null,
+    );
     return;
   }
 

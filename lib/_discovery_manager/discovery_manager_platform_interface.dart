@@ -24,7 +24,15 @@ abstract class GoogleCastDiscoveryManagerPlatformInterface
   /// Starts the discovery process.
   /// strongly recommended to call this method when the application is show cast devices dialog
   /// because the battery consumption is high when the discovery process is running.
-  Future<void> startDiscovery();
+  ///
+  /// On Android, discovery is passive by default: it only surfaces receivers
+  /// Google Play services already knows about. Pass [activeScan] as `true`
+  /// while a device picker is visible to request an active scan
+  /// (`MediaRouter.CALLBACK_FLAG_PERFORM_ACTIVE_SCAN`), which finds receivers
+  /// that the passive scan misses, then call [startDiscovery] again without it
+  /// (or [stopDiscovery]) when the picker closes to limit battery use.
+  /// iOS scans actively while discovery runs, so [activeScan] has no effect there.
+  Future<void> startDiscovery({bool activeScan = false});
 
   ///Stops the discovery process.
   /// strongly recommended to call this method when the application close the show cast devices dialog

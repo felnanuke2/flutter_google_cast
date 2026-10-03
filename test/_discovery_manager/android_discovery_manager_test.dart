@@ -74,6 +74,22 @@ void main() {
       expect(methodCalls.first.arguments, isNull);
     });
 
+    test('should request an active scan when asked', () async {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
+        methodCalls.add(methodCall);
+        return null;
+      });
+
+      discoveryManager = GoogleCastDiscoveryManagerMethodChannelAndroid();
+
+      await discoveryManager.startDiscovery(activeScan: true);
+
+      expect(methodCalls, hasLength(1));
+      expect(methodCalls.first.method, equals('startDiscovery'));
+      expect(methodCalls.first.arguments, equals({'activeScan': true}));
+    });
+
     test('should call stopDiscovery method on native side', () async {
       // Set up the mock to capture outgoing calls
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
