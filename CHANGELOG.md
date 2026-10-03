@@ -1,6 +1,10 @@
 ## Unreleased
 ### ✨ New Features
 - Added cross-platform custom Cast message channels for registering namespaces, sending text messages, and receiving receiver messages on Android and iOS.
+- Added opt-in `GoogleCastLogger.level` filtering with `none`, `error`, `warning`, `info`, and `verbose` levels.
+- Routed Dart, Android, and iOS plugin-owned logs through centralized level-aware loggers.
+- Applied explicitly selected levels to the iOS Google Cast SDK `GCKLogger`; Android Cast SDK-internal logs remain outside app control because CAF exposes no public logger configuration API.
+- Preserved legacy logging behavior when no level is explicitly configured.
 
 ### 🐛 Bug Fixes
 - Safely parse in-band Cast media tracks when the receiver omits `trackContentType`.

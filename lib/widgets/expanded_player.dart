@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:marquee/marquee.dart';
 import 'package:flutter_chrome_cast/lib.dart' hide GoogleCastPlayerTexts;
+import 'package:flutter_chrome_cast/src/logging/google_cast_logger_configuration.dart';
 import 'package:flutter_chrome_cast/themes.dart';
 
 /// A full-screen cast player controller widget that displays media information,
@@ -496,7 +497,7 @@ class _ExpandedGoogleCastPlayerControllerState
                                       GestureDetector(
                                         behavior: HitTestBehavior.opaque,
                                         onTap: () {
-                                          debugPrint(
+                                          GoogleCastLog.verbose(() =>
                                               '[Flutter] Play/Pause GestureDetector tapped! playerState: ${mediaStatus.playerState} (index: ${mediaStatus.playerState.index})');
                                           _togglePlayAndPause(
                                               mediaStatus.playerState);
@@ -675,28 +676,28 @@ class _ExpandedGoogleCastPlayerControllerState
     } catch (e) {
       // Handle potential errors silently
       // In a production app, you might want to show a snackbar or log the error
-      debugPrint('Failed to end cast session: $e');
+      GoogleCastLog.error(() => 'Failed to end cast session: $e');
     }
   }
 
   void _previous() => GoogleCastRemoteMediaClient.instance.queuePrevItem();
 
   void _togglePlayAndPause(CastMediaPlayerState playerState) {
-    debugPrint(
+    GoogleCastLog.verbose(() =>
         '[Flutter] _togglePlayAndPause called with state: $playerState (index: ${playerState.index})');
     switch (playerState) {
       case CastMediaPlayerState.playing:
       case CastMediaPlayerState.buffering:
       case CastMediaPlayerState.loading:
         // When playing or buffering - pause the media
-        debugPrint('[Flutter] Calling pause()');
+        GoogleCastLog.verbose(() => '[Flutter] Calling pause()');
         GoogleCastRemoteMediaClient.instance.pause();
         break;
       case CastMediaPlayerState.paused:
       case CastMediaPlayerState.idle:
       case CastMediaPlayerState.unknown:
         // When paused, idle, loading, or unknown - play the media
-        debugPrint('[Flutter] Calling play()');
+        GoogleCastLog.verbose(() => '[Flutter] Calling play()');
         GoogleCastRemoteMediaClient.instance.play();
         break;
     }
@@ -705,7 +706,7 @@ class _ExpandedGoogleCastPlayerControllerState
   void _next() => GoogleCastRemoteMediaClient.instance.queueNextItem();
 
   void _seekBackward30() {
-    debugPrint('[Flutter] _seekBackward30 called');
+    GoogleCastLog.verbose(() => '[Flutter] _seekBackward30 called');
     GoogleCastRemoteMediaClient.instance.seek(
       GoogleCastMediaSeekOption(
         position: const Duration(seconds: -30),
@@ -755,7 +756,8 @@ class _ExpandedGoogleCastPlayerControllerState
       _isSliding = false;
     });
     final durationToSeek = _getDurationToSeek(value, mediaStatus);
-    debugPrint('[Flutter] Slider seek to: ${durationToSeek.inSeconds} seconds');
+    GoogleCastLog.verbose(
+        () => '[Flutter] Slider seek to: ${durationToSeek.inSeconds} seconds');
     GoogleCastRemoteMediaClient.instance.seek(
       GoogleCastMediaSeekOption(
         position: durationToSeek,

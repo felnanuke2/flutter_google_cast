@@ -3,6 +3,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_chrome_cast/_google_cast_context/ios_google_cast_context_method_channel.dart';
 import 'package:flutter_chrome_cast/_google_cast_context/google_cast_context_platform_interface.dart';
 import 'package:flutter_chrome_cast/entities/cast_options.dart';
+import 'package:flutter_chrome_cast/logging.dart';
+import 'package:flutter_chrome_cast/src/logging/google_cast_logger_configuration.dart';
 
 void main() {
   group('FlutterIOSGoogleCastContextMethodChannel', () {
@@ -15,11 +17,13 @@ void main() {
       methodCalls = [];
       channel = const MethodChannel('google_cast.context');
       contextManager = FlutterIOSGoogleCastContextMethodChannel();
+      GoogleCastLoggerConfiguration.reset();
     });
 
     tearDown(() {
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
           .setMockMethodCallHandler(channel, null);
+      GoogleCastLoggerConfiguration.reset();
     });
 
     test('should implement GoogleCastContextPlatformInterface', () {
@@ -72,6 +76,24 @@ void main() {
       expect(result, isFalse);
       expect(methodCalls, hasLength(1));
       expect(methodCalls.first.method, equals('setSharedInstanceWithOptions'));
+    });
+
+    test('forwards an explicitly configured log level', () async {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
+        methodCalls.add(methodCall);
+        return true;
+      });
+      GoogleCastLogger.level = CastLogLevel.warning;
+
+      final castOptions = GoogleCastOptions();
+      await contextManager.setSharedInstanceWithOptions(castOptions);
+
+      expect(methodCalls.single.arguments, <String, dynamic>{
+        ...castOptions.toMap(),
+        'logLevel': 'warning',
+      });
+      expect(castOptions.toMap(), isNot(contains('logLevel')));
     });
 
     test(

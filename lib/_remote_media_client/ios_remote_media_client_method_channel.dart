@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_chrome_cast/_remote_media_client/remote_media_client_platform.dart';
 import 'package:flutter_chrome_cast/entities/cast_media_status.dart';
@@ -10,6 +9,7 @@ import 'package:flutter_chrome_cast/entities/queue_item.dart';
 import 'package:flutter_chrome_cast/entities/media_information.dart';
 import 'package:flutter_chrome_cast/models/ios/ios_cast_queue_item.dart';
 import 'package:flutter_chrome_cast/models/ios/ios_media_status.dart';
+import 'package:flutter_chrome_cast/src/logging/google_cast_logger_configuration.dart';
 import 'package:rxdart/rxdart.dart';
 
 /// iOS-specific implementation of Google Cast remote media client functionality.
@@ -237,15 +237,15 @@ class GoogleCastRemoteMediaClientIOSMethodChannel
       try {
         arguments =
             _convertToStringDynamicMap(arguments) as Map<String, dynamic>;
-        debugPrint(
+        GoogleCastLog.verbose(() =>
             '[Flutter] _onUpdateMediaStatus received: playerState=${arguments['playerState']}');
         final mediaStatus = GoogleCastIOSMediaStatus.fromMap(arguments);
-        debugPrint(
+        GoogleCastLog.verbose(() =>
             '[Flutter] _onUpdateMediaStatus parsed: playerState=${mediaStatus.playerState}');
         _queueHasNextItem = arguments["queueHasNextItem"];
         _mediaStatusStreamController.add(mediaStatus);
       } catch (e) {
-        debugPrint('[Flutter] _onUpdateMediaStatus error: $e');
+        GoogleCastLog.error(() => '[Flutter] _onUpdateMediaStatus error: $e');
         rethrow;
       }
     }

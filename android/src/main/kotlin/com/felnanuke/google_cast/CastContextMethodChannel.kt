@@ -3,7 +3,6 @@ package com.felnanuke.google_cast
 import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Build
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
@@ -139,7 +138,9 @@ class CastContextMethodChannel : FlutterPlugin, MethodChannel.MethodCallHandler 
         try {
             CastContext.getSharedInstance(appContext)?.sessionManager?.removeSessionManagerListener(sessionManagerMethodChannel)
         } catch (e: Exception) {
-            Log.w(TAG, "Failed to remove session manager listener", e)
+            GoogleCastLogger.warning(TAG, throwable = e) {
+                "Failed to remove session manager listener"
+            }
         }
         discoveryManager.onDetachedFromEngine(binding)
         sessionManagerMethodChannel.onDetachedFromEngine(binding)
@@ -158,9 +159,13 @@ class CastContextMethodChannel : FlutterPlugin, MethodChannel.MethodCallHandler 
         nearbyWifiDevicesPermissionLauncher =
             activity.registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
                 if (isGranted) {
-                    Log.d(TAG, "Nearby WiFi devices permission granted")
+                    GoogleCastLogger.verbose(TAG) {
+                        "Nearby WiFi devices permission granted"
+                    }
                 } else {
-                    Log.w(TAG, "Nearby WiFi devices permission denied")
+                    GoogleCastLogger.warning(TAG) {
+                        "Nearby WiFi devices permission denied"
+                    }
                 }
             }
     }
@@ -169,6 +174,7 @@ class CastContextMethodChannel : FlutterPlugin, MethodChannel.MethodCallHandler 
     private fun setSharedInstance(arguments: Any?, result: MethodChannel.Result) {
         try {
             val map = arguments as HashMap<*, *>
+            GoogleCastLogger.configure(map["logLevel"] as? String)
             val optionsBuilder = CastOptions.Builder()
             optionsBuilder.setReceiverApplicationId(map["appId"] as String)
             val launcherOptions = LaunchOptions.Builder().setAndroidReceiverCompatible(true).build()
@@ -180,12 +186,16 @@ class CastContextMethodChannel : FlutterPlugin, MethodChannel.MethodCallHandler 
             // Store the stopCastingOnAppTerminated option
             val stopCastingOnAppTerminated = map["stopCastingOnAppTerminated"] as? Boolean ?: false
             GoogleCastOptionsProvider.stopCastingOnAppTerminated = stopCastingOnAppTerminated
-            Log.d(TAG, "stopCastingOnAppTerminated set to: $stopCastingOnAppTerminated")
+            GoogleCastLogger.verbose(TAG) {
+                "stopCastingOnAppTerminated set to: $stopCastingOnAppTerminated"
+            }
             
             CastContext.getSharedInstance(appContext).sessionManager.addSessionManagerListener(sessionManagerMethodChannel)
             result.success(true)
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to set shared instance", e)
+            GoogleCastLogger.error(TAG, throwable = e) {
+                "Failed to set shared instance"
+            }
             result.error("CAST_ERROR", "Failed to initialize Cast context: ${e.message}", null)
         }
     }

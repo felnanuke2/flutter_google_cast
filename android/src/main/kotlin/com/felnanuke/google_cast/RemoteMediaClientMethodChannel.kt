@@ -252,9 +252,13 @@ class RemoteMediaClientMethodChannel : FlutterPlugin, MethodChannel.MethodCallHa
             ?.addStatusListener { status ->
                 if (status.isSuccess) {
 
-                    Log.w(TAG, "setActiveTrackIds success $longArray")
+                    GoogleCastLogger.info(TAG, legacyPriority = Log.WARN) {
+                        "setActiveTrackIds success $longArray"
+                    }
                 } else {
-                    Log.w(TAG, "setActiveTrackIds failed $longArray")
+                    GoogleCastLogger.warning(TAG) {
+                        "setActiveTrackIds failed $longArray"
+                    }
                 }
 
             }
@@ -456,7 +460,9 @@ class RemoteMediaClientMethodChannel : FlutterPlugin, MethodChannel.MethodCallHa
         val mediaStatus = currentRemoteMediaClient?.mediaStatus
         val jsonObject = currentRemoteMediaClient?.mediaStatus?.toJson()
         jsonObject?.put("activeTrackIds", Gson().toJson(mediaStatus?.activeTrackIds))
-        Log.w(TAG, "onStatusUpdated $jsonObject")
+        GoogleCastLogger.verbose(TAG, legacyPriority = Log.WARN) {
+            "onStatusUpdated $jsonObject"
+        }
         val json = jsonObject?.toString()
         channel.invokeMethod("onMediaStatusChanged", json)
     }

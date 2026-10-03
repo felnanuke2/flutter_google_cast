@@ -1,9 +1,11 @@
 import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_chrome_cast/_discovery_manager/discovery_manager_platform_interface.dart';
 import 'package:flutter_chrome_cast/entities/cast_device.dart';
 import 'package:flutter_chrome_cast/models/android/cast_device.dart';
+import 'package:flutter_chrome_cast/src/logging/google_cast_logger_configuration.dart';
 import 'package:rxdart/subjects.dart';
 
 /// Android-specific implementation of the Google Cast discovery manager.
@@ -19,8 +21,9 @@ class GoogleCastDiscoveryManagerMethodChannelAndroid
     _channel.setMethodCallHandler(_onMethodCallHandler);
   }
 
-  final _channel =
-      const MethodChannel('com.felnanuke.google_cast.discovery_manager');
+  final _channel = const MethodChannel(
+    'com.felnanuke.google_cast.discovery_manager',
+  );
 
   final _devicesStreamController = BehaviorSubject<List<GoogleCastDevice>>()
     ..add([]);
@@ -69,10 +72,14 @@ class GoogleCastDiscoveryManagerMethodChannelAndroid
       final devices = GoogleCastAndroidDevices.fromMap(listMap);
 
       if (kDebugMode) {
-        print('Received ${devices.length} devices from native');
+        GoogleCastLog.verbose(
+          () => 'Received ${devices.length} devices from native',
+        );
         for (final device in devices) {
-          print(
-              'Device: ${device.deviceID} - ${device.friendlyName} (${device.modelName})');
+          GoogleCastLog.verbose(
+            () =>
+                'Device: ${device.deviceID} - ${device.friendlyName} (${device.modelName})',
+          );
         }
       }
 
@@ -83,18 +90,22 @@ class GoogleCastDiscoveryManagerMethodChannelAndroid
         if (!uniqueDevices.containsKey(key)) {
           uniqueDevices[key] = device;
           if (kDebugMode) {
-            print('Added unique device with key: $key');
+            GoogleCastLog.verbose(() => 'Added unique device with key: $key');
           }
         } else {
           if (kDebugMode) {
-            print('Skipped duplicate device with key: $key');
+            GoogleCastLog.verbose(
+              () => 'Skipped duplicate device with key: $key',
+            );
           }
         }
       }
 
       if (kDebugMode) {
-        print(
-            'Final device count after deduplication: ${uniqueDevices.length}');
+        GoogleCastLog.verbose(
+          () =>
+              'Final device count after deduplication: ${uniqueDevices.length}',
+        );
       }
       _devicesStreamController.add(uniqueDevices.values.toList());
     } catch (e) {

@@ -146,6 +146,7 @@ class FGCDiscoveryManagerMethodChannel : UIResponder, GCKDiscoveryManagerListene
     ///   - device: The updated Cast device
     ///   - index: The index position of the device in the discovery list
     public func didUpdate(_ device: GCKDevice, at index: UInt) {
+        FlutterGoogleCastLogger.verbose("didUpdateDevice at index: \(index)")
         sendDeviceList()
     }
 
@@ -155,6 +156,7 @@ class FGCDiscoveryManagerMethodChannel : UIResponder, GCKDiscoveryManagerListene
     ///   - device: The newly discovered Cast device
     ///   - index: The index position assigned to the device
     public func didInsert(_ device: GCKDevice, at index: UInt) {
+        FlutterGoogleCastLogger.verbose("didInsertDevice at index: \(index)")
     }
 
     /// Called when a Cast device is removed from discovery
@@ -163,6 +165,7 @@ class FGCDiscoveryManagerMethodChannel : UIResponder, GCKDiscoveryManagerListene
     ///   - device: The Cast device that was removed
     ///   - index: The index position of the removed device
     public func didRemove(_ device: GCKDevice, at index: UInt) {
+        FlutterGoogleCastLogger.verbose("didRemoveDevice at index: \(index)")
     }
 
     /// Called when the device list changes

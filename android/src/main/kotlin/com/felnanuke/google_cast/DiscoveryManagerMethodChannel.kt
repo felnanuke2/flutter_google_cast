@@ -180,7 +180,9 @@ class DiscoveryManagerMethodChannel : FlutterPlugin, MethodChannel.MethodCallHan
             router: MediaRouter, route: MediaRouter.RouteInfo, reason: Int
         ) {
             super.onRouteUnselected(router, route, reason)
-            Log.d(TAG, "Route unselected, total routes: ${router.routes.size}")
+            GoogleCastLogger.verbose(TAG) {
+                "Route unselected, total routes: ${router.routes.size}"
+            }
         }
 
         override fun onRouteAdded(router: MediaRouter, route: MediaRouter.RouteInfo) {
@@ -206,17 +208,23 @@ class DiscoveryManagerMethodChannel : FlutterPlugin, MethodChannel.MethodCallHan
 
         override fun onProviderAdded(router: MediaRouter, provider: MediaRouter.ProviderInfo) {
             super.onProviderAdded(router, provider)
-            Log.d(TAG, "Provider added, total routes: ${router.routes.size}")
+            GoogleCastLogger.verbose(TAG) {
+                "Provider added, total routes: ${router.routes.size}"
+            }
         }
 
         override fun onProviderRemoved(router: MediaRouter, provider: MediaRouter.ProviderInfo) {
             super.onProviderRemoved(router, provider)
-            Log.d(TAG, "Provider removed, total routes: ${router.routes.size}")
+            GoogleCastLogger.verbose(TAG) {
+                "Provider removed, total routes: ${router.routes.size}"
+            }
         }
 
         override fun onProviderChanged(router: MediaRouter, provider: MediaRouter.ProviderInfo) {
             super.onProviderChanged(router, provider)
-            Log.d(TAG, "Provider changed, total routes: ${router.routes.size}")
+            GoogleCastLogger.verbose(TAG) {
+                "Provider changed, total routes: ${router.routes.size}"
+            }
         }
 
         private fun getCastDevice(routeInfo: MediaRouter.RouteInfo): Map<*, *>? {
@@ -241,7 +249,9 @@ class DiscoveryManagerMethodChannel : FlutterPlugin, MethodChannel.MethodCallHan
                     val deviceModel = device["model_name"] as? String
                     val deviceSignature = "${deviceName}_${deviceModel}"
                     
-                    Log.d(TAG, "Found route with device ID: $deviceId, name: $deviceName, model: $deviceModel")
+                    GoogleCastLogger.verbose(TAG) {
+                        "Found route with device ID: $deviceId, name: $deviceName, model: $deviceModel"
+                    }
                     
                     // Skip devices we've already seen by ID or by name+model combination
                     if (deviceId != null && 
@@ -250,15 +260,21 @@ class DiscoveryManagerMethodChannel : FlutterPlugin, MethodChannel.MethodCallHan
                         seenDeviceIds.add(deviceId)
                         seenDeviceSignatures.add(deviceSignature)
                         devices.add(device)
-                        Log.d(TAG, "Added unique device: $deviceId ($deviceSignature)")
+                        GoogleCastLogger.verbose(TAG) {
+                            "Added unique device: $deviceId ($deviceSignature)"
+                        }
                     } else {
-                        Log.w(TAG, "Skipping duplicate device - ID: $deviceId, signature: $deviceSignature")
+                        GoogleCastLogger.warning(TAG) {
+                            "Skipping duplicate device - ID: $deviceId, signature: $deviceSignature"
+                        }
                     }
                 }
             }
             val json = Gson().toJson(devices)
             this@DiscoveryManagerMethodChannel.channel.invokeMethod("onDevicesChanged", json)
-            Log.w(TAG, "onDevicesChanged $json")
+            GoogleCastLogger.verbose(TAG, legacyPriority = Log.WARN) {
+                "onDevicesChanged $json"
+            }
         }
     }
 

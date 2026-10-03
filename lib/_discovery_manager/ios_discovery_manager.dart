@@ -2,7 +2,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_chrome_cast/entities/cast_device.dart';
 import 'package:flutter_chrome_cast/models/ios/ios_cast_device.dart';
+import 'package:flutter_chrome_cast/src/logging/google_cast_logger_configuration.dart';
 import 'package:rxdart/subjects.dart';
+
 import 'discovery_manager_platform_interface.dart';
 
 /// iOS-specific implementation of the Google Cast discovery manager.
@@ -78,7 +80,7 @@ class GoogleCastDiscoveryManagerMethodChannelIOS
         break;
       default:
         if (kDebugMode) {
-          print('No Handler for method ${call.method}');
+          GoogleCastLog.warning(() => 'No Handler for method ${call.method}');
         }
     }
   }
