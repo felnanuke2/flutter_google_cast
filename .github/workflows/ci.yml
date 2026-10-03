@@ -80,7 +80,7 @@ jobs:
       run: |
         SDKMANAGER="${ANDROID_HOME}/cmdline-tools/latest/bin/sdkmanager"
         yes | "$SDKMANAGER" --licenses > /dev/null || true
-        yes | "$SDKMANAGER" "platforms;android-37" "build-tools;37.0.0" > /dev/null
+        yes | "$SDKMANAGER" "platforms;android-37.0" "build-tools;37.0.0" > /dev/null
     
     
     - name: Build Android (ARM64 and ARM only)
