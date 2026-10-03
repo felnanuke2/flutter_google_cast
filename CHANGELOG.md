@@ -1,13 +1,15 @@
-## Unreleased
+## 1.5.0 - Custom Cast Message Channels, Discovery and Logging
 ### ✨ New Features
 - Added cross-platform custom Cast message channels for registering namespaces, sending text messages, and receiving receiver messages on Android and iOS.
 - Added opt-in `GoogleCastLogger.level` filtering with `none`, `error`, `warning`, `info`, and `verbose` levels.
 - Routed Dart, Android, and iOS plugin-owned logs through centralized level-aware loggers.
 - Applied explicitly selected levels to the iOS Google Cast SDK `GCKLogger`; Android Cast SDK-internal logs remain outside app control because CAF exposes no public logger configuration API.
 - Preserved legacy logging behavior when no level is explicitly configured.
+- `startDiscovery` now accepts `activeScan: true` on Android to request an active scan (`MediaRouter.CALLBACK_FLAG_PERFORM_ACTIVE_SCAN`) while a device picker is visible, finding receivers the passive scan misses. No-op on iOS. (#93)
 
 ### 🐛 Bug Fixes
 - Safely parse in-band Cast media tracks when the receiver omits `trackContentType`.
+- iOS discovery now sends the live device list when devices change instead of an index-keyed mirror of a potentially stale array, so device pickers reflect additions and removals correctly. (#89)
 
 ### 🔧 Improvements
 - Added `dispose()` to the session manager platform interface (and both platform implementations) so stream controllers and the method-channel handler can be released in custom lifecycles; late native message events are safely dropped after disposal.
@@ -16,6 +18,10 @@
 - After `dispose()`, `currentSession` returns `null` and `connectionState` reports `disconnected` instead of surfacing the last cached session, and late native session-change events are safely dropped on both platforms.
 - iOS logs the underlying `GCKError` when a custom-channel send fails instead of silently returning `false`.
 - Android clears requested custom namespaces when the Flutter engine detaches, preventing stale registrations from silently reattaching on a future session.
+
+### 📦 Dependencies
+- Raised the minimum SDK to Dart `>=3.6.0` and Flutter `>=3.24.0` (required by `permission_handler` 13). (#96)
+- Upgraded `permission_handler` to `^13.0.2` and `pigeon` (dev) to `^29.0.6`; the example app now builds with compileSdk 37, AGP 8.13.2 and Gradle 8.13.
 
 ## 1.4.8 - Media Metadata, HLS and Content ID Fixes
 ### 🐛 Bug Fixes
