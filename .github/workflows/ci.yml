@@ -77,7 +77,10 @@ jobs:
         echo "Note: Some dependencies may have newer versions. Consider updating when compatible."
     
     - name: Install Android SDK Platform 37
-      run: yes | sdkmanager "platforms;android-37" "build-tools;37.0.0" > /dev/null || true
+      run: |
+        SDKMANAGER="${ANDROID_HOME}/cmdline-tools/latest/bin/sdkmanager"
+        yes | "$SDKMANAGER" --licenses > /dev/null || true
+        yes | "$SDKMANAGER" "platforms;android-37" "build-tools;37.0.0" > /dev/null
     
     
     - name: Build Android (ARM64 and ARM only)
