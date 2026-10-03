@@ -756,8 +756,8 @@ class _ExpandedGoogleCastPlayerControllerState
       _isSliding = false;
     });
     final durationToSeek = _getDurationToSeek(value, mediaStatus);
-    GoogleCastLog.verbose(() =>
-        '[Flutter] Slider seek to: ${durationToSeek.inSeconds} seconds');
+    GoogleCastLog.verbose(
+        () => '[Flutter] Slider seek to: ${durationToSeek.inSeconds} seconds');
     GoogleCastRemoteMediaClient.instance.seek(
       GoogleCastMediaSeekOption(
         position: durationToSeek,
