@@ -141,6 +141,8 @@ class CastContextMethodChannel : FlutterPlugin, MethodChannel.MethodCallHandler 
         } catch (e: Exception) {
             Log.w(TAG, "Failed to remove session manager listener", e)
         }
+        discoveryManager.onDetachedFromEngine(binding)
+        sessionManagerMethodChannel.onDetachedFromEngine(binding)
     }
 
 

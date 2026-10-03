@@ -27,14 +27,19 @@ class GoogleCastSessionManagerAndroidMethodChannel
   final _messageStreamController =
       StreamController<GoogleCastMessage>.broadcast();
 
+  /// Whether [dispose] has already been called on this instance.
+  ///
+  /// Once disposed, getters no longer surface the last cached session
+  /// (rxdart's [BehaviorSubject] retains its value after being closed).
+  bool _isDisposed = false;
+
   @override
   GoogleCastConnectState get connectionState =>
-      _currentSessionStreamController.value?.connectionState ??
-      GoogleCastConnectState.disconnected;
+      currentSession?.connectionState ?? GoogleCastConnectState.disconnected;
 
   @override
   GoogleCastSession? get currentSession =>
-      _currentSessionStreamController.value;
+      _isDisposed ? null : _currentSessionStreamController.value;
 
   @override
   Stream<GoogleCastSession?> get currentSessionStream =>
@@ -86,8 +91,7 @@ class GoogleCastSessionManagerAndroidMethodChannel
 
   @override
   bool get hasConnectedSession =>
-      _currentSessionStreamController.value?.connectionState ==
-      GoogleCastConnectState.connected;
+      connectionState == GoogleCastConnectState.connected;
 
   @override
   Future<void> setDefaultSessionOptions() {
@@ -129,6 +133,7 @@ class GoogleCastSessionManagerAndroidMethodChannel
   }
 
   void _onMessageReceived(dynamic arguments) {
+    if (_messageStreamController.isClosed) return;
     if (arguments is! Map) return;
     final map = Map<String, dynamic>.from(arguments);
     final namespace = map['namespace'];
@@ -141,6 +146,7 @@ class GoogleCastSessionManagerAndroidMethodChannel
   }
 
   void _onSessionChanged(dynamic arguments) {
+    if (_currentSessionStreamController.isClosed) return;
     try {
       if (arguments == null) {
         _currentSessionStreamController.add(null);
@@ -164,5 +170,14 @@ class GoogleCastSessionManagerAndroidMethodChannel
     // Stale sessions are not observed on Android;
     // delegate to the standard endSessionAndStopCasting
     return endSessionAndStopCasting();
+  }
+
+  @override
+  void dispose() {
+    if (_isDisposed) return;
+    _isDisposed = true;
+    _channel.setMethodCallHandler(null);
+    _messageStreamController.close();
+    _currentSessionStreamController.close();
   }
 }

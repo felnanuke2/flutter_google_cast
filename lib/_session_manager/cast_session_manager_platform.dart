@@ -127,6 +127,16 @@ abstract class GoogleCastSessionManagerPlatformInterface
   /// Sets the device volume.
   void setDeviceVolume(double value);
 
+  /// Releases resources held by this session manager, closing streams and
+  /// removing the method-channel handler.
+  ///
+  /// The default implementation does nothing, so existing implementations
+  /// keep working. Only call this when you own the instance lifecycle (for
+  /// example in tests or embedder scenarios); the default singleton returned
+  /// by [GoogleCastSessionManager.instance] is meant to live for the whole
+  /// application lifetime.
+  void dispose() {}
+
   /// Forcefully resets a stuck session.
   ///
   /// On iOS this performs a full teardown: it removes the session manager
