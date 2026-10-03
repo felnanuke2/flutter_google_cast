@@ -1,6 +1,6 @@
 /// Session Management functionality
 ///
 /// This module provides access to cast session management.
-library session;
+library;
 
 export '_session_manager/_session_manager.dart';
