@@ -1,10 +1,9 @@
 ## Unreleased
-### 🐛 Bug Fixes
 ### ✨ New Features
 - Added cross-platform custom Cast message channels for registering namespaces, sending text messages, and receiving receiver messages on Android and iOS.
 
 ### 🐛 Bug Fixes
-- **Android media status dropped when a track has no content type (#88)**: The Default Media Receiver reports embedded tracks with only `trackId` and `type`, but `GoogleCastMediaTrack.fromMap` required `trackContentType`, so every `onMediaStatusChanged` threw inside the method-call handler and `mediaStatusStream` never updated on Android. `trackContentType` is now nullable, matching `trackContentId`.
+- Safely parse in-band Cast media tracks when the receiver omits `trackContentType`.
 
 ### 🔧 Improvements
 - Added `dispose()` to the session manager platform interface (and both platform implementations) so stream controllers and the method-channel handler can be released in custom lifecycles; late native message events are safely dropped after disposal.
@@ -13,6 +12,7 @@
 - After `dispose()`, `currentSession` returns `null` and `connectionState` reports `disconnected` instead of surfacing the last cached session, and late native session-change events are safely dropped on both platforms.
 - iOS logs the underlying `GCKError` when a custom-channel send fails instead of silently returning `false`.
 - Android clears requested custom namespaces when the Flutter engine detaches, preventing stale registrations from silently reattaching on a future session.
+
 ## 1.4.8 - Media Metadata, HLS and Content ID Fixes
 ### 🐛 Bug Fixes
 - **iOS stale playback position after `loadMedia`**: Fixed `playerPosition` briefly showing the previous content's offset right after switching media. Position ticks are now suppressed until the SDK reports a new `mediaSessionID` and `approximateStreamPosition()` converges to the requested start time (±5 s tolerance), with a 10 s safety timeout.

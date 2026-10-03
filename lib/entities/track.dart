@@ -72,7 +72,11 @@ class GoogleCastMediaTrack {
             )
           : null,
       trackContentId: map['trackContentId'],
-      trackContentType: map['trackContentType'],
+      // In-band receiver tracks are allowed to omit a content type. Android's
+      // MediaTrack.toMap() consequently sends null for those tracks, so keep
+      // the public non-nullable API stable while parsing the missing value
+      // safely. Outbound tracks created by callers still provide a MIME type.
+      trackContentType: map['trackContentType'] as String? ?? '',
       trackId: map['trackId']?.toInt() ?? 0,
       type: GoogleCastTrackTypeAndroid.fromMap(map['type']),
     );
