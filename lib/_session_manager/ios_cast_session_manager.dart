@@ -26,6 +26,12 @@ class GoogleCastSessionManagerIOSMethodChannel
   final _messageStreamController =
       StreamController<GoogleCastMessage>.broadcast();
 
+  /// Whether [dispose] has already been called on this instance.
+  ///
+  /// Once disposed, getters no longer surface the last cached session
+  /// (rxdart's [BehaviorSubject] retains its value after being closed).
+  bool _isDisposed = false;
+
   @override
   Stream<GoogleCastMessage> get messageStream =>
       _messageStreamController.stream;
@@ -81,7 +87,7 @@ class GoogleCastSessionManagerIOSMethodChannel
 
   @override
   GoogleCastSession? get currentSession =>
-      _currentSessionStreamController.value;
+      _isDisposed ? null : _currentSessionStreamController.value;
 
   @override
   Future<bool> endSession() async {
@@ -125,6 +131,7 @@ class GoogleCastSessionManagerIOSMethodChannel
   }
 
   void _onMessageReceived(dynamic arguments) {
+    if (_messageStreamController.isClosed) return;
     if (arguments is! Map) return;
     final map = Map<String, dynamic>.from(arguments);
     final namespace = map['namespace'];
@@ -137,6 +144,7 @@ class GoogleCastSessionManagerIOSMethodChannel
   }
 
   void _onCurrentSessionChanged(dynamic arguments) async {
+    if (_currentSessionStreamController.isClosed) return;
     try {
       final session = IOSGoogleCastSessions.fromMap(
           arguments == null ? null : Map<String, dynamic>.from(arguments));
@@ -154,5 +162,14 @@ class GoogleCastSessionManagerIOSMethodChannel
   @override
   Future<bool> resetSession() async {
     return await _channel.invokeMethod('resetSession');
+  }
+
+  @override
+  void dispose() {
+    if (_isDisposed) return;
+    _isDisposed = true;
+    _channel.setMethodCallHandler(null);
+    _messageStreamController.close();
+    _currentSessionStreamController.close();
   }
 }

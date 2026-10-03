@@ -145,7 +145,11 @@ class SessionManagerMethodChannel(discoveryManager: DiscoveryManagerMethodChanne
                 }
             }
         }
+        // The engine may re-attach with fresh Dart state; drop stale
+        // registrations so channels don't silently reattach later.
+        requestedMessageNamespaces.clear()
         channel.setMethodCallHandler(null)
+        remoteMediaClientMethodChannel.onDetachedFromEngine(binding)
     }
 
     /**
@@ -234,9 +238,18 @@ class SessionManagerMethodChannel(discoveryManager: DiscoveryManagerMethodChanne
 
     private fun sendMessage(arguments: Any?, result: MethodChannel.Result) {
         val parsed = messageArguments(arguments)
-        val message = parsed?.second
+        if (parsed == null) {
+            result.error("INVALID_ARGUMENT", "A valid Cast namespace is required.", null)
+            return
+        }
+        val message = parsed.second
         val session = sessionManager?.currentCastSession
-        if (parsed == null || message == null || session == null) {
+        if (message == null || session == null ||
+            !requestedMessageNamespaces.contains(parsed.first)
+        ) {
+            // Runtime state, not a programmer error: report as `false` so the
+            // Dart API stays a simple Future<bool>. iOS enforces the same
+            // registration requirement via its channel dictionary.
             result.success(false)
             return
         }
