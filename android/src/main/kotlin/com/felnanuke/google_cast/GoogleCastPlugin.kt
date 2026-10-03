@@ -138,6 +138,7 @@ class GoogleCastPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, Applic
      */
     override fun onDetachedFromEngine(@NonNull binding: FlutterPlugin.FlutterPluginBinding) {
         channel.setMethodCallHandler(null)
+        castContextMethodChannel.onDetachedFromEngine(binding)
     }
     
     // MARK: - ActivityAware Implementation

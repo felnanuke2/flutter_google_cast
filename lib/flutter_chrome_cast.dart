@@ -28,7 +28,7 @@
 /// // Enums and Constants
 /// import 'package:flutter_chrome_cast/enums.dart';
 /// ```
-library flutter_chrome_cast;
+library;
 
 // Core functionality
 export 'cast_context.dart';
