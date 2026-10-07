@@ -25,7 +25,7 @@ let package = Package(
         // This is a community-maintained wrapper that provides SPM support for the official Google Cast SDK.
         // Check https://github.com/SRGSSR/google-cast-sdk for the latest version tag and release notes.
         // 4.8.4+ XCFramework includes arm64 + x86_64 simulator slices (Apple Silicon / iOS 26+).
-        .package(url: "https://github.com/SRGSSR/google-cast-sdk.git", from: "4.8.4")
+        .package(url: "https://github.com/SRGSSR/google-cast-sdk.git", "4.8.4"..<"4.8.6")
     ],
     targets: [
         .target(
