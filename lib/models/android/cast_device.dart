@@ -4,8 +4,9 @@ import 'package:flutter_chrome_cast/lib.dart';
 extension GoogleCastAndroidDevices on GoogleCastAndroidDevice {
   /// Creates a list of [GoogleCastAndroidDevice] from a list of maps.
   static List<GoogleCastAndroidDevice> fromMap(List maps) {
-    final devices =
-        maps.map((e) => GoogleCastAndroidDevice.fromMap(e)).toList();
+    final devices = maps
+        .map((e) => GoogleCastAndroidDevice.fromMap(e))
+        .toList();
     return devices;
   }
 }

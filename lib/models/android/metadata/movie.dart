@@ -15,14 +15,16 @@ class GoogleCastMovieMediaMetadataAndroid extends GoogleCastMovieMediaMetadata {
 
   /// Creates a movie media metadata instance from a map.
   factory GoogleCastMovieMediaMetadataAndroid.fromMap(
-      Map<String, dynamic> map) {
+    Map<String, dynamic> map,
+  ) {
     return GoogleCastMovieMediaMetadataAndroid(
       title: map['title'],
       subtitle: map['subtitle'],
       studio: map['studio'],
       images: map['images'] != null
           ? List<GoogleCastImage>.from(
-              map['images']?.map((x) => GoogleCastImage.fromMap(x)))
+              map['images']?.map((x) => GoogleCastImage.fromMap(x)),
+            )
           : null,
       releaseDate: map['releaseDate'] != null
           ? DateTimeString.tryParse(map['releaseDate'] ?? '')

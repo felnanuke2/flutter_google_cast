@@ -12,19 +12,11 @@ class GoogleCastImage {
   final int? width;
 
   /// Creates a new [GoogleCastImage] instance.
-  GoogleCastImage({
-    required this.url,
-    this.height,
-    this.width,
-  });
+  GoogleCastImage({required this.url, this.height, this.width});
 
   /// Converts this image to a map representation.
   Map<String, dynamic> toMap() {
-    return {
-      'url': url.toString(),
-      'height': height,
-      'width': width,
-    };
+    return {'url': url.toString(), 'height': height, 'width': width};
   }
 
   /// Creates a [GoogleCastImage] from a map representation.

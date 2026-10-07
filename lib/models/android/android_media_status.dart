@@ -31,15 +31,17 @@ class GoogleCastAndroidMediaStatus extends GoggleCastMediaStatus {
       playbackRate: map['playbackRate'] ?? 1,
       mediaInformation: map['media'] != null
           ? GoogleCastMediaInformationAndroid.fromMap(
-              Map<String, dynamic>.from(map['media']))
+              Map<String, dynamic>.from(map['media']),
+            )
           : null,
 
       volume: map['volume']?['level'] ?? 0,
       isMuted: map['volume']?['muted'] ?? true,
       repeatMode: GoogleCastRepeatModeAndroid.fromMap(map['repeatMode']),
       currentItemId: map['currentItemId']?.toInt(),
-      activeTrackIds:
-          List<int>.from(jsonDecode(map['activeTrackIds'] ?? '[]') ?? []),
+      activeTrackIds: List<int>.from(
+        jsonDecode(map['activeTrackIds'] ?? '[]') ?? [],
+      ),
 
       // adBreakStatus: map['adBreakStatus'] != null
       //     ? GoogleCastBrakeStatus.fromMap(map['adBreakStatus'])

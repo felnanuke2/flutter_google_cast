@@ -14,19 +14,13 @@ class UserActionState {
   ///
   /// [customData] - Custom data associated with the user action.
   /// [userAction] - The user action.
-  UserActionState({
-    this.customData,
-    this.userAction,
-  });
+  UserActionState({this.customData, this.userAction});
 
   /// Converts the [UserActionState] to a map.
   ///
   /// Returns a [Map] representation of this object.
   Map<String, dynamic> toMap() {
-    return {
-      'customData': customData,
-      'userAction': userAction?.name,
-    };
+    return {'customData': customData, 'userAction': userAction?.name};
   }
 
   /// Creates a [UserActionState] from a map.

@@ -18,29 +18,23 @@ class CastMediaVolume {
   ///
   /// Throws an assertion error if level is not between 0 and 1.
   CastMediaVolume(this.level, this.muted)
-      : assert(
-          level == null || (level >= 0 && level <= 1),
-          'level must be between 0 and 1',
-        );
+    : assert(
+        level == null || (level >= 0 && level <= 1),
+        'level must be between 0 and 1',
+      );
 
   /// Converts the [CastMediaVolume] to a map.
   ///
   /// Returns a [Map] representation of this object.
   Map<String, dynamic> toMap() {
-    return {
-      'level': level,
-      'muted': muted,
-    };
+    return {'level': level, 'muted': muted};
   }
 
   /// Creates a [CastMediaVolume] from a map.
   ///
   /// [map] - The map to create the instance from.
   factory CastMediaVolume.fromMap(Map<String, dynamic> map) {
-    return CastMediaVolume(
-      map['level'],
-      map['muted'],
-    );
+    return CastMediaVolume(map['level'], map['muted']);
   }
 
   /// Converts the [CastMediaVolume] to a JSON string.

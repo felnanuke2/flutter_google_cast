@@ -10,31 +10,29 @@ void main() {
   group('GoogleCastDiscoveryManagerMethodChannelIOS', () {
     late GoogleCastDiscoveryManagerMethodChannelIOS discoveryManager;
     late List<MethodCall> methodCalls;
-    const MethodChannel channel =
-        MethodChannel('google_cast.discovery_manager');
+    const MethodChannel channel = MethodChannel(
+      'google_cast.discovery_manager',
+    );
 
     setUp(() {
       methodCalls = [];
 
       // Mock the method channel
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-          .setMockMethodCallHandler(
-        channel,
-        (MethodCall methodCall) async {
-          methodCalls.add(methodCall);
+          .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
+            methodCalls.add(methodCall);
 
-          switch (methodCall.method) {
-            case 'isDiscoveryActiveForDeviceCategory':
-              return true;
-            case 'startDiscovery':
-              return null;
-            case 'stopDiscovery':
-              return null;
-            default:
-              return null;
-          }
-        },
-      );
+            switch (methodCall.method) {
+              case 'isDiscoveryActiveForDeviceCategory':
+                return true;
+              case 'startDiscovery':
+                return null;
+              case 'stopDiscovery':
+                return null;
+              default:
+                return null;
+            }
+          });
 
       discoveryManager = GoogleCastDiscoveryManagerMethodChannelIOS();
     });
@@ -64,7 +62,7 @@ void main() {
           'category': 'audio',
           'uniqueID': 'unique-123',
           'index': 0,
-        }
+        },
       ];
 
       discoveryManager.onDevicesChanged(deviceData);
@@ -97,7 +95,7 @@ void main() {
           'category': 'audio',
           'uniqueID': 'unique-stream',
           'index': 0,
-        }
+        },
       ];
 
       discoveryManager.onDevicesChanged(deviceData);
@@ -115,8 +113,9 @@ void main() {
 
     test('isDiscoveryActiveForDeviceCategory calls correct method', () async {
       const testCategory = 'audio';
-      final result = await discoveryManager
-          .isDiscoveryActiveForDeviceCategory(testCategory);
+      final result = await discoveryManager.isDiscoveryActiveForDeviceCategory(
+        testCategory,
+      );
 
       expect(result, isTrue);
       expect(methodCalls, hasLength(1));
@@ -163,7 +162,7 @@ void main() {
           'category': 'audio',
           'uniqueID': 'unique-789',
           'index': 2,
-        }
+        },
       ];
 
       discoveryManager.onDevicesChanged(deviceData);
@@ -194,7 +193,7 @@ void main() {
           'category': 'audio',
           'uniqueID': 'unique-123',
           'index': 0,
-        }
+        },
       ];
 
       final methodCall = MethodCall('onDevicesChanged', deviceData);
@@ -218,18 +217,19 @@ void main() {
     });
 
     test(
-        'handleMethodCall prints debug message for unknown methods in debug mode',
-        () async {
-      // We can't easily capture print output, but we can ensure the method
-      // doesn't throw and executes the debug branch
-      final methodCall = MethodCall('unknownMethod', null);
+      'handleMethodCall prints debug message for unknown methods in debug mode',
+      () async {
+        // We can't easily capture print output, but we can ensure the method
+        // doesn't throw and executes the debug branch
+        final methodCall = MethodCall('unknownMethod', null);
 
-      // Override debug mode temporarily if needed
-      await expectLater(
-        discoveryManager.handleMethodCall(methodCall),
-        completes,
-      );
-    });
+        // Override debug mode temporarily if needed
+        await expectLater(
+          discoveryManager.handleMethodCall(methodCall),
+          completes,
+        );
+      },
+    );
 
     test('multiple device updates work correctly', () {
       // First update
@@ -244,7 +244,7 @@ void main() {
           'category': 'audio',
           'uniqueID': 'unique-1',
           'index': 0,
-        }
+        },
       ]);
 
       expect(discoveryManager.devices, hasLength(1));
@@ -272,7 +272,7 @@ void main() {
           'category': 'video',
           'uniqueID': 'unique-2',
           'index': 1,
-        }
+        },
       ]);
 
       expect(discoveryManager.devices, hasLength(2));
@@ -313,7 +313,7 @@ void main() {
           'category': 'audio',
           'uniqueID': 'unique-temp',
           'index': 0,
-        }
+        },
       ]);
 
       expect(discoveryManager.devices, hasLength(1));
@@ -338,7 +338,7 @@ void main() {
             'category': 'audio',
             'uniqueID': 'unique-temp',
             'index': 0,
-          }
+          },
         ]),
       );
 

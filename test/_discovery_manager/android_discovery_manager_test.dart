@@ -14,8 +14,9 @@ void main() {
     setUp(() {
       TestWidgetsFlutterBinding.ensureInitialized();
       methodCalls = [];
-      channel =
-          const MethodChannel('com.felnanuke.google_cast.discovery_manager');
+      channel = const MethodChannel(
+        'com.felnanuke.google_cast.discovery_manager',
+      );
     });
 
     tearDown(() {
@@ -29,13 +30,17 @@ void main() {
 
       expect(discoveryManager, isNotNull);
       expect(
-          discoveryManager, isA<GoogleCastDiscoveryManagerPlatformInterface>());
+        discoveryManager,
+        isA<GoogleCastDiscoveryManagerPlatformInterface>(),
+      );
     });
 
     test('should implement GoogleCastDiscoveryManagerPlatformInterface', () {
       discoveryManager = GoogleCastDiscoveryManagerMethodChannelAndroid();
       expect(
-          discoveryManager, isA<GoogleCastDiscoveryManagerPlatformInterface>());
+        discoveryManager,
+        isA<GoogleCastDiscoveryManagerPlatformInterface>(),
+      );
     });
 
     test('should initialize with empty devices list', () {
@@ -47,22 +52,26 @@ void main() {
     test('should provide devices stream', () {
       discoveryManager = GoogleCastDiscoveryManagerMethodChannelAndroid();
       // Test devicesStream getter (line 33)
-      expect(discoveryManager.devicesStream,
-          isA<Stream<List<GoogleCastDevice>>>());
+      expect(
+        discoveryManager.devicesStream,
+        isA<Stream<List<GoogleCastDevice>>>(),
+      );
 
       // Test initial empty state
-      discoveryManager.devicesStream.listen(expectAsync1((devices) {
-        expect(devices, isEmpty);
-      }));
+      discoveryManager.devicesStream.listen(
+        expectAsync1((devices) {
+          expect(devices, isEmpty);
+        }),
+      );
     });
 
     test('should call startDiscovery method on native side', () async {
       // Set up the mock to capture outgoing calls
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
           .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
-        methodCalls.add(methodCall);
-        return null;
-      });
+            methodCalls.add(methodCall);
+            return null;
+          });
 
       discoveryManager = GoogleCastDiscoveryManagerMethodChannelAndroid();
 
@@ -77,9 +86,9 @@ void main() {
     test('should request an active scan when asked', () async {
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
           .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
-        methodCalls.add(methodCall);
-        return null;
-      });
+            methodCalls.add(methodCall);
+            return null;
+          });
 
       discoveryManager = GoogleCastDiscoveryManagerMethodChannelAndroid();
 
@@ -94,9 +103,9 @@ void main() {
       // Set up the mock to capture outgoing calls
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
           .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
-        methodCalls.add(methodCall);
-        return null;
-      });
+            methodCalls.add(methodCall);
+            return null;
+          });
 
       discoveryManager = GoogleCastDiscoveryManagerMethodChannelAndroid();
 
@@ -109,16 +118,17 @@ void main() {
     });
 
     test(
-        'should throw UnimplementedError for isDiscoveryActiveForDeviceCategory',
-        () {
-      discoveryManager = GoogleCastDiscoveryManagerMethodChannelAndroid();
+      'should throw UnimplementedError for isDiscoveryActiveForDeviceCategory',
+      () {
+        discoveryManager = GoogleCastDiscoveryManagerMethodChannelAndroid();
 
-      // Test line 37
-      expect(
-        () => discoveryManager.isDiscoveryActiveForDeviceCategory('test'),
-        throwsA(isA<UnimplementedError>()),
-      );
-    });
+        // Test line 37
+        expect(
+          () => discoveryManager.isDiscoveryActiveForDeviceCategory('test'),
+          throwsA(isA<UnimplementedError>()),
+        );
+      },
+    );
 
     group('Method Channel Handler Tests', () {
       setUp(() {
@@ -140,12 +150,12 @@ void main() {
         final streamCompleter = Completer<List<GoogleCastDevice>>();
         late StreamSubscription subscription;
 
-        subscription = discoveryManager.devicesStream.skip(1).take(1).listen(
-          (devices) {
-            streamCompleter.complete(devices);
-            subscription.cancel();
-          },
-        );
+        subscription = discoveryManager.devicesStream.skip(1).take(1).listen((
+          devices,
+        ) {
+          streamCompleter.complete(devices);
+          subscription.cancel();
+        });
 
         // Simulate method call from native side
         final binding = TestDefaultBinaryMessengerBinding.instance;
@@ -200,12 +210,12 @@ void main() {
         final streamCompleter = Completer<List<GoogleCastDevice>>();
         late StreamSubscription subscription;
 
-        subscription = discoveryManager.devicesStream.skip(1).take(1).listen(
-          (devices) {
-            streamCompleter.complete(devices);
-            subscription.cancel();
-          },
-        );
+        subscription = discoveryManager.devicesStream.skip(1).take(1).listen((
+          devices,
+        ) {
+          streamCompleter.complete(devices);
+          subscription.cancel();
+        });
 
         // Simulate method call from native side
         final binding = TestDefaultBinaryMessengerBinding.instance;
@@ -232,10 +242,13 @@ void main() {
         expect(deviceNames, contains('Living Room TV'));
         expect(deviceNames, contains('Kitchen Display'));
 
-        final chromecastDevices =
-            devices.where((d) => d.modelName == 'Chromecast').toList();
-        expect(chromecastDevices,
-            hasLength(1)); // Only one Chromecast with same name
+        final chromecastDevices = devices
+            .where((d) => d.modelName == 'Chromecast')
+            .toList();
+        expect(
+          chromecastDevices,
+          hasLength(1),
+        ); // Only one Chromecast with same name
       });
 
       test('should handle empty devices list', () async {
@@ -244,12 +257,12 @@ void main() {
         final streamCompleter = Completer<List<GoogleCastDevice>>();
         late StreamSubscription subscription;
 
-        subscription = discoveryManager.devicesStream.skip(1).take(1).listen(
-          (devices) {
-            streamCompleter.complete(devices);
-            subscription.cancel();
-          },
-        );
+        subscription = discoveryManager.devicesStream.skip(1).take(1).listen((
+          devices,
+        ) {
+          streamCompleter.complete(devices);
+          subscription.cancel();
+        });
 
         final binding = TestDefaultBinaryMessengerBinding.instance;
         final codec = const StandardMethodCodec();
@@ -293,9 +306,9 @@ void main() {
         // Set up mock to capture outgoing method calls for integration tests
         TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
             .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
-          methodCalls.add(methodCall);
-          return null;
-        });
+              methodCalls.add(methodCall);
+              return null;
+            });
         discoveryManager = GoogleCastDiscoveryManagerMethodChannelAndroid();
       });
 
@@ -318,12 +331,12 @@ void main() {
         final streamCompleter = Completer<List<GoogleCastDevice>>();
         late StreamSubscription subscription;
 
-        subscription = discoveryManager.devicesStream.skip(1).take(1).listen(
-          (devices) {
-            streamCompleter.complete(devices);
-            subscription.cancel();
-          },
-        );
+        subscription = discoveryManager.devicesStream.skip(1).take(1).listen((
+          devices,
+        ) {
+          streamCompleter.complete(devices);
+          subscription.cancel();
+        });
 
         final binding = TestDefaultBinaryMessengerBinding.instance;
         final codec = const StandardMethodCodec();
@@ -365,13 +378,13 @@ void main() {
         final firstCompleter = Completer<List<GoogleCastDevice>>();
         late StreamSubscription firstSubscription;
 
-        firstSubscription =
-            discoveryManager.devicesStream.skip(1).take(1).listen(
-          (devices) {
-            firstCompleter.complete(devices);
-            firstSubscription.cancel();
-          },
-        );
+        firstSubscription = discoveryManager.devicesStream
+            .skip(1)
+            .take(1)
+            .listen((devices) {
+              firstCompleter.complete(devices);
+              firstSubscription.cancel();
+            });
 
         final binding = TestDefaultBinaryMessengerBinding.instance;
         final codec = const StandardMethodCodec();
@@ -408,13 +421,13 @@ void main() {
         final secondCompleter = Completer<List<GoogleCastDevice>>();
         late StreamSubscription secondSubscription;
 
-        secondSubscription =
-            discoveryManager.devicesStream.skip(1).take(1).listen(
-          (devices) {
-            secondCompleter.complete(devices);
-            secondSubscription.cancel();
-          },
-        );
+        secondSubscription = discoveryManager.devicesStream
+            .skip(1)
+            .take(1)
+            .listen((devices) {
+              secondCompleter.complete(devices);
+              secondSubscription.cancel();
+            });
 
         final binding2 = TestDefaultBinaryMessengerBinding.instance;
         final codec2 = const StandardMethodCodec();
@@ -430,9 +443,13 @@ void main() {
         final secondDevices = await secondCompleter.future;
         expect(secondDevices, hasLength(2));
         expect(
-            secondDevices.map((d) => d.friendlyName), contains('First Device'));
-        expect(secondDevices.map((d) => d.friendlyName),
-            contains('Second Device'));
+          secondDevices.map((d) => d.friendlyName),
+          contains('First Device'),
+        );
+        expect(
+          secondDevices.map((d) => d.friendlyName),
+          contains('Second Device'),
+        );
       });
     });
 

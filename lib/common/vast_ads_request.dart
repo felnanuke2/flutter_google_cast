@@ -18,19 +18,13 @@ class VastAdsRequest {
   ///
   /// [adsResponse] - Specifies a VAST document to be used as the ads response.
   /// [adTagUrl] - URL for VAST file.
-  VastAdsRequest({
-    this.adsResponse,
-    this.adTagUrl,
-  });
+  VastAdsRequest({this.adsResponse, this.adTagUrl});
 
   /// Converts the [VastAdsRequest] to a map.
   ///
   /// Returns a [Map] representation of this object.
   Map<String, dynamic> toMap() {
-    return {
-      'adsResponse': adsResponse,
-      'adTagUrl': adTagUrl,
-    };
+    return {'adsResponse': adsResponse, 'adTagUrl': adTagUrl};
   }
 
   /// Creates a [VastAdsRequest] from a map.

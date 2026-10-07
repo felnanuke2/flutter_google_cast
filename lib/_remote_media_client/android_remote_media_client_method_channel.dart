@@ -129,10 +129,7 @@ class GoogleCastRemoteMediaClientAndroidMethodChannel
 
   @override
   Future<void> setActiveTrackIDs(List<int> activeTrackIDs) async {
-    await _channel.invokeMethod(
-      'setActiveTrackIds',
-      activeTrackIDs,
-    );
+    await _channel.invokeMethod('setActiveTrackIds', activeTrackIDs);
   }
 
   @override
@@ -141,13 +138,8 @@ class GoogleCastRemoteMediaClientAndroidMethodChannel
   }
 
   @override
-  Future<void> setTextTrackStyle(
-    TextTrackStyle textTrackStyle,
-  ) async {
-    await _channel.invokeMethod(
-      'setTextTrackStyle',
-      textTrackStyle.toMap(),
-    );
+  Future<void> setTextTrackStyle(TextTrackStyle textTrackStyle) async {
+    await _channel.invokeMethod('setTextTrackStyle', textTrackStyle.toMap());
   }
 
   @override
@@ -162,10 +154,7 @@ class GoogleCastRemoteMediaClientAndroidMethodChannel
 
   @override
   Future<void> queueRemoveItemsWithIds(List<int> itemIds) async {
-    await _channel.invokeMethod(
-      'queueRemoveItemsWithIds',
-      itemIds,
-    );
+    await _channel.invokeMethod('queueRemoveItemsWithIds', itemIds);
   }
 
   @override
@@ -225,9 +214,7 @@ class GoogleCastRemoteMediaClientAndroidMethodChannel
     final queueItems = map
         .map(
           (e) => GoogleCastAndroidQueueItem.fromMap(
-            Map<String, dynamic>.from(
-              Map<String, dynamic>.from(jsonDecode(e)),
-            ),
+            Map<String, dynamic>.from(Map<String, dynamic>.from(jsonDecode(e))),
           ),
         )
         .toList();

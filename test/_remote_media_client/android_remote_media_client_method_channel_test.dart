@@ -22,9 +22,7 @@ void main() {
 
   // Helper function to create a queue item
   GoogleCastQueueItem createTestQueueItem([String? url]) {
-    return GoogleCastQueueItem(
-      mediaInformation: createTestMediaInfo(url),
-    );
+    return GoogleCastQueueItem(mediaInformation: createTestMediaInfo(url));
   }
 
   group('GoogleCastRemoteMediaClientAndroidMethodChannel', () {
@@ -35,8 +33,9 @@ void main() {
     setUp(() {
       TestWidgetsFlutterBinding.ensureInitialized();
       methodCalls = [];
-      channel =
-          const MethodChannel('com.felnanuke.google_cast.remote_media_client');
+      channel = const MethodChannel(
+        'com.felnanuke.google_cast.remote_media_client',
+      );
       remoteMediaClient = GoogleCastRemoteMediaClientAndroidMethodChannel();
     });
 
@@ -46,8 +45,10 @@ void main() {
     });
 
     test('should implement GoogleCastRemoteMediaClientPlatformInterface', () {
-      expect(remoteMediaClient,
-          isA<GoogleCastRemoteMediaClientPlatformInterface>());
+      expect(
+        remoteMediaClient,
+        isA<GoogleCastRemoteMediaClientPlatformInterface>(),
+      );
     });
 
     group('Constructor and initial values', () {
@@ -66,17 +67,11 @@ void main() {
 
     group('Streams', () {
       test('mediaStatusStream should emit initial null value', () {
-        expectLater(
-          remoteMediaClient.mediaStatusStream,
-          emitsInOrder([null]),
-        );
+        expectLater(remoteMediaClient.mediaStatusStream, emitsInOrder([null]));
       });
 
       test('queueItemsStream should emit initial empty list', () {
-        expectLater(
-          remoteMediaClient.queueItemsStream,
-          emitsInOrder([[]]),
-        );
+        expectLater(remoteMediaClient.queueItemsStream, emitsInOrder([[]]));
       });
 
       test('playerPositionStream should emit initial zero duration', () {
@@ -96,9 +91,9 @@ void main() {
         // Setup method call handler to simulate native callbacks
         TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
             .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
-          // Do nothing for the setMethodCallHandler call
-          return null;
-        });
+              // Do nothing for the setMethodCallHandler call
+              return null;
+            });
 
         // Simulate queue status change by triggering method call handler
         final queueData = [
@@ -109,12 +104,12 @@ void main() {
         // Create new instance to reset state and trigger method call handler
         await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
             .handlePlatformMessage(
-          'com.felnanuke.google_cast.remote_media_client',
-          const StandardMethodCodec().encodeMethodCall(
-            MethodCall('onQueueStatusChanged', queueData),
-          ),
-          (data) {},
-        );
+              'com.felnanuke.google_cast.remote_media_client',
+              const StandardMethodCodec().encodeMethodCall(
+                MethodCall('onQueueStatusChanged', queueData),
+              ),
+              (data) {},
+            );
 
         // Simulate media status change
         final mediaStatusJson = jsonEncode({
@@ -125,12 +120,12 @@ void main() {
 
         await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
             .handlePlatformMessage(
-          'com.felnanuke.google_cast.remote_media_client',
-          const StandardMethodCodec().encodeMethodCall(
-            MethodCall('onMediaStatusChanged', mediaStatusJson),
-          ),
-          (data) {},
-        );
+              'com.felnanuke.google_cast.remote_media_client',
+              const StandardMethodCodec().encodeMethodCall(
+                MethodCall('onMediaStatusChanged', mediaStatusJson),
+              ),
+              (data) {},
+            );
 
         // Give time for async operations to complete
         await Future.delayed(Duration(milliseconds: 10));
@@ -138,85 +133,95 @@ void main() {
         expect(remoteMediaClient.queueHasNextItem, isFalse);
       });
 
-      test('should return true when current item is not the last item',
-          () async {
-        // Setup method call handler to simulate native callbacks
-        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-            .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
-          // Do nothing for the setMethodCallHandler call
-          return null;
-        });
+      test(
+        'should return true when current item is not the last item',
+        () async {
+          // Setup method call handler to simulate native callbacks
+          TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+              .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
+                // Do nothing for the setMethodCallHandler call
+                return null;
+              });
 
-        // Simulate queue status change with proper format
-        final queueData = [
-          jsonEncode({
-            'itemId': 1,
-            'media': {
-              'contentId': 'test-content-1',
-              'contentType': 'video/mp4',
-              'streamType': 'BUFFERED',
-            },
-            'autoplay': true,
-            'startTime': 0,
-            'preLoadTime': 0,
-          }),
-          jsonEncode({
-            'itemId': 2,
-            'media': {
-              'contentId': 'test-content-2',
-              'contentType': 'video/mp4',
-              'streamType': 'BUFFERED',
-            },
-            'autoplay': true,
-            'startTime': 0,
-            'preLoadTime': 0,
-          }),
-        ];
+          // Simulate queue status change with proper format
+          final queueData = [
+            jsonEncode({
+              'itemId': 1,
+              'media': {
+                'contentId': 'test-content-1',
+                'contentType': 'video/mp4',
+                'streamType': 'BUFFERED',
+              },
+              'autoplay': true,
+              'startTime': 0,
+              'preLoadTime': 0,
+            }),
+            jsonEncode({
+              'itemId': 2,
+              'media': {
+                'contentId': 'test-content-2',
+                'contentType': 'video/mp4',
+                'streamType': 'BUFFERED',
+              },
+              'autoplay': true,
+              'startTime': 0,
+              'preLoadTime': 0,
+            }),
+          ];
 
-        await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-            .handlePlatformMessage(
-          'com.felnanuke.google_cast.remote_media_client',
-          const StandardMethodCodec().encodeMethodCall(
-            MethodCall('onQueueStatusChanged', queueData),
-          ),
-          (data) {},
-        );
+          await TestDefaultBinaryMessengerBinding
+              .instance
+              .defaultBinaryMessenger
+              .handlePlatformMessage(
+                'com.felnanuke.google_cast.remote_media_client',
+                const StandardMethodCodec().encodeMethodCall(
+                  MethodCall('onQueueStatusChanged', queueData),
+                ),
+                (data) {},
+              );
 
-        // Simulate media status change with proper format
-        final mediaStatusJson = jsonEncode({
-          'mediaSessionId': 123,
-          'playerState': 'PLAYING',
-          'playbackRate': 1.0,
-          'volume': {'level': 0.5, 'muted': false},
-          'isMuted': false,
-          'repeatMode': 'OFF',
-          'currentItemId': 1,
-          'activeTrackIds': '[]',
-        });
+          // Simulate media status change with proper format
+          final mediaStatusJson = jsonEncode({
+            'mediaSessionId': 123,
+            'playerState': 'PLAYING',
+            'playbackRate': 1.0,
+            'volume': {'level': 0.5, 'muted': false},
+            'isMuted': false,
+            'repeatMode': 'OFF',
+            'currentItemId': 1,
+            'activeTrackIds': '[]',
+          });
 
-        await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-            .handlePlatformMessage(
-          'com.felnanuke.google_cast.remote_media_client',
-          const StandardMethodCodec().encodeMethodCall(
-            MethodCall('onMediaStatusChanged', mediaStatusJson),
-          ),
-          (data) {},
-        );
+          await TestDefaultBinaryMessengerBinding
+              .instance
+              .defaultBinaryMessenger
+              .handlePlatformMessage(
+                'com.felnanuke.google_cast.remote_media_client',
+                const StandardMethodCodec().encodeMethodCall(
+                  MethodCall('onMediaStatusChanged', mediaStatusJson),
+                ),
+                (data) {},
+              );
 
-        // Give time for async operations to complete
-        await Future.delayed(Duration(milliseconds: 10));
+          // Give time for async operations to complete
+          await Future.delayed(Duration(milliseconds: 10));
 
-        expect(remoteMediaClient.queueHasNextItem, isTrue);
-      });
+          expect(remoteMediaClient.queueHasNextItem, isTrue);
+        },
+      );
     });
 
     group('loadMedia', () {
       test('should call native method with correct parameters', () async {
         TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
             .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
-          methodCalls.add(methodCall);
-          return {'requestID': 123, 'inProgress': false, 'isExternal': false};
-        });
+              methodCalls.add(methodCall);
+              return {
+                'requestID': 123,
+                'inProgress': false,
+                'isExternal': false,
+              };
+            });
 
         final mediaInfo = GoogleCastMediaInformation(
           contentId: 'video-123',
@@ -237,24 +242,34 @@ void main() {
 
         expect(methodCalls, hasLength(1));
         expect(methodCalls.first.method, equals('loadMedia'));
-        expect(methodCalls.first.arguments['mediaInfo'],
-            equals(mediaInfo.toMap()));
+        expect(
+          methodCalls.first.arguments['mediaInfo'],
+          equals(mediaInfo.toMap()),
+        );
         expect(methodCalls.first.arguments['autoPlay'], isTrue);
         expect(methodCalls.first.arguments['playPosition'], equals(30));
         expect(methodCalls.first.arguments['playbackRate'], equals(1.5));
         expect(methodCalls.first.arguments['activeTrackIds'], equals([1, 2]));
-        expect(methodCalls.first.arguments['credentials'],
-            equals('test-credentials'));
         expect(
-            methodCalls.first.arguments['credentialsType'], equals('Bearer'));
+          methodCalls.first.arguments['credentials'],
+          equals('test-credentials'),
+        );
+        expect(
+          methodCalls.first.arguments['credentialsType'],
+          equals('Bearer'),
+        );
       });
 
       test('should call native method with customData', () async {
         TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
             .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
-          methodCalls.add(methodCall);
-          return {'requestID': 123, 'inProgress': false, 'isExternal': false};
-        });
+              methodCalls.add(methodCall);
+              return {
+                'requestID': 123,
+                'inProgress': false,
+                'isExternal': false,
+              };
+            });
 
         final mediaInfo = GoogleCastMediaInformation(
           contentId: 'video-123',
@@ -270,16 +285,22 @@ void main() {
 
         expect(methodCalls, hasLength(1));
         expect(methodCalls.first.method, equals('loadMedia'));
-        expect(methodCalls.first.arguments['customData'],
-            equals({'Authorization': 'Bearer token123', 'X-Custom': 'value'}));
+        expect(
+          methodCalls.first.arguments['customData'],
+          equals({'Authorization': 'Bearer token123', 'X-Custom': 'value'}),
+        );
       });
 
       test('should call native method with nested customData', () async {
         TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
             .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
-          methodCalls.add(methodCall);
-          return {'requestID': 123, 'inProgress': false, 'isExternal': false};
-        });
+              methodCalls.add(methodCall);
+              return {
+                'requestID': 123,
+                'inProgress': false,
+                'isExternal': false,
+              };
+            });
 
         final mediaInfo = GoogleCastMediaInformation(
           contentId: 'video-123',
@@ -293,11 +314,8 @@ void main() {
             'Authorization': 'Bearer token123',
             'X-Client': 'flutter-test',
           },
-          'options': {
-            'retry': true,
-            'timeout': 30,
-          },
-          'tags': ['sports', 'live']
+          'options': {'retry': true, 'timeout': 30},
+          'tags': ['sports', 'live'],
         };
 
         await remoteMediaClient.loadMedia(
@@ -307,16 +325,22 @@ void main() {
 
         expect(methodCalls, hasLength(1));
         expect(methodCalls.first.method, equals('loadMedia'));
-        expect(methodCalls.first.arguments['customData'],
-            equals(nestedCustomData));
+        expect(
+          methodCalls.first.arguments['customData'],
+          equals(nestedCustomData),
+        );
       });
 
       test('should send null customData when not provided', () async {
         TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
             .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
-          methodCalls.add(methodCall);
-          return {'requestID': 456, 'inProgress': false, 'isExternal': false};
-        });
+              methodCalls.add(methodCall);
+              return {
+                'requestID': 456,
+                'inProgress': false,
+                'isExternal': false,
+              };
+            });
 
         final mediaInfo = createTestMediaInfo();
         await remoteMediaClient.loadMedia(mediaInfo);
@@ -330,9 +354,13 @@ void main() {
       test('should call native pause method', () async {
         TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
             .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
-          methodCalls.add(methodCall);
-          return {'requestID': 123, 'inProgress': false, 'isExternal': false};
-        });
+              methodCalls.add(methodCall);
+              return {
+                'requestID': 123,
+                'inProgress': false,
+                'isExternal': false,
+              };
+            });
 
         await remoteMediaClient.pause();
 
@@ -345,9 +373,9 @@ void main() {
       test('should call native play method', () async {
         TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
             .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
-          methodCalls.add(methodCall);
-          return {'requestId': 123};
-        });
+              methodCalls.add(methodCall);
+              return {'requestId': 123};
+            });
 
         await remoteMediaClient.play();
 
@@ -360,12 +388,12 @@ void main() {
       test('should call native method with queue items and options', () async {
         TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
             .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
-          methodCalls.add(methodCall);
-          return {'requestId': 123};
-        });
+              methodCalls.add(methodCall);
+              return {'requestId': 123};
+            });
 
         final queueItems = [
-          createTestQueueItem('https://example.com/video1.mp4')
+          createTestQueueItem('https://example.com/video1.mp4'),
         ];
         final options = GoogleCastQueueLoadOptions(startIndex: 0);
 
@@ -380,12 +408,12 @@ void main() {
       test('should call native method with queue items only', () async {
         TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
             .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
-          methodCalls.add(methodCall);
-          return {'requestId': 123};
-        });
+              methodCalls.add(methodCall);
+              return {'requestId': 123};
+            });
 
         final queueItems = [
-          createTestQueueItem('https://example.com/video1.mp4')
+          createTestQueueItem('https://example.com/video1.mp4'),
         ];
 
         await remoteMediaClient.queueLoadItems(queueItems);
@@ -400,9 +428,9 @@ void main() {
       test('should call native queueNextItem method', () async {
         TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
             .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
-          methodCalls.add(methodCall);
-          return {'requestId': 123};
-        });
+              methodCalls.add(methodCall);
+              return {'requestId': 123};
+            });
 
         await remoteMediaClient.queueNextItem();
 
@@ -415,9 +443,9 @@ void main() {
       test('should call native queuePrevItem method', () async {
         TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
             .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
-          methodCalls.add(methodCall);
-          return {'requestId': 123};
-        });
+              methodCalls.add(methodCall);
+              return {'requestId': 123};
+            });
 
         await remoteMediaClient.queuePrevItem();
 
@@ -430,9 +458,9 @@ void main() {
       test('should call native seek method with options', () async {
         TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
             .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
-          methodCalls.add(methodCall);
-          return {'requestId': 123};
-        });
+              methodCalls.add(methodCall);
+              return {'requestId': 123};
+            });
 
         final seekOption = GoogleCastMediaSeekOption(
           position: Duration(seconds: 60),
@@ -450,9 +478,9 @@ void main() {
       test('should call native setActiveTrackIds method', () async {
         TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
             .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
-          methodCalls.add(methodCall);
-          return {'requestId': 123};
-        });
+              methodCalls.add(methodCall);
+              return {'requestId': 123};
+            });
 
         final trackIds = [1, 2, 3];
 
@@ -468,9 +496,9 @@ void main() {
       test('should call native setPlaybackRate method', () async {
         TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
             .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
-          methodCalls.add(methodCall);
-          return {'requestId': 123};
-        });
+              methodCalls.add(methodCall);
+              return {'requestId': 123};
+            });
 
         await remoteMediaClient.setPlaybackRate(2.0);
 
@@ -484,9 +512,9 @@ void main() {
       test('should call native setTextTrackStyle method', () async {
         TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
             .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
-          methodCalls.add(methodCall);
-          return {'requestId': 123};
-        });
+              methodCalls.add(methodCall);
+              return {'requestId': 123};
+            });
 
         final textTrackStyle = TextTrackStyle();
 
@@ -502,9 +530,9 @@ void main() {
       test('should call native stop method', () async {
         TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
             .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
-          methodCalls.add(methodCall);
-          return {'requestId': 123};
-        });
+              methodCalls.add(methodCall);
+              return {'requestId': 123};
+            });
 
         await remoteMediaClient.stop();
 
@@ -517,9 +545,9 @@ void main() {
       test('should call native queueJumpToItemWithId method', () async {
         TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
             .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
-          methodCalls.add(methodCall);
-          return {'requestId': 123};
-        });
+              methodCalls.add(methodCall);
+              return {'requestId': 123};
+            });
 
         await remoteMediaClient.queueJumpToItemWithId(42);
 
@@ -533,9 +561,9 @@ void main() {
       test('should call native queueRemoveItemsWithIds method', () async {
         TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
             .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
-          methodCalls.add(methodCall);
-          return {'requestId': 123};
-        });
+              methodCalls.add(methodCall);
+              return {'requestId': 123};
+            });
 
         final itemIds = [1, 2, 3];
 
@@ -551,9 +579,9 @@ void main() {
       test('should call native queueInsertItemAndPlay method', () async {
         TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
             .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
-          methodCalls.add(methodCall);
-          return {'requestId': 123};
-        });
+              methodCalls.add(methodCall);
+              return {'requestId': 123};
+            });
 
         final queueItem = createTestQueueItem('https://example.com/video.mp4');
 
@@ -570,57 +598,60 @@ void main() {
     });
 
     group('queueInsertItems', () {
-      test('should call native queueInsertItems method with beforeItemWithId',
-          () async {
-        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-            .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
-          methodCalls.add(methodCall);
-          return {'requestId': 123};
-        });
+      test(
+        'should call native queueInsertItems method with beforeItemWithId',
+        () async {
+          TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+              .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
+                methodCalls.add(methodCall);
+                return {'requestId': 123};
+              });
 
-        final queueItems = [
-          createTestQueueItem('https://example.com/video1.mp4')
-        ];
+          final queueItems = [
+            createTestQueueItem('https://example.com/video1.mp4'),
+          ];
 
-        await remoteMediaClient.queueInsertItems(
-          queueItems,
-          beforeItemWithId: 5,
-        );
+          await remoteMediaClient.queueInsertItems(
+            queueItems,
+            beforeItemWithId: 5,
+          );
 
-        expect(methodCalls, hasLength(1));
-        expect(methodCalls.first.method, equals('queueInsertItems'));
-        expect(methodCalls.first.arguments['items'], hasLength(1));
-        expect(methodCalls.first.arguments['beforeItemWithId'], equals(5));
-      });
+          expect(methodCalls, hasLength(1));
+          expect(methodCalls.first.method, equals('queueInsertItems'));
+          expect(methodCalls.first.arguments['items'], hasLength(1));
+          expect(methodCalls.first.arguments['beforeItemWithId'], equals(5));
+        },
+      );
 
       test(
-          'should call native queueInsertItems method without beforeItemWithId',
-          () async {
-        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-            .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
-          methodCalls.add(methodCall);
-          return {'requestId': 123};
-        });
+        'should call native queueInsertItems method without beforeItemWithId',
+        () async {
+          TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+              .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
+                methodCalls.add(methodCall);
+                return {'requestId': 123};
+              });
 
-        final queueItems = [
-          createTestQueueItem('https://example.com/video1.mp4')
-        ];
+          final queueItems = [
+            createTestQueueItem('https://example.com/video1.mp4'),
+          ];
 
-        await remoteMediaClient.queueInsertItems(queueItems);
+          await remoteMediaClient.queueInsertItems(queueItems);
 
-        expect(methodCalls, hasLength(1));
-        expect(methodCalls.first.method, equals('queueInsertItems'));
-        expect(methodCalls.first.arguments['beforeItemWithId'], isNull);
-      });
+          expect(methodCalls, hasLength(1));
+          expect(methodCalls.first.method, equals('queueInsertItems'));
+          expect(methodCalls.first.arguments['beforeItemWithId'], isNull);
+        },
+      );
     });
 
     group('queueReorderItems', () {
       test('should call native queueReorderItems method', () async {
         TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
             .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
-          methodCalls.add(methodCall);
-          return null;
-        });
+              methodCalls.add(methodCall);
+              return null;
+            });
 
         await remoteMediaClient.queueReorderItems(
           itemsIds: [1, 2, 3],
@@ -634,23 +665,24 @@ void main() {
       });
 
       test(
-          'should call native queueReorderItems method with null beforeItemWithId',
-          () async {
-        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-            .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
-          methodCalls.add(methodCall);
-          return null;
-        });
+        'should call native queueReorderItems method with null beforeItemWithId',
+        () async {
+          TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+              .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
+                methodCalls.add(methodCall);
+                return null;
+              });
 
-        await remoteMediaClient.queueReorderItems(
-          itemsIds: [1, 2, 3],
-          beforeItemWithId: null,
-        );
+          await remoteMediaClient.queueReorderItems(
+            itemsIds: [1, 2, 3],
+            beforeItemWithId: null,
+          );
 
-        expect(methodCalls, hasLength(1));
-        expect(methodCalls.first.method, equals('queueReorderItems'));
-        expect(methodCalls.first.arguments['beforeItemWithId'], isNull);
-      });
+          expect(methodCalls, hasLength(1));
+          expect(methodCalls.first.method, equals('queueReorderItems'));
+          expect(methodCalls.first.arguments['beforeItemWithId'], isNull);
+        },
+      );
     });
 
     group('Method call handler', () {
@@ -675,12 +707,12 @@ void main() {
         // Simulate the native platform calling the method handler
         await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
             .handlePlatformMessage(
-          'com.felnanuke.google_cast.remote_media_client',
-          const StandardMethodCodec().encodeMethodCall(
-            MethodCall('onMediaStatusChanged', mediaStatusJson),
-          ),
-          (data) {},
-        );
+              'com.felnanuke.google_cast.remote_media_client',
+              const StandardMethodCodec().encodeMethodCall(
+                MethodCall('onMediaStatusChanged', mediaStatusJson),
+              ),
+              (data) {},
+            );
 
         // Give time for async operations to complete
         await Future.delayed(Duration(milliseconds: 10));
@@ -689,26 +721,34 @@ void main() {
         expect(remoteMediaClient.mediaStatus!.currentItemId, equals(1));
         expect(remoteMediaClient.mediaStatus!.mediaSessionID, equals(123));
         expect(remoteMediaClient.mediaStatus!.liveSeekableRange, isNotNull);
-        expect(remoteMediaClient.mediaStatus!.liveSeekableRange!.start,
-            equals(Duration.zero));
-        expect(remoteMediaClient.mediaStatus!.liveSeekableRange!.end,
-            equals(Duration(seconds: 3600)));
-        expect(remoteMediaClient.mediaStatus!.liveSeekableRange!.isLiveDone,
-            isFalse);
-        expect(remoteMediaClient.mediaStatus!.liveSeekableRange!.isMovingWindow,
-            isTrue);
+        expect(
+          remoteMediaClient.mediaStatus!.liveSeekableRange!.start,
+          equals(Duration.zero),
+        );
+        expect(
+          remoteMediaClient.mediaStatus!.liveSeekableRange!.end,
+          equals(Duration(seconds: 3600)),
+        );
+        expect(
+          remoteMediaClient.mediaStatus!.liveSeekableRange!.isLiveDone,
+          isFalse,
+        );
+        expect(
+          remoteMediaClient.mediaStatus!.liveSeekableRange!.isMovingWindow,
+          isTrue,
+        );
       });
 
       test('should handle onMediaStatusChanged with null data', () async {
         // Simulate the native platform calling the method handler
         await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
             .handlePlatformMessage(
-          'com.felnanuke.google_cast.remote_media_client',
-          const StandardMethodCodec().encodeMethodCall(
-            MethodCall('onMediaStatusChanged', null),
-          ),
-          (data) {},
-        );
+              'com.felnanuke.google_cast.remote_media_client',
+              const StandardMethodCodec().encodeMethodCall(
+                MethodCall('onMediaStatusChanged', null),
+              ),
+              (data) {},
+            );
 
         // Give time for async operations to complete
         await Future.delayed(Duration(milliseconds: 10));
@@ -745,12 +785,12 @@ void main() {
         // Simulate the native platform calling the method handler
         await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
             .handlePlatformMessage(
-          'com.felnanuke.google_cast.remote_media_client',
-          const StandardMethodCodec().encodeMethodCall(
-            MethodCall('onQueueStatusChanged', queueData),
-          ),
-          (data) {},
-        );
+              'com.felnanuke.google_cast.remote_media_client',
+              const StandardMethodCodec().encodeMethodCall(
+                MethodCall('onQueueStatusChanged', queueData),
+              ),
+              (data) {},
+            );
 
         // Give time for async operations to complete
         await Future.delayed(Duration(milliseconds: 10));
@@ -764,12 +804,12 @@ void main() {
         // Simulate the native platform calling the method handler
         await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
             .handlePlatformMessage(
-          'com.felnanuke.google_cast.remote_media_client',
-          const StandardMethodCodec().encodeMethodCall(
-            MethodCall('onQueueStatusChanged', null),
-          ),
-          (data) {},
-        );
+              'com.felnanuke.google_cast.remote_media_client',
+              const StandardMethodCodec().encodeMethodCall(
+                MethodCall('onQueueStatusChanged', null),
+              ),
+              (data) {},
+            );
 
         // Give time for async operations to complete
         await Future.delayed(Duration(milliseconds: 10));
@@ -783,30 +823,32 @@ void main() {
         // Simulate the native platform calling the method handler
         await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
             .handlePlatformMessage(
-          'com.felnanuke.google_cast.remote_media_client',
-          const StandardMethodCodec().encodeMethodCall(
-            MethodCall('onPlayerPositionChanged', positionData),
-          ),
-          (data) {},
-        );
+              'com.felnanuke.google_cast.remote_media_client',
+              const StandardMethodCodec().encodeMethodCall(
+                MethodCall('onPlayerPositionChanged', positionData),
+              ),
+              (data) {},
+            );
 
         // Give time for async operations to complete
         await Future.delayed(Duration(milliseconds: 10));
 
-        expect(remoteMediaClient.playerPosition,
-            equals(Duration(milliseconds: 5000)));
+        expect(
+          remoteMediaClient.playerPosition,
+          equals(Duration(milliseconds: 5000)),
+        );
       });
 
       test('should handle onPlayerPositionChanged with null data', () async {
         // Simulate the native platform calling the method handler
         await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
             .handlePlatformMessage(
-          'com.felnanuke.google_cast.remote_media_client',
-          const StandardMethodCodec().encodeMethodCall(
-            MethodCall('onPlayerPositionChanged', null),
-          ),
-          (data) {},
-        );
+              'com.felnanuke.google_cast.remote_media_client',
+              const StandardMethodCodec().encodeMethodCall(
+                MethodCall('onPlayerPositionChanged', null),
+              ),
+              (data) {},
+            );
 
         // Give time for async operations to complete
         await Future.delayed(Duration(milliseconds: 10));
@@ -814,36 +856,40 @@ void main() {
         expect(remoteMediaClient.playerPosition, equals(Duration.zero));
       });
 
-      test('should handle onPlayerPositionChanged with null progress',
-          () async {
-        final positionData = {'progress': null};
+      test(
+        'should handle onPlayerPositionChanged with null progress',
+        () async {
+          final positionData = {'progress': null};
 
-        // Simulate the native platform calling the method handler
-        await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-            .handlePlatformMessage(
-          'com.felnanuke.google_cast.remote_media_client',
-          const StandardMethodCodec().encodeMethodCall(
-            MethodCall('onPlayerPositionChanged', positionData),
-          ),
-          (data) {},
-        );
+          // Simulate the native platform calling the method handler
+          await TestDefaultBinaryMessengerBinding
+              .instance
+              .defaultBinaryMessenger
+              .handlePlatformMessage(
+                'com.felnanuke.google_cast.remote_media_client',
+                const StandardMethodCodec().encodeMethodCall(
+                  MethodCall('onPlayerPositionChanged', positionData),
+                ),
+                (data) {},
+              );
 
-        // Give time for async operations to complete
-        await Future.delayed(Duration(milliseconds: 10));
+          // Give time for async operations to complete
+          await Future.delayed(Duration(milliseconds: 10));
 
-        expect(remoteMediaClient.playerPosition, equals(Duration.zero));
-      });
+          expect(remoteMediaClient.playerPosition, equals(Duration.zero));
+        },
+      );
 
       test('should handle unknown method calls', () async {
         // Should not throw an exception
         await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
             .handlePlatformMessage(
-          'com.felnanuke.google_cast.remote_media_client',
-          const StandardMethodCodec().encodeMethodCall(
-            MethodCall('unknownMethod', null),
-          ),
-          (data) {},
-        );
+              'com.felnanuke.google_cast.remote_media_client',
+              const StandardMethodCodec().encodeMethodCall(
+                MethodCall('unknownMethod', null),
+              ),
+              (data) {},
+            );
 
         // Should not crash
         expect(remoteMediaClient, isNotNull);
@@ -852,107 +898,121 @@ void main() {
 
     group('Stream integration tests', () {
       test(
-          'mediaStatusStream should emit updates when method handler is called',
-          () async {
-        final mediaStatusJson = jsonEncode({
-          'mediaSessionId': 123,
-          'playerState': 'PLAYING',
-          'playbackRate': 1.0,
-          'volume': {'level': 0.5, 'muted': false},
-          'isMuted': false,
-          'repeatMode': 'OFF',
-          'currentItemId': 123,
-          'activeTrackIds': '[]',
-        });
+        'mediaStatusStream should emit updates when method handler is called',
+        () async {
+          final mediaStatusJson = jsonEncode({
+            'mediaSessionId': 123,
+            'playerState': 'PLAYING',
+            'playbackRate': 1.0,
+            'volume': {'level': 0.5, 'muted': false},
+            'isMuted': false,
+            'repeatMode': 'OFF',
+            'currentItemId': 123,
+            'activeTrackIds': '[]',
+          });
 
-        bool streamUpdated = false;
-        final subscription =
-            remoteMediaClient.mediaStatusStream.listen((status) {
-          if (status?.currentItemId == 123) {
-            streamUpdated = true;
-          }
-        });
+          bool streamUpdated = false;
+          final subscription = remoteMediaClient.mediaStatusStream.listen((
+            status,
+          ) {
+            if (status?.currentItemId == 123) {
+              streamUpdated = true;
+            }
+          });
 
-        // Simulate the native platform calling the method handler
-        await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-            .handlePlatformMessage(
-          'com.felnanuke.google_cast.remote_media_client',
-          const StandardMethodCodec().encodeMethodCall(
-            MethodCall('onMediaStatusChanged', mediaStatusJson),
-          ),
-          (data) {},
-        );
+          // Simulate the native platform calling the method handler
+          await TestDefaultBinaryMessengerBinding
+              .instance
+              .defaultBinaryMessenger
+              .handlePlatformMessage(
+                'com.felnanuke.google_cast.remote_media_client',
+                const StandardMethodCodec().encodeMethodCall(
+                  MethodCall('onMediaStatusChanged', mediaStatusJson),
+                ),
+                (data) {},
+              );
 
-        await Future.delayed(Duration(milliseconds: 10));
-        expect(streamUpdated, isTrue);
-        await subscription.cancel();
-      });
-
-      test('queueItemsStream should emit updates when method handler is called',
-          () async {
-        final queueData = [
-          jsonEncode({
-            'itemId': 100,
-            'media': {
-              'contentId': 'test-stream-content',
-              'contentType': 'video/mp4',
-              'streamType': 'BUFFERED',
-            },
-            'autoplay': true,
-            'startTime': 0,
-            'preLoadTime': 0,
-          }),
-        ];
-
-        bool streamUpdated = false;
-        final subscription = remoteMediaClient.queueItemsStream.listen((items) {
-          if (items.isNotEmpty && items[0].itemId == 100) {
-            streamUpdated = true;
-          }
-        });
-
-        // Simulate the native platform calling the method handler
-        await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-            .handlePlatformMessage(
-          'com.felnanuke.google_cast.remote_media_client',
-          const StandardMethodCodec().encodeMethodCall(
-            MethodCall('onQueueStatusChanged', queueData),
-          ),
-          (data) {},
-        );
-
-        await Future.delayed(Duration(milliseconds: 10));
-        expect(streamUpdated, isTrue);
-        await subscription.cancel();
-      });
+          await Future.delayed(Duration(milliseconds: 10));
+          expect(streamUpdated, isTrue);
+          await subscription.cancel();
+        },
+      );
 
       test(
-          'playerPositionStream should emit updates when method handler is called',
-          () async {
-        final positionData = {'progress': 7500};
+        'queueItemsStream should emit updates when method handler is called',
+        () async {
+          final queueData = [
+            jsonEncode({
+              'itemId': 100,
+              'media': {
+                'contentId': 'test-stream-content',
+                'contentType': 'video/mp4',
+                'streamType': 'BUFFERED',
+              },
+              'autoplay': true,
+              'startTime': 0,
+              'preLoadTime': 0,
+            }),
+          ];
 
-        bool streamUpdated = false;
-        final subscription =
-            remoteMediaClient.playerPositionStream.listen((position) {
-          if (position == Duration(milliseconds: 7500)) {
-            streamUpdated = true;
-          }
-        });
+          bool streamUpdated = false;
+          final subscription = remoteMediaClient.queueItemsStream.listen((
+            items,
+          ) {
+            if (items.isNotEmpty && items[0].itemId == 100) {
+              streamUpdated = true;
+            }
+          });
 
-        // Simulate the native platform calling the method handler
-        await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-            .handlePlatformMessage(
-          'com.felnanuke.google_cast.remote_media_client',
-          const StandardMethodCodec().encodeMethodCall(
-            MethodCall('onPlayerPositionChanged', positionData),
-          ),
-          (data) {},
-        );
+          // Simulate the native platform calling the method handler
+          await TestDefaultBinaryMessengerBinding
+              .instance
+              .defaultBinaryMessenger
+              .handlePlatformMessage(
+                'com.felnanuke.google_cast.remote_media_client',
+                const StandardMethodCodec().encodeMethodCall(
+                  MethodCall('onQueueStatusChanged', queueData),
+                ),
+                (data) {},
+              );
 
-        await Future.delayed(Duration(milliseconds: 10));
-        expect(streamUpdated, isTrue);
-        await subscription.cancel();
-      });
+          await Future.delayed(Duration(milliseconds: 10));
+          expect(streamUpdated, isTrue);
+          await subscription.cancel();
+        },
+      );
+
+      test(
+        'playerPositionStream should emit updates when method handler is called',
+        () async {
+          final positionData = {'progress': 7500};
+
+          bool streamUpdated = false;
+          final subscription = remoteMediaClient.playerPositionStream.listen((
+            position,
+          ) {
+            if (position == Duration(milliseconds: 7500)) {
+              streamUpdated = true;
+            }
+          });
+
+          // Simulate the native platform calling the method handler
+          await TestDefaultBinaryMessengerBinding
+              .instance
+              .defaultBinaryMessenger
+              .handlePlatformMessage(
+                'com.felnanuke.google_cast.remote_media_client',
+                const StandardMethodCodec().encodeMethodCall(
+                  MethodCall('onPlayerPositionChanged', positionData),
+                ),
+                (data) {},
+              );
+
+          await Future.delayed(Duration(milliseconds: 10));
+          expect(streamUpdated, isTrue);
+          await subscription.cancel();
+        },
+      );
     });
   });
 }

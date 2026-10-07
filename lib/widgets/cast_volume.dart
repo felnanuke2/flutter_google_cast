@@ -61,21 +61,20 @@ class _GoogleCastVolumeState extends State<GoogleCastVolume> {
   Widget build(BuildContext context) {
     return PopupMenuButton(
       padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       color: widget.popupBackgroundColor,
       icon: StreamBuilder(
-          stream: volumeMuted.stream,
-          builder: (context, snapshot) {
-            return Icon(
-              volumeMuted.value || volumeLevel.value == 0
-                  ? Icons.volume_off
-                  : Icons.volume_up,
-              color: widget.iconColor ?? Colors.white,
-              size: widget.iconSize ?? 44,
-            );
-          }),
+        stream: volumeMuted.stream,
+        builder: (context, snapshot) {
+          return Icon(
+            volumeMuted.value || volumeLevel.value == 0
+                ? Icons.volume_off
+                : Icons.volume_up,
+            color: widget.iconColor ?? Colors.white,
+            size: widget.iconSize ?? 44,
+          );
+        },
+      ),
       itemBuilder: (context) {
         return [
           PopupMenuItem(

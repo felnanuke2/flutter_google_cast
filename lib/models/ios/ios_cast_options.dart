@@ -50,10 +50,6 @@ class IOSGoogleCastOptions extends GoogleCastOptions {
   @override
   Map<String, dynamic> toMap() {
     return super.toMap()
-      ..addAll(
-        {
-          'discoveryCriteria': _discoveryCriteria.toMap(),
-        },
-      );
+      ..addAll({'discoveryCriteria': _discoveryCriteria.toMap()});
   }
 }

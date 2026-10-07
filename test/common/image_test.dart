@@ -23,7 +23,10 @@ void main() {
 
     test('toJson/fromJson roundtrip', () {
       final img = GoogleCastImage(
-          url: Uri.parse('https://ex.com/x.jpg'), width: 10, height: 20);
+        url: Uri.parse('https://ex.com/x.jpg'),
+        width: 10,
+        height: 20,
+      );
       final json = img.toJson();
       final parsed = GoogleCastImage.fromJson(json);
       expect(parsed!.url.toString(), 'https://ex.com/x.jpg');
@@ -32,9 +35,7 @@ void main() {
     });
 
     test('fromMap handles null width and height', () {
-      final img = GoogleCastImage.fromMap({
-        'url': 'https://example.com/b.png',
-      });
+      final img = GoogleCastImage.fromMap({'url': 'https://example.com/b.png'});
       expect(img, isNotNull);
       expect(img!.url.toString(), 'https://example.com/b.png');
       expect(img.width, isNull);

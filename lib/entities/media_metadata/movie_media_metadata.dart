@@ -11,9 +11,7 @@ class GoogleCastMovieMediaMetadata extends GoogleCastMediaMetadata {
     this.studio,
     super.images,
     this.releaseDate,
-  }) : super(
-          metadataType: GoogleCastMediaMetadataType.movieMediaMetadata,
-        );
+  }) : super(metadataType: GoogleCastMediaMetadataType.movieMediaMetadata);
 
   /// 	optional Descriptive title
   ///  of the content. Player can

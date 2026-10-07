@@ -16,5 +16,5 @@ enum GoogleCastMediaIdleReason {
   interrupted,
 
   ///ERROR  The media was interrupted due to an error; for example, if the player could not download the media due to network issues
-  error;
+  error,
 }

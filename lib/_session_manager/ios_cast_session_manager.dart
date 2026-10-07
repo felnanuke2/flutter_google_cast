@@ -9,9 +9,7 @@ class GoogleCastSessionManagerIOSMethodChannel
     implements GoogleCastSessionManagerPlatformInterface {
   /// Creates a new iOS session manager method channel.
   GoogleCastSessionManagerIOSMethodChannel() {
-    _channel.setMethodCallHandler(
-      (call) => _methodCallHandler(call),
-    );
+    _channel.setMethodCallHandler((call) => _methodCallHandler(call));
   }
 
   final _channel = const MethodChannel('google_cast.session_manager');
@@ -56,23 +54,17 @@ class GoogleCastSessionManagerIOSMethodChannel
 
   @override
   Future<bool> sendMessage(String namespace, String message) async {
-    return await _channel.invokeMethod<bool>(
-          'sendMessage',
-          <String, dynamic>{
-            'namespace': namespace,
-            'message': message,
-          },
-        ) ??
+    return await _channel.invokeMethod<bool>('sendMessage', <String, dynamic>{
+          'namespace': namespace,
+          'message': message,
+        }) ??
         false;
   }
 
   @override
   Future<bool> startSessionWithDevice(GoogleCastDevice device) async {
     device as GoogleCastIosDevice;
-    return await _channel.invokeMethod(
-      'startSessionWithDevice',
-      device.index,
-    );
+    return await _channel.invokeMethod('startSessionWithDevice', device.index);
   }
 
   @override
@@ -147,7 +139,8 @@ class GoogleCastSessionManagerIOSMethodChannel
     if (_currentSessionStreamController.isClosed) return;
     try {
       final session = IOSGoogleCastSessions.fromMap(
-          arguments == null ? null : Map<String, dynamic>.from(arguments));
+        arguments == null ? null : Map<String, dynamic>.from(arguments),
+      );
       _currentSessionStreamController.add(session);
     } catch (e) {
       rethrow;

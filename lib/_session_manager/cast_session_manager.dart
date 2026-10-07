@@ -13,8 +13,8 @@ import 'cast_session_manager_platform.dart';
 class GoogleCastSessionManager {
   static final GoogleCastSessionManagerPlatformInterface _instance =
       Platform.isAndroid
-          ? GoogleCastSessionManagerAndroidMethodChannel()
-          : GoogleCastSessionManagerIOSMethodChannel();
+      ? GoogleCastSessionManagerAndroidMethodChannel()
+      : GoogleCastSessionManagerIOSMethodChannel();
 
   /// Gets the singleton instance of the session manager.
   ///

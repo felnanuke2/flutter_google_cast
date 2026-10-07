@@ -61,10 +61,14 @@ void main() {
 
     test('should verify type system compatibility', () {
       // Test that our types are compatible with the expected interfaces
-      expect(() => GoogleCastDiscoveryManagerMethodChannelAndroid(),
-          isA<Function>());
       expect(
-          () => GoogleCastDiscoveryManagerMethodChannelIOS(), isA<Function>());
+        () => GoogleCastDiscoveryManagerMethodChannelAndroid(),
+        isA<Function>(),
+      );
+      expect(
+        () => GoogleCastDiscoveryManagerMethodChannelIOS(),
+        isA<Function>(),
+      );
     });
 
     test('should create Android implementation instance directly', () {
@@ -75,9 +79,13 @@ void main() {
       // Verify instance is created and implements the interface
       expect(androidInstance, isNotNull);
       expect(
-          androidInstance, isA<GoogleCastDiscoveryManagerPlatformInterface>());
-      expect(androidInstance,
-          isA<GoogleCastDiscoveryManagerMethodChannelAndroid>());
+        androidInstance,
+        isA<GoogleCastDiscoveryManagerPlatformInterface>(),
+      );
+      expect(
+        androidInstance,
+        isA<GoogleCastDiscoveryManagerMethodChannelAndroid>(),
+      );
 
       // This ensures that the Android branch in line 20 is conceptually covered
       // even if we can't force Platform.isAndroid to be true in tests
@@ -103,7 +111,7 @@ void main() {
         'devicesStream',
         'startDiscovery',
         'stopDiscovery',
-        'isDiscoveryActiveForDeviceCategory'
+        'isDiscoveryActiveForDeviceCategory',
       ];
 
       for (final method in methods) {
@@ -113,11 +121,15 @@ void main() {
 
     test('should document expected behavior', () {
       // This test documents the expected interface behavior
-      expect('GoogleCastDiscoveryManager provides platform-agnostic discovery',
-          isA<String>());
+      expect(
+        'GoogleCastDiscoveryManager provides platform-agnostic discovery',
+        isA<String>(),
+      );
       expect('Singleton pattern ensures single instance', isA<String>());
-      expect('Platform-specific implementations handle method channels',
-          isA<String>());
+      expect(
+        'Platform-specific implementations handle method channels',
+        isA<String>(),
+      );
     });
   });
 
@@ -138,7 +150,7 @@ void main() {
         'devicesStream',
         'startDiscovery',
         'stopDiscovery',
-        'isDiscoveryActiveForDeviceCategory'
+        'isDiscoveryActiveForDeviceCategory',
       ];
 
       for (final method in apiMethods) {
@@ -169,8 +181,10 @@ void main() {
 
       // Verify that line 20 logic is sound by testing the Android implementation
       expect(androidImpl, isNotNull);
-      expect(androidImpl.runtimeType.toString(),
-          equals('GoogleCastDiscoveryManagerMethodChannelAndroid'));
+      expect(
+        androidImpl.runtimeType.toString(),
+        equals('GoogleCastDiscoveryManagerMethodChannelAndroid'),
+      );
 
       // COVERAGE STATUS:
       // - Line 20 is functionally tested (Android impl validation)
@@ -218,8 +232,7 @@ void main() {
       }
     });
 
-    test('should demonstrate platform logic for Android (line 20 coverage)',
-        () {
+    test('should demonstrate platform logic for Android (line 20 coverage)', () {
       // This test documents and validates the Android platform logic
       // that is present in line 20 of discovery_manager.dart
 
@@ -230,7 +243,9 @@ void main() {
 
       // Verify the type relationship that would be true on Android
       expect(
-          androidImpl, isA<GoogleCastDiscoveryManagerMethodChannelAndroid>());
+        androidImpl,
+        isA<GoogleCastDiscoveryManagerMethodChannelAndroid>(),
+      );
 
       // Document the conditional logic from line 19-21:
       // Platform.isAndroid ? GoogleCastDiscoveryManagerMethodChannelAndroid() : GoogleCastDiscoveryManagerMethodChannelIOS()
@@ -242,8 +257,10 @@ void main() {
 
       // Note: Line 20 will be fully covered when tests run on an Android environment
       // This test ensures the Android path is valid and will work correctly
-      expect(androidImpl.runtimeType.toString(),
-          contains('GoogleCastDiscoveryManagerMethodChannelAndroid'));
+      expect(
+        androidImpl.runtimeType.toString(),
+        contains('GoogleCastDiscoveryManagerMethodChannelAndroid'),
+      );
     });
 
     test('should validate platform detection logic completeness', () {
@@ -252,7 +269,9 @@ void main() {
       // Test Android branch logic (line 20)
       final androidInstance = GoogleCastDiscoveryManagerMethodChannelAndroid();
       expect(
-          androidInstance, isA<GoogleCastDiscoveryManagerPlatformInterface>());
+        androidInstance,
+        isA<GoogleCastDiscoveryManagerPlatformInterface>(),
+      );
 
       // Test iOS branch logic (line 21)
       final iosInstance = GoogleCastDiscoveryManagerMethodChannelIOS();
@@ -261,7 +280,9 @@ void main() {
       // Verify that the current platform gets the correct implementation
       final currentInstance = GoogleCastDiscoveryManager.instance;
       expect(
-          currentInstance, isA<GoogleCastDiscoveryManagerPlatformInterface>());
+        currentInstance,
+        isA<GoogleCastDiscoveryManagerPlatformInterface>(),
+      );
 
       // Document coverage: This test validates the implementations that would
       // be selected by the platform detection logic in lines 19-21

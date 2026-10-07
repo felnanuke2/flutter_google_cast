@@ -13,13 +13,15 @@ class GoogleCastGenericMediaMetadataAndroid
 
   /// Creates a generic media metadata instance from a map.
   factory GoogleCastGenericMediaMetadataAndroid.fromMap(
-      Map<String, dynamic> map) {
+    Map<String, dynamic> map,
+  ) {
     return GoogleCastGenericMediaMetadataAndroid(
       title: map['title'],
       subtitle: map['subtitle'],
       images: map['images'] != null
           ? List<GoogleCastImage>.from(
-              map['images']?.map((x) => GoogleCastImage.fromMap(x)))
+              map['images']?.map((x) => GoogleCastImage.fromMap(x)),
+            )
           : null,
       releaseDate: map['releaseDate'] != null
           ? DateTimeString.tryParse(map['releaseDate'] ?? '')

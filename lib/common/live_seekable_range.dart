@@ -65,8 +65,9 @@ class GoogleCastMediaLiveSeekableRange {
       end: map['end'] != null ? Duration(seconds: map['end'].toInt()) : null,
       isLiveDone: map['isLiveDone'],
       isMovingWindow: map['isMovingWindow'],
-      start:
-          map['start'] != null ? Duration(seconds: map['start'].toInt()) : null,
+      start: map['start'] != null
+          ? Duration(seconds: map['start'].toInt())
+          : null,
     );
   }
 

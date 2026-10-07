@@ -721,7 +721,9 @@ enum Rfc5646Language {
   /// Throws a [StateError] if no matching language code is found.
   factory Rfc5646Language.fromMap(String? value) {
     if (value == null) return english;
-    return values.firstWhere((element) => element.toString() == value,
-        orElse: () => english);
+    return values.firstWhere(
+      (element) => element.toString() == value,
+      orElse: () => english,
+    );
   }
 }

@@ -21,7 +21,7 @@ void main() {
             {
               'url': 'https://example.com/img1.jpg',
               'width': 100,
-              'height': 100
+              'height': 100,
             },
             {'url': '', 'width': 50, 'height': 50},
           ],
@@ -44,42 +44,28 @@ void main() {
       });
 
       test('fromMap handles null images', () {
-        final map = {
-          'albumTitle': 'Album',
-          'title': 'Track',
-          'images': null,
-        };
+        final map = {'albumTitle': 'Album', 'title': 'Track', 'images': null};
 
         final m = GoogleCastMusicMediaMetadataIOS.fromMap(map);
         expect(m.images, isNull);
       });
 
       test('fromMap handles empty images list', () {
-        final map = {
-          'albumTitle': 'Album',
-          'title': 'Track',
-          'images': [],
-        };
+        final map = {'albumTitle': 'Album', 'title': 'Track', 'images': []};
 
         final m = GoogleCastMusicMediaMetadataIOS.fromMap(map);
         expect(m.images, isEmpty);
       });
 
       test('fromMap handles null releaseDate', () {
-        final map = {
-          'title': 'Track',
-          'releaseDate': null,
-        };
+        final map = {'title': 'Track', 'releaseDate': null};
 
         final m = GoogleCastMusicMediaMetadataIOS.fromMap(map);
         expect(m.releaseDate, isNull);
       });
 
       test('fromMap handles non-int releaseDate', () {
-        final map = {
-          'title': 'Track',
-          'releaseDate': 'not an int',
-        };
+        final map = {'title': 'Track', 'releaseDate': 'not an int'};
 
         final m = GoogleCastMusicMediaMetadataIOS.fromMap(map);
         expect(m.releaseDate, isNull);
@@ -93,7 +79,7 @@ void main() {
           composer: 'Composer',
           discNumber: 2,
           images: [
-            GoogleCastImage(url: Uri.parse('https://example.com/img.jpg'))
+            GoogleCastImage(url: Uri.parse('https://example.com/img.jpg')),
           ],
           releaseDate: DateTime(2023, 1, 1),
           title: 'Title',
@@ -153,7 +139,7 @@ void main() {
             {
               'url': 'https://example.com/poster.png',
               'width': 300,
-              'height': 450
+              'height': 450,
             },
           ],
           'releaseDate': DateTime(2022, 1, 1).millisecondsSinceEpoch,
@@ -164,35 +150,28 @@ void main() {
         expect(m.subtitle, 'A Subtitle');
         expect(m.studio, 'Studio Q');
         expect(
-            m.images!.first.url.toString(), 'https://example.com/poster.png');
+          m.images!.first.url.toString(),
+          'https://example.com/poster.png',
+        );
         expect(m.releaseDate, isA<DateTime>());
       });
 
       test('fromMap handles null images', () {
-        final map = {
-          'title': 'Movie',
-          'images': null,
-        };
+        final map = {'title': 'Movie', 'images': null};
 
         final m = GoogleCastMovieMediaMetadataIOS.fromMap(map);
         expect(m.images, isNull);
       });
 
       test('fromMap handles null releaseDate', () {
-        final map = {
-          'title': 'Movie',
-          'releaseDate': null,
-        };
+        final map = {'title': 'Movie', 'releaseDate': null};
 
         final m = GoogleCastMovieMediaMetadataIOS.fromMap(map);
         expect(m.releaseDate, isNull);
       });
 
       test('fromMap handles non-int releaseDate', () {
-        final map = {
-          'title': 'Movie',
-          'releaseDate': 'not an int',
-        };
+        final map = {'title': 'Movie', 'releaseDate': 'not an int'};
 
         final m = GoogleCastMovieMediaMetadataIOS.fromMap(map);
         expect(m.releaseDate, isNull);
@@ -204,7 +183,7 @@ void main() {
           subtitle: 'Subtitle',
           studio: 'Studio',
           images: [
-            GoogleCastImage(url: Uri.parse('https://example.com/poster.jpg'))
+            GoogleCastImage(url: Uri.parse('https://example.com/poster.jpg')),
           ],
           releaseDate: DateTime(2023, 6, 15),
         );
@@ -226,7 +205,7 @@ void main() {
           {
             'url': 'https://example.com/poster.png',
             'width': 300,
-            'height': 450
+            'height': 450,
           },
         ],
         'releaseDate': DateTime(2022, 1, 1).millisecondsSinceEpoch,
@@ -259,11 +238,7 @@ void main() {
       });
 
       test('fromMap handles null images', () {
-        final map = {
-          'title': 'Title',
-          'subtitle': 'Subtitle',
-          'images': null,
-        };
+        final map = {'title': 'Title', 'subtitle': 'Subtitle', 'images': null};
 
         final m = GoogleCastGenericMediaMetadataIOS.fromMap(map);
         expect(m.images, isNull);
@@ -298,7 +273,7 @@ void main() {
           title: 'Title',
           subtitle: 'Subtitle',
           images: [
-            GoogleCastImage(url: Uri.parse('https://example.com/img.jpg'))
+            GoogleCastImage(url: Uri.parse('https://example.com/img.jpg')),
           ],
           releaseDate: DateTime(2023, 3, 20),
         );
@@ -349,20 +324,14 @@ void main() {
       });
 
       test('fromMap handles null images', () {
-        final map = {
-          'seriesTitle': 'Series',
-          'images': null,
-        };
+        final map = {'seriesTitle': 'Series', 'images': null};
 
         final m = GoogleCastTvShowMediaMetadataIOS.fromMap(map);
         expect(m.images, isNull);
       });
 
       test('fromMap handles null releaseDate', () {
-        final map = {
-          'seriesTitle': 'Series',
-          'releaseDate': null,
-        };
+        final map = {'seriesTitle': 'Series', 'releaseDate': null};
 
         final m = GoogleCastTvShowMediaMetadataIOS.fromMap(map);
         expect(m.originalAirDate, isNull);
@@ -385,7 +354,7 @@ void main() {
           season: 3,
           episode: 10,
           images: [
-            GoogleCastImage(url: Uri.parse('https://example.com/episode.jpg'))
+            GoogleCastImage(url: Uri.parse('https://example.com/episode.jpg')),
           ],
           originalAirDate: DateTime(2023, 9, 15),
         );
