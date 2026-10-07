@@ -7,7 +7,8 @@
 #
 # arm64 iOS Simulator:
 # - Do NOT set EXCLUDED_ARCHS for iphonesimulator (required for Apple Silicon / iOS 26+ sims).
-# - Depend on google-cast-sdk >= 4.8.4, which ships an XCFramework with ios-arm64 simulator slices.
+# - Depend on google-cast-sdk >= 4.8.4, which ships an XCFramework with ios-arm64 simulator slices,
+#   and < 4.8.6, which raises the minimum iOS version to 16.0 (this pod targets 15.0).
 # - Do NOT use google-cast-sdk-no-bluetooth; that pod excludes arm64 simulator architectures.
 #
 Pod::Spec.new do |s|
@@ -31,7 +32,7 @@ This plugin supports both CocoaPods and Swift Package Manager (SPM) for iOS depe
   s.platform = :ios, '15.0'
   s.ios.deployment_target  = '15.0'
   # 4.8.4+ XCFramework includes arm64 simulator; required for Apple Silicon iOS 26+ simulators.
-  s.dependency 'google-cast-sdk', '~> 4.8.4'
+  s.dependency 'google-cast-sdk', '>= 4.8.4', '< 4.8.6'
   s.dependency 'Protobuf'
   s.static_framework = true
 
