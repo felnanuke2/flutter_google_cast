@@ -54,7 +54,8 @@ class GoogleCastMediaInformationIOS extends GoogleCastMediaInformation {
       atvEntity: map['atvEntity'],
       breakClips: map['breakClips'] != null
           ? List<CastBreakClips>.from(
-              map['breakClips']?.map((x) => CastBreakClips.fromMap(x)))
+              map['breakClips']?.map((x) => CastBreakClips.fromMap(x)),
+            )
           : null,
       contentId: map['contentID'] ?? '',
       streamType: CastMediaStreamType.values[map['streamType']],
@@ -70,7 +71,8 @@ class GoogleCastMediaInformationIOS extends GoogleCastMediaInformation {
           : null,
       breaks: map['breaks'] != null
           ? List<CastBreak>.from(
-              map['breaks']?.map((x) => CastBreak.fromMap(x)))
+              map['breaks']?.map((x) => CastBreak.fromMap(x)),
+            )
           : null,
       contentUrl: Uri.tryParse(map['contentURL'] ?? ''),
       entity: map['entity'],
@@ -88,14 +90,13 @@ class GoogleCastMediaInformationIOS extends GoogleCastMediaInformation {
           : null,
       tracks: map['tracks'] != null
           ? List<GoogleCastMediaTrack>.from(
-              map['tracks']?.map(
-                (x) => IosMediaTrack.fromMap(x),
-              ),
+              map['tracks']?.map((x) => IosMediaTrack.fromMap(x)),
             )
           : null,
       userActionStates: map['userActionStates'] != null
           ? List<UserActionState>.from(
-              map['userActionStates']?.map((x) => UserActionState.fromMap(x)))
+              map['userActionStates']?.map((x) => UserActionState.fromMap(x)),
+            )
           : null,
       vmapAdsRequest: map['vmapAdsRequest'] != null
           ? VastAdsRequest.fromMap(map['vmapAdsRequest'])

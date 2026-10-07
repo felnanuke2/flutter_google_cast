@@ -97,9 +97,7 @@ abstract class GoogleCastRemoteMediaClientPlatformInterface
   });
 
   /// Removes items from the queue by their IDs.
-  Future<void> queueRemoveItemsWithIds(
-    List<int> itemIds,
-  );
+  Future<void> queueRemoveItemsWithIds(List<int> itemIds);
 
   /// Jumps to a specific item in the queue by its ID.
   Future<void> queueJumpToItemWithId(int itemId);

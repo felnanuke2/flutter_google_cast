@@ -10,10 +10,7 @@ class GoogleCastMediaMetadata {
   final List<GoogleCastImage>? images;
 
   /// Creates a new [GoogleCastMediaMetadata] instance.
-  GoogleCastMediaMetadata({
-    required this.metadataType,
-    this.images,
-  });
+  GoogleCastMediaMetadata({required this.metadataType, this.images});
 
   /// Converts the object to a map for serialization.
   Map<String, dynamic> toMap() {

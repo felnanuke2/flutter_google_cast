@@ -33,5 +33,5 @@ enum TextTrackType {
   chapters,
 
   /// Tracks intended for use from script.
-  metadata;
+  metadata,
 }

@@ -27,14 +27,13 @@ void main() {
       expect(manager, isA<GoogleCastSessionManagerPlatformInterface>());
     });
 
-    test(
-        'startSessionWithDevice invokes native "startSessionWithDeviceId" '
+    test('startSessionWithDevice invokes native "startSessionWithDeviceId" '
         'with the Android device ID', () async {
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
           .setMockMethodCallHandler(channel, (MethodCall call) async {
-        methodCalls.add(call);
-        return true;
-      });
+            methodCalls.add(call);
+            return true;
+          });
 
       final device = GoogleCastAndroidDevice(
         deviceID: 'device-1',
@@ -55,39 +54,40 @@ void main() {
       expect(methodCalls.first.arguments, equals('device-1'));
     });
 
-    test('startSessionWithDevice propagates false from the native side',
-        () async {
-      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-          .setMockMethodCallHandler(channel, (MethodCall call) async {
-        methodCalls.add(call);
-        return false;
-      });
-
-      final device = GoogleCastAndroidDevice(
-        deviceID: 'device-1',
-        friendlyName: 'Living Room TV',
-        modelName: 'Chromecast',
-        statusText: null,
-        deviceVersion: '5',
-        isOnLocalNetwork: true,
-        category: 'cast',
-        uniqueID: 'device-1',
-      );
-
-      final result = await manager.startSessionWithDevice(device);
-
-      expect(result, isFalse);
-      expect(methodCalls.single.method, equals('startSessionWithDeviceId'));
-    });
-
     test(
-        'resetSession delegates to endSessionAndStopCasting on Android '
+      'startSessionWithDevice propagates false from the native side',
+      () async {
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+            .setMockMethodCallHandler(channel, (MethodCall call) async {
+              methodCalls.add(call);
+              return false;
+            });
+
+        final device = GoogleCastAndroidDevice(
+          deviceID: 'device-1',
+          friendlyName: 'Living Room TV',
+          modelName: 'Chromecast',
+          statusText: null,
+          deviceVersion: '5',
+          isOnLocalNetwork: true,
+          category: 'cast',
+          uniqueID: 'device-1',
+        );
+
+        final result = await manager.startSessionWithDevice(device);
+
+        expect(result, isFalse);
+        expect(methodCalls.single.method, equals('startSessionWithDeviceId'));
+      },
+    );
+
+    test('resetSession delegates to endSessionAndStopCasting on Android '
         'because stale sessions are not observed on that platform', () async {
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
           .setMockMethodCallHandler(channel, (MethodCall call) async {
-        methodCalls.add(call);
-        return true;
-      });
+            methodCalls.add(call);
+            return true;
+          });
 
       final result = await manager.resetSession();
 
@@ -97,26 +97,28 @@ void main() {
       expect(methodCalls.first.method, equals('endSessionAndStopCasting'));
     });
 
-    test('resetSession propagates false from endSessionAndStopCasting',
-        () async {
-      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-          .setMockMethodCallHandler(channel, (MethodCall call) async {
-        methodCalls.add(call);
-        return false;
-      });
+    test(
+      'resetSession propagates false from endSessionAndStopCasting',
+      () async {
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+            .setMockMethodCallHandler(channel, (MethodCall call) async {
+              methodCalls.add(call);
+              return false;
+            });
 
-      final result = await manager.resetSession();
+        final result = await manager.resetSession();
 
-      expect(result, isFalse);
-      expect(methodCalls.single.method, equals('endSessionAndStopCasting'));
-    });
+        expect(result, isFalse);
+        expect(methodCalls.single.method, equals('endSessionAndStopCasting'));
+      },
+    );
 
     test('custom message methods forward namespace and payload', () async {
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
           .setMockMethodCallHandler(channel, (MethodCall call) async {
-        methodCalls.add(call);
-        return true;
-      });
+            methodCalls.add(call);
+            return true;
+          });
 
       expect(
         await manager.addMessageChannel('urn:x-cast:example.channel'),
@@ -150,15 +152,15 @@ void main() {
 
       await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
           .handlePlatformMessage(
-        channel.name,
-        const StandardMethodCodec().encodeMethodCall(
-          const MethodCall('onMessageReceived', <String, dynamic>{
-            'namespace': 'urn:x-cast:example.channel',
-            'message': '{"status":"ready"}',
-          }),
-        ),
-        (_) {},
-      );
+            channel.name,
+            const StandardMethodCodec().encodeMethodCall(
+              const MethodCall('onMessageReceived', <String, dynamic>{
+                'namespace': 'urn:x-cast:example.channel',
+                'message': '{"status":"ready"}',
+              }),
+            ),
+            (_) {},
+          );
 
       final message = await messageFuture;
       expect(message.namespace, 'urn:x-cast:example.channel');
@@ -169,12 +171,14 @@ void main() {
       final received = <GoogleCastMessage>[];
       final subscription = manager.messageStream.listen(received.add);
 
-      Future<void> emit(Object? arguments) =>
-          TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-              .handlePlatformMessage(
+      Future<void> emit(Object? arguments) => TestDefaultBinaryMessengerBinding
+          .instance
+          .defaultBinaryMessenger
+          .handlePlatformMessage(
             channel.name,
-            const StandardMethodCodec()
-                .encodeMethodCall(MethodCall('onMessageReceived', arguments)),
+            const StandardMethodCodec().encodeMethodCall(
+              MethodCall('onMessageReceived', arguments),
+            ),
             (_) {},
           );
 
@@ -199,28 +203,28 @@ void main() {
       // A late native event must be a no-op, not a StateError.
       await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
           .handlePlatformMessage(
-        channel.name,
-        const StandardMethodCodec().encodeMethodCall(
-          const MethodCall('onMessageReceived', <String, dynamic>{
-            'namespace': 'urn:x-cast:example.channel',
-            'message': 'late',
-          }),
-        ),
-        (_) {},
-      );
+            channel.name,
+            const StandardMethodCodec().encodeMethodCall(
+              const MethodCall('onMessageReceived', <String, dynamic>{
+                'namespace': 'urn:x-cast:example.channel',
+                'message': 'late',
+              }),
+            ),
+            (_) {},
+          );
     });
 
-    test(
-        'dispose clears the cached session and drops late session events '
+    test('dispose clears the cached session and drops late session events '
         'instead of surfacing stale data', () async {
       Future<void> emitSession(Object? arguments) =>
           TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
               .handlePlatformMessage(
-            channel.name,
-            const StandardMethodCodec()
-                .encodeMethodCall(MethodCall('onSessionChanged', arguments)),
-            (_) {},
-          );
+                channel.name,
+                const StandardMethodCodec().encodeMethodCall(
+                  MethodCall('onSessionChanged', arguments),
+                ),
+                (_) {},
+              );
 
       await emitSession(<String, dynamic>{
         'sessionID': 'session-1',

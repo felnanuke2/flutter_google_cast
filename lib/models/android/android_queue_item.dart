@@ -18,7 +18,8 @@ class GoogleCastAndroidQueueItem extends GoogleCastQueueItem {
   factory GoogleCastAndroidQueueItem.fromMap(Map<String, dynamic> map) {
     return GoogleCastAndroidQueueItem(
       mediaInformation: GoogleCastMediaInformationAndroid.fromMap(
-          Map<String, dynamic>.from(map['media'])),
+        Map<String, dynamic>.from(map['media']),
+      ),
       activeTrackIds: List.from(map['activeTracksIds'] ?? []),
       autoPlay: map['autoplay'] ?? false,
       customData: map['customData'],

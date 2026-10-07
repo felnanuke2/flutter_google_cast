@@ -154,9 +154,7 @@ void main() {
     test('fromMap with vastAdsRequest', () {
       final map = {
         'id': 'clip-vast',
-        'vastAdsRequest': {
-          'adTagUrl': 'https://ads.example.com/vast',
-        },
+        'vastAdsRequest': {'adTagUrl': 'https://ads.example.com/vast'},
       };
 
       final clip = CastBreakClips.fromMap(map);

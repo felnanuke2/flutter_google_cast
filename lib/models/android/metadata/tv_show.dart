@@ -14,14 +14,16 @@ class GoogleCastTvShowMediaMetadataAndroid
 
   /// Creates a TV show media metadata instance from a map.
   factory GoogleCastTvShowMediaMetadataAndroid.fromMap(
-      Map<String, dynamic> map) {
+    Map<String, dynamic> map,
+  ) {
     return GoogleCastTvShowMediaMetadataAndroid(
       seriesTitle: map['seriesTitle'],
       season: map['season']?.toInt(),
       episode: map['episode']?.toInt(),
       images: map['images'] != null
           ? List<GoogleCastImage>.from(
-              map['images']?.map((x) => GoogleCastImage.fromMap(x)))
+              map['images']?.map((x) => GoogleCastImage.fromMap(x)),
+            )
           : null,
       originalAirDate: map['originalAirDate'] != null
           ? DateTimeString.tryParse(map['originalAirDate'])

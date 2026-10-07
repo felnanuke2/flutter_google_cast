@@ -7,18 +7,20 @@ import 'package:flutter_chrome_cast/_google_cast_context/ios_google_cast_context
 
 void main() {
   group('GoogleCastContext', () {
-    test('should return Android implementation when Platform.isAndroid is true',
-        () {
-      // This test covers the static instance creation and Platform.isAndroid check
-      final instance = GoogleCastContext.instance;
+    test(
+      'should return Android implementation when Platform.isAndroid is true',
+      () {
+        // This test covers the static instance creation and Platform.isAndroid check
+        final instance = GoogleCastContext.instance;
 
-      // Verify that we get a platform interface instance
-      expect(instance, isA<GoogleCastContextPlatformInterface>());
+        // Verify that we get a platform interface instance
+        expect(instance, isA<GoogleCastContextPlatformInterface>());
 
-      // The actual implementation depends on the platform the test is running on
-      // But we can verify the instance is properly initialized
-      expect(instance, isNotNull);
-    });
+        // The actual implementation depends on the platform the test is running on
+        // But we can verify the instance is properly initialized
+        expect(instance, isNotNull);
+      },
+    );
 
     test('should provide singleton instance access', () {
       // This test covers the static instance getter (line 22)

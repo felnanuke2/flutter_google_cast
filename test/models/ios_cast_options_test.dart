@@ -20,15 +20,21 @@ void main() {
       final options = IOSGoogleCastOptions(discoveryCriteria);
       final map = options.toMap();
 
-      expect(map.containsKey('physicalVolumeButtonsWillControlDeviceVolume'),
-          isTrue);
+      expect(
+        map.containsKey('physicalVolumeButtonsWillControlDeviceVolume'),
+        isTrue,
+      );
       expect(map.containsKey('suspendSessionsWhenBackgrounded'), isTrue);
       expect(map.containsKey('disableDiscoveryAutostart'), isTrue);
       expect(map.containsKey('disableAnalyticsLogging'), isTrue);
       expect(
-          map.containsKey('stopReceiverApplicationWhenEndingSession'), isTrue);
+        map.containsKey('stopReceiverApplicationWhenEndingSession'),
+        isTrue,
+      );
       expect(
-          map.containsKey('startDiscoveryAfterFirstTapOnCastButton'), isTrue);
+        map.containsKey('startDiscoveryAfterFirstTapOnCastButton'),
+        isTrue,
+      );
       expect(map.containsKey('stopCastingOnAppTerminated'), isTrue);
     });
 
@@ -123,8 +129,9 @@ void main() {
 
     test('toMap with namespaces discovery criteria', () {
       final nsDiscoveryCriteria =
-          GoogleCastDiscoveryCriteriaInitialize.initWithNamespaces(
-              {'urn:x-cast:com.example'});
+          GoogleCastDiscoveryCriteriaInitialize.initWithNamespaces({
+            'urn:x-cast:com.example',
+          });
       final options = IOSGoogleCastOptions(nsDiscoveryCriteria);
       final map = options.toMap();
 

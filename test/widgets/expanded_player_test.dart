@@ -11,23 +11,26 @@ void main() {
     late MethodChannel sessionChannel;
 
     setUp(() {
-      remoteMediaChannel =
-          const MethodChannel('google_cast.remote_media_client');
+      remoteMediaChannel = const MethodChannel(
+        'google_cast.remote_media_client',
+      );
       sessionChannel = const MethodChannel('google_cast.session_manager');
 
       // Set up mock for remote media client
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-          .setMockMethodCallHandler(remoteMediaChannel,
-              (MethodCall methodCall) async {
-        return null;
-      });
+          .setMockMethodCallHandler(remoteMediaChannel, (
+            MethodCall methodCall,
+          ) async {
+            return null;
+          });
 
       // Set up mock for session manager
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-          .setMockMethodCallHandler(sessionChannel,
-              (MethodCall methodCall) async {
-        return null;
-      });
+          .setMockMethodCallHandler(sessionChannel, (
+            MethodCall methodCall,
+          ) async {
+            return null;
+          });
     });
 
     tearDown(() {
@@ -74,8 +77,10 @@ void main() {
       expect(texts.nowPlaying, equals('Now Playing'));
       expect(texts.noCaptionsAvailable, equals('No captions available'));
       expect(texts.captionsOff, equals('Off'));
-      expect(texts.castingToDevice('Test Device'),
-          equals('Casting to Test Device'));
+      expect(
+        texts.castingToDevice('Test Device'),
+        equals('Casting to Test Device'),
+      );
       expect(texts.trackFallback(1), equals('Track 1'));
     });
 

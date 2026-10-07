@@ -66,9 +66,9 @@ class GoogleCastDiscoveryManagerMethodChannelIOS
   }
 
   void _onDevicesChanged(List arguments) {
-    final devices = List.from(arguments)
-        .map((device) => GoogleCastIosDevice.fromMap(Map.from(device)))
-        .toList();
+    final devices = List.from(
+      arguments,
+    ).map((device) => GoogleCastIosDevice.fromMap(Map.from(device))).toList();
 
     _devicesStreamController.add(devices);
   }

@@ -11,42 +11,51 @@ void main() {
     test('value equality covers namespace and message', () {
       expect(
         message,
-        equals(const GoogleCastMessage(
-          namespace: 'urn:x-cast:example.channel',
-          message: '{"status":"ready"}',
-        )),
+        equals(
+          const GoogleCastMessage(
+            namespace: 'urn:x-cast:example.channel',
+            message: '{"status":"ready"}',
+          ),
+        ),
       );
       expect(
         message,
-        isNot(equals(const GoogleCastMessage(
-          namespace: 'urn:x-cast:other.channel',
-          message: '{"status":"ready"}',
-        ))),
+        isNot(
+          equals(
+            const GoogleCastMessage(
+              namespace: 'urn:x-cast:other.channel',
+              message: '{"status":"ready"}',
+            ),
+          ),
+        ),
       );
       expect(
         message,
-        isNot(equals(const GoogleCastMessage(
-          namespace: 'urn:x-cast:example.channel',
-          message: '{"status":"other"}',
-        ))),
+        isNot(
+          equals(
+            const GoogleCastMessage(
+              namespace: 'urn:x-cast:example.channel',
+              message: '{"status":"other"}',
+            ),
+          ),
+        ),
       );
     });
 
     test('hashCode matches equal instances', () {
       expect(
         message.hashCode,
-        equals(const GoogleCastMessage(
-          namespace: 'urn:x-cast:example.channel',
-          message: '{"status":"ready"}',
-        ).hashCode),
+        equals(
+          const GoogleCastMessage(
+            namespace: 'urn:x-cast:example.channel',
+            message: '{"status":"ready"}',
+          ).hashCode,
+        ),
       );
     });
 
     test('toString includes namespace and message', () {
-      expect(
-        message.toString(),
-        contains('urn:x-cast:example.channel'),
-      );
+      expect(message.toString(), contains('urn:x-cast:example.channel'));
       expect(message.toString(), contains('{"status":"ready"}'));
     });
   });

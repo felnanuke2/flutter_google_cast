@@ -19,7 +19,8 @@ class GoogleCastMusicMediaMetadataAndroid extends GoogleCastMusicMediaMetadata {
 
   /// Creates a music media metadata instance from a map.
   factory GoogleCastMusicMediaMetadataAndroid.fromMap(
-      Map<String, dynamic> map) {
+    Map<String, dynamic> map,
+  ) {
     return GoogleCastMusicMediaMetadataAndroid(
       albumName: map['albumName'],
       title: map['title'],
@@ -30,7 +31,8 @@ class GoogleCastMusicMediaMetadataAndroid extends GoogleCastMusicMediaMetadata {
       discNumber: map['discNumber']?.toInt(),
       images: map['images'] != null
           ? List<GoogleCastImage>.from(
-              map['images']?.map((x) => GoogleCastImage.fromMap(x)))
+              map['images']?.map((x) => GoogleCastImage.fromMap(x)),
+            )
           : null,
       releaseDate: map['releaseDate'] != null
           ? DateTimeString.tryParse(map['releaseDate'])

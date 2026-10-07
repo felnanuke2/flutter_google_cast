@@ -1,3 +1,7 @@
+## Unreleased
+- Updates the minimum supported SDK version to Flutter 3.44/Dart 3.12.
+- Migrates the Android plugin to built-in Kotlin: it no longer applies the Kotlin Gradle Plugin. (#94)
+
 ## 1.5.0 - Custom Cast Message Channels, Discovery and Logging
 ### ✨ New Features
 - Added cross-platform custom Cast message channels for registering namespaces, sending text messages, and receiving receiver messages on Android and iOS.

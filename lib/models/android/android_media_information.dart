@@ -30,7 +30,8 @@ class GoogleCastMediaInformationAndroid extends GoogleCastMediaInformation {
       atvEntity: map['atvEntity'],
       breakClips: map['breakClips'] != null
           ? List<CastBreakClips>.from(
-              map['breakClips']?.map((x) => CastBreakClips.fromMap(x)))
+              map['breakClips']?.map((x) => CastBreakClips.fromMap(x)),
+            )
           : null,
       contentId: map['contentId'] ?? '',
       streamType: GoogleCastAndroidStreamType.fromMap(map['streamType']),
@@ -44,7 +45,8 @@ class GoogleCastMediaInformationAndroid extends GoogleCastMediaInformation {
       customData: Map<String, dynamic>.from(map['customData'] ?? {}),
       breaks: map['breaks'] != null
           ? List<CastBreak>.from(
-              map['breaks']?.map((x) => CastBreak.fromMap(x)))
+              map['breaks']?.map((x) => CastBreak.fromMap(x)),
+            )
           : null,
       contentUrl: Uri.tryParse(map['contentUrl'] ?? ''),
       entity: map['entity'],
@@ -61,12 +63,17 @@ class GoogleCastMediaInformationAndroid extends GoogleCastMediaInformation {
           ? TextTrackStyle.fromMap(map['textTrackStyle'])
           : null,
       tracks: map['tracks'] != null
-          ? List<GoogleCastMediaTrack>.from(map['tracks']?.map((x) =>
-              GoogleCastMediaTrack.fromMap(Map<String, dynamic>.from(x))))
+          ? List<GoogleCastMediaTrack>.from(
+              map['tracks']?.map(
+                (x) =>
+                    GoogleCastMediaTrack.fromMap(Map<String, dynamic>.from(x)),
+              ),
+            )
           : null,
       userActionStates: map['userActionStates'] != null
           ? List<UserActionState>.from(
-              map['userActionStates']?.map((x) => UserActionState.fromMap(x)))
+              map['userActionStates']?.map((x) => UserActionState.fromMap(x)),
+            )
           : null,
       vmapAdsRequest: map['vmapAdsRequest'] != null
           ? VastAdsRequest.fromMap(map['vmapAdsRequest'])

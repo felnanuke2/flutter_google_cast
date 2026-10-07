@@ -36,8 +36,10 @@ void main() {
     });
 
     test('should implement GoogleCastRemoteMediaClientPlatformInterface', () {
-      expect(remoteMediaClient,
-          isA<GoogleCastRemoteMediaClientPlatformInterface>());
+      expect(
+        remoteMediaClient,
+        isA<GoogleCastRemoteMediaClientPlatformInterface>(),
+      );
     });
 
     group('Constructor', () {
@@ -61,66 +63,84 @@ void main() {
         expect(remoteMediaClient.mediaStatus, isNull);
       });
 
-      test('mediaStatusStream should provide stream of media status changes',
-          () {
-        expect(remoteMediaClient.mediaStatusStream,
-            isA<Stream<GoggleCastMediaStatus?>>());
-      });
+      test(
+        'mediaStatusStream should provide stream of media status changes',
+        () {
+          expect(
+            remoteMediaClient.mediaStatusStream,
+            isA<Stream<GoggleCastMediaStatus?>>(),
+          );
+        },
+      );
 
       test('playerPosition getter should return current player position', () {
         expect(remoteMediaClient.playerPosition, equals(Duration.zero));
       });
 
-      test('playerPositionStream should provide stream of position changes',
-          () {
-        expect(remoteMediaClient.playerPositionStream, isA<Stream<Duration>>());
-      });
+      test(
+        'playerPositionStream should provide stream of position changes',
+        () {
+          expect(
+            remoteMediaClient.playerPositionStream,
+            isA<Stream<Duration>>(),
+          );
+        },
+      );
 
       test('queueItems getter should return current queue items', () {
         expect(remoteMediaClient.queueItems, isEmpty);
       });
 
       test('queueItemsStream should provide stream of queue items changes', () {
-        expect(remoteMediaClient.queueItemsStream,
-            isA<Stream<List<GoogleCastQueueItem>>>());
+        expect(
+          remoteMediaClient.queueItemsStream,
+          isA<Stream<List<GoogleCastQueueItem>>>(),
+        );
       });
 
       test(
-          'queueHasNextItem getter should return current queue next item state',
-          () {
-        expect(remoteMediaClient.queueHasNextItem, isFalse);
-      });
-
-      test('queueHasPreviousItem should return false when no items in queue',
-          () {
-        expect(remoteMediaClient.queueHasPreviousItem, isFalse);
-      });
+        'queueHasNextItem getter should return current queue next item state',
+        () {
+          expect(remoteMediaClient.queueHasNextItem, isFalse);
+        },
+      );
 
       test(
-          'queueHasPreviousItem should return false when current item is first',
-          () {
-        // This test covers the logic in queueHasPreviousItem getter
-        // Since we can't directly set queue items, we test with the default empty state
-        expect(remoteMediaClient.queueHasPreviousItem, isFalse);
-      });
+        'queueHasPreviousItem should return false when no items in queue',
+        () {
+          expect(remoteMediaClient.queueHasPreviousItem, isFalse);
+        },
+      );
 
       test(
-          'queueHasPreviousItem should return true when current item is not first',
-          () {
-        // This test covers the logic in queueHasPreviousItem getter
-        // The method calculates based on queue items and current media status
-        expect(remoteMediaClient.queueHasPreviousItem,
-            isFalse); // Will be false until queue is populated
-      });
+        'queueHasPreviousItem should return false when current item is first',
+        () {
+          // This test covers the logic in queueHasPreviousItem getter
+          // Since we can't directly set queue items, we test with the default empty state
+          expect(remoteMediaClient.queueHasPreviousItem, isFalse);
+        },
+      );
+
+      test(
+        'queueHasPreviousItem should return true when current item is not first',
+        () {
+          // This test covers the logic in queueHasPreviousItem getter
+          // The method calculates based on queue items and current media status
+          expect(
+            remoteMediaClient.queueHasPreviousItem,
+            isFalse,
+          ); // Will be false until queue is populated
+        },
+      );
     });
 
     group('loadMedia', () {
       test('should call native method with correct parameters', () async {
         TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
             .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
-          methodCalls.add(methodCall);
-          return null;
-        });
+              methodCalls.add(methodCall);
+              return null;
+            });
 
         final mediaInfo = GoogleCastMediaInformation(
           contentId: 'test_content',
@@ -153,9 +173,9 @@ void main() {
       test('should call native method with customData', () async {
         TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
             .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
-          methodCalls.add(methodCall);
-          return null;
-        });
+              methodCalls.add(methodCall);
+              return null;
+            });
 
         final mediaInfo = GoogleCastMediaInformation(
           contentId: 'test_content',
@@ -173,16 +193,18 @@ void main() {
         expect(methodCalls.first.method, equals('loadMedia'));
 
         final args = methodCalls.first.arguments as Map<dynamic, dynamic>;
-        expect(args['customData'],
-            equals({'Authorization': 'Bearer token123', 'X-Custom': 'value'}));
+        expect(
+          args['customData'],
+          equals({'Authorization': 'Bearer token123', 'X-Custom': 'value'}),
+        );
       });
 
       test('should call native method with nested customData', () async {
         TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
             .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
-          methodCalls.add(methodCall);
-          return null;
-        });
+              methodCalls.add(methodCall);
+              return null;
+            });
 
         final mediaInfo = GoogleCastMediaInformation(
           contentId: 'test_content',
@@ -196,11 +218,8 @@ void main() {
             'Authorization': 'Bearer token123',
             'X-Client': 'flutter-test',
           },
-          'options': {
-            'retry': true,
-            'timeout': 30,
-          },
-          'tags': ['sports', 'live']
+          'options': {'retry': true, 'timeout': 30},
+          'tags': ['sports', 'live'],
         };
 
         await remoteMediaClient.loadMedia(
@@ -218,9 +237,9 @@ void main() {
       test('should omit customData key when not provided', () async {
         TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
             .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
-          methodCalls.add(methodCall);
-          return null;
-        });
+              methodCalls.add(methodCall);
+              return null;
+            });
 
         final mediaInfo = GoogleCastMediaInformation(
           contentId: 'test_content',
@@ -232,8 +251,10 @@ void main() {
 
         expect(methodCalls, hasLength(1));
         final args = methodCalls.first.arguments as Map<dynamic, dynamic>;
-        expect(args.containsKey('customData'),
-            isFalse); // Should be removed due to null
+        expect(
+          args.containsKey('customData'),
+          isFalse,
+        ); // Should be removed due to null
       });
     });
 
@@ -241,9 +262,9 @@ void main() {
       setUp(() {
         TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
             .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
-          methodCalls.add(methodCall);
-          return null;
-        });
+              methodCalls.add(methodCall);
+              return null;
+            });
       });
 
       test('pause should call native method', () async {
@@ -286,53 +307,57 @@ void main() {
       });
 
       test(
-          'setActiveTrackIDs should call native method with correct parameters',
-          () async {
-        final trackIds = [1, 2, 3];
+        'setActiveTrackIDs should call native method with correct parameters',
+        () async {
+          final trackIds = [1, 2, 3];
 
-        await remoteMediaClient.setActiveTrackIDs(trackIds);
+          await remoteMediaClient.setActiveTrackIDs(trackIds);
 
-        expect(methodCalls, hasLength(1));
-        expect(methodCalls.first.method, equals('setActiveTrackIDs'));
-        expect(methodCalls.first.arguments, equals(trackIds));
-      });
-
-      test('setPlaybackRate should call native method with correct parameters',
-          () async {
-        const rate = 2.0;
-
-        await remoteMediaClient.setPlaybackRate(rate);
-
-        expect(methodCalls, hasLength(1));
-        expect(methodCalls.first.method, equals('setPlaybackRate'));
-        expect(methodCalls.first.arguments, equals(rate));
-      });
+          expect(methodCalls, hasLength(1));
+          expect(methodCalls.first.method, equals('setActiveTrackIDs'));
+          expect(methodCalls.first.arguments, equals(trackIds));
+        },
+      );
 
       test(
-          'setTextTrackStyle should call native method with correct parameters',
-          () async {
-        final textTrackStyle = TextTrackStyle(
-          backgroundColor: Colors.black,
-          foregroundColor: Colors.white,
-          fontStyle: TextTrackFontStyle.bold,
-          windowType: TextTrackWindowType.normal,
-        );
+        'setPlaybackRate should call native method with correct parameters',
+        () async {
+          const rate = 2.0;
 
-        await remoteMediaClient.setTextTrackStyle(textTrackStyle);
+          await remoteMediaClient.setPlaybackRate(rate);
 
-        expect(methodCalls, hasLength(1));
-        expect(methodCalls.first.method, equals('setTextTrackStyle'));
-        expect(methodCalls.first.arguments, equals(textTrackStyle.toMap()));
-      });
+          expect(methodCalls, hasLength(1));
+          expect(methodCalls.first.method, equals('setPlaybackRate'));
+          expect(methodCalls.first.arguments, equals(rate));
+        },
+      );
+
+      test(
+        'setTextTrackStyle should call native method with correct parameters',
+        () async {
+          final textTrackStyle = TextTrackStyle(
+            backgroundColor: Colors.black,
+            foregroundColor: Colors.white,
+            fontStyle: TextTrackFontStyle.bold,
+            windowType: TextTrackWindowType.normal,
+          );
+
+          await remoteMediaClient.setTextTrackStyle(textTrackStyle);
+
+          expect(methodCalls, hasLength(1));
+          expect(methodCalls.first.method, equals('setTextTrackStyle'));
+          expect(methodCalls.first.arguments, equals(textTrackStyle.toMap()));
+        },
+      );
     });
 
     group('Queue Control Methods', () {
       setUp(() {
         TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
             .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
-          methodCalls.add(methodCall);
-          return null;
-        });
+              methodCalls.add(methodCall);
+              return null;
+            });
       });
 
       test('queueNextItem should call native method', () async {
@@ -351,305 +376,341 @@ void main() {
         expect(methodCalls.first.arguments, isNull);
       });
 
-      test('queueLoadItems should call native method with items only',
-          () async {
-        final queueItems = [
-          GoogleCastQueueItem(
+      test(
+        'queueLoadItems should call native method with items only',
+        () async {
+          final queueItems = [
+            GoogleCastQueueItem(
+              mediaInformation: GoogleCastMediaInformation(
+                contentId: 'test1',
+                contentType: 'video/mp4',
+                streamType: CastMediaStreamType.buffered,
+              ),
+            ),
+          ];
+
+          await remoteMediaClient.queueLoadItems(queueItems);
+
+          expect(methodCalls, hasLength(1));
+          expect(methodCalls.first.method, equals('queueLoadItems'));
+
+          final args = methodCalls.first.arguments as Map<dynamic, dynamic>;
+          expect(args['items'], isA<List>());
+          expect(args.containsKey('options'), isFalse);
+        },
+      );
+
+      test(
+        'queueLoadItems should call native method with items and options',
+        () async {
+          final queueItems = [
+            GoogleCastQueueItem(
+              mediaInformation: GoogleCastMediaInformation(
+                contentId: 'test1',
+                contentType: 'video/mp4',
+                streamType: CastMediaStreamType.buffered,
+              ),
+            ),
+          ];
+
+          final options = GoogleCastQueueLoadOptions(
+            startIndex: 1,
+            playPosition: const Duration(seconds: 30),
+            repeatMode: GoogleCastMediaRepeatMode.all,
+          );
+
+          await remoteMediaClient.queueLoadItems(queueItems, options: options);
+
+          expect(methodCalls, hasLength(1));
+          expect(methodCalls.first.method, equals('queueLoadItems'));
+
+          final args = methodCalls.first.arguments as Map<dynamic, dynamic>;
+          expect(args['items'], isA<List>());
+          expect(args['options'], equals(options.toMap()));
+        },
+      );
+
+      test(
+        'queueInsertItems should call native method with correct parameters',
+        () async {
+          final items = [
+            GoogleCastQueueItem(
+              mediaInformation: GoogleCastMediaInformation(
+                contentId: 'test1',
+                contentType: 'video/mp4',
+                streamType: CastMediaStreamType.buffered,
+              ),
+            ),
+          ];
+
+          await remoteMediaClient.queueInsertItems(items, beforeItemWithId: 2);
+
+          expect(methodCalls, hasLength(1));
+          expect(methodCalls.first.method, equals('queueInsertItems'));
+
+          final args = methodCalls.first.arguments as Map<dynamic, dynamic>;
+          expect(args['items'], isA<List>());
+          expect(args['beforeItemWithId'], equals(2));
+        },
+      );
+
+      test(
+        'queueInsertItems should call native method without beforeItemWithId',
+        () async {
+          final items = [
+            GoogleCastQueueItem(
+              mediaInformation: GoogleCastMediaInformation(
+                contentId: 'test1',
+                contentType: 'video/mp4',
+                streamType: CastMediaStreamType.buffered,
+              ),
+            ),
+          ];
+
+          await remoteMediaClient.queueInsertItems(items);
+
+          expect(methodCalls, hasLength(1));
+          expect(methodCalls.first.method, equals('queueInsertItems'));
+
+          final args = methodCalls.first.arguments as Map<dynamic, dynamic>;
+          expect(args['items'], isA<List>());
+          expect(args['beforeItemWithId'], isNull);
+        },
+      );
+
+      test(
+        'queueInsertItemAndPlay should call native method with correct parameters',
+        () async {
+          final item = GoogleCastQueueItem(
             mediaInformation: GoogleCastMediaInformation(
               contentId: 'test1',
               contentType: 'video/mp4',
               streamType: CastMediaStreamType.buffered,
             ),
-          ),
-        ];
+          );
 
-        await remoteMediaClient.queueLoadItems(queueItems);
+          await remoteMediaClient.queueInsertItemAndPlay(
+            item,
+            beforeItemWithId: 5,
+          );
 
-        expect(methodCalls, hasLength(1));
-        expect(methodCalls.first.method, equals('queueLoadItems'));
+          expect(methodCalls, hasLength(1));
+          expect(methodCalls.first.method, equals('queueInsertItemAndPlay'));
 
-        final args = methodCalls.first.arguments as Map<dynamic, dynamic>;
-        expect(args['items'], isA<List>());
-        expect(args.containsKey('options'), isFalse);
-      });
+          final args = methodCalls.first.arguments as Map<dynamic, dynamic>;
+          expect(args['item'], equals(item.toMap()));
+          expect(args['beforeItemWithId'], equals(5));
+        },
+      );
 
-      test('queueLoadItems should call native method with items and options',
-          () async {
-        final queueItems = [
-          GoogleCastQueueItem(
+      test(
+        'queueInsertItemAndPlay should assert beforeItemWithId is non-negative',
+        () async {
+          final item = GoogleCastQueueItem(
             mediaInformation: GoogleCastMediaInformation(
               contentId: 'test1',
               contentType: 'video/mp4',
               streamType: CastMediaStreamType.buffered,
             ),
-          ),
-        ];
+          );
 
-        final options = GoogleCastQueueLoadOptions(
-          startIndex: 1,
-          playPosition: const Duration(seconds: 30),
-          repeatMode: GoogleCastMediaRepeatMode.all,
-        );
-
-        await remoteMediaClient.queueLoadItems(queueItems, options: options);
-
-        expect(methodCalls, hasLength(1));
-        expect(methodCalls.first.method, equals('queueLoadItems'));
-
-        final args = methodCalls.first.arguments as Map<dynamic, dynamic>;
-        expect(args['items'], isA<List>());
-        expect(args['options'], equals(options.toMap()));
-      });
-
-      test('queueInsertItems should call native method with correct parameters',
-          () async {
-        final items = [
-          GoogleCastQueueItem(
-            mediaInformation: GoogleCastMediaInformation(
-              contentId: 'test1',
-              contentType: 'video/mp4',
-              streamType: CastMediaStreamType.buffered,
+          expect(
+            () => remoteMediaClient.queueInsertItemAndPlay(
+              item,
+              beforeItemWithId: -1,
             ),
-          ),
-        ];
-
-        await remoteMediaClient.queueInsertItems(items, beforeItemWithId: 2);
-
-        expect(methodCalls, hasLength(1));
-        expect(methodCalls.first.method, equals('queueInsertItems'));
-
-        final args = methodCalls.first.arguments as Map<dynamic, dynamic>;
-        expect(args['items'], isA<List>());
-        expect(args['beforeItemWithId'], equals(2));
-      });
+            throwsA(isA<AssertionError>()),
+          );
+        },
+      );
 
       test(
-          'queueInsertItems should call native method without beforeItemWithId',
-          () async {
-        final items = [
-          GoogleCastQueueItem(
-            mediaInformation: GoogleCastMediaInformation(
-              contentId: 'test1',
-              contentType: 'video/mp4',
-              streamType: CastMediaStreamType.buffered,
-            ),
-          ),
-        ];
+        'queueJumpToItemWithId should call native method with correct parameters',
+        () async {
+          const itemId = 123;
 
-        await remoteMediaClient.queueInsertItems(items);
+          await remoteMediaClient.queueJumpToItemWithId(itemId);
 
-        expect(methodCalls, hasLength(1));
-        expect(methodCalls.first.method, equals('queueInsertItems'));
-
-        final args = methodCalls.first.arguments as Map<dynamic, dynamic>;
-        expect(args['items'], isA<List>());
-        expect(args['beforeItemWithId'], isNull);
-      });
+          expect(methodCalls, hasLength(1));
+          expect(methodCalls.first.method, equals('queueJumpToItemWithId'));
+          expect(methodCalls.first.arguments, equals(itemId));
+        },
+      );
 
       test(
-          'queueInsertItemAndPlay should call native method with correct parameters',
-          () async {
-        final item = GoogleCastQueueItem(
-          mediaInformation: GoogleCastMediaInformation(
-            contentId: 'test1',
-            contentType: 'video/mp4',
-            streamType: CastMediaStreamType.buffered,
-          ),
-        );
+        'queueRemoveItemsWithIds should call native method with correct parameters',
+        () async {
+          final itemIds = [1, 2, 3];
 
-        await remoteMediaClient.queueInsertItemAndPlay(item,
-            beforeItemWithId: 5);
+          await remoteMediaClient.queueRemoveItemsWithIds(itemIds);
 
-        expect(methodCalls, hasLength(1));
-        expect(methodCalls.first.method, equals('queueInsertItemAndPlay'));
-
-        final args = methodCalls.first.arguments as Map<dynamic, dynamic>;
-        expect(args['item'], equals(item.toMap()));
-        expect(args['beforeItemWithId'], equals(5));
-      });
+          expect(methodCalls, hasLength(1));
+          expect(methodCalls.first.method, equals('queueRemoveItemsWithIds'));
+          expect(methodCalls.first.arguments, equals(itemIds));
+        },
+      );
 
       test(
-          'queueInsertItemAndPlay should assert beforeItemWithId is non-negative',
-          () async {
-        final item = GoogleCastQueueItem(
-          mediaInformation: GoogleCastMediaInformation(
-            contentId: 'test1',
-            contentType: 'video/mp4',
-            streamType: CastMediaStreamType.buffered,
-          ),
-        );
+        'queueReorderItems should call native method with correct parameters',
+        () async {
+          final itemsIds = [1, 2, 3];
+          const beforeItemWithId = 5;
 
-        expect(
-          () => remoteMediaClient.queueInsertItemAndPlay(item,
-              beforeItemWithId: -1),
-          throwsA(isA<AssertionError>()),
-        );
-      });
+          await remoteMediaClient.queueReorderItems(
+            itemsIds: itemsIds,
+            beforeItemWithId: beforeItemWithId,
+          );
 
-      test(
-          'queueJumpToItemWithId should call native method with correct parameters',
-          () async {
-        const itemId = 123;
+          expect(methodCalls, hasLength(1));
+          expect(methodCalls.first.method, equals('queueReorderItems'));
 
-        await remoteMediaClient.queueJumpToItemWithId(itemId);
-
-        expect(methodCalls, hasLength(1));
-        expect(methodCalls.first.method, equals('queueJumpToItemWithId'));
-        expect(methodCalls.first.arguments, equals(itemId));
-      });
+          final args = methodCalls.first.arguments as Map<dynamic, dynamic>;
+          expect(args['itemsIds'], equals(itemsIds));
+          expect(args['beforeItemWithId'], equals(beforeItemWithId));
+        },
+      );
 
       test(
-          'queueRemoveItemsWithIds should call native method with correct parameters',
-          () async {
-        final itemIds = [1, 2, 3];
+        'queueReorderItems should call native method with null beforeItemWithId',
+        () async {
+          final itemsIds = [1, 2, 3];
 
-        await remoteMediaClient.queueRemoveItemsWithIds(itemIds);
+          await remoteMediaClient.queueReorderItems(
+            itemsIds: itemsIds,
+            beforeItemWithId: null,
+          );
 
-        expect(methodCalls, hasLength(1));
-        expect(methodCalls.first.method, equals('queueRemoveItemsWithIds'));
-        expect(methodCalls.first.arguments, equals(itemIds));
-      });
+          expect(methodCalls, hasLength(1));
+          expect(methodCalls.first.method, equals('queueReorderItems'));
 
-      test(
-          'queueReorderItems should call native method with correct parameters',
-          () async {
-        final itemsIds = [1, 2, 3];
-        const beforeItemWithId = 5;
-
-        await remoteMediaClient.queueReorderItems(
-          itemsIds: itemsIds,
-          beforeItemWithId: beforeItemWithId,
-        );
-
-        expect(methodCalls, hasLength(1));
-        expect(methodCalls.first.method, equals('queueReorderItems'));
-
-        final args = methodCalls.first.arguments as Map<dynamic, dynamic>;
-        expect(args['itemsIds'], equals(itemsIds));
-        expect(args['beforeItemWithId'], equals(beforeItemWithId));
-      });
-
-      test(
-          'queueReorderItems should call native method with null beforeItemWithId',
-          () async {
-        final itemsIds = [1, 2, 3];
-
-        await remoteMediaClient.queueReorderItems(
-          itemsIds: itemsIds,
-          beforeItemWithId: null,
-        );
-
-        expect(methodCalls, hasLength(1));
-        expect(methodCalls.first.method, equals('queueReorderItems'));
-
-        final args = methodCalls.first.arguments as Map<dynamic, dynamic>;
-        expect(args['itemsIds'], equals(itemsIds));
-        expect(args['beforeItemWithId'], isNull);
-      });
+          final args = methodCalls.first.arguments as Map<dynamic, dynamic>;
+          expect(args['itemsIds'], equals(itemsIds));
+          expect(args['beforeItemWithId'], isNull);
+        },
+      );
     });
 
     group('Method Call Handler', () {
       test(
-          'should handle onUpdateMediaStatus with valid arguments and update streams',
-          () async {
-        final mediaStatusData = {
-          'mediaSessionID': 123,
-          'playerState': CastMediaPlayerState.playing.index,
-          'playbackRate': 1.0,
-          'volume': 0.5,
-          'isMuted': false,
-          'repeatMode': GoogleCastMediaRepeatMode.off.index,
-          'queueHasNextItem': true,
-          'currentItemId': 1,
-          'activeTrackIds': [1, 2],
-          'liveSeekableRange': {
-            'start': 0,
-            'end': 3600,
-            'isLiveDone': false,
-            'isMovingWindow': true,
-          },
-        };
+        'should handle onUpdateMediaStatus with valid arguments and update streams',
+        () async {
+          final mediaStatusData = {
+            'mediaSessionID': 123,
+            'playerState': CastMediaPlayerState.playing.index,
+            'playbackRate': 1.0,
+            'volume': 0.5,
+            'isMuted': false,
+            'repeatMode': GoogleCastMediaRepeatMode.off.index,
+            'queueHasNextItem': true,
+            'currentItemId': 1,
+            'activeTrackIds': [1, 2],
+            'liveSeekableRange': {
+              'start': 0,
+              'end': 3600,
+              'isLiveDone': false,
+              'isMovingWindow': true,
+            },
+          };
 
-        // Set up a fresh client and handle method calls directly
-        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-            .setMockMethodCallHandler(
-          const MethodChannel('google_cast.remote_media_client'),
-          (MethodCall methodCall) async {
-            // Simulate the method call handler behavior
-            if (methodCall.method == 'onUpdateMediaStatus') {
-              // This simulates what the actual _methodCallHandler would do
-              final testArguments = methodCall.arguments;
-              if (testArguments != null) {
-                try {
-                  final arguments = Map<String, dynamic>.from(testArguments);
-                  final mediaStatus =
-                      GoogleCastIOSMediaStatus.fromMap(arguments);
-                  // Simulate the stream updates that would happen
-                  expect(arguments["queueHasNextItem"], isTrue);
-                  expect(mediaStatus.mediaSessionID, equals(123));
-                  expect(mediaStatus.liveSeekableRange, isNotNull);
-                  expect(mediaStatus.liveSeekableRange!.start,
-                      equals(Duration.zero));
-                  expect(mediaStatus.liveSeekableRange!.end,
-                      equals(Duration(seconds: 3600)));
-                  expect(mediaStatus.liveSeekableRange!.isLiveDone, isFalse);
-                  expect(mediaStatus.liveSeekableRange!.isMovingWindow, isTrue);
-                } catch (e) {
-                  // Test error handling
-                  expect(e, isNotNull);
-                }
-              }
-              return null;
-            }
-            return null;
-          },
-        );
+          // Set up a fresh client and handle method calls directly
+          TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+              .setMockMethodCallHandler(
+                const MethodChannel('google_cast.remote_media_client'),
+                (MethodCall methodCall) async {
+                  // Simulate the method call handler behavior
+                  if (methodCall.method == 'onUpdateMediaStatus') {
+                    // This simulates what the actual _methodCallHandler would do
+                    final testArguments = methodCall.arguments;
+                    if (testArguments != null) {
+                      try {
+                        final arguments = Map<String, dynamic>.from(
+                          testArguments,
+                        );
+                        final mediaStatus = GoogleCastIOSMediaStatus.fromMap(
+                          arguments,
+                        );
+                        // Simulate the stream updates that would happen
+                        expect(arguments["queueHasNextItem"], isTrue);
+                        expect(mediaStatus.mediaSessionID, equals(123));
+                        expect(mediaStatus.liveSeekableRange, isNotNull);
+                        expect(
+                          mediaStatus.liveSeekableRange!.start,
+                          equals(Duration.zero),
+                        );
+                        expect(
+                          mediaStatus.liveSeekableRange!.end,
+                          equals(Duration(seconds: 3600)),
+                        );
+                        expect(
+                          mediaStatus.liveSeekableRange!.isLiveDone,
+                          isFalse,
+                        );
+                        expect(
+                          mediaStatus.liveSeekableRange!.isMovingWindow,
+                          isTrue,
+                        );
+                      } catch (e) {
+                        // Test error handling
+                        expect(e, isNotNull);
+                      }
+                    }
+                    return null;
+                  }
+                  return null;
+                },
+              );
 
-        // Trigger the method call
-        await const MethodChannel('google_cast.remote_media_client')
-            .invokeMethod('onUpdateMediaStatus', mediaStatusData);
-      });
+          // Trigger the method call
+          await const MethodChannel(
+            'google_cast.remote_media_client',
+          ).invokeMethod('onUpdateMediaStatus', mediaStatusData);
+        },
+      );
 
       test('should handle onUpdateMediaStatus with null arguments', () async {
         TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
             .setMockMethodCallHandler(
-          const MethodChannel('google_cast.remote_media_client'),
-          (MethodCall methodCall) async {
-            if (methodCall.method == 'onUpdateMediaStatus') {
-              // This should handle null gracefully
-              expect(methodCall.arguments, isNull);
-              return null;
-            }
-            return null;
-          },
-        );
+              const MethodChannel('google_cast.remote_media_client'),
+              (MethodCall methodCall) async {
+                if (methodCall.method == 'onUpdateMediaStatus') {
+                  // This should handle null gracefully
+                  expect(methodCall.arguments, isNull);
+                  return null;
+                }
+                return null;
+              },
+            );
 
         // Trigger the method call with null
-        await const MethodChannel('google_cast.remote_media_client')
-            .invokeMethod('onUpdateMediaStatus', null);
+        await const MethodChannel(
+          'google_cast.remote_media_client',
+        ).invokeMethod('onUpdateMediaStatus', null);
       });
 
-      test('should handle onUpdatePlayerPosition and update position stream',
-          () async {
-        const seconds = 120;
+      test(
+        'should handle onUpdatePlayerPosition and update position stream',
+        () async {
+          const seconds = 120;
 
-        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-            .setMockMethodCallHandler(
-          const MethodChannel('google_cast.remote_media_client'),
-          (MethodCall methodCall) async {
-            if (methodCall.method == 'onUpdatePlayerPosition') {
-              // Test that the arguments are correct
-              expect(methodCall.arguments, equals(seconds));
-              return null;
-            }
-            return null;
-          },
-        );
+          TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+              .setMockMethodCallHandler(
+                const MethodChannel('google_cast.remote_media_client'),
+                (MethodCall methodCall) async {
+                  if (methodCall.method == 'onUpdatePlayerPosition') {
+                    // Test that the arguments are correct
+                    expect(methodCall.arguments, equals(seconds));
+                    return null;
+                  }
+                  return null;
+                },
+              );
 
-        // Trigger the method call
-        await const MethodChannel('google_cast.remote_media_client')
-            .invokeMethod('onUpdatePlayerPosition', seconds);
-      });
+          // Trigger the method call
+          await const MethodChannel(
+            'google_cast.remote_media_client',
+          ).invokeMethod('onUpdatePlayerPosition', seconds);
+        },
+      );
 
       test('should handle updateQueueItems and update queue stream', () async {
         final queueItemsData = [
@@ -670,89 +731,98 @@ void main() {
 
         TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
             .setMockMethodCallHandler(
-          const MethodChannel('google_cast.remote_media_client'),
-          (MethodCall methodCall) async {
-            if (methodCall.method == 'updateQueueItems') {
-              // Test that the method receives the queue items
-              expect(methodCall.arguments, isA<List>());
-              final items = List.from(methodCall.arguments ?? []);
-              expect(items.length, equals(1));
+              const MethodChannel('google_cast.remote_media_client'),
+              (MethodCall methodCall) async {
+                if (methodCall.method == 'updateQueueItems') {
+                  // Test that the method receives the queue items
+                  expect(methodCall.arguments, isA<List>());
+                  final items = List.from(methodCall.arguments ?? []);
+                  expect(items.length, equals(1));
 
-              // Simulate the parsing logic
-              final queueItems = items
-                  .map((item) => GoogleCastQueueItemIOS.fromMap(
-                      Map<String, dynamic>.from(item)))
-                  .toList();
-              expect(queueItems.length, equals(1));
-              expect(
-                  queueItems.first.mediaInformation.contentId, equals('test1'));
-              return null;
-            }
-            return null;
-          },
-        );
+                  // Simulate the parsing logic
+                  final queueItems = items
+                      .map(
+                        (item) => GoogleCastQueueItemIOS.fromMap(
+                          Map<String, dynamic>.from(item),
+                        ),
+                      )
+                      .toList();
+                  expect(queueItems.length, equals(1));
+                  expect(
+                    queueItems.first.mediaInformation.contentId,
+                    equals('test1'),
+                  );
+                  return null;
+                }
+                return null;
+              },
+            );
 
         // Trigger the method call
-        await const MethodChannel('google_cast.remote_media_client')
-            .invokeMethod('updateQueueItems', queueItemsData);
+        await const MethodChannel(
+          'google_cast.remote_media_client',
+        ).invokeMethod('updateQueueItems', queueItemsData);
       });
 
       test('should handle updateQueueItems with null arguments', () async {
         TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
             .setMockMethodCallHandler(
-          const MethodChannel('google_cast.remote_media_client'),
-          (MethodCall methodCall) async {
-            if (methodCall.method == 'updateQueueItems') {
-              // Test handling of null arguments
-              final items = List.from(methodCall.arguments ?? []);
-              expect(items, isEmpty);
-              return null;
-            }
-            return null;
-          },
-        );
+              const MethodChannel('google_cast.remote_media_client'),
+              (MethodCall methodCall) async {
+                if (methodCall.method == 'updateQueueItems') {
+                  // Test handling of null arguments
+                  final items = List.from(methodCall.arguments ?? []);
+                  expect(items, isEmpty);
+                  return null;
+                }
+                return null;
+              },
+            );
 
         // Trigger the method call with null
-        await const MethodChannel('google_cast.remote_media_client')
-            .invokeMethod('updateQueueItems', null);
+        await const MethodChannel(
+          'google_cast.remote_media_client',
+        ).invokeMethod('updateQueueItems', null);
       });
 
       test('should handle updateQueueItems with empty list', () async {
         TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
             .setMockMethodCallHandler(
-          const MethodChannel('google_cast.remote_media_client'),
-          (MethodCall methodCall) async {
-            if (methodCall.method == 'updateQueueItems') {
-              final items = List.from(methodCall.arguments ?? []);
-              expect(items, isEmpty);
-              return null;
-            }
-            return null;
-          },
-        );
+              const MethodChannel('google_cast.remote_media_client'),
+              (MethodCall methodCall) async {
+                if (methodCall.method == 'updateQueueItems') {
+                  final items = List.from(methodCall.arguments ?? []);
+                  expect(items, isEmpty);
+                  return null;
+                }
+                return null;
+              },
+            );
 
         // Trigger the method call with empty list
-        await const MethodChannel('google_cast.remote_media_client')
-            .invokeMethod('updateQueueItems', []);
+        await const MethodChannel(
+          'google_cast.remote_media_client',
+        ).invokeMethod('updateQueueItems', []);
       });
 
       test('should handle unknown method call gracefully', () async {
         TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
             .setMockMethodCallHandler(
-          const MethodChannel('google_cast.remote_media_client'),
-          (MethodCall methodCall) async {
-            if (methodCall.method == 'unknownMethod') {
-              // Unknown methods should be handled gracefully
-              expect(methodCall.method, equals('unknownMethod'));
-              return null;
-            }
-            return null;
-          },
-        );
+              const MethodChannel('google_cast.remote_media_client'),
+              (MethodCall methodCall) async {
+                if (methodCall.method == 'unknownMethod') {
+                  // Unknown methods should be handled gracefully
+                  expect(methodCall.method, equals('unknownMethod'));
+                  return null;
+                }
+                return null;
+              },
+            );
 
         // Trigger unknown method call
-        await const MethodChannel('google_cast.remote_media_client')
-            .invokeMethod('unknownMethod', null);
+        await const MethodChannel(
+          'google_cast.remote_media_client',
+        ).invokeMethod('unknownMethod', null);
       });
 
       test('should handle onUpdateMediaStatus with malformed data', () async {
@@ -763,29 +833,31 @@ void main() {
 
         TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
             .setMockMethodCallHandler(
-          const MethodChannel('google_cast.remote_media_client'),
-          (MethodCall methodCall) async {
-            if (methodCall.method == 'onUpdateMediaStatus') {
-              try {
-                // Try to simulate the parsing that would happen
-                final arguments =
-                    Map<String, dynamic>.from(methodCall.arguments);
-                // This should work but the model creation might fail
-                expect(arguments['invalidKey'], equals('invalidValue'));
+              const MethodChannel('google_cast.remote_media_client'),
+              (MethodCall methodCall) async {
+                if (methodCall.method == 'onUpdateMediaStatus') {
+                  try {
+                    // Try to simulate the parsing that would happen
+                    final arguments = Map<String, dynamic>.from(
+                      methodCall.arguments,
+                    );
+                    // This should work but the model creation might fail
+                    expect(arguments['invalidKey'], equals('invalidValue'));
+                    return null;
+                  } catch (e) {
+                    // Expected to potentially throw due to malformed data
+                    expect(e, isNotNull);
+                    return null;
+                  }
+                }
                 return null;
-              } catch (e) {
-                // Expected to potentially throw due to malformed data
-                expect(e, isNotNull);
-                return null;
-              }
-            }
-            return null;
-          },
-        );
+              },
+            );
 
         // Trigger the method call with malformed data
-        await const MethodChannel('google_cast.remote_media_client')
-            .invokeMethod('onUpdateMediaStatus', malformedData);
+        await const MethodChannel(
+          'google_cast.remote_media_client',
+        ).invokeMethod('onUpdateMediaStatus', malformedData);
       });
     });
 
@@ -810,9 +882,9 @@ void main() {
       test('should handle loadMedia with null optional parameters', () async {
         TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
             .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
-          methodCalls.add(methodCall);
-          return null;
-        });
+              methodCalls.add(methodCall);
+              return null;
+            });
 
         final mediaInfo = GoogleCastMediaInformation(
           contentId: 'test_content',
@@ -839,9 +911,9 @@ void main() {
       test('should handle empty track IDs list', () async {
         TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
             .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
-          methodCalls.add(methodCall);
-          return null;
-        });
+              methodCalls.add(methodCall);
+              return null;
+            });
 
         await remoteMediaClient.setActiveTrackIDs([]);
 
@@ -853,9 +925,9 @@ void main() {
       test('should handle empty queue items list', () async {
         TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
             .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
-          methodCalls.add(methodCall);
-          return null;
-        });
+              methodCalls.add(methodCall);
+              return null;
+            });
 
         await remoteMediaClient.queueLoadItems([]);
 
@@ -866,38 +938,42 @@ void main() {
         expect(args['items'], isEmpty);
       });
 
-      test('should handle zero beforeItemWithId in queueInsertItemAndPlay',
-          () async {
-        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-            .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
-          methodCalls.add(methodCall);
-          return null;
-        });
+      test(
+        'should handle zero beforeItemWithId in queueInsertItemAndPlay',
+        () async {
+          TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+              .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
+                methodCalls.add(methodCall);
+                return null;
+              });
 
-        final item = GoogleCastQueueItem(
-          mediaInformation: GoogleCastMediaInformation(
-            contentId: 'test1',
-            contentType: 'video/mp4',
-            streamType: CastMediaStreamType.buffered,
-          ),
-        );
+          final item = GoogleCastQueueItem(
+            mediaInformation: GoogleCastMediaInformation(
+              contentId: 'test1',
+              contentType: 'video/mp4',
+              streamType: CastMediaStreamType.buffered,
+            ),
+          );
 
-        await remoteMediaClient.queueInsertItemAndPlay(item,
-            beforeItemWithId: 0);
+          await remoteMediaClient.queueInsertItemAndPlay(
+            item,
+            beforeItemWithId: 0,
+          );
 
-        expect(methodCalls, hasLength(1));
-        expect(methodCalls.first.method, equals('queueInsertItemAndPlay'));
+          expect(methodCalls, hasLength(1));
+          expect(methodCalls.first.method, equals('queueInsertItemAndPlay'));
 
-        final args = methodCalls.first.arguments as Map<dynamic, dynamic>;
-        expect(args['beforeItemWithId'], equals(0));
-      });
+          final args = methodCalls.first.arguments as Map<dynamic, dynamic>;
+          expect(args['beforeItemWithId'], equals(0));
+        },
+      );
 
       test('should handle very large item IDs', () async {
         TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
             .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
-          methodCalls.add(methodCall);
-          return null;
-        });
+              methodCalls.add(methodCall);
+              return null;
+            });
 
         const largeItemId = 999999999;
 
@@ -911,9 +987,9 @@ void main() {
       test('should handle complex TextTrackStyle configuration', () async {
         TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
             .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
-          methodCalls.add(methodCall);
-          return null;
-        });
+              methodCalls.add(methodCall);
+              return null;
+            });
 
         final complexTextTrackStyle = TextTrackStyle(
           backgroundColor: Colors.red.withValues(alpha: 0.5),
@@ -930,7 +1006,9 @@ void main() {
         expect(methodCalls, hasLength(1));
         expect(methodCalls.first.method, equals('setTextTrackStyle'));
         expect(
-            methodCalls.first.arguments, equals(complexTextTrackStyle.toMap()));
+          methodCalls.first.arguments,
+          equals(complexTextTrackStyle.toMap()),
+        );
       });
     });
 
@@ -968,8 +1046,9 @@ void main() {
         // This test verifies our understanding of the implementation
         final emptyQueue = <GoogleCastQueueItem>[];
         final itemIds = emptyQueue.map((e) => e.itemId).toList();
-        final index =
-            itemIds.lastIndexOf(null); // mediaStatus is null initially
+        final index = itemIds.lastIndexOf(
+          null,
+        ); // mediaStatus is null initially
         expect(index > 0, isFalse); // index will be -1, so -1 > 0 is false
       });
     });
@@ -986,8 +1065,10 @@ void main() {
       });
 
       test('mediaStatusStream should have correct type', () {
-        expect(remoteMediaClient.mediaStatusStream,
-            isA<Stream<GoggleCastMediaStatus?>>());
+        expect(
+          remoteMediaClient.mediaStatusStream,
+          isA<Stream<GoggleCastMediaStatus?>>(),
+        );
         expect(remoteMediaClient.mediaStatus, isNull);
       });
 
@@ -997,8 +1078,10 @@ void main() {
       });
 
       test('queueItemsStream should have correct type', () {
-        expect(remoteMediaClient.queueItemsStream,
-            isA<Stream<List<GoogleCastQueueItem>>>());
+        expect(
+          remoteMediaClient.queueItemsStream,
+          isA<Stream<List<GoogleCastQueueItem>>>(),
+        );
         expect(remoteMediaClient.queueItems, isEmpty);
       });
     });
@@ -1007,9 +1090,9 @@ void main() {
       test('should handle setActiveTrackIDs with toList() call', () async {
         TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
             .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
-          methodCalls.add(methodCall);
-          return null;
-        });
+              methodCalls.add(methodCall);
+              return null;
+            });
 
         // Test with a Set to ensure toList() is called
         final trackIds = {1, 2, 3}.toList();
@@ -1024,9 +1107,9 @@ void main() {
       test('queuePrevItem should not await the channel call', () async {
         TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
             .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
-          methodCalls.add(methodCall);
-          return null;
-        });
+              methodCalls.add(methodCall);
+              return null;
+            });
 
         // The implementation doesn't await this call
         remoteMediaClient.queuePrevItem();
@@ -1042,9 +1125,9 @@ void main() {
       test('queueJumpToItemWithId should not await the channel call', () async {
         TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
             .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
-          methodCalls.add(methodCall);
-          return null;
-        });
+              methodCalls.add(methodCall);
+              return null;
+            });
 
         const itemId = 42;
 
@@ -1059,33 +1142,35 @@ void main() {
         expect(methodCalls.first.arguments, equals(itemId));
       });
 
-      test('queueRemoveItemsWithIds should not await the channel call',
-          () async {
-        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-            .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
-          methodCalls.add(methodCall);
-          return null;
-        });
+      test(
+        'queueRemoveItemsWithIds should not await the channel call',
+        () async {
+          TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+              .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
+                methodCalls.add(methodCall);
+                return null;
+              });
 
-        final itemIds = [10, 20, 30];
+          final itemIds = [10, 20, 30];
 
-        // The implementation doesn't await this call
-        remoteMediaClient.queueRemoveItemsWithIds(itemIds);
+          // The implementation doesn't await this call
+          remoteMediaClient.queueRemoveItemsWithIds(itemIds);
 
-        // Give a small delay to ensure the call is made
-        await Future.delayed(const Duration(milliseconds: 10));
+          // Give a small delay to ensure the call is made
+          await Future.delayed(const Duration(milliseconds: 10));
 
-        expect(methodCalls, hasLength(1));
-        expect(methodCalls.first.method, equals('queueRemoveItemsWithIds'));
-        expect(methodCalls.first.arguments, equals(itemIds));
-      });
+          expect(methodCalls, hasLength(1));
+          expect(methodCalls.first.method, equals('queueRemoveItemsWithIds'));
+          expect(methodCalls.first.arguments, equals(itemIds));
+        },
+      );
 
       test('queueLoadItems should not await the channel call', () async {
         TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
             .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
-          methodCalls.add(methodCall);
-          return null;
-        });
+              methodCalls.add(methodCall);
+              return null;
+            });
 
         final queueItems = [
           GoogleCastQueueItem(
@@ -1110,9 +1195,9 @@ void main() {
       test('queueInsertItems should not await the channel call', () async {
         TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
             .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
-          methodCalls.add(methodCall);
-          return null;
-        });
+              methodCalls.add(methodCall);
+              return null;
+            });
 
         final items = [
           GoogleCastQueueItem(
@@ -1134,38 +1219,40 @@ void main() {
         expect(methodCalls.first.method, equals('queueInsertItems'));
       });
 
-      test('queueInsertItemAndPlay should not await the channel call',
-          () async {
-        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-            .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
-          methodCalls.add(methodCall);
-          return null;
-        });
+      test(
+        'queueInsertItemAndPlay should not await the channel call',
+        () async {
+          TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+              .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
+                methodCalls.add(methodCall);
+                return null;
+              });
 
-        final item = GoogleCastQueueItem(
-          mediaInformation: GoogleCastMediaInformation(
-            contentId: 'test1',
-            contentType: 'video/mp4',
-            streamType: CastMediaStreamType.buffered,
-          ),
-        );
+          final item = GoogleCastQueueItem(
+            mediaInformation: GoogleCastMediaInformation(
+              contentId: 'test1',
+              contentType: 'video/mp4',
+              streamType: CastMediaStreamType.buffered,
+            ),
+          );
 
-        // The implementation doesn't await this call
-        remoteMediaClient.queueInsertItemAndPlay(item, beforeItemWithId: 1);
+          // The implementation doesn't await this call
+          remoteMediaClient.queueInsertItemAndPlay(item, beforeItemWithId: 1);
 
-        // Give a small delay to ensure the call is made
-        await Future.delayed(const Duration(milliseconds: 10));
+          // Give a small delay to ensure the call is made
+          await Future.delayed(const Duration(milliseconds: 10));
 
-        expect(methodCalls, hasLength(1));
-        expect(methodCalls.first.method, equals('queueInsertItemAndPlay'));
-      });
+          expect(methodCalls, hasLength(1));
+          expect(methodCalls.first.method, equals('queueInsertItemAndPlay'));
+        },
+      );
 
       test('queueReorderItems should not await the channel call', () async {
         TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
             .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
-          methodCalls.add(methodCall);
-          return null;
-        });
+              methodCalls.add(methodCall);
+              return null;
+            });
 
         final itemsIds = [1, 2, 3];
 
@@ -1185,9 +1272,9 @@ void main() {
       test('loadMedia should not await the channel call', () async {
         TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
             .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
-          methodCalls.add(methodCall);
-          return null;
-        });
+              methodCalls.add(methodCall);
+              return null;
+            });
 
         final mediaInfo = GoogleCastMediaInformation(
           contentId: 'test_content',

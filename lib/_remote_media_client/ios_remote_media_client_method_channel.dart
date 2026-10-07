@@ -99,19 +99,19 @@ class GoogleCastRemoteMediaClientIOSMethodChannel
     // that any position tick emitted right after `loadMedia` is filtered out.
     _armPendingLoadGuard(playPosition);
     _channel.invokeMethod(
-        'loadMedia',
-        mediaInfo.toMap()
-          ..addAll(
-            {
-              'autoPlay': autoPlay,
-              'playPosition': playPosition.inSeconds,
-              'playbackRate': playbackRate,
-              'activeTrackIds': activeTrackIds,
-              'credentials': credentials,
-              'credentialsType': credentialsType,
-              'customData': customData,
-            }..removeWhere((key, value) => value == null),
-          ));
+      'loadMedia',
+      mediaInfo.toMap()..addAll(
+        {
+          'autoPlay': autoPlay,
+          'playPosition': playPosition.inSeconds,
+          'playbackRate': playbackRate,
+          'activeTrackIds': activeTrackIds,
+          'credentials': credentials,
+          'credentialsType': credentialsType,
+          'customData': customData,
+        }..removeWhere((key, value) => value == null),
+      ),
+    );
   }
 
   @override
@@ -159,7 +159,7 @@ class GoogleCastRemoteMediaClientIOSMethodChannel
     _channel.invokeMethod('queuePrevItem');
   }
 
-// MARK: - MethodCallHandler
+  // MARK: - MethodCallHandler
   Future _methodCallHandler(MethodCall call) async {
     switch (call.method) {
       case "onUpdateMediaStatus":
@@ -180,7 +180,8 @@ class GoogleCastRemoteMediaClientIOSMethodChannel
           _mediaStatusStreamController.value?.mediaSessionID;
       // `mediaSessionID` is non-null `int` (defaults to 0 when no status yet).
       // Treat 0 and the previously observed id as "not changed yet".
-      final sessionChanged = currentSessionId != null &&
+      final sessionChanged =
+          currentSessionId != null &&
           currentSessionId != 0 &&
           currentSessionId != _pendingLoadPreviousMediaSessionId;
       final converged =
@@ -237,11 +238,15 @@ class GoogleCastRemoteMediaClientIOSMethodChannel
       try {
         arguments =
             _convertToStringDynamicMap(arguments) as Map<String, dynamic>;
-        GoogleCastLog.verbose(() =>
-            '[Flutter] _onUpdateMediaStatus received: playerState=${arguments['playerState']}');
+        GoogleCastLog.verbose(
+          () =>
+              '[Flutter] _onUpdateMediaStatus received: playerState=${arguments['playerState']}',
+        );
         final mediaStatus = GoogleCastIOSMediaStatus.fromMap(arguments);
-        GoogleCastLog.verbose(() =>
-            '[Flutter] _onUpdateMediaStatus parsed: playerState=${mediaStatus.playerState}');
+        GoogleCastLog.verbose(
+          () =>
+              '[Flutter] _onUpdateMediaStatus parsed: playerState=${mediaStatus.playerState}',
+        );
         _queueHasNextItem = arguments["queueHasNextItem"];
         _mediaStatusStreamController.add(mediaStatus);
       } catch (e) {
@@ -256,18 +261,17 @@ class GoogleCastRemoteMediaClientIOSMethodChannel
     List<GoogleCastQueueItem> queueItems, {
     GoogleCastQueueLoadOptions? options,
   }) async {
-    _channel.invokeMethod(
-      'queueLoadItems',
-      {
-        'items': queueItems.map((item) => item.toMap()).toList(),
-        if (options != null) 'options': options.toMap(),
-      },
-    );
+    _channel.invokeMethod('queueLoadItems', {
+      'items': queueItems.map((item) => item.toMap()).toList(),
+      if (options != null) 'options': options.toMap(),
+    });
   }
 
   @override
-  Future<void> queueInsertItems(List<GoogleCastQueueItem> items,
-      {int? beforeItemWithId}) async {
+  Future<void> queueInsertItems(
+    List<GoogleCastQueueItem> items, {
+    int? beforeItemWithId,
+  }) async {
     _channel.invokeMethod('queueInsertItems', {
       'items': items.map((item) => item.toMap()).toList(),
       'beforeItemWithId': beforeItemWithId,
@@ -300,21 +304,22 @@ class GoogleCastRemoteMediaClientIOSMethodChannel
   FutureOr<void> _updateQueueItems(dynamic arguments) async {
     final items = List.from(arguments ?? []);
     final queueItems = items
-        .map((item) =>
-            GoogleCastQueueItemIOS.fromMap(Map<String, dynamic>.from(item)))
+        .map(
+          (item) =>
+              GoogleCastQueueItemIOS.fromMap(Map<String, dynamic>.from(item)),
+        )
         .toList();
     _queueItemsStreamController.add(queueItems);
   }
 
   @override
-  Future<void> queueReorderItems(
-      {required List<int> itemsIds, required int? beforeItemWithId}) async {
-    _channel.invokeMethod(
-      'queueReorderItems',
-      {
-        'itemsIds': itemsIds,
-        'beforeItemWithId': beforeItemWithId,
-      },
-    );
+  Future<void> queueReorderItems({
+    required List<int> itemsIds,
+    required int? beforeItemWithId,
+  }) async {
+    _channel.invokeMethod('queueReorderItems', {
+      'itemsIds': itemsIds,
+      'beforeItemWithId': beforeItemWithId,
+    });
   }
 }

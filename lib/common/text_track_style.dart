@@ -107,8 +107,9 @@ class TextTrackStyle {
       customData: map['customData'] != null
           ? Map<String, dynamic>.from(map['customData'])
           : null,
-      edgeColor:
-          map['edgeColor'] != null ? HColor.fromHex(map['edgeColor']) : null,
+      edgeColor: map['edgeColor'] != null
+          ? HColor.fromHex(map['edgeColor'])
+          : null,
       edgeType: map['edgeType'] != null
           ? TextTrackStyle.fromMap(map['edgeType'])
           : null,

@@ -16,8 +16,8 @@ class GoogleCastRemoteMediaClient {
 
   static final GoogleCastRemoteMediaClientPlatformInterface _instance =
       Platform.isAndroid
-          ? GoogleCastRemoteMediaClientAndroidMethodChannel()
-          : GoogleCastRemoteMediaClientIOSMethodChannel();
+      ? GoogleCastRemoteMediaClientAndroidMethodChannel()
+      : GoogleCastRemoteMediaClientIOSMethodChannel();
 
   /// Gets the singleton instance of the remote media client.
   ///

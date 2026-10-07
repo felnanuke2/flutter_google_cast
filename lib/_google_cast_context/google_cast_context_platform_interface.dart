@@ -9,7 +9,7 @@ abstract class GoogleCastContextPlatformInterface extends PlatformInterface {
   /// Creates a new instance of the platform interface.
   GoogleCastContextPlatformInterface() : super(token: Object());
 
-//MARK: - CONTEXT
+  //MARK: - CONTEXT
   /// Initializes the shared Google Cast context with the provided options.
   ///
   /// [castOptions] contains the configuration options for the Cast context.

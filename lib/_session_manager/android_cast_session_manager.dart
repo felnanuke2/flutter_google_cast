@@ -18,8 +18,9 @@ class GoogleCastSessionManagerAndroidMethodChannel
   GoogleCastSessionManagerAndroidMethodChannel() {
     _channel.setMethodCallHandler(_onMethodCallHandler);
   }
-  final _channel =
-      const MethodChannel('com.felnanuke.google_cast.session_manager');
+  final _channel = const MethodChannel(
+    'com.felnanuke.google_cast.session_manager',
+  );
 
   final _currentSessionStreamController = BehaviorSubject<GoogleCastSession?>()
     ..add(null);
@@ -69,13 +70,10 @@ class GoogleCastSessionManagerAndroidMethodChannel
 
   @override
   Future<bool> sendMessage(String namespace, String message) async {
-    return await _channel.invokeMethod<bool>(
-          'sendMessage',
-          <String, dynamic>{
-            'namespace': namespace,
-            'message': message,
-          },
-        ) ??
+    return await _channel.invokeMethod<bool>('sendMessage', <String, dynamic>{
+          'namespace': namespace,
+          'message': message,
+        }) ??
         false;
   }
 

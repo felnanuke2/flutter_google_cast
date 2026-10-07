@@ -37,7 +37,8 @@ class GoogleCastIOSMediaStatus extends GoggleCastMediaStatus {
       playbackRate: map['playbackRate'] ?? 0,
       mediaInformation: map['mediaInformation'] != null
           ? GoogleCastMediaInformationIOS.fromMap(
-              Map<String, dynamic>.from(map['mediaInformation']))
+              Map<String, dynamic>.from(map['mediaInformation']),
+            )
           : null,
 
       volume: map['volume'] ?? 0,

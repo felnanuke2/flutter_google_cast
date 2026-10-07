@@ -14,24 +14,16 @@ void main() {
           'title': 'Some Title',
           'subtitle': 'Some Subtitle',
           'images': [
-            {'url': 'https://example.com/art.jpg', 'width': 512, 'height': 512}
+            {'url': 'https://example.com/art.jpg', 'width': 512, 'height': 512},
           ],
         },
         'duration': 120.5, // seconds
         'customData': {'foo': 'bar'},
         'breaks': [
-          {
-            'id': 'b1',
-            'startTime': 30,
-            'duration': 10,
-          }
+          {'id': 'b1', 'startTime': 30, 'duration': 10},
         ],
         'breakClips': [
-          {
-            'id': 'c1',
-            'contentId': 'ad-1',
-            'duration': 5,
-          }
+          {'id': 'c1', 'contentId': 'ad-1', 'duration': 5},
         ],
         'contentURL': 'https://cdn.example.com/stream.m3u8',
         'entity': 'urn:foo:bar',
@@ -55,15 +47,13 @@ void main() {
             'name': 'English',
             'subtype': TextTrackType.subtitles.index,
             'content_id': 'sub-en',
-          }
+          },
         ],
         'userActionStates': [
           {'userAction': 'LIKE'},
           {'userAction': 'FOLLOW'},
         ],
-        'vmapAdsRequest': {
-          'adTagUrl': 'https://ads.example.com/tag',
-        },
+        'vmapAdsRequest': {'adTagUrl': 'https://ads.example.com/tag'},
       };
 
       final info = GoogleCastMediaInformationIOS.fromMap(map);
@@ -71,7 +61,9 @@ void main() {
       expect(info.streamType, CastMediaStreamType.buffered);
       expect(info.contentType, 'application/vnd.apple.mpegurl');
       expect(
-          info.contentUrl?.toString(), 'https://cdn.example.com/stream.m3u8');
+        info.contentUrl?.toString(),
+        'https://cdn.example.com/stream.m3u8',
+      );
       expect(info.duration, isA<Duration>());
       expect(info.duration?.inMilliseconds, greaterThan(120000));
       expect(info.metadata?.extractedTitle, 'Some Title');
@@ -81,7 +73,9 @@ void main() {
       expect(info.tracks, isNotNull);
       expect(info.tracks!.first, isA<GoogleCastMediaTrack>());
       expect(
-          (info.tracks!.first as IosMediaTrack).trackContentType, 'text/vtt');
+        (info.tracks!.first as IosMediaTrack).trackContentType,
+        'text/vtt',
+      );
       expect(info.userActionStates, isNotNull);
     });
 
@@ -196,9 +190,7 @@ void main() {
         'contentID': 'no-meta',
         'streamType': CastMediaStreamType.buffered.index,
         'contentType': 'video/mp4',
-        'metadata': {
-          'title': 'Title Without Type',
-        },
+        'metadata': {'title': 'Title Without Type'},
       };
 
       final info = GoogleCastMediaInformationIOS.fromMap(map);

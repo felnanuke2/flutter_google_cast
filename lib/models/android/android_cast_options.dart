@@ -18,9 +18,6 @@ class GoogleCastOptionsAndroid extends GoogleCastOptions {
 
   @override
   Map<String, dynamic> toMap() {
-    return super.toMap()
-      ..addAll({
-        'appId': appId,
-      });
+    return super.toMap()..addAll({'appId': appId});
   }
 }

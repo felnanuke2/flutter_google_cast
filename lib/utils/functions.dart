@@ -11,7 +11,9 @@ import '../entities/entities.dart';
 /// [mediaStatus] - The current media status containing duration information
 /// [currentDuration] - The current playback position
 double? getPlayerPercentage(
-    GoggleCastMediaStatus mediaStatus, Duration? currentDuration) {
+  GoggleCastMediaStatus mediaStatus,
+  Duration? currentDuration,
+) {
   if (currentDuration == null || currentDuration.inSeconds == 0) return null;
   final mediaDuration = mediaStatus.mediaInformation?.duration;
   if (mediaDuration == null || mediaDuration.inSeconds == 0) return null;
