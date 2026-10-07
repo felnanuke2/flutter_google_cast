@@ -1,6 +1,9 @@
-## Unreleased
+## 2.0.0 - Built-in Kotlin Migration
+### ⚠️ Breaking Changes
 - Updates the minimum supported SDK version to Flutter 3.44/Dart 3.12.
 - Migrates the Android plugin to built-in Kotlin: it no longer applies the Kotlin Gradle Plugin. (#94)
+
+### 🔧 Maintenance
 - Migrates the example app to AGP 9 and Flutter built-in Kotlin (requires Flutter 3.47+ to build the example).
 
 ## 1.5.0 - Custom Cast Message Channels, Discovery and Logging
