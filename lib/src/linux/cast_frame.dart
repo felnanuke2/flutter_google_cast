@@ -94,24 +94,37 @@ class CastFrame {
 
 /// Reassembles length-prefixed Cast frames across arbitrary TCP chunks.
 class CastFrameDecoder {
-  List<int> _buffer = [];
+  Uint8List _buffer = Uint8List(0);
+  int _offset = 0;
+
   List<CastFrame> add(List<int> chunk) {
-    _buffer.addAll(chunk);
+    final incoming = chunk is Uint8List ? chunk : Uint8List.fromList(chunk);
+    final unread = _buffer.length - _offset;
+    final merged = Uint8List(unread + incoming.length)
+      ..setRange(0, unread, _buffer, _offset)
+      ..setAll(unread, incoming);
+    _buffer = merged;
+    _offset = 0;
     final frames = <CastFrame>[];
-    while (_buffer.length >= 4) {
-      final length = ByteData.sublistView(
-        Uint8List.fromList(_buffer.sublist(0, 4)),
-      ).getUint32(0);
+    final header = ByteData.sublistView(_buffer);
+    while (_buffer.length - _offset >= 4) {
+      final length = header.getUint32(_offset);
       if (length == 0 || length > 1024 * 1024) {
         throw const FormatException('Invalid Cast frame size');
       }
-      if (_buffer.length < length + 4) break;
+      if (_buffer.length - _offset < length + 4) break;
       final frame = CastFrame.decode(
-        Uint8List.fromList(_buffer.sublist(4, length + 4)),
+        _buffer.sublist(_offset + 4, _offset + 4 + length),
       );
       if (frame != null) frames.add(frame);
-      _buffer = _buffer.sublist(length + 4);
+      _offset += length + 4;
     }
+    if (_offset == _buffer.length) {
+      _buffer = Uint8List(0);
+    } else if (_offset > 0) {
+      _buffer = Uint8List.fromList(_buffer.sublist(_offset));
+    }
+    _offset = 0;
     return frames;
   }
 }

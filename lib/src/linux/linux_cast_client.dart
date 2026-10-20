@@ -40,6 +40,9 @@ class LinuxCastClient {
   static const _receiver = 'urn:x-cast:com.google.cast.receiver';
   static const _media = 'urn:x-cast:com.google.cast.media';
   static const _deadline = Duration(seconds: 15);
+  static const _launchDeadline = Duration(seconds: 30);
+  static const _getStatusDeadline = Duration(seconds: 5);
+  static const _getStatusAttempts = 6;
   final _statuses = StreamController<Map<String, dynamic>>.broadcast();
   final _messages = StreamController<Map<String, dynamic>>.broadcast();
   final _pending = <int, Completer<Map<String, dynamic>>>{};
@@ -53,6 +56,13 @@ class LinuxCastClient {
   int _nextRequest = 0;
   bool _disposed = false;
   Map<String, dynamic>? _status;
+  Completer<Map<String, dynamic>>? _pendingLoad;
+  Timer? _loadWatchTimer;
+  int? _pendingLoadRequestId;
+  int? _pendingLoadSessionId;
+  final _knownSessions = <int>{};
+  Set<int> _loadPriorSessions = const {};
+  bool _failed = false;
 
   /// Whether the receiver application is connected.
   bool get isConnected => _socket != null && _transport != null;
@@ -137,6 +147,7 @@ class LinuxCastClient {
   }) async {
     if (_disposed) throw StateError('Client is disposed');
     await disconnect();
+    _failed = false;
     try {
       _socket = await SecureSocket.connect(
         device.host,
@@ -165,10 +176,12 @@ class LinuxCastClient {
       _heartbeatTimer = Timer.periodic(const Duration(seconds: 5), (_) {
         _send(_heartbeat, {'type': 'PING'}, destination: 'receiver-0');
       });
-      final response = await _request(_receiver, {
-        'type': 'LAUNCH',
-        'appId': receiverApplicationId,
-      }, destination: 'receiver-0');
+      final response = await _request(
+        _receiver,
+        {'type': 'LAUNCH', 'appId': receiverApplicationId},
+        destination: 'receiver-0',
+        timeout: _launchDeadline,
+      );
       final status = response['status'] as Map<String, dynamic>?;
       final apps = status?['applications'] as List<dynamic>? ?? [];
       final app = apps
@@ -181,7 +194,16 @@ class LinuxCastClient {
       _transport = app['transportId'] as String;
       _session = app['sessionId'] as String?;
       _send(_connection, {'type': 'CONNECT'});
-      await _request(_media, {'type': 'GET_STATUS'});
+      for (var attempt = 1; ; attempt++) {
+        try {
+          await _request(_media, {
+            'type': 'GET_STATUS',
+          }, timeout: _getStatusDeadline);
+          break;
+        } on TimeoutException {
+          if (attempt == _getStatusAttempts) rethrow;
+        }
+      }
       _pollTimer = Timer.periodic(const Duration(seconds: 2), (_) {
         if (isConnected) {
           _send(_media, {'type': 'GET_STATUS', 'requestId': ++_nextRequest});
@@ -196,33 +218,35 @@ class LinuxCastClient {
   void _handle(CastFrame frame) {
     final decoded = jsonDecode(frame.payload);
     if (decoded is! Map<String, dynamic>) return;
-    if (frame.namespace == _heartbeat && decoded['type'] == 'PING') {
+    final type = decoded['type'] as String? ?? '';
+    if (frame.namespace == _heartbeat && type == 'PING') {
       _send(_heartbeat, {'type': 'PONG'}, destination: frame.source);
     }
-    if (frame.namespace == _connection && decoded['type'] == 'CLOSE') {
+    if (frame.namespace == _connection && type == 'CLOSE') {
       _fail(
         const SocketException('Receiver ended Cast connection'),
         StackTrace.current,
       );
       return;
     }
-    if (frame.namespace == _media && decoded['type'] == 'MEDIA_STATUS') {
-      final statuses = decoded['status'] as List<dynamic>? ?? [];
-      if (statuses.isNotEmpty) {
-        _status = Map<String, dynamic>.from(statuses.first as Map);
-        _mediaSession = _status!['mediaSessionId'] as int?;
-        _statuses.add(_status!);
-      } else {
-        _status = null;
-        _mediaSession = null;
-        _statuses.add({'playerState': 'IDLE'});
-      }
+    if (frame.namespace == _media && type == 'MEDIA_STATUS') {
+      _applyMediaStatus(decoded);
     }
-    _messages.add({'namespace': frame.namespace, 'message': decoded});
+    if (!_disposed) {
+      _messages.add({'namespace': frame.namespace, 'message': decoded});
+    }
+    if (frame.namespace == _media &&
+        (type == 'LOAD_FAILED' || type == 'LOAD_CANCELLED') &&
+        decoded['requestId'] == _pendingLoadRequestId) {
+      _status = null;
+      _mediaSession = null;
+      if (!_disposed) _statuses.add({'playerState': 'IDLE'});
+      _failLoad(StateError('Cast load rejected: $decoded'));
+      return;
+    }
     final requestId = decoded['requestId'];
     final pending = _pending.remove(requestId);
     if (pending != null) {
-      final type = decoded['type'] as String? ?? '';
       if (type.endsWith('_FAILED') ||
           type.endsWith('_ERROR') ||
           type == 'INVALID_REQUEST' ||
@@ -234,7 +258,53 @@ class LinuxCastClient {
     }
   }
 
+  void _applyMediaStatus(Map<String, dynamic> decoded) {
+    final statuses = decoded['status'] as List<dynamic>? ?? [];
+    if (statuses.isEmpty) {
+      _status = null;
+      _mediaSession = null;
+      if (!_disposed) _statuses.add({'playerState': 'IDLE'});
+      return;
+    }
+    final entry = Map<String, dynamic>.from(statuses.first as Map);
+    if (!_disposed) _statuses.add(entry);
+    if (entry['mediaSessionId'] is int) {
+      _knownSessions.add(entry['mediaSessionId'] as int);
+    }
+    if (entry['extendedStatus'] != null) {
+      if (decoded['requestId'] == _pendingLoadRequestId &&
+          entry['mediaSessionId'] is int) {
+        _pendingLoadSessionId = entry['mediaSessionId'] as int;
+      }
+      return;
+    }
+    _status = entry;
+    _mediaSession = entry['mediaSessionId'] as int?;
+    if (entry['mediaSessionId'] is int &&
+        (_pendingLoadSessionId != null
+            ? entry['mediaSessionId'] == _pendingLoadSessionId
+            : !_loadPriorSessions.contains(entry['mediaSessionId']))) {
+      _completeLoad(decoded);
+    }
+  }
+
+  void _completeLoad(Map<String, dynamic> response) {
+    final completer = _pendingLoad;
+    if (completer == null || completer.isCompleted) return;
+    completer.complete(response);
+  }
+
+  void _failLoad(Object error, [StackTrace? stack]) {
+    final completer = _pendingLoad;
+    if (completer == null || completer.isCompleted) return;
+    completer.completeError(error, stack);
+  }
+
   void _fail(Object error, StackTrace stack) {
+    if (_failed) return;
+    _failed = true;
+    final wasConnected = _socket != null || _transport != null;
+    _failLoad(error, stack);
     for (final pending in _pending.values) {
       pending.completeError(error, stack);
     }
@@ -247,7 +317,9 @@ class LinuxCastClient {
     _session = null;
     _mediaSession = null;
     _status = null;
-    if (!_disposed) _statuses.add({'playerState': 'DISCONNECTED'});
+    if (wasConnected && !_disposed) {
+      _statuses.add({'playerState': 'DISCONNECTED'});
+    }
   }
 
   void _send(
@@ -269,30 +341,59 @@ class LinuxCastClient {
     String namespace,
     Map<String, dynamic> payload, {
     String? destination,
+    Duration? timeout,
   }) async {
     final id = ++_nextRequest;
     final completer = Completer<Map<String, dynamic>>();
     _pending[id] = completer;
     try {
       _send(namespace, {...payload, 'requestId': id}, destination: destination);
-      return await completer.future.timeout(_deadline);
+      return await completer.future.timeout(timeout ?? _deadline);
     } finally {
       _pending.remove(id);
     }
   }
 
   /// Loads a Cast MediaInformation JSON object; URLs must reach the receiver.
+  ///
+  /// Resolves only on a final MEDIA_STATUS update: intermediate LOADING acks
+  /// are ignored and LOAD_FAILED or LOAD_CANCELLED reject the future.
   Future<void> load(
     Map<String, dynamic> media, {
     bool autoplay = true,
     List<int>? activeTrackIds,
   }) async {
-    await _request(_media, {
-      'type': 'LOAD',
-      'media': media,
-      'autoplay': autoplay,
-      'activeTrackIds': ?activeTrackIds,
+    final previous = _pendingLoad;
+    if (previous != null && !previous.isCompleted) {
+      throw StateError('A media load is already pending');
+    }
+    final id = ++_nextRequest;
+    final completer = Completer<Map<String, dynamic>>();
+    _pendingLoad = completer;
+    _pendingLoadRequestId = id;
+    _pendingLoadSessionId = null;
+    _loadPriorSessions = Set.of(_knownSessions);
+    _loadWatchTimer = Timer(_deadline, () {
+      _failLoad(TimeoutException('Cast load timed out', _deadline));
     });
+    try {
+      _send(_media, {
+        'type': 'LOAD',
+        'requestId': id,
+        'media': media,
+        'autoplay': autoplay,
+        'activeTrackIds': ?activeTrackIds,
+      });
+      await completer.future;
+    } finally {
+      _loadWatchTimer?.cancel();
+      _loadWatchTimer = null;
+      if (identical(_pendingLoad, completer)) {
+        _pendingLoad = null;
+        _pendingLoadRequestId = null;
+        _pendingLoadSessionId = null;
+      }
+    }
   }
 
   Future<void> _mediaCommand(
@@ -336,27 +437,21 @@ class LinuxCastClient {
 
   /// Closes the sender connection, optionally stopping the receiver app.
   Future<void> disconnect({bool stopReceiver = false}) async {
-    if (stopReceiver && _socket != null && _session != null) {
-      try {
+    try {
+      if (stopReceiver && _socket != null && _session != null) {
         await _request(_receiver, {
           'type': 'STOP',
           'sessionId': _session,
         }, destination: 'receiver-0');
-      } finally {
-        _fail(
-          const SocketException('Cast session disconnected'),
-          StackTrace.current,
-        );
-        await _subscription?.cancel();
       }
-    } else {
+    } finally {
       _fail(
         const SocketException('Cast session disconnected'),
         StackTrace.current,
       );
       await _subscription?.cancel();
+      _subscription = null;
     }
-    _subscription = null;
   }
 
   /// Disconnects and closes streams. A disposed client cannot reconnect.
