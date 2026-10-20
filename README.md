@@ -1017,3 +1017,34 @@ Contributions are welcome! Please submit pull requests to our GitHub repository.
 ## License
 
 This plugin is released under the BSD-3-Clause License. See the LICENSE file for details.
+
+## Linux sender
+
+The additional `package:flutter_chrome_cast/linux.dart` entry point provides a pure Dart `LinuxCastClient` on Linux and other Dart VM hosts. It does not require a native Linux plugin, Avahi bindings, or Google Play Services. Android and iOS retain their existing native SDK APIs; the Linux client is an explicit API rather than a replacement for those singletons.
+
+```dart
+import 'package:flutter_chrome_cast/linux.dart';
+
+final devices = await LinuxCastClient.discover();
+final client = LinuxCastClient();
+await client.connect(devices.first); // Default Media Receiver: CC1AD845.
+await client.load({
+  'contentId': 'http://192.168.1.10:8080/movie.mp4',
+  'contentType': 'video/mp4',
+  'streamType': 'BUFFERED',
+});
+await client.pause();
+await client.seek(const Duration(seconds: 30));
+await client.disconnect(stopReceiver: true);
+await client.dispose();
+```
+
+Discovery uses IPv4 mDNS (`_googlecast._tcp.local`, UDP 5353), and sessions use Cast V2 protobuf envelopes over TLS to the advertised port (normally TCP 8009). The host and receiver must be mutually reachable; guest Wi-Fi isolation and multicast filtering can prevent discovery. A `LinuxCastDevice` can also be constructed with a known address. Each discovery query has a bounded timeout; discovering multiple services may take several query intervals.
+
+`mediaStatusStream` emits Cast media status JSON entries, including playback state, position and media session ID. An empty media status clears the session and emits `IDLE`; a lost connection emits `DISCONNECTED`. Playback requests wait for receiver acknowledgements and report receiver errors. Available controls are load, play, pause, stop, seek, active track IDs, text style, and custom namespace messages. Queue management, automatic session resumption and official sender device authentication are not implemented.
+
+Cast receivers use self-signed TLS certificates. This implementation encrypts traffic but accepts the receiver certificate without Google's DeviceAuth verification. Use it on a trusted local network; it is unsuitable for transmitting credentials or protected media secrets.
+
+A receiver still determines codec/container support and subtitle rendering. The default receiver renders one text track; sending two IDs does not provide independently styled top/bottom subtitles. Use a custom receiver or prepare a compatible video with both subtitle layers burned in. Media and external caption URLs must be accessible directly from the Chromecast; local filesystem paths cannot be cast.
+
+Focused protocol tests run with `flutter test test/linux_cast_client_test.dart`. They start a temporary loopback TLS peer and require the `openssl` executable to generate an ephemeral test certificate. No persistent server or certificate is installed. Real receiver playback and mDNS discovery require separate validation on a Linux host and a reachable Cast device.

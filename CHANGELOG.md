@@ -1,3 +1,8 @@
+## Unreleased
+
+### New Features
+- Added an explicit `linux.dart` sender API with IPv4 mDNS discovery, Cast V2 sessions over TLS, media controls, track selection, and custom messages. The existing Android/iOS APIs remain unchanged. DeviceAuth verification, queue management, and automatic session resumption are not implemented; use only on trusted local networks.
+
 ## 2.0.0 - Built-in Kotlin Migration
 ### ⚠️ Breaking Changes
 - Updates the minimum supported SDK version to Flutter 3.44/Dart 3.12.

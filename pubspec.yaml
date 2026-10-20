@@ -13,6 +13,7 @@ dependencies:
     sdk: flutter
   get: ^4.7.2
   marquee: ^2.2.3
+  multicast_dns: ^0.3.3+1
   permission_handler: ^13.0.2
   plugin_platform_interface: ^2.1.8
   rxdart: ^0.28.0
