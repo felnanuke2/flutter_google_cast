@@ -5,9 +5,11 @@ import 'channels/ios_discovery_manager.dart';
 import 'channels/ios_google_cast_context_method_channel.dart';
 import 'channels/ios_remote_media_client_method_channel.dart';
 
+/// Registers the iOS implementations of the platform interfaces.
 class FlutterChromeCastIos {
   FlutterChromeCastIos._();
 
+  /// Registers the iOS platform implementations.
   static void registerWith() {
     GoogleCastContextPlatformInterface.instance =
         FlutterIOSGoogleCastContextMethodChannel();

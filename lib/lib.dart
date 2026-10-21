@@ -14,6 +14,6 @@
 /// import 'package:flutter_chrome_cast/media.dart';
 /// import 'package:flutter_chrome_cast/widgets.dart';
 /// ```
-library flutter_chrome_cast_legacy;
+library;
 
 export 'flutter_chrome_cast.dart';

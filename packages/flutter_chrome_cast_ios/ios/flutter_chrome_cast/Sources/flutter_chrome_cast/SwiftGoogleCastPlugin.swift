@@ -95,8 +95,16 @@ public class SwiftGoogleCastPlugin: NSObject, GCKLoggerDelegate, FlutterPlugin, 
     ///   - arguments: Dictionary containing Cast configuration options from Flutter
     /// - Returns: `true` when context initialization succeeds.
     /// - Note: This method should be called once during app initialization
-    private func setSharedInstanceWithOption(option: GCKCastOptions) throws -> Bool {
-      
+    private func setSharedInstanceWithOption(option: GCKCastOptions, logLevel: String?) throws -> Bool {
+       
+        // Opt-in levels are installed before Cast context initialization so
+        // initialization logs are filtered as well. With no level configured,
+        // the legacy logger setup below remains unchanged.
+        FlutterGoogleCastLogger.configure(logLevel)
+        if let configuredLevel = FlutterGoogleCastLogger.configuredLevel {
+            configureCastSDKLogger(level: configuredLevel)
+        }
+
         // Initialize the shared Cast context with parsed options
        GCKCastContext.setSharedInstanceWith(option)
         
@@ -167,7 +175,33 @@ public class SwiftGoogleCastPlugin: NSObject, GCKLoggerDelegate, FlutterPlugin, 
         option.startDiscoveryAfterFirstTapOnCastButton = options.startDiscoveryAfterFirstTapOnCastButton
         stopCastingOnAppTerminated = options.stopCastingOnAppTerminated
 
-        return try setSharedInstanceWithOption(option: option)
+        return try setSharedInstanceWithOption(option: option, logLevel: options.logLevel)
+    }
+
+    /// Applies the configured log level to the Google Cast SDK logger.
+    ///
+    /// The Cast SDK exposes its own logger, so the selected level is applied to
+    /// `GCKLogger` in addition to the plugin-owned logs.
+    private func configureCastSDKLogger(level: FlutterGoogleCastLogLevel) {
+        let filter = GCKLoggerFilter.init()
+        switch level {
+        case .none:
+            filter.minimumLevel = .error
+            GCKLogger.sharedInstance().consoleLoggingEnabled = false
+        case .error:
+            filter.minimumLevel = .error
+            GCKLogger.sharedInstance().consoleLoggingEnabled = true
+        case .warning:
+            filter.minimumLevel = .warning
+            GCKLogger.sharedInstance().consoleLoggingEnabled = true
+        case .info:
+            filter.minimumLevel = .info
+            GCKLogger.sharedInstance().consoleLoggingEnabled = true
+        case .verbose:
+            filter.minimumLevel = .verbose
+            GCKLogger.sharedInstance().consoleLoggingEnabled = true
+        }
+        GCKLogger.sharedInstance().filter = filter
     }
 
     // MARK: - Teardown / Lifecycle handlers

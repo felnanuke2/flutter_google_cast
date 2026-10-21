@@ -1,5 +1,6 @@
 package com.felnanuke.google_cast.extensions
 
+import android.net.Uri
 import com.felnanuke.google_cast.CastDebugLog
 import com.felnanuke.google_cast.pigeon.LiveSeekableRange
 import com.felnanuke.google_cast.pigeon.LoadMediaRequestPigeon
@@ -19,11 +20,16 @@ import com.google.android.gms.cast.MediaQueueItem as CastMediaQueueItem
 import com.google.android.gms.cast.MediaSeekOptions
 import com.google.android.gms.cast.MediaStatus as CastMediaStatus
 import com.google.android.gms.cast.MediaTrack as CastMediaTrack
-import com.google.android.gms.cast.images.WebImage
+import com.google.android.gms.common.images.WebImage
 import com.felnanuke.google_cast.pigeon.MediaImagePigeon
 import com.felnanuke.google_cast.pigeon.MediaMetadataPigeon
 import org.json.JSONArray
 import org.json.JSONObject
+import java.text.ParseException
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Locale
+import java.util.TimeZone
 
 private const val TAG = "ModelExtensions"
 
@@ -72,6 +78,38 @@ fun MediaInfo.toCastMediaInfo(): CastMediaInfo? {
         }
     )
 
+    // Stream duration: Flutter sends seconds, the SDK expects milliseconds.
+    if (duration > 0) {
+        builder.setStreamDuration(duration * 1000)
+    }
+
+    // HLS segment formats. Required for fragmented-MP4 HLS (e.g. PeerTube
+    // VOD) to play on the Default Media Receiver: without the hint the
+    // receiver cannot demux fMP4 segments and stays stuck in LOADING.
+    // The dedicated pigeon fields take precedence over the legacy
+    // customData keys.
+    val hlsSegmentFormat = GoogleCastMediaInfoExtensions.hlsSegmentFormatFromName(
+        this.hlsSegmentFormat
+            ?: (customData?.get(GoogleCastMediaInfoExtensions.HLS_SEGMENT_FORMAT_KEY) as? String)
+    )
+    hlsSegmentFormat?.let {
+        CastDebugLog.d(TAG, "toCastMediaInfo: Setting hlsSegmentFormat=$it")
+        builder.setHlsSegmentFormat(it)
+    }
+    val hlsVideoSegmentFormat = GoogleCastMediaInfoExtensions.hlsVideoSegmentFormatFromName(
+        this.hlsVideoSegmentFormat
+            ?: (customData?.get(GoogleCastMediaInfoExtensions.HLS_VIDEO_SEGMENT_FORMAT_KEY) as? String)
+    )
+    hlsVideoSegmentFormat?.let {
+        CastDebugLog.d(TAG, "toCastMediaInfo: Setting hlsVideoSegmentFormat=$it")
+        builder.setHlsVideoSegmentFormat(it)
+    }
+
+    metadata?.toCastMediaMetadata()?.let {
+        CastDebugLog.d(TAG, "toCastMediaInfo: Setting metadata (type=${it.mediaType})")
+        builder.setMetadata(it)
+    }
+
     val castTracks = tracks?.mapNotNull { it?.toCastMediaTrack() }.orEmpty()
     if (castTracks.isNotEmpty()) {
         builder.setMediaTracks(castTracks)
@@ -80,10 +118,103 @@ fun MediaInfo.toCastMediaInfo(): CastMediaInfo? {
 
     customData?.let {
         CastDebugLog.d(TAG, "toCastMediaInfo: Setting customData")
-        builder.setCustomData(it.toJsonObject())
+        // The HLS segment format hints are an internal detail of the load
+        // request and must not reach the receiver as custom metadata.
+        builder.setCustomData(
+            GoogleCastMediaInfoExtensions.withoutHlsSegmentFormats(it).toJsonObject()
+        )
     }
 
     return builder.build()
+}
+
+/**
+ * Converts the pigeon media metadata into a Cast SDK [MediaMetadata].
+ *
+ * Port of the legacy map based `GoogleCastMetadataBuilder.fromMap` to the
+ * pigeon payload: the fields are stored under the canonical Cast metadata
+ * keys so receivers display them, the ISO-8601 dates are converted with
+ * [MediaMetadata.putDate] and the images are attached as [WebImage]s.
+ */
+fun MediaMetadataPigeon.toCastMediaMetadata(): MediaMetadata {
+    val metadata = MediaMetadata(metadataType.toInt())
+
+    title?.let { metadata.putString(MediaMetadata.KEY_TITLE, it) }
+    subtitle?.let { metadata.putString(MediaMetadata.KEY_SUBTITLE, it) }
+    studio?.let { metadata.putString(MediaMetadata.KEY_STUDIO, it) }
+    artist?.let { metadata.putString(MediaMetadata.KEY_ARTIST, it) }
+    albumName?.let { metadata.putString(MediaMetadata.KEY_ALBUM_TITLE, it) }
+    albumArtist?.let { metadata.putString(MediaMetadata.KEY_ALBUM_ARTIST, it) }
+    composer?.let { metadata.putString(MediaMetadata.KEY_COMPOSER, it) }
+    seriesTitle?.let { metadata.putString(MediaMetadata.KEY_SERIES_TITLE, it) }
+    location?.let { metadata.putString(MediaMetadata.KEY_LOCATION_NAME, it) }
+    trackNumber?.let { metadata.putInt(MediaMetadata.KEY_TRACK_NUMBER, it.toInt()) }
+    discNumber?.let { metadata.putInt(MediaMetadata.KEY_DISC_NUMBER, it.toInt()) }
+    season?.let { metadata.putInt(MediaMetadata.KEY_SEASON_NUMBER, it.toInt()) }
+    episode?.let { metadata.putInt(MediaMetadata.KEY_EPISODE_NUMBER, it.toInt()) }
+    width?.let { metadata.putInt(MediaMetadata.KEY_WIDTH, it.toInt()) }
+    height?.let { metadata.putInt(MediaMetadata.KEY_HEIGHT, it.toInt()) }
+    latitude?.let { metadata.putDouble(MediaMetadata.KEY_LOCATION_LATITUDE, it) }
+    longitude?.let { metadata.putDouble(MediaMetadata.KEY_LOCATION_LONGITUDE, it) }
+    iso8601ToCalendar(releaseDate)?.let { metadata.putDate(MediaMetadata.KEY_RELEASE_DATE, it) }
+    // The TV show original air date is stored under the broadcast date key,
+    // the closest canonical key exposed by the Android Cast SDK.
+    iso8601ToCalendar(originalAirDate)?.let { metadata.putDate(MediaMetadata.KEY_BROADCAST_DATE, it) }
+    iso8601ToCalendar(creationDateTime)?.let { metadata.putDate(MediaMetadata.KEY_CREATION_DATE, it) }
+
+    images?.mapNotNull { it }?.forEach { image ->
+        if (image.url.isNotBlank()) {
+            val uri = Uri.parse(image.url)
+            val width = image.width?.toInt()
+            val height = image.height?.toInt()
+            metadata.addImage(
+                if (width != null && height != null) {
+                    WebImage(uri, width, height)
+                } else {
+                    WebImage(uri)
+                }
+            )
+        }
+    }
+
+    return metadata
+}
+
+/**
+ * Parses an ISO-8601 date string (the representation produced by
+ * `DateTime.toUtc().toIso8601String()` on the Dart side) into a [Calendar].
+ *
+ * A plain epoch-milliseconds string and the `yyyy-MM-dd` date only form are
+ * also accepted for backwards compatibility with the legacy map based
+ * payloads.
+ */
+private fun iso8601ToCalendar(value: String?): Calendar? {
+    if (value.isNullOrBlank()) return null
+    val trimmed = value.trim()
+    trimmed.toLongOrNull()?.let { millis ->
+        return Calendar.getInstance(TimeZone.getTimeZone("UTC")).apply { timeInMillis = millis }
+    }
+    // Fractional seconds beyond milliseconds are truncated so the
+    // SimpleDateFormat patterns below can parse the value.
+    val truncated = trimmed.replace(Regex("""(\.\d{3})\d+"""), "$1")
+    val patterns = listOf(
+        "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
+        "yyyy-MM-dd'T'HH:mm:ss'Z'",
+        "yyyy-MM-dd"
+    )
+    for (pattern in patterns) {
+        try {
+            val format = SimpleDateFormat(pattern, Locale.US)
+            format.timeZone = TimeZone.getTimeZone("UTC")
+            format.isLenient = false
+            val date = format.parse(truncated) ?: continue
+            return Calendar.getInstance(TimeZone.getTimeZone("UTC")).apply { time = date }
+        } catch (e: ParseException) {
+            // Try the next pattern.
+        }
+    }
+    CastDebugLog.w(TAG, "iso8601ToCalendar: unable to parse date '$value'")
+    return null
 }
 
 fun MediaQueueItem.toCastMediaQueueItem(): CastMediaQueueItem? {
@@ -185,10 +316,16 @@ fun CastMediaInfo.toPigeonMediaInfo(): MediaInfo {
         contentType = contentType ?: "",
         streamType = stream,
         contentUrl = contentUrl ?: "",
-        duration = streamDuration,
+        // The pigeon contract reports the duration in seconds; the SDK
+        // exposes it in milliseconds.
+        duration = if (streamDuration > 0) streamDuration / 1000 else 0,
         customData = customData?.toMapRecursive(),
         tracks = mediaTracks?.map { it.toPigeonMediaTrack() },
-        metadata = metadata?.toPigeonMetadata()
+        metadata = metadata?.toPigeonMetadata(),
+        hlsSegmentFormat = GoogleCastMediaInfoExtensions.hlsSegmentFormatToName(hlsSegmentFormat),
+        hlsVideoSegmentFormat = GoogleCastMediaInfoExtensions.hlsVideoSegmentFormatToName(
+            hlsVideoSegmentFormat
+        )
     )
 }
 
@@ -221,7 +358,7 @@ fun MediaMetadata.toPigeonMetadata(): MediaMetadataPigeon {
     }
 
     return MediaMetadataPigeon(
-        metadataType = metadataType.toLong(),
+        metadataType = mediaType.toLong(),
         title = title,
         subtitle = subtitle,
         studio = studio,

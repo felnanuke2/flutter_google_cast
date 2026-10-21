@@ -37,6 +37,7 @@ class GoogleCastContextAndroidMethodChannel
       stopCastingOnAppTerminated: castOptions.stopCastingOnAppTerminated,
       appId: castOptions.appId,
       discoveryCriteria: null,
+      logLevel: GoogleCastLoggerConfiguration.wireValue,
     );
   }
 }

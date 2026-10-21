@@ -19,6 +19,7 @@ class _DiscoveryFlutterApiHandler extends DiscoveryManagerFlutterApi {
 /// using method channels to communicate with the native iOS implementation.
 class GoogleCastDiscoveryManagerMethodChannelIOS
     extends GoogleCastDiscoveryManagerPlatformInterface {
+  /// Creates a new iOS discovery manager method channel.
   GoogleCastDiscoveryManagerMethodChannelIOS();
 
   final DiscoveryManagerHostApi _hostApi = DiscoveryManagerHostApi();
@@ -53,8 +54,9 @@ class GoogleCastDiscoveryManagerMethodChannelIOS
   }
 
   @override
-  Future<void> startDiscovery() {
-    return _api.startDiscovery();
+  Future<void> startDiscovery({bool activeScan = false}) {
+    // iOS scans actively while discovery runs, so `activeScan` is a no-op.
+    return _api.startDiscovery(activeScan);
   }
 
   @override

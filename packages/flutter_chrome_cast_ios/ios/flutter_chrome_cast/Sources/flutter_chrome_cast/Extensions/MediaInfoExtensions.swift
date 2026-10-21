@@ -9,6 +9,14 @@ import Foundation
 import GoogleCast
 
 extension GCKMediaInformation{
+    /// Key used to carry the HLS audio segment format inside the media
+    /// information custom data.
+    static let hlsSegmentFormatKey = "hlsSegmentFormat"
+
+    /// Key used to carry the HLS video segment format inside the media
+    /// information custom data.
+    static let hlsVideoSegmentFormatKey = "hlsVideoSegmentFormat"
+
     static func fromMap(_ arguments: Dictionary<String, Any> ) -> GCKMediaInformation? {
         let streamType: GCKMediaStreamType = {
                     switch arguments["streamType"] as? String {
@@ -27,6 +35,9 @@ extension GCKMediaInformation{
         
         let builder =  GCKMediaInformationBuilder.init(contentURL: contentUrl)
         builder.streamType = streamType
+        if let contentID = arguments["contentID"] as? String, !contentID.isEmpty {
+            builder.contentID = contentID
+        }
         if let contentType = arguments["contentType"] as? String {
              builder.contentType = contentType
         }
@@ -39,7 +50,7 @@ extension GCKMediaInformation{
             builder.startAbsoluteTime = startAbsoluteTime / 1000.0
         }
         
-        if let hlsSegmentFormat = arguments["hlsSegmentFormat"] as? String {
+        if let hlsSegmentFormat = arguments[GCKMediaInformation.hlsSegmentFormatKey] as? String {
              switch hlsSegmentFormat {
              case "aac":
                  builder.hlsSegmentFormat = .AAC
@@ -51,12 +62,16 @@ extension GCKMediaInformation{
                  builder.hlsSegmentFormat = .TS
              case "tsAac":
                  builder.hlsSegmentFormat = .TS_AAC
+             case "eAc3":
+                 builder.hlsSegmentFormat = .E_AC3
+             case "fmp4":
+                 builder.hlsSegmentFormat = .FMP4
              default:
                  break
              }
          }
          
-         if let hlsVideoSegmentFormat = arguments["hlsVideoSegmentFormat"] as? String {
+         if let hlsVideoSegmentFormat = arguments[GCKMediaInformation.hlsVideoSegmentFormatKey] as? String {
              switch hlsVideoSegmentFormat {
              case "mpeg2Ts":
                  builder.hlsVideoSegmentFormat = .MPEG2_TS
@@ -88,7 +103,17 @@ extension GCKMediaInformation{
     
     func toMap() -> Dictionary<String, Any> {
         var dict = Dictionary<String, Any>()
-        dict["contentID"] = self.contentID
+        // Only return the receiver-reported contentID here. The plugin layer
+        // (RemoteMediaClienteMethodChannel) is responsible for substituting
+        // the contentID that the Flutter side originally passed when loading
+        // media, because the Default Media Receiver does not always echo it
+        // back in the first media status update. A contentURL fallback is
+        // applied by the plugin layer only when no contentID is available at
+        // all. This keeps iOS behaviour consistent with Android, where the
+        // originally provided contentID is always delivered first.
+        if let contentID = self.contentID, !contentID.isEmpty {
+            dict["contentID"] = contentID
+        }
         dict["contentType"] = self.contentType
         dict["streamType"] = self.streamType.rawValue
         dict["contentURL"] = self.contentURL?.absoluteString

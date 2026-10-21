@@ -38,5 +38,16 @@ void main() {
       expect(clip.vastAdsRequest, isNull);
       expect(clip.whenSkippable, isNull);
     });
+
+    test('fromMap with vastAdsRequest', () {
+      final map = {
+        'id': 'clip-vast',
+        'vastAdsRequest': {'adTagUrl': 'https://ads.example.com/vast'},
+      };
+
+      final clip = CastBreakClips.fromMap(map);
+      expect(clip.id, 'clip-vast');
+      expect(clip.vastAdsRequest, isNotNull);
+    });
   });
 }

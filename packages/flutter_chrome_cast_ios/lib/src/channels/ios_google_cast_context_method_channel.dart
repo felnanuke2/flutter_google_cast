@@ -45,6 +45,7 @@ class FlutterIOSGoogleCastContextMethodChannel
               namespaces: castOptions.discoveryCriteria!.namespaces?.toList(),
             )
           : null,
+      logLevel: GoogleCastLoggerConfiguration.wireValue,
     );
   }
 

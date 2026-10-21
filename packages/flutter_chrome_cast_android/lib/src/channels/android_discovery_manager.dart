@@ -19,6 +19,7 @@ class _DiscoveryFlutterApiHandler extends DiscoveryManagerFlutterApi {
 /// using method channels to communicate with the native Android implementation.
 class GoogleCastDiscoveryManagerMethodChannelAndroid
     extends GoogleCastDiscoveryManagerPlatformInterface {
+  /// Creates a new Android discovery manager method channel.
   GoogleCastDiscoveryManagerMethodChannelAndroid();
 
   final DiscoveryManagerHostApi _hostApi = DiscoveryManagerHostApi();
@@ -53,8 +54,8 @@ class GoogleCastDiscoveryManagerMethodChannelAndroid
   }
 
   @override
-  Future<void> startDiscovery() async {
-    await _api.startDiscovery();
+  Future<void> startDiscovery({bool activeScan = false}) async {
+    await _api.startDiscovery(activeScan);
   }
 
   @override

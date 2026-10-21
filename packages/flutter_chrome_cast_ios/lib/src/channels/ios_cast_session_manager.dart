@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_chrome_cast_platform_interface/flutter_chrome_cast_platform_interface.dart';
 import 'package:rxdart/subjects.dart';
 
@@ -13,19 +15,26 @@ class _PlatformCastSession extends GoogleCastSession {
 }
 
 class _SessionFlutterApiHandler extends SessionManagerFlutterApi {
-  _SessionFlutterApiHandler(this._onSessionChanged);
+  _SessionFlutterApiHandler(this._onSessionChanged, this._onMessageReceived);
 
   final void Function(CastSessionPigeon? session) _onSessionChanged;
+  final void Function(String namespace, String message) _onMessageReceived;
 
   @override
   void onSessionChanged(CastSessionPigeon? session) {
     _onSessionChanged(session);
+  }
+
+  @override
+  void onMessageReceived(String namespace, String message) {
+    _onMessageReceived(namespace, message);
   }
 }
 
 /// iOS-specific implementation of Google Cast session manager functionality.
 class GoogleCastSessionManagerIOSMethodChannel
     extends GoogleCastSessionManagerPlatformInterface {
+  /// Creates a new iOS session manager method channel.
   GoogleCastSessionManagerIOSMethodChannel();
 
   final SessionManagerHostApi _hostApi = SessionManagerHostApi();
@@ -35,7 +44,7 @@ class GoogleCastSessionManagerIOSMethodChannel
     if (_flutterApiSetUp) return;
     _flutterApiSetUp = true;
     SessionManagerFlutterApi.setUp(
-      _SessionFlutterApiHandler(_onCurrentSessionChanged),
+      _SessionFlutterApiHandler(_onCurrentSessionChanged, _onMessageReceived),
     );
   }
 
@@ -51,6 +60,15 @@ class GoogleCastSessionManagerIOSMethodChannel
   final _currentSessionStreamController = BehaviorSubject<GoogleCastSession?>()
     ..add(null);
 
+  final _messageStreamController =
+      StreamController<GoogleCastMessage>.broadcast();
+
+  /// Whether [dispose] has already been called on this instance.
+  ///
+  /// Once disposed, getters no longer surface the last cached session
+  /// (rxdart's [BehaviorSubject] retains its value after being closed).
+  bool _isDisposed = false;
+
   @override
   Future<bool> startSessionWithDevice(GoogleCastDevice device) async {
     return _api.startSessionWithDevice(
@@ -64,7 +82,26 @@ class GoogleCastSessionManagerIOSMethodChannel
 
   @override
   GoogleCastSession? get currentSession =>
-      _currentSessionStreamController.value;
+      _isDisposed ? null : _currentSessionStreamController.value;
+
+  @override
+  Stream<GoogleCastMessage> get messageStream =>
+      _messageStreamController.stream;
+
+  @override
+  Future<bool> addMessageChannel(String namespace) {
+    return _api.addMessageChannel(namespace);
+  }
+
+  @override
+  Future<bool> removeMessageChannel(String namespace) {
+    return _api.removeMessageChannel(namespace);
+  }
+
+  @override
+  Future<bool> sendMessage(String namespace, String message) {
+    return _api.sendMessage(namespace, message);
+  }
 
   @override
   Future<bool> endSession() async {
@@ -108,6 +145,7 @@ class GoogleCastSessionManagerIOSMethodChannel
   }
 
   void _onCurrentSessionChanged(CastSessionPigeon? arguments) async {
+    if (_isDisposed) return;
     try {
       final session = arguments == null
           ? null
@@ -137,6 +175,14 @@ class GoogleCastSessionManagerIOSMethodChannel
     }
   }
 
+  void _onMessageReceived(String namespace, String message) {
+    if (_isDisposed) return;
+    if (_messageStreamController.isClosed) return;
+    _messageStreamController.add(
+      GoogleCastMessage(namespace: namespace, message: message),
+    );
+  }
+
   @override
   void setDeviceVolumeLevel(CastDeviceVolume volume) {
     _api.setDeviceVolume(volume.value);
@@ -145,5 +191,18 @@ class GoogleCastSessionManagerIOSMethodChannel
   @override
   void setDeviceVolume(double value) {
     setDeviceVolumeLevel(CastDeviceVolume(value));
+  }
+
+  @override
+  Future<bool> resetSession() async {
+    return _api.resetSession();
+  }
+
+  @override
+  void dispose() {
+    if (_isDisposed) return;
+    _isDisposed = true;
+    _messageStreamController.close();
+    _currentSessionStreamController.close();
   }
 }

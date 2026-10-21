@@ -3,11 +3,18 @@ package com.felnanuke.google_cast
 import com.felnanuke.google_cast.pigeon.CastDevicePigeon
 import com.felnanuke.google_cast.pigeon.CastSessionPigeon
 import com.felnanuke.google_cast.pigeon.ConnectionStatePigeon
+import com.felnanuke.google_cast.pigeon.FlutterError
 import com.felnanuke.google_cast.pigeon.SessionManagerFlutterApi
 import com.felnanuke.google_cast.pigeon.SessionManagerHostApi
 import com.felnanuke.google_cast.pigeon.StartSessionRequest
+import com.google.android.gms.cast.Cast
 import com.google.android.gms.cast.framework.*
 import io.flutter.embedding.engine.plugins.FlutterPlugin
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlin.coroutines.resume
 
 private const val TAG = "SessionManager"
 
@@ -16,9 +23,20 @@ class SessionManagerMethodChannel(discoveryManager: DiscoveryManagerMethodChanne
 
     private lateinit var flutterApi: SessionManagerFlutterApi
 
+    /** Fire-and-forget scope used to push Flutter API events. */
+    private val eventScope = CoroutineScope(Dispatchers.Main)
+
     private val discoveryManagerMethodChannel: DiscoveryManagerMethodChannel = discoveryManager
 
     private val remoteMediaClientMethodChannel = RemoteMediaClientMethodChannel()
+
+    /** Namespaces requested by Flutter. They survive Cast session changes. */
+    private val requestedMessageNamespaces = mutableSetOf<String>()
+
+    /** Forwards receiver text messages to the Dart message stream. */
+    private val messageReceivedCallback = Cast.MessageReceivedCallback { _, namespace, message ->
+        eventScope.launch { flutterApi.onMessageReceived(namespace, message) }
+    }
 
     private val sessionManager: SessionManager?
         get() {
@@ -37,6 +55,18 @@ class SessionManagerMethodChannel(discoveryManager: DiscoveryManagerMethodChanne
 
     override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
         CastDebugLog.d(TAG, "onDetachedFromEngine: Cleaning up SessionManager")
+        sessionManager?.currentCastSession?.let { session ->
+            requestedMessageNamespaces.forEach { namespace ->
+                try {
+                    session.removeMessageReceivedCallbacks(namespace)
+                } catch (_: Exception) {
+                    // The Cast session may already be disconnected.
+                }
+            }
+        }
+        // The engine may re-attach with fresh Dart state; drop stale
+        // registrations so channels don't silently reattach later.
+        requestedMessageNamespaces.clear()
         SessionManagerHostApi.setUp(binding.binaryMessenger, null)
         CastDebugLog.d(TAG, "onDetachedFromEngine: SessionManager cleaned up")
     }
@@ -82,6 +112,80 @@ class SessionManagerMethodChannel(discoveryManager: DiscoveryManagerMethodChanne
         } catch (e: Exception) {
             CastDebugLog.castError(TAG, "setDeviceVolume(value=$value)", e)
         }
+    }
+
+    // MARK: - Custom Cast Message Channels
+
+    private fun validateNamespace(namespace: String): String {
+        if (!namespace.startsWith("urn:x-cast:") || namespace.length > 128) {
+            throw FlutterError(
+                "INVALID_ARGUMENT",
+                "A valid Cast namespace is required.",
+                null
+            )
+        }
+        return namespace
+    }
+
+    private fun registerMessageChannel(namespace: String): Boolean {
+        val session = sessionManager?.currentCastSession ?: return true
+        return try {
+            session.removeMessageReceivedCallbacks(namespace)
+            session.setMessageReceivedCallbacks(namespace, messageReceivedCallback)
+            true
+        } catch (e: Exception) {
+            CastDebugLog.castError(TAG, "registerMessageChannel($namespace)", e)
+            false
+        }
+    }
+
+    private fun registerRequestedMessageChannels() {
+        requestedMessageNamespaces.forEach(::registerMessageChannel)
+    }
+
+    override fun addMessageChannel(namespace: String): Boolean {
+        val namespace = validateNamespace(namespace)
+        requestedMessageNamespaces.add(namespace)
+        return registerMessageChannel(namespace)
+    }
+
+    override fun removeMessageChannel(namespace: String): Boolean {
+        val namespace = validateNamespace(namespace)
+        requestedMessageNamespaces.remove(namespace)
+        return try {
+            sessionManager?.currentCastSession?.removeMessageReceivedCallbacks(namespace)
+            true
+        } catch (e: Exception) {
+            CastDebugLog.castError(TAG, "removeMessageChannel($namespace)", e)
+            false
+        }
+    }
+
+    override suspend fun sendMessage(namespace: String, message: String): Boolean {
+        val namespace = validateNamespace(namespace)
+        val session = sessionManager?.currentCastSession
+        if (session == null || !requestedMessageNamespaces.contains(namespace)) {
+            // Runtime state, not a programmer error: report as `false` so the
+            // Dart API stays a simple Future<bool>. iOS enforces the same
+            // registration requirement via its channel dictionary.
+            return false
+        }
+        return try {
+            suspendCancellableCoroutine { continuation ->
+                session.sendMessage(namespace, message).setResultCallback { status ->
+                    continuation.resume(status.isSuccess)
+                }
+            }
+        } catch (e: Exception) {
+            CastDebugLog.castError(TAG, "sendMessage($namespace)", e)
+            false
+        }
+    }
+
+    override fun resetSession(): Boolean {
+        // Stale sessions are not observed on Android; delegate to the
+        // standard end-and-stop-casting flow.
+        return endSessionAndStopCasting()
     }
 
     //SessionManagerLister
@@ -151,7 +255,7 @@ class SessionManagerMethodChannel(discoveryManager: DiscoveryManagerMethodChanne
                 "isConnected=${session?.isConnected}, " +
                 "isConnecting=${session?.isConnecting}, " +
                 "device=${session?.castDevice?.friendlyName}")
-        flutterApi.onSessionChanged(pigeonSession) { }
+        eventScope.launch { flutterApi.onSessionChanged(pigeonSession) }
     }
 
     private fun toSessionPigeon(session: CastSession): CastSessionPigeon {

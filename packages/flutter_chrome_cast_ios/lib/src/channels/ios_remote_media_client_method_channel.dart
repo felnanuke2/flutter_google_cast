@@ -36,6 +36,7 @@ class _RemoteMediaFlutterApiHandler extends RemoteMediaClientFlutterApi {
 /// iOS-specific implementation of Google Cast remote media client functionality.
 class GoogleCastRemoteMediaClientIOSMethodChannel
     extends GoogleCastRemoteMediaClientPlatformInterface {
+  /// Creates a new iOS remote media client method channel.
   GoogleCastRemoteMediaClientIOSMethodChannel();
 
   final RemoteMediaClientHostApi _hostApi = RemoteMediaClientHostApi();
@@ -337,27 +338,7 @@ class GoogleCastRemoteMediaClientIOSMethodChannel
   }
 
   MediaInfo _toMediaInfo(GoogleCastMediaInformation mediaInfo) {
-    return MediaInfo(
-      contentId: mediaInfo.contentId,
-      contentType: mediaInfo.contentType,
-      streamType: mediaInfo.streamType.value,
-      contentUrl: mediaInfo.contentUrl?.toString() ?? '',
-      duration: mediaInfo.duration?.inSeconds ?? 0,
-      customData: mediaInfo.customData,
-      tracks: mediaInfo.tracks
-          ?.map(
-            (track) => MediaTrack(
-              trackId: track.trackId,
-              type: track.type.index,
-              trackContentId: track.trackContentId ?? '',
-              trackContentType: track.trackContentType,
-              subtype: track.subtype?.index ?? 0,
-              name: track.name ?? '',
-              language: track.language?.toString() ?? '',
-            ),
-          )
-          .toList(),
-    );
+    return toPigeonMediaInfo(mediaInfo);
   }
 
   MediaQueueItem _toMediaQueueItem(GoogleCastQueueItem item) {
@@ -468,6 +449,12 @@ class GoogleCastRemoteMediaClientIOSMethodChannel
           )
           .toList(),
       metadata: _toMediaMetadata(media.metadata),
+      hlsSegmentFormat: media.hlsSegmentFormat != null
+          ? CastHlsSegmentFormat.fromMap(media.hlsSegmentFormat!)
+          : null,
+      hlsVideoSegmentFormat: media.hlsVideoSegmentFormat != null
+          ? HlsVideoSegmentFormat.fromMap(media.hlsVideoSegmentFormat!)
+          : null,
     );
   }
 

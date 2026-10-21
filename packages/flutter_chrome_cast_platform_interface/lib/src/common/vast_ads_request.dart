@@ -1,4 +1,4 @@
-///VAST ad request configuration.
+/// Specifies a VAST ads request.
 class VastAdsRequest {
   /// Specifies a VAST document to be used as
   /// the ads response instead of making a request
@@ -17,4 +17,21 @@ class VastAdsRequest {
   /// [adsResponse] - Specifies a VAST document to be used as the ads response.
   /// [adTagUrl] - URL for VAST file.
   VastAdsRequest({this.adsResponse, this.adTagUrl});
+
+  /// Converts the [VastAdsRequest] to a map.
+  ///
+  /// Returns a [Map] representation of this object.
+  Map<String, dynamic> toMap() {
+    return {'adsResponse': adsResponse, 'adTagUrl': adTagUrl};
+  }
+
+  /// Creates a [VastAdsRequest] from a map.
+  ///
+  /// [map] - The map to create the instance from.
+  factory VastAdsRequest.fromMap(Map<String, dynamic> map) {
+    return VastAdsRequest(
+      adsResponse: map['adsResponse'],
+      adTagUrl: map['adTagUrl'],
+    );
+  }
 }

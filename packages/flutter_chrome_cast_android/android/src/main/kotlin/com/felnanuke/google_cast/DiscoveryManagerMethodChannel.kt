@@ -12,8 +12,15 @@ import com.felnanuke.google_cast.pigeon.DiscoveryManagerHostApi
 import com.google.android.gms.cast.CastDevice
 import com.google.android.gms.cast.CastMediaControlIntent
 import io.flutter.embedding.engine.plugins.FlutterPlugin
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 
 private const val TAG = "DiscoveryManager"
+
+/** Fire-and-forget scope used to push Flutter API events. */
+private val flutterApiScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
 
 class DiscoveryManagerMethodChannel : FlutterPlugin, DiscoveryManagerHostApi {
 
@@ -48,17 +55,21 @@ class DiscoveryManagerMethodChannel : FlutterPlugin, DiscoveryManagerHostApi {
         CastDebugLog.discoveryEvent(TAG, "Discovery STOPPED")
     }
 
-    override fun startDiscovery() {
-        CastDebugLog.d(TAG, "startDiscovery: Starting Cast device discovery")
+    override fun startDiscovery(activeScan: Boolean) {
+        CastDebugLog.d(TAG, "startDiscovery: Starting Cast device discovery (activeScan=$activeScan)")
         router.removeCallback(routerCallBack)
         val selector = MediaRouteSelector.Builder()
             .addControlCategories(listOf(CastMediaControlIntent.categoryForRemotePlayback()))
             .build()
+        var flags = MediaRouter.CALLBACK_FLAG_REQUEST_DISCOVERY
+        if (activeScan) {
+            // Ask the media router to perform an active scan so receivers that
+            // the passive scan misses are still discovered.
+            flags = flags or MediaRouter.CALLBACK_FLAG_PERFORM_ACTIVE_SCAN
+        }
         CastDebugLog.d(TAG, "startDiscovery: MediaRouteSelector built with categoryForRemotePlayback")
-        router.addCallback(
-            selector, routerCallBack, MediaRouter.CALLBACK_FLAG_REQUEST_DISCOVERY
-        )
-        CastDebugLog.d(TAG, "startDiscovery: Router callback registered with CALLBACK_FLAG_REQUEST_DISCOVERY")
+        router.addCallback(selector, routerCallBack, flags)
+        CastDebugLog.d(TAG, "startDiscovery: Router callback registered with flags=$flags")
         CastDebugLog.discoveryEvent(TAG, "Discovery STARTED", mapOf(
             "totalRoutes" to router.routes.size
         ))
@@ -201,7 +212,7 @@ class DiscoveryManagerMethodChannel : FlutterPlugin, DiscoveryManagerHostApi {
             }
 
             CastDebugLog.d(TAG, "getCastDevicesMap: Sending ${devices.size} unique devices to Flutter")
-            flutterApi.onDevicesChanged(devices) { }
+            flutterApiScope.launch { flutterApi.onDevicesChanged(devices) }
         }
     }
 

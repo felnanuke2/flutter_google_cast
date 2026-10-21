@@ -22,8 +22,8 @@ import GoogleCast
 /// - Device indexing for Flutter-side device selection
 /// - Singleton pattern for consistent state management
 ///
-/// The class maintains a dictionary of discovered devices indexed by their
-/// discovery position, enabling Flutter to reference devices by index when
+/// Each device sent to Flutter carries its index in the discovery manager's
+/// live device list, enabling Flutter to reference devices by index when
 /// initiating Cast sessions.
 ///
 /// - Author: LUIZ FELIPE ALVES LIMA
@@ -65,11 +65,6 @@ class FGCDiscoveryManagerMethodChannel : UIResponder, GCKDiscoveryManagerListene
         body(GCKCastContext.sharedInstance().discoveryManager)
     }
     
-    /// Dictionary storing discovered Cast devices indexed by their discovery position
-    /// The key represents the device index in the discovery list, and the value
-    /// is the corresponding GCKDevice object
-    var devices : [UInt : GCKDevice] = [:]
-    
     /// Typed Flutter API for sending discovery updates to Flutter.
     private var flutterApi: DiscoveryManagerFlutterApi?
     
@@ -82,12 +77,13 @@ class FGCDiscoveryManagerMethodChannel : UIResponder, GCKDiscoveryManagerListene
     /// device discovery related method calls from Flutter.
     ///
     /// - Parameter registrar: The Flutter plugin registrar for method channel setup
-    static func register(with registrar: FlutterPluginRegistrar) {
+    public static func register(with registrar: FlutterPluginRegistrar) {
         DiscoveryManagerHostApiSetup.setUp(binaryMessenger: registrar.messenger(), api: instance)
         instance.flutterApi = DiscoveryManagerFlutterApi(binaryMessenger: registrar.messenger())
     }
     
-    func startDiscovery() throws {
+    func startDiscovery(activeScan: Bool) throws {
+        // iOS scans actively while discovery runs, so `activeScan` is a no-op.
         withDiscoveryManager(result: { _ in }) { discoveryManager in
             SwiftGoogleCastPlugin.instance?.shouldResumeDiscoveryOnForeground = true
             discoveryManager.passiveScan = false
@@ -104,8 +100,8 @@ class FGCDiscoveryManagerMethodChannel : UIResponder, GCKDiscoveryManagerListene
             if discoveryManager.discoveryState == .running {
                 discoveryManager.stopDiscovery()
             }
-            devices.removeAll()
-            didUpdateDeviceList()
+            // Notify Flutter with an empty list
+            Task { @MainActor in try? await flutterApi?.onDevicesChanged(devices: []) }
         }
     }
 
@@ -120,61 +116,62 @@ class FGCDiscoveryManagerMethodChannel : UIResponder, GCKDiscoveryManagerListene
     // MARK: - Google Cast Discovery Manager Listener
     
     /// Called when a Cast device is updated in the discovery list
-    /// 
-    /// This method is invoked by the Cast SDK when an existing device's
-    /// information is updated (e.g., name change, capability updates).
+    ///
+    /// The list is sent here as well as from `didUpdateDeviceList`, so that
+    /// name and status changes reach Flutter even if the SDK reports them
+    /// without a list update.
     ///
     /// - Parameters:
     ///   - device: The updated Cast device
     ///   - index: The index position of the device in the discovery list
     public func didUpdate(_ device: GCKDevice, at index: UInt) {
-        devices[index] = device
-        print("didUpdateDevice at index: \(index)")
+        FlutterGoogleCastLogger.verbose("didUpdateDevice at index: \(index)")
+        sendDeviceList()
     }
-    
+
     /// Called when a new Cast device is discovered
-    /// 
-    /// This method is invoked when a new Cast device becomes available
-    /// on the network. The device is added to the internal devices dictionary.
     ///
     /// - Parameters:
     ///   - device: The newly discovered Cast device
     ///   - index: The index position assigned to the device
     public func didInsert(_ device: GCKDevice, at index: UInt) {
-        devices[index] = device
-        print("didInsertDevice at index: \(index)")
+        FlutterGoogleCastLogger.verbose("didInsertDevice at index: \(index)")
     }
-    
+
     /// Called when a Cast device is removed from discovery
-    /// 
-    /// This method is invoked when a Cast device is no longer available
-    /// (e.g., device goes offline, network changes). The device is removed
-    /// from the internal devices dictionary.
     ///
     /// - Parameters:
     ///   - device: The Cast device that was removed
     ///   - index: The index position of the removed device
     public func didRemove(_ device: GCKDevice, at index: UInt) {
-        devices.removeValue(forKey: index)
-        print("didRemoveDevice at index: \(index)")
+        FlutterGoogleCastLogger.verbose("didRemoveDevice at index: \(index)")
     }
-    
+
     /// Called when the device list changes
-    /// 
-    /// This method is invoked whenever there are changes to the discovery
-    /// device list. It sends the updated device list to Flutter via the
-    /// method channel, allowing the Flutter side to update its UI accordingly.
     ///
-    /// The device list is sorted by index and converted to a format suitable
-    /// for Flutter consumption, with each device represented as a dictionary
-    /// containing device information and its discovery index.
+    /// Sends the updated device list to Flutter via the method channel.
     public func didUpdateDeviceList() {
-        let mappedDevices: [CastDevicePigeon] = devices.sorted {
-            a, b in
-            a.key > b.key
-        }.map { entry in
-            let device = entry.value
-            return CastDevicePigeon(
+        sendDeviceList()
+    }
+
+    /// Sends the discovery manager's current device list to Flutter.
+    ///
+    /// The list is read from `GCKDiscoveryManager` every time rather than
+    /// mirrored from the insert/remove callbacks. Their indices are positions
+    /// in a live array that shift on every insert and removal, so a mirror
+    /// keyed by index loses devices (an insert overwrites the entry at its
+    /// index) and keeps stale ones (a removal leaves the entries after it at
+    /// their old indices). Reading the live list also keeps each device's
+    /// `index` valid for `startSessionWithDevice`, which looks the device up
+    /// by index in that same list.
+    private func sendDeviceList() {
+        guard GCKCastContext.isSharedInstanceInitialized() else { return }
+
+        let discoveryManager = GCKCastContext.sharedInstance().discoveryManager
+        var mappedDevices: [CastDevicePigeon] = []
+        for index in 0..<discoveryManager.deviceCount {
+            let device = discoveryManager.device(at: index)
+            mappedDevices.append(CastDevicePigeon(
                 deviceId: device.deviceID ?? "",
                 friendlyName: device.friendlyName ?? "",
                 modelName: device.modelName,
@@ -183,11 +180,11 @@ class FGCDiscoveryManagerMethodChannel : UIResponder, GCKDiscoveryManagerListene
                 isOnLocalNetwork: device.isOnLocalNetwork,
                 category: device.category ?? "",
                 uniqueId: device.uniqueID ?? "",
-                index: Int64(entry.key)
-            )
+                index: Int64(index)
+            ))
         }
 
-        flutterApi?.onDevicesChanged(devices: mappedDevices) { _ in }
+        Task { @MainActor in try? await flutterApi?.onDevicesChanged(devices: mappedDevices) }
     }
     
 }

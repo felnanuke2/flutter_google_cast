@@ -6,10 +6,7 @@ import 'package:flutter_chrome_cast/session.dart';
 import 'package:flutter_chrome_cast/media.dart';
 import 'package:flutter_chrome_cast/themes.dart';
 import 'package:flutter_chrome_cast/widgets.dart';
-import 'package:flutter_chrome_cast/entities.dart';
-import 'package:flutter_chrome_cast/enums.dart';
 import 'package:flutter_chrome_cast/models.dart';
-import 'package:flutter_chrome_cast/common.dart';
 import 'dart:async';
 import 'media_urls.dart';
 
@@ -1002,7 +999,7 @@ class _ThemeShowcaseSection extends StatelessWidget {
                     color: Colors.blue,
                     onTap: () => onShowPlayer(
                       context,
-                      const GoogleCastPlayerTexts(),
+                      _MyAppState._englishTexts,
                       'English',
                     ),
                   ),

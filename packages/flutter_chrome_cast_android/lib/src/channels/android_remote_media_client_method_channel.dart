@@ -331,27 +331,7 @@ class GoogleCastRemoteMediaClientAndroidMethodChannel
   }
 
   MediaInfo _toMediaInfo(GoogleCastMediaInformation mediaInfo) {
-    return MediaInfo(
-      contentId: mediaInfo.contentId,
-      contentType: mediaInfo.contentType,
-      streamType: mediaInfo.streamType.value,
-      contentUrl: mediaInfo.contentUrl?.toString() ?? '',
-      duration: mediaInfo.duration?.inSeconds ?? 0,
-      customData: mediaInfo.customData,
-      tracks: mediaInfo.tracks
-          ?.map(
-            (track) => MediaTrack(
-              trackId: track.trackId,
-              type: track.type.index,
-              trackContentId: track.trackContentId ?? '',
-              trackContentType: track.trackContentType,
-              subtype: track.subtype?.index ?? 0,
-              name: track.name ?? '',
-              language: track.language?.toString() ?? '',
-            ),
-          )
-          .toList(),
-    );
+    return toPigeonMediaInfo(mediaInfo);
   }
 
   MediaQueueItem _toMediaQueueItem(GoogleCastQueueItem item) {
@@ -462,6 +442,12 @@ class GoogleCastRemoteMediaClientAndroidMethodChannel
           )
           .toList(),
       metadata: _toMediaMetadata(media.metadata),
+      hlsSegmentFormat: media.hlsSegmentFormat != null
+          ? CastHlsSegmentFormat.fromMap(media.hlsSegmentFormat!)
+          : null,
+      hlsVideoSegmentFormat: media.hlsVideoSegmentFormat != null
+          ? HlsVideoSegmentFormat.fromMap(media.hlsVideoSegmentFormat!)
+          : null,
     );
   }
 
@@ -481,6 +467,16 @@ class GoogleCastRemoteMediaClientAndroidMethodChannel
 
     final type = GoogleCastMediaMetadataType.fromMap(meta.metadataType.toInt());
 
+    final releaseDate = meta.releaseDate != null
+        ? DateTime.tryParse(meta.releaseDate!)
+        : null;
+    final originalAirDate = (meta.originalAirDate ?? meta.releaseDate) != null
+        ? DateTime.tryParse((meta.originalAirDate ?? meta.releaseDate)!)
+        : null;
+    final creationDateTime = meta.creationDateTime != null
+        ? DateTime.tryParse(meta.creationDateTime!)
+        : null;
+
     switch (type) {
       case GoogleCastMediaMetadataType.movieMediaMetadata:
         return GoogleCastMovieMediaMetadata(
@@ -488,9 +484,7 @@ class GoogleCastRemoteMediaClientAndroidMethodChannel
           subtitle: meta.subtitle,
           studio: meta.studio,
           images: images,
-          releaseDate: meta.releaseDate != null
-              ? DateTime.tryParse(meta.releaseDate!)
-              : null,
+          releaseDate: releaseDate,
         );
       case GoogleCastMediaMetadataType.tvShowMediaMetadata:
         return GoogleCastTvShowMediaMetadata(
@@ -498,33 +492,37 @@ class GoogleCastRemoteMediaClientAndroidMethodChannel
           season: meta.season?.toInt(),
           episode: meta.episode?.toInt(),
           images: images,
-          originalAirDate: meta.releaseDate != null
-              ? DateTime.tryParse(meta.releaseDate!)
-              : null,
+          originalAirDate: originalAirDate,
         );
       case GoogleCastMediaMetadataType.musicTrackMediaMetadata:
         return GoogleCastMusicMediaMetadata(
           title: meta.title,
           albumName: meta.albumName,
+          albumArtist: meta.albumArtist,
           artist: meta.artist,
+          composer: meta.composer,
+          trackNumber: meta.trackNumber?.toInt(),
+          discNumber: meta.discNumber?.toInt(),
           images: images,
-          releaseDate: meta.releaseDate != null
-              ? DateTime.tryParse(meta.releaseDate!)
-              : null,
+          releaseDate: releaseDate,
         );
       case GoogleCastMediaMetadataType.photoMediaMetadata:
         return GoogleCastPhotoMediaMetadata(
           title: meta.title,
           artist: meta.artist,
+          location: meta.location,
+          latitude: meta.latitude,
+          longitude: meta.longitude,
+          width: meta.width?.toInt(),
+          height: meta.height?.toInt(),
+          creationDateTime: creationDateTime,
         );
       case GoogleCastMediaMetadataType.genericMediaMetadata:
         return GoogleCastGenericMediaMetadata(
           title: meta.title,
           subtitle: meta.subtitle,
           images: images,
-          releaseDate: meta.releaseDate != null
-              ? DateTime.tryParse(meta.releaseDate!)
-              : null,
+          releaseDate: releaseDate,
         );
     }
   }

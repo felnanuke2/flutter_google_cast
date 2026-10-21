@@ -106,6 +106,11 @@ class CastContextMethodChannel : FlutterPlugin, GoogleCastContextHostApi {
             throw IllegalArgumentException("Missing required Cast appId - cannot initialize Cast context without a receiver app ID")
         }
 
+        // Opt-in levels are applied before the Cast context is initialized so
+        // initialization logs are filtered as well. Without a configured level
+        // the legacy logging behavior is retained.
+        GoogleCastLogger.configure(options.logLevel)
+
         CastDebugLog.d(TAG, "setSharedInstance: Building CastOptions with appId=$appId")
 
         val optionsBuilder = CastOptions.Builder()

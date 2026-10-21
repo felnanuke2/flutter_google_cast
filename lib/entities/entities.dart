@@ -1,6 +1,7 @@
 export 'break_status.dart';
 export 'cast_device.dart';
 export 'cast_media_status.dart';
+export 'cast_message.dart';
 export 'cast_options.dart';
 export 'cast_session.dart';
 export 'device_volume.dart';

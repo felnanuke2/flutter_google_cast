@@ -29,7 +29,6 @@ extension GoogleCastMediaMetadataExtensions on GoogleCastMediaMetadata {
         metadata as GoogleCastPhotoMediaMetadata;
         title = metadata.title;
         break;
-      default:
     }
     return title;
   }
@@ -69,7 +68,6 @@ extension GoogleCastMediaMetadataExtensions on GoogleCastMediaMetadata {
         metadata as GoogleCastPhotoMediaMetadata;
         subtitle = metadata.artist;
         break;
-      default:
     }
     //replace line breaks with spaces
     if (subtitle != null) {

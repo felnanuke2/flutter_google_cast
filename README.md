@@ -301,6 +301,7 @@ import 'package:flutter_chrome_cast/cast_context.dart';  // Google Cast initiali
 import 'package:flutter_chrome_cast/discovery.dart';    // Device discovery
 import 'package:flutter_chrome_cast/session.dart';      // Session management
 import 'package:flutter_chrome_cast/media.dart';        // Media control
+import 'package:flutter_chrome_cast/logging.dart';      // Optional log filtering
 
 // UI widgets (if needed)
 import 'package:flutter_chrome_cast/widgets.dart';      // Cast UI widgets
@@ -347,6 +348,27 @@ Future<void> initPlatformState() async {
   GoogleCastContext.instance.setSharedInstanceWithOptions(options!);
 }
 ```
+
+### Optional Log Filtering
+
+Logging keeps its existing behavior unless the app explicitly selects a level.
+Set the level before initializing `GoogleCastContext`:
+
+```dart
+GoogleCastLogger.level = CastLogLevel.error;
+
+await GoogleCastContext.instance.setSharedInstanceWithOptions(options!);
+```
+
+Available levels are `none`, `error`, `warning`, `info`, and `verbose`.
+`none` suppresses every log owned by the plugin, while `error` keeps only
+errors. On iOS the level is also applied to the Google Cast SDK's `GCKLogger`.
+The Android Cast Application Framework does not expose a public SDK logging
+control, so Android filtering covers Dart and Android-native logs emitted by
+this plugin; Google Play services may still emit its own Logcat messages.
+
+If `GoogleCastLogger.level` is not assigned, the plugin does not send any
+logging configuration to the native side and retains the previous behavior.
 
 ### Configuration Options
 
@@ -849,6 +871,10 @@ The usage snippets above cover the most common integration patterns. For advance
 Main entry point for Google Cast functionality.
 - `setSharedInstanceWithOptions(GoogleCastOptions options)`: Initialize Cast context
 
+#### GoogleCastLogger
+Opt-in control for Dart, native plugin, and supported Cast SDK log output.
+- `level`: Set a `CastLogLevel` before initializing the Cast context
+
 #### GoogleCastDiscoveryManager
 Manages device discovery.
 - `startDiscovery()`: Start discovering Cast devices
@@ -1006,3 +1032,41 @@ Contributions are welcome! Please submit pull requests to our GitHub repository.
 ## License
 
 This plugin is released under the BSD-3-Clause License. See the LICENSE file for details.
+
+## Linux sender
+
+The additional `package:flutter_chrome_cast/linux.dart` entry point provides a pure Dart `LinuxCastClient` on Linux and other Dart VM hosts. It does not require a native Linux plugin, Avahi bindings, or Google Play Services. Android and iOS retain their existing native SDK APIs; the Linux client is an explicit API rather than a replacement for those singletons.
+
+```dart
+import 'package:flutter_chrome_cast/linux.dart';
+
+final devices = await LinuxCastClient.discover();
+final client = LinuxCastClient();
+await client.connect(devices.first); // Default Media Receiver: CC1AD845.
+await client.load({
+  'contentId': 'http://192.168.1.10:8080/movie.mp4',
+  'contentType': 'video/mp4',
+  'streamType': 'BUFFERED',
+});
+await client.pause();
+await client.seek(const Duration(seconds: 30));
+await client.disconnect(stopReceiver: true);
+await client.dispose();
+```
+
+Discovery uses IPv4 mDNS (`_googlecast._tcp.local`, UDP 5353), and sessions use Cast V2 protobuf envelopes over TLS to the advertised port (normally TCP 8009). The host and receiver must be mutually reachable; guest Wi-Fi isolation and multicast filtering can prevent discovery. A `LinuxCastDevice` can also be constructed with a known address. Each discovery query has a bounded timeout; discovering multiple services may take several query intervals.
+
+`mediaStatusStream` emits Cast media status JSON entries, including playback state, position and media session ID. An empty media status clears the session and emits `IDLE`; a lost connection emits `DISCONNECTED`. Playback requests wait for receiver acknowledgements and report receiver errors. Available controls are load, play, pause, stop, seek, active track IDs, text style, and custom namespace messages. Queue management, automatic session resumption and official sender device authentication are not implemented.
+
+Cast receivers use self-signed TLS certificates. This implementation encrypts traffic but accepts the receiver certificate without Google's DeviceAuth verification. Use it on a trusted local network; it is unsuitable for transmitting credentials or protected media secrets.
+
+A receiver still determines codec/container support and subtitle rendering. The default receiver renders one text track; sending two IDs does not provide independently styled top/bottom subtitles. Use a custom receiver or prepare a compatible video with both subtitle layers burned in. Media and external caption URLs must be accessible directly from the Chromecast; local filesystem paths cannot be cast.
+
+Focused protocol tests run with `flutter test test/linux_cast_client_test.dart`. They start a temporary loopback TLS peer and require the `openssl` executable to generate an ephemeral test certificate. No persistent server or certificate is installed. Real receiver playback and mDNS discovery require separate validation on a Linux host and a reachable Cast device.
+
+Two manual harnesses under `tool/` validate the client against a real receiver on the local network; they are development aids, not part of the public API. Run them with `dart run tool/<script>.dart` from the package root on any Dart VM host that can reach the device.
+
+- `tool/cast_smoke_test.dart` discovers Cast devices over mDNS, connects to the first whose name contains `POKEMON` (falls back to the first found), then exercises the full flow: connect, a load expected to fail (asserting the error surfaces), a load expected to play, pause/play/seek, and a clean disconnect. It prints every receiver acknowledgement and counts `DISCONNECTED` emissions (expected: exactly one).
+- `tool/cast_subtitle_test.dart` loads an HLS stream with an external WebVTT sidecar track, activates it, applies an oversized red text style, then deactivates and reactivates the track while reporting `activeTrackIds` from the receiver. Serve the caption file yourself (any HTTP server with permissive CORS) and point the test at it through the `CAST_VTT_URL` environment variable; the default expects `http://<host>:8000/subs.vtt`.
+
+Both scripts need a reachable Cast device and a network that permits mDNS (UDP 5353) and the Cast TLS port (TCP 8009). Guest Wi-Fi isolation or multicast filtering will make discovery return nothing.

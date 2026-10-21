@@ -22,7 +22,7 @@ class _FakeDiscoveryManager extends GoogleCastDiscoveryManagerPlatformInterface
   }
 
   @override
-  Future<void> startDiscovery() async {}
+  Future<void> startDiscovery({bool activeScan = false}) async {}
 
   @override
   Future<void> stopDiscovery() async {}

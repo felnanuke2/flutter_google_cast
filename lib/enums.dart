@@ -1,6 +1,6 @@
 /// Enums for Chrome Cast
 ///
 /// This module provides access to all enums and constants.
-library enums;
+library;
 
 export 'enums/enums.dart';

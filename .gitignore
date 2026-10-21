@@ -33,3 +33,6 @@ build/
 coverage/
 
 .fvm/
+
+# Local tooling
+.kilo/

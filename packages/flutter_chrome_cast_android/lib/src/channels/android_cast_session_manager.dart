@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_chrome_cast_platform_interface/flutter_chrome_cast_platform_interface.dart';
 import 'package:rxdart/subjects.dart';
 
@@ -13,13 +15,19 @@ class _PlatformCastSession extends GoogleCastSession {
 }
 
 class _SessionFlutterApiHandler extends SessionManagerFlutterApi {
-  _SessionFlutterApiHandler(this._onSessionChanged);
+  _SessionFlutterApiHandler(this._onSessionChanged, this._onMessageReceived);
 
   final void Function(CastSessionPigeon? session) _onSessionChanged;
+  final void Function(String namespace, String message) _onMessageReceived;
 
   @override
   void onSessionChanged(CastSessionPigeon? session) {
     _onSessionChanged(session);
+  }
+
+  @override
+  void onMessageReceived(String namespace, String message) {
+    _onMessageReceived(namespace, message);
   }
 }
 
@@ -36,7 +44,7 @@ class GoogleCastSessionManagerAndroidMethodChannel
     if (_flutterApiSetUp) return;
     _flutterApiSetUp = true;
     SessionManagerFlutterApi.setUp(
-      _SessionFlutterApiHandler(_onSessionChanged),
+      _SessionFlutterApiHandler(_onSessionChanged, _onMessageReceived),
     );
   }
 
@@ -48,18 +56,45 @@ class GoogleCastSessionManagerAndroidMethodChannel
   final _currentSessionStreamController = BehaviorSubject<GoogleCastSession?>()
     ..add(null);
 
+  final _messageStreamController =
+      StreamController<GoogleCastMessage>.broadcast();
+
+  /// Whether [dispose] has already been called on this instance.
+  ///
+  /// Once disposed, getters no longer surface the last cached session
+  /// (rxdart's [BehaviorSubject] retains its value after being closed).
+  bool _isDisposed = false;
+
   @override
   GoogleCastConnectState get connectionState =>
-      _currentSessionStreamController.value?.connectionState ??
-      GoogleCastConnectState.disconnected;
+      currentSession?.connectionState ?? GoogleCastConnectState.disconnected;
 
   @override
   GoogleCastSession? get currentSession =>
-      _currentSessionStreamController.value;
+      _isDisposed ? null : _currentSessionStreamController.value;
 
   @override
   Stream<GoogleCastSession?> get currentSessionStream =>
       _currentSessionStreamController.stream;
+
+  @override
+  Stream<GoogleCastMessage> get messageStream =>
+      _messageStreamController.stream;
+
+  @override
+  Future<bool> addMessageChannel(String namespace) {
+    return _api.addMessageChannel(namespace);
+  }
+
+  @override
+  Future<bool> removeMessageChannel(String namespace) {
+    return _api.removeMessageChannel(namespace);
+  }
+
+  @override
+  Future<bool> sendMessage(String namespace, String message) {
+    return _api.sendMessage(namespace, message);
+  }
 
   @override
   Future<bool> endSession() async {
@@ -73,8 +108,7 @@ class GoogleCastSessionManagerAndroidMethodChannel
 
   @override
   bool get hasConnectedSession =>
-      _currentSessionStreamController.value?.connectionState ==
-      GoogleCastConnectState.connected;
+      connectionState == GoogleCastConnectState.connected;
 
   @override
   Future<void> setDefaultSessionOptions() {
@@ -110,6 +144,7 @@ class GoogleCastSessionManagerAndroidMethodChannel
   }
 
   void _onSessionChanged(CastSessionPigeon? arguments) {
+    if (_isDisposed) return;
     try {
       if (arguments == null) {
         _currentSessionStreamController.add(null);
@@ -141,6 +176,14 @@ class GoogleCastSessionManagerAndroidMethodChannel
     }
   }
 
+  void _onMessageReceived(String namespace, String message) {
+    if (_isDisposed) return;
+    if (_messageStreamController.isClosed) return;
+    _messageStreamController.add(
+      GoogleCastMessage(namespace: namespace, message: message),
+    );
+  }
+
   @override
   void setDeviceVolumeLevel(CastDeviceVolume volume) {
     _api.setDeviceVolume(volume.value);
@@ -149,5 +192,20 @@ class GoogleCastSessionManagerAndroidMethodChannel
   @override
   void setDeviceVolume(double value) {
     setDeviceVolumeLevel(CastDeviceVolume(value));
+  }
+
+  @override
+  Future<bool> resetSession() async {
+    // Stale sessions are not observed on Android;
+    // delegate to the standard endSessionAndStopCasting
+    return endSessionAndStopCasting();
+  }
+
+  @override
+  void dispose() {
+    if (_isDisposed) return;
+    _isDisposed = true;
+    _messageStreamController.close();
+    _currentSessionStreamController.close();
   }
 }

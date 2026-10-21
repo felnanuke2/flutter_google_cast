@@ -5,14 +5,11 @@ PODS:
     - google-cast-sdk (~> 4.8)
     - Protobuf
   - google-cast-sdk (4.8.4)
-  - permission_handler_apple (9.3.0):
-    - Flutter
   - Protobuf (5.34.1)
 
 DEPENDENCIES:
   - Flutter (from `Flutter`)
   - flutter_chrome_cast_ios (from `.symlinks/plugins/flutter_chrome_cast_ios/ios`)
-  - permission_handler_apple (from `.symlinks/plugins/permission_handler_apple/ios`)
 
 SPEC REPOS:
   trunk:
@@ -24,14 +21,11 @@ EXTERNAL SOURCES:
     :path: Flutter
   flutter_chrome_cast_ios:
     :path: ".symlinks/plugins/flutter_chrome_cast_ios/ios"
-  permission_handler_apple:
-    :path: ".symlinks/plugins/permission_handler_apple/ios"
 
 SPEC CHECKSUMS:
   Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
   flutter_chrome_cast_ios: a87483e2337b58a03e588073db0f47795fd41344
   google-cast-sdk: 32f65af50d164e3c475e79ad123db3cc26fbcd37
-  permission_handler_apple: 4ed2196e43d0651e8ff7ca3483a069d469701f2d
   Protobuf: b51e2d95aace0c1ce911b7483315efb7c3ab037f
 
 PODFILE CHECKSUM: 57c8aed26fba39d3ec9424816221f294a07c58eb

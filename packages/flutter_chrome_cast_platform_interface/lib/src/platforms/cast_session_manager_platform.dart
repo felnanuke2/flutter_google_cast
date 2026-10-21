@@ -1,5 +1,6 @@
 import 'package:flutter_chrome_cast_platform_interface/src/entities/cast_session.dart';
 import 'package:flutter_chrome_cast_platform_interface/src/entities/cast_device.dart';
+import 'package:flutter_chrome_cast_platform_interface/src/entities/cast_message.dart';
 import 'package:flutter_chrome_cast_platform_interface/src/entities/device_volume.dart';
 import 'package:flutter_chrome_cast_platform_interface/src/enums/connection_state.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
@@ -50,6 +51,18 @@ abstract class GoogleCastSessionManagerPlatformInterface
 
   /// Stream of current session changes.
   Stream<GoogleCastSession?> get currentSessionStream;
+
+  /// Messages received from registered custom Cast namespaces.
+  Stream<GoogleCastMessage> get messageStream;
+
+  /// Registers a custom Cast namespace for the current and future sessions.
+  Future<bool> addMessageChannel(String namespace);
+
+  /// Stops listening to a previously registered custom Cast namespace.
+  Future<bool> removeMessageChannel(String namespace);
+
+  /// Sends a UTF-8 text message through a registered Cast namespace.
+  Future<bool> sendMessage(String namespace, String message);
 
   /// 	readnonatomicassign
 
@@ -151,4 +164,27 @@ abstract class GoogleCastSessionManagerPlatformInterface
   void setDeviceVolume(double value) {
     setDeviceVolumeLevel(CastDeviceVolume(value));
   }
+
+  /// Releases resources held by this session manager, closing streams and
+  /// removing the method-channel handler.
+  ///
+  /// The default implementation does nothing, so existing implementations
+  /// keep working. Only call this when you own the instance lifecycle (for
+  /// example in tests or embedder scenarios); the default singleton returned
+  /// by [GoogleCastSessionManager.instance] is meant to live for the whole
+  /// application lifetime.
+  void dispose() {}
+
+  /// Forcefully resets a stuck session.
+  ///
+  /// On iOS this performs a full teardown: it removes the session manager
+  /// listener, cleans up the remote media client (listener, position timer,
+  /// queue), force-ends the current session, resets internal dedup state,
+  /// re-adds the listener, and emits a `null` session to Flutter so that
+  /// [currentSessionStream], [currentSession] and [connectionState] are
+  /// cleared.
+  ///
+  /// On Android this delegates to [endSessionAndStopCasting] because
+  /// stale-session issues are not observed on that platform.
+  Future<bool> resetSession();
 }

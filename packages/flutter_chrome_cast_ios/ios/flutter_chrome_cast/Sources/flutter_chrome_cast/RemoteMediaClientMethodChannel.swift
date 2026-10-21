@@ -69,7 +69,44 @@ class RemoteMediaClientMethodChannel :UIResponder, FlutterPlugin, GCKRemoteMedia
     /// Dictionary storing queue items by their ID
     /// Maps queue item IDs to their corresponding GCKMediaQueueItem objects
     private var queueItems  : Dictionary<UInt, GCKMediaQueueItem> = [:]
-    
+
+    /// The last `contentID` that the Flutter side passed when loading media.
+    ///
+    /// The Google Cast Default Media Receiver does not always echo the
+    /// `contentID` we sent back in the first `mediaStatus` update — in that
+    /// case `GCKMediaInformation.contentID` is nil/empty. To match Android
+    /// behaviour (where the originally provided `contentID` is delivered from
+    /// the very first update), we cache the value sent from Flutter and
+    /// substitute it into the media status whenever the receiver reports an
+    /// empty `contentID`.
+    private var lastLoadedContentID: String?
+
+    /// The last `mediaSessionID` reported by the Cast SDK.
+    ///
+    /// Used to detect that the SDK already applied a newly loaded media item.
+    private var lastKnownMediaSessionID: Int = 0
+
+    /// Expected start position (in seconds) of a media load that is still
+    /// being applied by the receiver.
+    ///
+    /// While a load is pending, the position ticks are suppressed: right
+    /// after `loadMedia` the SDK keeps reporting the previous content's
+    /// position until the new media status is applied.
+    private var pendingLoadExpectedPosition: TimeInterval?
+
+    /// The `mediaSessionID` observed at the moment `loadMedia` was called.
+    private var pendingLoadPreviousMediaSessionID: Int = 0
+
+    /// Safety timer that releases the pending load guard.
+    private var pendingLoadGuardTimer: Timer?
+
+    /// Tolerance (in seconds) used to check that the reported position
+    /// converged to the requested start position.
+    private static let pendingLoadGuardTolerance: TimeInterval = 5
+
+    /// Maximum time (in seconds) the pending load guard stays armed.
+    private static let pendingLoadGuardTimeout: TimeInterval = 10
+
     /// Computed property returning queue items in proper order
     /// - Returns: Array of queue items sorted according to queueOrder
     private var orderedQueueItems : Array<GCKMediaQueueItem> {
@@ -93,7 +130,7 @@ class RemoteMediaClientMethodChannel :UIResponder, FlutterPlugin, GCKRemoteMedia
     /// media-related method calls from Flutter.
     ///
     /// - Parameter registrar: The Flutter plugin registrar for method channel setup
-    static func register(with registrar: FlutterPluginRegistrar) {
+    public static func register(with registrar: FlutterPluginRegistrar) {
         
         let instance = RemoteMediaClientMethodChannel.instance
         RemoteMediaClientHostApiSetup.setUp(binaryMessenger: registrar.messenger(), api: instance)
@@ -103,6 +140,19 @@ class RemoteMediaClientMethodChannel :UIResponder, FlutterPlugin, GCKRemoteMedia
     // MARK: - Pigeon Host API
 
     func loadMedia(request: LoadMediaRequestPigeon) throws {
+        // Cache the contentID that Flutter passed so we can inject it into
+        // the media status updates where the receiver reports no contentID
+        // back (see `resolvedContentID`).
+        if !request.mediaInfo.contentId.isEmpty {
+            self.lastLoadedContentID = request.mediaInfo.contentId
+        } else {
+            self.lastLoadedContentID = nil
+        }
+
+        // Suppress the position ticks until the SDK applied the new media
+        // item, otherwise the previous content's position is reported.
+        armPendingLoadGuard(expectedPosition: TimeInterval(request.playPosition))
+
         guard let mediaInfo = GCKMediaInformation.fromMap(mediaInfoToMap(request.mediaInfo)) else {
             throw NSError(
                 domain: "INVALID_ARGUMENT",
@@ -227,8 +277,20 @@ class RemoteMediaClientMethodChannel :UIResponder, FlutterPlugin, GCKRemoteMedia
     }
     
     public func startListen(){
-        print("[GoogleCast] startListen() called, adding listener to remoteMediaClient: \(String(describing: currentRemoteMediaClient))")
+        FlutterGoogleCastLogger.verbose("[GoogleCast] startListen() called, adding listener to remoteMediaClient: \(String(describing: currentRemoteMediaClient))")
         currentRemoteMediaClient?.add(self)
+    }
+
+    /// Tears down media client state: removes the listener, stops the
+    /// position timer and clears the queue cache. Used by session reset.
+    public func cleanUp(){
+        currentRemoteMediaClient?.remove(self)
+        positionTimer?.invalidate()
+        positionTimer = nil
+        queueItems.removeAll()
+        queueOrder.removeAll()
+        lastLoadedContentID = nil
+        releasePendingLoadGuard()
     }
     
     
@@ -238,8 +300,13 @@ class RemoteMediaClientMethodChannel :UIResponder, FlutterPlugin, GCKRemoteMedia
     func remoteMediaClient(_ client: GCKRemoteMediaClient, didUpdate mediaStatus: GCKMediaStatus?) {
         print("[GoogleCast] didUpdate mediaStatus - playerState: \(mediaStatus?.playerState.rawValue ?? -1), idleReason: \(mediaStatus?.idleReason.rawValue ?? -1)")
         print("[GoogleCast] mediaStatus contentID: \(mediaStatus?.mediaInformation?.contentID ?? "nil")")
+        if let sessionID = mediaStatus?.mediaSessionID {
+            lastKnownMediaSessionID = sessionID
+        }
         startListenPlayerPosition()
-        flutterApi?.onMediaStatusChanged(status: mediaStatus.flatMap { toPigeonMediaStatus($0) }) { _ in }
+        Task { @MainActor in
+            try? await flutterApi?.onMediaStatusChanged(status: mediaStatus.flatMap { toPigeonMediaStatus($0) })
+        }
         if client.mediaStatus?.idleReason == .finished {
          onSessionEnd()
         }
@@ -255,6 +322,7 @@ class RemoteMediaClientMethodChannel :UIResponder, FlutterPlugin, GCKRemoteMedia
     }
     func remoteMediaClient(_ client: GCKRemoteMediaClient, didStartMediaSessionWithID sessionID: Int) {
         print("[GoogleCast] didStartMediaSessionWithID: \(sessionID)")
+        lastKnownMediaSessionID = sessionID
         startListenPlayerPosition()
     }
     
@@ -302,12 +370,14 @@ class RemoteMediaClientMethodChannel :UIResponder, FlutterPlugin, GCKRemoteMedia
     
     private func updateQueueItems() {
         let items = orderedQueueItems.map { toPigeonQueueItem($0) }
-        flutterApi?.onQueueStatusChanged(queueItems: items) { _ in }
+        Task { @MainActor in try? await flutterApi?.onQueueStatusChanged(queueItems: items) }
     }
     
     public func onSessionEnd(){
         queueItems.removeAll()
         queueOrder.removeAll()
+        lastLoadedContentID = nil
+        releasePendingLoadGuard()
         updateQueueItems()
     }
     
@@ -320,15 +390,81 @@ class RemoteMediaClientMethodChannel :UIResponder, FlutterPlugin, GCKRemoteMedia
         self.positionTimer?.invalidate()
         self.positionTimer = nil
         
-        self.positionTimer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true){_ in
-            let update = PlayerPositionUpdate(
-                progress: Int64((self.currentRemoteMediaClient?.approximateStreamPosition() ?? 0) * 1000),
-                duration: Int64((self.currentRemoteMediaClient?.mediaStatus?.mediaInformation?.streamDuration ?? 0) * 1000)
-            )
-            self.flutterApi?.onPlayerPositionChanged(update: update) { _ in }
-
-            
+        self.positionTimer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true){ [weak self] _ in
+            guard let self = self else { return }
+            let position = self.currentRemoteMediaClient?.approximateStreamPosition() ?? 0
+            guard self.shouldEmitPosition(position) else { return }
+            self.emitPositionUpdate(progress: position)
         }
+    }
+
+    /// Emits a position update to the Flutter side.
+    /// - Parameter progress: The current playback position in seconds
+    private func emitPositionUpdate(progress: TimeInterval) {
+        let update = PlayerPositionUpdate(
+            progress: Int64(progress * 1000),
+            duration: Int64((self.currentRemoteMediaClient?.mediaStatus?.mediaInformation?.streamDuration ?? 0) * 1000)
+        )
+        Task { @MainActor in try? await self.flutterApi?.onPlayerPositionChanged(update: update) }
+    }
+
+    /// Arms the guard that suppresses the stale position updates sent right
+    /// after a `loadMedia` call.
+    ///
+    /// After `loadMedia` the Cast SDK keeps reporting the position of the
+    /// previously loaded content until the new media status is applied. The
+    /// guard is released as soon as the SDK reported a new media session and
+    /// the position converged to the requested start position, or by the
+    /// safety timeout when the convergence never happens.
+    ///
+    /// - Parameter expectedPosition: The requested start position in seconds
+    private func armPendingLoadGuard(expectedPosition: TimeInterval) {
+        pendingLoadExpectedPosition = expectedPosition
+        pendingLoadPreviousMediaSessionID = currentMediaSessionID()
+        pendingLoadGuardTimer?.invalidate()
+        pendingLoadGuardTimer = Timer.scheduledTimer(
+            withTimeInterval: RemoteMediaClientMethodChannel.pendingLoadGuardTimeout,
+            repeats: false
+        ) { [weak self] _ in
+            self?.releasePendingLoadGuard()
+        }
+        // Publish the requested start position right away, so the Flutter
+        // side does not keep showing the last position of the previous
+        // content while the new one is being applied.
+        emitPositionUpdate(progress: expectedPosition)
+    }
+
+    /// Releases the pending load guard and resumes the position updates.
+    private func releasePendingLoadGuard() {
+        pendingLoadExpectedPosition = nil
+        pendingLoadGuardTimer?.invalidate()
+        pendingLoadGuardTimer = nil
+    }
+
+    /// Decides whether the given position can be forwarded to the Flutter side.
+    ///
+    /// While a media load is pending the ticks are suppressed until the SDK
+    /// reported a new media session **and** the position converged to the
+    /// requested start position (±5 s).
+    ///
+    /// - Parameter position: The current playback position in seconds
+    /// - Returns: `true` when the position can be sent to the Flutter side
+    private func shouldEmitPosition(_ position: TimeInterval) -> Bool {
+        guard let expectedPosition = pendingLoadExpectedPosition else { return true }
+        let sessionID = currentMediaSessionID()
+        let sessionChanged = sessionID != 0 && sessionID != pendingLoadPreviousMediaSessionID
+        let converged = abs(position - expectedPosition) <= RemoteMediaClientMethodChannel.pendingLoadGuardTolerance
+        if sessionChanged && converged {
+            releasePendingLoadGuard()
+            return true
+        }
+        return false
+    }
+
+    /// The media session ID currently reported by the Cast SDK.
+    /// - Returns: The media session ID or 0 when no session is known
+    private func currentMediaSessionID() -> Int {
+        currentRemoteMediaClient?.mediaStatus?.mediaSessionID ?? lastKnownMediaSessionID
     }
 
     private func repeatModeToString(_ mode: RepeatModePigeon) -> String {
@@ -471,39 +607,193 @@ class RemoteMediaClientMethodChannel :UIResponder, FlutterPlugin, GCKRemoteMedia
     }
 
     private func mediaInfoToMap(_ mediaInfo: MediaInfo) -> [String: Any] {
-        return [
+        // The HLS segment format hints are forwarded to the
+        // `GCKMediaInformationBuilder` instead of the receiver. They arrive
+        // in the dedicated pigeon fields; the legacy customData keys are
+        // still honoured as a fallback (and stripped from the payload sent
+        // to the receiver).
+        var customData = mediaInfo.customData?.compactMapValues { value -> Any? in value } ?? [:]
+        let customDataHlsSegmentFormat = customData.removeValue(forKey: GCKMediaInformation.hlsSegmentFormatKey) as? String
+        let customDataHlsVideoSegmentFormat = customData.removeValue(forKey: GCKMediaInformation.hlsVideoSegmentFormatKey) as? String
+        let hlsSegmentFormat = mediaInfo.hlsSegmentFormat ?? customDataHlsSegmentFormat
+        let hlsVideoSegmentFormat = mediaInfo.hlsVideoSegmentFormat ?? customDataHlsVideoSegmentFormat
+
+        var map: [String: Any] = [
             "contentID": mediaInfo.contentId,
             "contentType": mediaInfo.contentType,
             "streamType": mediaInfo.streamType,
-            "contentURL": mediaInfo.contentUrl,
-            "duration": mediaInfo.duration,
-            "customData": mediaInfo.customData as Any,
-            "tracks": mediaInfo.tracks?.compactMap { track -> [String: Any]? in
+            "contentURL": resolvedContentURL(mediaInfo),
+            "duration": Double(mediaInfo.duration),
+            "customData": customData,
+        ]
+
+        if let hlsSegmentFormat = hlsSegmentFormat {
+            map["hlsSegmentFormat"] = hlsSegmentFormat
+        }
+        if let hlsVideoSegmentFormat = hlsVideoSegmentFormat {
+            map["hlsVideoSegmentFormat"] = hlsVideoSegmentFormat
+        }
+        if let tracks = mediaInfo.tracks {
+            map["tracks"] = tracks.compactMap{ track -> [String: Any]? in
                 guard let track else { return nil }
                 return [
-                    "trackID": track.trackId,
-                    "type": track.type,
-                    "contentID": track.trackContentId,
-                    "contentType": track.trackContentType,
-                    "subtype": track.subtype,
+                    "trackId": Int(track.trackId),
+                    "type": Int(track.type),
+                    "trackContentId": track.trackContentId,
+                    "trackContentType": track.trackContentType,
+                    "subtype": Int(track.subtype),
                     "name": track.name,
                     "language": track.language,
                 ]
-            } as Any,
-        ]
+            }
+        }
+        if let metadata = mediaInfo.metadata {
+            map["metadata"] = metadataToMap(metadata)
+        }
+        return map
     }
 
     private func mediaQueueItemToMap(_ item: MediaQueueItem) -> [String: Any] {
-        return [
-            "itemId": item.itemId,
-            "preLoadTime": item.preLoadTime,
-            "startTime": item.startTime,
-            "playbackDuration": item.playbackDuration,
-            "mediaInformation": item.media.map(mediaInfoToMap) as Any,
-            "autoPlay": item.autoplay,
-            "activeTracksIds": item.activeTrackIds as Any,
-            "customData": item.customData as Any,
+        var map: [String: Any] = [
+            "itemId": Int(item.itemId),
+            "preloadTime": Double(item.preLoadTime),
+            "startTime": Double(item.startTime),
+            "playbackDuration": Double(item.playbackDuration),
+            "autoplay": item.autoplay,
         ]
+        if let media = item.media {
+            map["media"] = mediaInfoToMap(media)
+        }
+        if let activeTrackIds = item.activeTrackIds {
+            map["activeTrackIds"] = activeTrackIds.compactMap { $0 }.map { NSNumber(value: $0) }
+        }
+        if let customData = item.customData?.compactMapValues({ value -> Any? in value }) {
+            map["customData"] = customData
+        }
+        return map
+    }
+
+    /// Resolves the URL used to load the media.
+    ///
+    /// The content URL is used when it is available. When it is missing the
+    /// content ID is used as the media URL, matching the behaviour of the
+    /// other platforms.
+    private func resolvedContentURL(_ mediaInfo: MediaInfo) -> String {
+        if !mediaInfo.contentUrl.isEmpty {
+            return mediaInfo.contentUrl
+        }
+        return mediaInfo.contentId
+    }
+
+    /// Converts the media metadata into the map representation understood by
+    /// `GCKMediaMetadata.fromMap`, which maps the keys to the canonical Cast
+    /// metadata keys.
+    private func metadataToMap(_ metadata: MediaMetadataPigeon) -> [String: Any] {
+        var dict: [String: Any] = [:]
+        dict["metadataType"] = Int(metadata.metadataType)
+        if let title = metadata.title {
+            dict["title"] = title
+        }
+        if let subtitle = metadata.subtitle {
+            dict["subtitle"] = subtitle
+        }
+        if let studio = metadata.studio {
+            dict["studio"] = studio
+        }
+        if let artist = metadata.artist {
+            dict["artist"] = artist
+        }
+        if let albumName = metadata.albumName {
+            dict["albumName"] = albumName
+        }
+        if let albumArtist = metadata.albumArtist {
+            dict["albumArtist"] = albumArtist
+        }
+        if let composer = metadata.composer {
+            dict["composer"] = composer
+        }
+        if let trackNumber = metadata.trackNumber {
+            dict["trackNumber"] = Int(trackNumber)
+        }
+        if let discNumber = metadata.discNumber {
+            dict["discNumber"] = Int(discNumber)
+        }
+        if let seriesTitle = metadata.seriesTitle {
+            dict["seriesTitle"] = seriesTitle
+        }
+        if let season = metadata.season {
+            dict["season"] = Int(season)
+        }
+        if let episode = metadata.episode {
+            dict["episode"] = Int(episode)
+        }
+        if let location = metadata.location {
+            dict["location"] = location
+        }
+        if let latitude = metadata.latitude {
+            dict["latitude"] = latitude
+        }
+        if let longitude = metadata.longitude {
+            dict["longitude"] = longitude
+        }
+        if let width = metadata.width {
+            dict["width"] = Int(width)
+        }
+        if let height = metadata.height {
+            dict["height"] = Int(height)
+        }
+        if let creationDateTime = metadata.creationDateTime, let millis = iso8601DateMillis(creationDateTime) {
+            dict["creationDateTime"] = millis
+        }
+        if let releaseDate = metadata.releaseDate, let millis = iso8601DateMillis(releaseDate) {
+            dict["releaseDate"] = millis
+        }
+        // The TV show original air date is sent under the broadcast date key,
+        // the closest canonical key exposed by the GoogleCast iOS SDK.
+        if let originalAirDate = metadata.originalAirDate, let millis = iso8601DateMillis(originalAirDate) {
+            dict["broadcastDate"] = millis
+        }
+        if let images = metadata.images {
+            dict["images"] = images.compactMap{ image -> [String: Any]? in
+                guard let image else { return nil }
+                var imageDict: [String: Any] = ["url": image.url]
+                if let width = image.width {
+                    imageDict["width"] = Int(width)
+                }
+                if let height = image.height {
+                    imageDict["height"] = Int(height)
+                }
+                return imageDict
+            }
+        }
+        return dict
+    }
+
+    /// Parses an ISO-8601 date string (the representation produced by
+    /// `DateTime.toUtc().toIso8601String()` on the Dart side) into the epoch
+    /// time in milliseconds expected by `GCKMediaMetadata.fromMap`.
+    ///
+    /// The value may also be a plain epoch time in milliseconds or a
+    /// `yyyy-MM-dd` date-only string, the forms used by the legacy map based
+    /// payloads.
+    private func iso8601DateMillis(_ value: String) -> Double? {
+        if let millis = Double(value) {
+            return millis
+        }
+        let isoFormatter = ISO8601DateFormatter()
+        isoFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        if let date = isoFormatter.date(from: value) {
+            return date.timeIntervalSince1970 * 1000
+        }
+        isoFormatter.formatOptions = [.withInternetDateTime]
+        if let date = isoFormatter.date(from: value) {
+            return date.timeIntervalSince1970 * 1000
+        }
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        guard let date = formatter.date(from: value) else { return nil }
+        return date.timeIntervalSince1970 * 1000
     }
 
     private func toPigeonMediaStatus(_ status: GCKMediaStatus) -> MediaStatus {
@@ -526,7 +816,7 @@ class RemoteMediaClientMethodChannel :UIResponder, FlutterPlugin, GCKRemoteMedia
 
     private func toPigeonMediaInfo(_ info: GCKMediaInformation) -> MediaInfo {
         return MediaInfo(
-            contentId: info.contentID ?? "",
+            contentId: resolvedContentID(info),
             contentType: info.contentType ?? "",
             streamType: PigeonStreamTypeValue(info.streamType).rawValue,
             contentUrl: info.contentURL?.absoluteString ?? "",
@@ -543,17 +833,61 @@ class RemoteMediaClientMethodChannel :UIResponder, FlutterPlugin, GCKRemoteMedia
                     language: track.languageCode ?? ""
                 )
             },
-            metadata: toPigeonMetadata(info.metadata)
+            metadata: toPigeonMetadata(info.metadata),
+            hlsSegmentFormat: pigeonHlsSegmentFormat(info.hlsSegmentFormat),
+            hlsVideoSegmentFormat: pigeonHlsVideoSegmentFormat(info.hlsVideoSegmentFormat)
         )
+    }
+
+    /// Maps the Cast SDK HLS audio segment format back to the Flutter
+    /// `CastHlsSegmentFormat` enum name.
+    private func pigeonHlsSegmentFormat(_ format: GCKHLSSegmentFormat) -> String? {
+        switch format {
+        case .AAC: return "aac"
+        case .AC3: return "ac3"
+        case .MP3: return "mp3"
+        case .TS: return "ts"
+        case .TS_AAC: return "tsAac"
+        case .E_AC3: return "eAc3"
+        case .FMP4: return "fmp4"
+        default: return nil
+        }
+    }
+
+    /// Maps the Cast SDK HLS video segment format back to the Flutter
+    /// `HlsVideoSegmentFormat` enum name.
+    private func pigeonHlsVideoSegmentFormat(_ format: GCKHLSVideoSegmentFormat) -> String? {
+        switch format {
+        case .MPEG2_TS: return "mpeg2Ts"
+        case .FMP4: return "fmp4"
+        default: return nil
+        }
+    }
+
+    /// Ensures the media information always carries a usable content ID.
+    ///
+    /// Priority:
+    ///   1. The `contentID` already populated by the receiver (kept as-is).
+    ///   2. The `contentID` originally passed from Flutter in `loadMedia`
+    ///      (cached in `lastLoadedContentID`).
+    ///   3. The `contentURL` as a last-resort fallback.
+    private func resolvedContentID(_ info: GCKMediaInformation) -> String {
+        if let contentID = info.contentID, !contentID.isEmpty {
+            return contentID
+        }
+        if let cached = lastLoadedContentID, !cached.isEmpty {
+            return cached
+        }
+        return info.contentURL?.absoluteString ?? ""
     }
 
     private func toPigeonMetadata(_ metadata: GCKMediaMetadata?) -> MediaMetadataPigeon? {
         guard let metadata = metadata else { return nil }
 
-        let images = metadata.images()?.compactMap { image -> MediaImagePigeon? in
-            guard let url = image.url else { return nil }
+        let images = metadata.images().compactMap { item -> MediaImagePigeon? in
+            guard let image = item as? GCKImage else { return nil }
             return MediaImagePigeon(
-                url: url.absoluteString,
+                url: image.url.absoluteString,
                 width: image.width > 0 ? Int64(image.width) : nil,
                 height: image.height > 0 ? Int64(image.height) : nil
             )
@@ -567,13 +901,13 @@ class RemoteMediaClientMethodChannel :UIResponder, FlutterPlugin, GCKRemoteMedia
         let seriesTitle = metadata.string(forKey: kGCKMetadataKeySeriesTitle)
 
         var season: Int64? = nil
-        if metadata.isKey(kGCKMetadataKeySeasonNumber) {
+        if metadata.containsKey(kGCKMetadataKeySeasonNumber) {
             let val = metadata.integer(forKey: kGCKMetadataKeySeasonNumber)
             if val != NSNotFound { season = Int64(val) }
         }
 
         var episode: Int64? = nil
-        if metadata.isKey(kGCKMetadataKeyEpisodeNumber) {
+        if metadata.containsKey(kGCKMetadataKeyEpisodeNumber) {
             let val = metadata.integer(forKey: kGCKMetadataKeyEpisodeNumber)
             if val != NSNotFound { episode = Int64(val) }
         }
@@ -587,7 +921,7 @@ class RemoteMediaClientMethodChannel :UIResponder, FlutterPlugin, GCKRemoteMedia
         }
 
         return MediaMetadataPigeon(
-            metadataType: Int64(metadata.metadataType),
+            metadataType: Int64(metadata.metadataType.rawValue),
             title: title,
             subtitle: subtitle,
             studio: studio,

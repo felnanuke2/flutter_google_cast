@@ -42,10 +42,15 @@ export 'src/common/user_action_state.dart';
 export 'src/common/vast_ads_request.dart';
 export 'src/common/volume.dart';
 
+// ── Logging ─────────────────────────────────────────────────────────────────
+export 'src/logging/cast_log_level.dart';
+export 'src/logging/google_cast_logger_configuration.dart';
+
 // ── Entities ────────────────────────────────────────────────────────────────
 export 'src/entities/break_status.dart';
 export 'src/entities/cast_device.dart';
 export 'src/entities/cast_media_status.dart';
+export 'src/entities/cast_message.dart';
 export 'src/entities/cast_options.dart';
 export 'src/entities/cast_session.dart';
 export 'src/entities/device_volume.dart';
@@ -75,3 +80,6 @@ export 'src/platforms/remote_media_client_platform.dart';
 export 'src/pigeon/google_cast_context_pigeon.g.dart';
 export 'src/pigeon/cast_manager_pigeon.g.dart' hide wrapResponse;
 export 'src/pigeon/remote_media_client_pigeon.g.dart' hide wrapResponse;
+
+// ── Pigeon conversions ───────────────────────────────────────────────────────
+export 'src/pigeon/media_info_pigeon_conversion.dart';

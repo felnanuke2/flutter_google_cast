@@ -41,6 +41,7 @@ class CastOptionsPigeon {
     required this.stopCastingOnAppTerminated,
     this.appId,
     this.discoveryCriteria,
+    this.logLevel,
   });
 
   bool physicalVolumeButtonsWillControlDeviceVolume;
@@ -52,6 +53,7 @@ class CastOptionsPigeon {
   bool stopCastingOnAppTerminated;
   String? appId;
   DiscoveryCriteriaPigeon? discoveryCriteria;
+  String? logLevel;
 }
 
 class CastContextInitRequest {

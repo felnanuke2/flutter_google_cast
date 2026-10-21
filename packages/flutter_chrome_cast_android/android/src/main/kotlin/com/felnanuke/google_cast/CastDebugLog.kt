@@ -2,6 +2,15 @@ package com.felnanuke.google_cast
 
 import android.util.Log
 
+/**
+ * Debug logging facade used across the Android implementation.
+ *
+ * Every call is routed through [GoogleCastLogger], so the level configured by
+ * the application through `GoogleCastLogger.level` applies to all plugin-owned
+ * Android logs. When the application did not opt in, the legacy behavior is
+ * retained: debug logs are emitted only in debug builds and the original
+ * `Log` priorities are used.
+ */
 object CastDebugLog {
 
     val isDebug: Boolean
@@ -12,38 +21,33 @@ object CastDebugLog {
         }
 
     fun d(tag: String, message: String) {
-        if (isDebug) {
-            Log.d(tag, message)
-        }
+        if (!isDebug) return
+        GoogleCastLogger.verbose(tag) { message }
     }
 
     fun d(tag: String, message: String, throwable: Throwable?) {
-        if (isDebug) {
-            Log.d(tag, message, throwable)
-        }
+        if (!isDebug) return
+        GoogleCastLogger.verbose(tag, throwable = throwable) { message }
     }
 
     fun i(tag: String, message: String) {
-        if (isDebug) {
-            Log.i(tag, message)
-        }
-        Log.i(tag, message)
+        GoogleCastLogger.info(tag) { message }
     }
 
     fun w(tag: String, message: String) {
-        Log.w(tag, message)
+        GoogleCastLogger.warning(tag) { message }
     }
 
     fun w(tag: String, message: String, throwable: Throwable?) {
-        Log.w(tag, message, throwable)
+        GoogleCastLogger.warning(tag, throwable = throwable) { message }
     }
 
     fun e(tag: String, message: String) {
-        Log.e(tag, message)
+        GoogleCastLogger.error(tag) { message }
     }
 
     fun e(tag: String, message: String, throwable: Throwable?) {
-        Log.e(tag, message, throwable)
+        GoogleCastLogger.error(tag, throwable = throwable) { message }
     }
 
     fun castError(tag: String, operation: String, error: Throwable?): String {
@@ -58,7 +62,7 @@ object CastDebugLog {
             }
         }
         if (isDebug) {
-            Log.e(tag, errorMsg)
+            GoogleCastLogger.error(tag) { errorMsg }
         }
         return errorMsg
     }
@@ -68,19 +72,21 @@ object CastDebugLog {
         val detailStr = if (details.isEmpty()) "" else " | ${
             details.entries.joinToString(", ") { "${it.key}=${it.value}" }
         }"
-        Log.d(tag, "[CAST_OP] $operation$detailStr")
+        GoogleCastLogger.verbose(tag) { "[CAST_OP] $operation$detailStr" }
     }
 
     fun castResult(tag: String, operation: String, success: Boolean, details: String = "") {
         if (!isDebug) return
         val status = if (success) "SUCCESS" else "FAILED"
         val detailStr = if (details.isEmpty()) "" else " | $details"
-        Log.d(tag, "[CAST_RESULT] $operation -> $status$detailStr")
+        GoogleCastLogger.verbose(tag) { "[CAST_RESULT] $operation -> $status$detailStr" }
     }
 
     fun sessionEvent(tag: String, event: String, sessionId: String?, deviceId: String?, extra: String = "") {
         if (!isDebug) return
-        Log.d(tag, "[SESSION] $event | sessionId=$sessionId | deviceId=$deviceId${if (extra.isNotEmpty()) " | $extra" else ""}")
+        GoogleCastLogger.verbose(tag) {
+            "[SESSION] $event | sessionId=$sessionId | deviceId=$deviceId${if (extra.isNotEmpty()) " | $extra" else ""}"
+        }
     }
 
     fun mediaEvent(tag: String, event: String, details: Map<String, Any?> = emptyMap()) {
@@ -88,7 +94,7 @@ object CastDebugLog {
         val detailStr = if (details.isEmpty()) "" else " | ${
             details.entries.joinToString(", ") { "${it.key}=${it.value}" }
         }"
-        Log.d(tag, "[MEDIA] $event$detailStr")
+        GoogleCastLogger.verbose(tag) { "[MEDIA] $event$detailStr" }
     }
 
     fun discoveryEvent(tag: String, event: String, details: Map<String, Any?> = emptyMap()) {
@@ -96,6 +102,6 @@ object CastDebugLog {
         val detailStr = if (details.isEmpty()) "" else " | ${
             details.entries.joinToString(", ") { "${it.key}=${it.value}" }
         }"
-        Log.d(tag, "[DISCOVERY] $event$detailStr")
+        GoogleCastLogger.verbose(tag) { "[DISCOVERY] $event$detailStr" }
     }
 }

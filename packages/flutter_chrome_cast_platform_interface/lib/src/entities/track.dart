@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter_chrome_cast_platform_interface/src/common/rfc5646_language.dart';
 import 'package:flutter_chrome_cast_platform_interface/src/enums/text_track_type.dart';
 import 'package:flutter_chrome_cast_platform_interface/src/enums/track_type.dart';
@@ -39,4 +41,54 @@ class GoogleCastMediaTrack {
     required this.trackId,
     required this.type,
   });
+
+  /// Converts the object to a map for serialization.
+  Map<String, dynamic> toMap() {
+    return {
+      'customData': customData,
+      'language': language?.toString(),
+      'name': name,
+      'subtype': subtype?.name,
+      'trackContentId': trackContentId,
+      'trackContentType': trackContentType,
+      'trackId': trackId,
+      'type': type.name,
+    };
+  }
+
+  /// Creates a [GoogleCastMediaTrack] from a map.
+  factory GoogleCastMediaTrack.fromMap(Map<String, dynamic> map) {
+    return GoogleCastMediaTrack(
+      customData: map['customData'] != null
+          ? Map<String, dynamic>.from(map['customData'])
+          : null,
+      language:
+          map['language'] != null ? Rfc5646Language.fromMap(map['language']) : null,
+      name: map['name'],
+      subtype: map['subtype'] != null
+          ? TextTrackType.values.firstWhere(
+              (e) => e.name == map['subtype'],
+              orElse: () => TextTrackType.unknown,
+            )
+          : null,
+      trackContentId: map['trackContentId'],
+      // In-band receiver tracks are allowed to omit a content type. Android's
+      // MediaTrack.toMap() consequently sends null for those tracks, so keep
+      // the public non-nullable API stable while parsing the missing value
+      // safely. Outbound tracks created by callers still provide a MIME type.
+      trackContentType: map['trackContentType'] as String? ?? '',
+      trackId: map['trackId']?.toInt() ?? 0,
+      type: TrackType.values.firstWhere(
+        (e) => e.name.toLowerCase() == '${map['type']}'.toLowerCase(),
+        orElse: () => TrackType.unknown,
+      ),
+    );
+  }
+
+  /// Converts the object to a JSON string.
+  String toJson() => json.encode(toMap());
+
+  /// Creates a [GoogleCastMediaTrack] from a JSON string.
+  factory GoogleCastMediaTrack.fromJson(String source) =>
+      GoogleCastMediaTrack.fromMap(json.decode(source));
 }

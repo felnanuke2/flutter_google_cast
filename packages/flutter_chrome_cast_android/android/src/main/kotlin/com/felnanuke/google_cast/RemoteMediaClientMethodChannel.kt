@@ -7,9 +7,16 @@ import com.felnanuke.google_cast.pigeon.*
 import com.google.android.gms.cast.framework.CastContext
 import com.google.android.gms.cast.framework.media.RemoteMediaClient
 import io.flutter.embedding.engine.plugins.FlutterPlugin
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 import org.json.JSONObject
 
 private const val TAG = "RemoteMediaClient"
+
+/** Fire-and-forget scope used to push Flutter API events. */
+private val flutterApiScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
 
 class RemoteMediaClientMethodChannel : FlutterPlugin, RemoteMediaClientHostApi,
     RemoteMediaClient.Callback(), RemoteMediaClient.ProgressListener {
@@ -373,7 +380,7 @@ class RemoteMediaClientMethodChannel : FlutterPlugin, RemoteMediaClientHostApi,
             "currentItemId" to pigeonStatus?.currentItemId,
             "repeatMode" to pigeonStatus?.repeatMode
         ))
-        flutterApi.onMediaStatusChanged(pigeonStatus) { }
+        flutterApiScope.launch { flutterApi.onMediaStatusChanged(pigeonStatus) }
     }
 
     override fun onQueueStatusUpdated() {
@@ -382,7 +389,7 @@ class RemoteMediaClientMethodChannel : FlutterPlugin, RemoteMediaClientHostApi,
         CastDebugLog.mediaEvent(TAG, "onQueueStatusUpdated", mapOf(
             "queueItemCount" to queueItems.size
         ))
-        flutterApi.onQueueStatusChanged(queueItems) { }
+        flutterApiScope.launch { flutterApi.onQueueStatusChanged(queueItems) }
     }
 
     override fun onProgressUpdated(progress: Long, duration: Long) {
@@ -391,7 +398,7 @@ class RemoteMediaClientMethodChannel : FlutterPlugin, RemoteMediaClientHostApi,
             CastDebugLog.d(TAG, "onProgressUpdated: progress=${progress}ms, duration=${duration}ms")
         }
         val update = PlayerPositionUpdate(progress, duration)
-        flutterApi.onPlayerPositionChanged(update) { }
+        flutterApiScope.launch { flutterApi.onPlayerPositionChanged(update) }
     }
 
     fun startListen() {

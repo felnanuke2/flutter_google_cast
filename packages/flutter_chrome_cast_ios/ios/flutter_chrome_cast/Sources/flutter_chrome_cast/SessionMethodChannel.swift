@@ -38,7 +38,7 @@ class FGCSessionMethodChannel: UIResponder, FlutterPlugin{
     /// method calls from Flutter.
     ///
     /// - Parameter registrar: The Flutter plugin registrar for method channel setup
-    static func register(with registrar: FlutterPluginRegistrar) {
+    public static func register(with registrar: FlutterPluginRegistrar) {
         _ = registrar
     }
 }

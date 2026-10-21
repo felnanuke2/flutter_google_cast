@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter_chrome_cast_platform_interface/src/common/hls_segment_format.dart';
 import 'package:flutter_chrome_cast_platform_interface/src/common/vast_ads_request.dart';
 
@@ -82,4 +84,63 @@ class CastBreakClips {
     this.vastAdsRequest,
     this.whenSkippable,
   });
+
+  /// Converts the break clip object to a map for serialization.
+  Map<String, dynamic> toMap() {
+    return {
+      'clickThroughUrl': clickThroughUrl,
+      'contentId': contentId,
+      'contentType': contentType,
+      'contentUrl': contentUrl,
+      'customData': customData,
+      'duration': duration?.inSeconds,
+      'hlsSegmentFormat': hlsSegmentFormat?.name,
+      'id': id,
+      'posterUrl': posterUrl,
+      'title': title,
+      'vastAdsRequest': vastAdsRequest?.toMap(),
+      'whenSkippable': whenSkippable?.inSeconds,
+    };
+  }
+
+  /// Creates a [CastBreakClips] instance from a map.
+  ///
+  /// [map] - The map to create the instance from.
+  factory CastBreakClips.fromMap(Map<String, dynamic> map) {
+    return CastBreakClips(
+      clickThroughUrl: map['clickThroughUrl'],
+      contentId: map['contentId'],
+      contentType: map['contentType'],
+      contentUrl: map['contentUrl'],
+      customData: map['customData'] != null
+          ? Map<String, dynamic>.from(map['customData'])
+          : null,
+      duration: map['duration'] != null
+          ? Duration(seconds: map['duration'].round())
+          : null,
+      hlsSegmentFormat: map['hlsSegmentFormat'] != null
+          ? CastHlsSegmentFormat.fromMap(map['hlsSegmentFormat'])
+          : null,
+      id: map['id'] ?? '',
+      posterUrl: map['posterUrl'],
+      title: map['title'],
+      vastAdsRequest: map['vastAdsRequest'] != null
+          ? VastAdsRequest.fromMap(
+              Map<String, dynamic>.from(map['vastAdsRequest']),
+            )
+          : null,
+      whenSkippable: map['whenSkippable'] != null
+          ? Duration(seconds: map['whenSkippable'].round())
+          : null,
+    );
+  }
+
+  /// Converts the [CastBreakClips] to a JSON string.
+  ///
+  /// Returns a JSON string representation of this object.
+  String toJson() => json.encode(toMap());
+
+  /// Creates a [CastBreakClips] from a JSON string.
+  factory CastBreakClips.fromJson(String source) =>
+      CastBreakClips.fromMap(json.decode(source));
 }

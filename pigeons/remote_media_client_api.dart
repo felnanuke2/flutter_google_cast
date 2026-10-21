@@ -72,10 +72,21 @@ class MediaMetadataPigeon {
     this.studio,
     this.artist,
     this.albumName,
+    this.albumArtist,
+    this.composer,
+    this.trackNumber,
+    this.discNumber,
     this.seriesTitle,
     this.season,
     this.episode,
+    this.location,
+    this.latitude,
+    this.longitude,
+    this.width,
+    this.height,
     this.releaseDate,
+    this.originalAirDate,
+    this.creationDateTime,
     this.images,
   });
 
@@ -85,10 +96,27 @@ class MediaMetadataPigeon {
   String? studio;
   String? artist;
   String? albumName;
+  String? albumArtist;
+  String? composer;
+  int? trackNumber;
+  int? discNumber;
   String? seriesTitle;
   int? season;
   int? episode;
+  String? location;
+  double? latitude;
+  double? longitude;
+  int? width;
+  int? height;
+
+  /// ISO-8601 representation of the date the content was released.
   String? releaseDate;
+
+  /// ISO-8601 representation of the date the episode was originally aired.
+  String? originalAirDate;
+
+  /// ISO-8601 representation of the date the content was created.
+  String? creationDateTime;
   List<MediaImagePigeon?>? images;
 }
 
@@ -103,16 +131,26 @@ class MediaInfo {
     this.customData,
     this.tracks,
     this.metadata,
+    this.hlsSegmentFormat,
+    this.hlsVideoSegmentFormat,
   });
 
   String contentId;
   String contentType;
   String streamType;
   String contentUrl;
+
+  /// Stream duration in seconds.
   int duration;
   Map<String, Object?>? customData;
   List<MediaTrack?>? tracks;
   MediaMetadataPigeon? metadata;
+
+  /// Name of the HLS audio segment format (e.g. `aac`, `tsAac`, `mpeg2Ts`).
+  String? hlsSegmentFormat;
+
+  /// Name of the HLS video segment format (e.g. `mpeg2Ts`, `fmp4`).
+  String? hlsVideoSegmentFormat;
 }
 
 /// Volume information

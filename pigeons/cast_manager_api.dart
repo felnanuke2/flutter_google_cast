@@ -41,7 +41,7 @@ class CastDevicePigeon {
 
 @HostApi()
 abstract class DiscoveryManagerHostApi {
-  void startDiscovery();
+  void startDiscovery(bool activeScan);
 
   void stopDiscovery();
 
@@ -96,9 +96,20 @@ abstract class SessionManagerHostApi {
   bool endSessionAndStopCasting();
 
   void setDeviceVolume(double value);
+
+  bool addMessageChannel(String namespace);
+
+  bool removeMessageChannel(String namespace);
+
+  @async
+  bool sendMessage(String namespace, String message);
+
+  bool resetSession();
 }
 
 @FlutterApi()
 abstract class SessionManagerFlutterApi {
   void onSessionChanged(CastSessionPigeon? session);
+
+  void onMessageReceived(String namespace, String message);
 }
