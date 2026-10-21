@@ -1,27 +1,5 @@
-/// Enum representing the HLS video segment format types.
-enum HlsVideoSegmentFormat {
-  /// MPEG-2 Transport Stream format.
-  mpeg2Ts,
-
-  /// Fragmented MP4 format.
-  fmp4,
-
-  /// No specific format.
-  none;
-
-  factory HlsVideoSegmentFormat.fromMap(String value) {
-    // Try matching by name (lowerCamelCase)
-    for (final v in values) {
-      if (v.name == value) return v;
-    }
-    // Fallback: match legacy UPPER_SNAKE_CASE
-    switch (value) {
-      case 'MPEG2_TS':
-        return HlsVideoSegmentFormat.mpeg2Ts;
-      case 'FMP4':
-        return HlsVideoSegmentFormat.fmp4;
-      default:
-        return HlsVideoSegmentFormat.none;
-    }
-  }
-}
+// Re-exported from flutter_chrome_cast_platform_interface.
+// This file exists for backward compatibility with
+// `package:flutter_chrome_cast/common/hls_video_segment_format.dart`.
+// All types are now defined in the platform_interface package.
+export 'package:flutter_chrome_cast_platform_interface/src/common/hls_video_segment_format.dart';

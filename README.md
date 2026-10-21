@@ -7,6 +7,21 @@
 
 > **📱 Alternative for Non-Cast Devices**: If you need to integrate with devices that don't have Google Cast built-in or are not Chromecast devices, you may be interested in https://github.com/felnanuke2/media_cast_dlna - take a look!
 
+> **🔄 Migration Notice**: This plugin is currently migrating from a legacy monolithic architecture to a [federated plugin](https://docs.flutter.dev/packages-and-plugins/developing-packages#federated-plugins) architecture. The platform-specific implementations are being split into separate packages. See the [Packages](#packages) section for details.
+
+## Packages
+
+This plugin is migrating to a [federated plugin](https://docs.flutter.dev/packages-and-plugins/developing-packages#federated-plugins) architecture:
+
+| Package | Description |
+|---------|-------------|
+| [`flutter_chrome_cast`](packages/flutter_chrome_cast) | App-facing API — this is what most users depend on |
+| [`flutter_chrome_cast_platform_interface`](packages/flutter_chrome_cast_platform_interface) | Platform interface shared by all implementations |
+| [`flutter_chrome_cast_android`](packages/flutter_chrome_cast_android) | Android implementation |
+| [`flutter_chrome_cast_ios`](packages/flutter_chrome_cast_ios) | iOS implementation |
+
+Most users only need to depend on `flutter_chrome_cast`, which re-exports the platform packages automatically.
+
 ## Demo Video
 
 <video src="https://raw.githubusercontent.com/felnanuke2/flutter_google_cast/refs/heads/master/Screen_Recording_20250618_125333.mp4" controls width="600" poster="https://raw.githubusercontent.com/felnanuke2/flutter_google_cast/refs/heads/master/Screenshot_20250618_130514.jpg">
@@ -480,18 +495,18 @@ Future<void> _loadSingleMedia(GoogleCastDevice device) async {
       contentId: 'elephants_dream',
       streamType: CastMediaStreamType.BUFFERED,
       contentUrl: Uri.parse(
-        'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4'
+        'https://download.blender.org/durian/trailer/sintel_trailer-480p.mp4'
       ),
       contentType: 'video/mp4',
       metadata: GoogleCastTvShowMediaMetadata(
         episode: 1,
         season: 1,
-        seriesTitle: 'Elephants Dream',
+        seriesTitle: 'Sintel Trailer',
         originalAirDate: DateTime.now(),
         images: [
           GoogleCastImage(
             url: Uri.parse(
-              'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/images/ElephantsDream.jpg'
+              'https://upload.wikimedia.org/wikipedia/commons/9/90/Elephants_Dream_s1_proog.jpg'
             ),
             height: 480,
             width: 854,
@@ -534,17 +549,17 @@ Future<void> _loadMediaQueue(GoogleCastDevice device) async {
           contentId: 'elephants_dream',
           streamType: CastMediaStreamType.BUFFERED,
           contentUrl: Uri.parse(
-            'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4'
+            'https://download.blender.org/durian/trailer/sintel_trailer-480p.mp4'
           ),
           contentType: 'video/mp4',
           metadata: GoogleCastMovieMediaMetadata(
-            title: 'Elephants Dream',
+            title: 'Sintel Trailer',
             studio: 'Blender Foundation',
-            releaseDate: DateTime(2006),
+            releaseDate: DateTime(2010),
             images: [
               GoogleCastImage(
                 url: Uri.parse(
-                  'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/images/ElephantsDream.jpg'
+                  'https://upload.wikimedia.org/wikipedia/commons/9/90/Elephants_Dream_s1_proog.jpg'
                 ),
                 height: 480,
                 width: 854,
@@ -572,7 +587,7 @@ Future<void> _loadMediaQueue(GoogleCastDevice device) async {
           contentId: 'big_buck_bunny',
           streamType: CastMediaStreamType.BUFFERED,
           contentUrl: Uri.parse(
-            'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4'
+            'https://download.blender.org/peach/bigbuckbunny_movies/BigBuckBunny_320x180.mp4'
           ),
           contentType: 'video/mp4',
           metadata: GoogleCastMovieMediaMetadata(
@@ -582,7 +597,7 @@ Future<void> _loadMediaQueue(GoogleCastDevice device) async {
             images: [
               GoogleCastImage(
                 url: Uri.parse(
-                  'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/images/BigBuckBunny.jpg'
+                  'https://peach.blender.org/wp-content/uploads/bbb-splash.png'
                 ),
                 height: 480,
                 width: 854,

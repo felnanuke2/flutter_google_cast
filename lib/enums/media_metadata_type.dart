@@ -1,31 +1,5 @@
-/// Enum representing different types of media metadata for Google Cast.
-enum GoogleCastMediaMetadataType {
-  /// Generic media metadata type.
-  genericMediaMetadata(0),
-
-  /// Movie media metadata type.
-  movieMediaMetadata(1),
-
-  /// TV show media metadata type.
-  tvShowMediaMetadata(2),
-
-  /// Music track media metadata type.
-  musicTrackMediaMetadata(3),
-
-  /// Photo media metadata type.
-  photoMediaMetadata(4);
-
-  /// The integer value representing this metadata type.
-  final int value;
-
-  /// Creates a [GoogleCastMediaMetadataType] with the given [value].
-  const GoogleCastMediaMetadataType(this.value);
-
-  /// Creates a [GoogleCastMediaMetadataType] from an integer value.
-  factory GoogleCastMediaMetadataType.fromMap(int value) {
-    return values.firstWhere(
-      (element) => element.value == value,
-      orElse: () => genericMediaMetadata,
-    );
-  }
-}
+// Re-exported from flutter_chrome_cast_platform_interface.
+// This file exists for backward compatibility with
+// `package:flutter_chrome_cast/enums/media_metadata_type.dart`.
+// All types are now defined in the platform_interface package.
+export 'package:flutter_chrome_cast_platform_interface/src/enums/media_metadata_type.dart';

@@ -1,0 +1,685 @@
+//
+//  SessionManagerMethodChannel.swift
+//  google_cast
+//
+//  Created by LUIZ FELIPE ALVES LIMA on 30/06/22.
+//
+
+import Flutter
+import Foundation
+import GoogleCast
+
+/// Flutter method channel for Google Cast session management
+///
+/// This class serves as the bridge between Flutter and the native Google Cast
+/// SDK's session management functionality on iOS. It handles session lifecycle
+/// operations (starting, ending, suspending sessions) and forwards session
+/// state changes back to Flutter.
+///
+/// Key features:
+/// - Cast session creation and termination
+/// - Session state monitoring and event handling
+/// - Device volume control during active sessions
+/// - Custom Cast namespace message channels
+/// - Real-time session updates to Flutter
+/// - Singleton pattern for consistent session state
+///
+/// The class provides a bridge between Flutter's session management API
+/// and the native Google Cast SDK session functionality on iOS.
+///
+/// - Author: LUIZ FELIPE ALVES LIMA
+/// - Since: iOS 10.0+
+public class FGCSessionManagerMethodChannel : UIResponder, FlutterPlugin, GCKSessionManagerListener, GCKGenericChannelDelegate, SessionManagerHostApi {
+    
+    // MARK: - Singleton Implementation
+    
+    /// Private initializer to enforce singleton pattern
+    private override init() {
+        
+    }
+    
+    /// Shared singleton instance
+    static private let _instance = FGCSessionManagerMethodChannel()
+    
+    /// Public accessor for the singleton instance
+    /// - Returns: The shared FGCSessionManagerMethodChannel instance
+    static public var instance : FGCSessionManagerMethodChannel{
+         _instance
+    }
+    
+    // MARK: - Google Cast Session Properties
+    
+    /// The current active Cast session (if any)
+    /// - Returns: The current session or nil if no session is active
+    var currentSession : GCKSession? {
+        sessionManager.currentSession
+    }
+    
+    /// The current active Cast session specifically (more specific than currentSession)
+    /// - Returns: The current Cast session or nil if no Cast session is active
+    var currentCastSession: GCKCastSession? {
+        sessionManager.currentCastSession
+    }
+    
+    /// The current connection state of the session manager
+    /// - Returns: The connection state (disconnected, connecting, connected, etc.)
+    var connectState: GCKConnectionState{
+        sessionManager.connectionState
+    }
+    
+    // MARK: - Communication Properties
+    
+    /// Typed Flutter API for sending session updates.
+    private var flutterApi: SessionManagerFlutterApi?
+    
+    /// Tracks the last emitted connection state to deduplicate events.
+    /// iOS Cast SDK fires multiple delegate callbacks (for both GCKSession
+    /// and GCKCastSession) with the same connection state in rapid succession,
+    /// causing event spam on the Flutter side.
+    private var _lastEmittedConnectionState: GCKConnectionState?
+
+    /// Generic channels requested by Flutter, keyed by Cast namespace.
+    private var messageChannels: [String: GCKGenericChannel] = [:]
+
+    /// The Cast session to which the generic channels are currently attached.
+    private weak var messageChannelSession: GCKCastSession?
+    
+    /// Reference to the Google Cast session manager
+    /// - Returns: The session manager from the shared Cast context
+    private var sessionManager : GCKSessionManager  {
+        GCKCastContext.sharedInstance().sessionManager
+    }
+    
+    /// Reference to the Google Cast discovery manager
+    /// Used for device selection when starting sessions
+    /// - Returns: The discovery manager from the shared Cast context
+    private var discoveryManager: GCKDiscoveryManager  {
+        GCKCastContext.sharedInstance().discoveryManager
+    }
+    
+    // MARK: - Flutter Plugin Registration
+        /// Registers the session manager method channel with Flutter
+    /// 
+    /// Sets up the Flutter method channel for session management communication.
+    /// The channel name is "google_cast.session_manager" and handles all
+    /// session-related method calls from Flutter.
+    ///
+    /// - Parameter registrar: The Flutter plugin registrar for method channel setup
+    public static func register(with registrar: FlutterPluginRegistrar) {
+        
+        let instance = FGCSessionManagerMethodChannel.instance
+        SessionManagerHostApiSetup.setUp(binaryMessenger: registrar.messenger(), api: instance)
+        instance.flutterApi = SessionManagerFlutterApi(binaryMessenger: registrar.messenger())
+    }
+    
+    func startSessionWithDevice(request: StartSessionRequest) throws -> Bool {
+        if let index = request.deviceIndex {
+            return startSessionWithDevice(deviceIndex: Int(index))
+        }
+
+        if let deviceId = request.deviceId {
+            return startSessionWithDevice(deviceId: deviceId)
+        }
+        return false
+    }
+
+    func endSession() throws -> Bool {
+        sessionManager.endSession()
+        return true
+    }
+
+    func endSessionAndStopCasting() throws -> Bool {
+        sessionManager.endSessionAndStopCasting(true)
+        return true
+    }
+
+    func setDeviceVolume(value: Double) throws {
+        sessionManager.currentCastSession?.setDeviceVolume(Float(value))
+    }
+    
+    // MARK: - Custom Cast Message Channels
+    
+    /// Validates a Cast namespace requested from Flutter.
+    private func validatedNamespace(_ namespace: String) throws -> String {
+        guard namespace.hasPrefix("urn:x-cast:"), namespace.count <= 128 else {
+            throw PigeonError(
+                code: "INVALID_ARGUMENT",
+                message: "A valid Cast namespace is required.",
+                details: nil
+            )
+        }
+        return namespace
+    }
+
+    private func attachMessageChannels(to session: GCKCastSession) {
+        if messageChannelSession !== session {
+            if let previousSession = messageChannelSession {
+                for channel in messageChannels.values {
+                    previousSession.remove(channel)
+                }
+            }
+            messageChannelSession = session
+            for channel in messageChannels.values {
+                session.add(channel)
+            }
+        }
+    }
+
+    private func detachMessageChannels(from session: GCKCastSession) {
+        guard messageChannelSession === session else { return }
+        for channel in messageChannels.values {
+            session.remove(channel)
+        }
+        messageChannelSession = nil
+    }
+
+    func addMessageChannel(namespace: String) throws -> Bool {
+        let namespace = try validatedNamespace(namespace)
+        if messageChannels[namespace] == nil {
+            let channel = GCKGenericChannel(namespace: namespace)
+            channel.delegate = self
+            messageChannels[namespace] = channel
+            if let session = currentCastSession {
+                if messageChannelSession !== session {
+                    attachMessageChannels(to: session)
+                } else {
+                    session.add(channel)
+                }
+            }
+        }
+        return true
+    }
+
+    func removeMessageChannel(namespace: String) throws -> Bool {
+        let namespace = try validatedNamespace(namespace)
+        if let channel = messageChannels.removeValue(forKey: namespace) {
+            messageChannelSession?.remove(channel)
+            channel.delegate = nil
+        }
+        return true
+    }
+
+    func sendMessage(namespace: String, message: String) async throws -> Bool {
+        let namespace = try validatedNamespace(namespace)
+        guard let channel = messageChannels[namespace],
+              messageChannelSession != nil else {
+            return false
+        }
+        var error: GCKError?
+        let sent = channel.sendTextMessage(message, error: &error)
+        if !sent {
+            FlutterGoogleCastLogger.error(
+                "[GoogleCast] sendMessage failed on \(namespace): \(String(describing: error))"
+            )
+        }
+        return sent
+    }
+
+    public func cast(_ channel: GCKGenericChannel, didReceiveTextMessage message: String, withNamespace protocolNamespace: String) {
+        Task { @MainActor in
+            try? await flutterApi?.onMessageReceived(
+                namespace: protocolNamespace,
+                message: message
+            )
+        }
+    }
+    
+    // MARK: - Cast Session Management Methods
+    
+    /// Initiates a Cast session with the specified device
+    /// 
+    /// Attempts to start a Cast session with a device from the discovery list.
+    /// The device is identified by its index in the discovery manager's device list.
+    ///
+    /// - Parameter deviceIndex: The index of the device in the discovery list
+    /// - Returns: `true` if session initiation was successful, `false` otherwise
+    /// - Note: This method only initiates the session; actual connection status
+    ///         is reported through session manager listener callbacks
+    ///
+    /// The index is bounds-checked against `GCKDiscoveryManager.deviceCount`
+    /// before accessing the underlying device. `GCKDiscoveryManager.device(at:)`
+    /// is backed by an `NSArray` and throws `NSRangeException` for out-of-bounds
+    /// access, which crashes the process (Swift cannot catch Obj-C exceptions).
+    /// The index comes from the Dart side, which holds a snapshot of the device
+    /// list received via `onDevicesChanged`; between that snapshot and this
+    /// call a device may disappear from the live discovery list (flaky
+    /// receivers, network hiccups), making the snapshot index stale.
+    private func startSessionWithDevice(deviceIndex : Int ) -> Bool {
+        let deviceCount = discoveryManager.deviceCount
+        guard deviceIndex >= 0, UInt(deviceIndex) < deviceCount else {
+            FlutterGoogleCastLogger.warning(
+                "[GoogleCast] startSessionWithDevice: index \(deviceIndex) is out of bounds (deviceCount=\(deviceCount)); the Dart-side snapshot is stale"
+            )
+            return false
+        }
+        let device = discoveryManager.device(at: UInt(deviceIndex))
+        return sessionManager.startSession(with: device)
+    }
+
+    /// Initiates a Cast session with the device identified by [deviceId],
+    /// looking it up in the discovery manager's live device list.
+    private func startSessionWithDevice(deviceId: String) -> Bool {
+        let count = discoveryManager.deviceCount
+        guard count > 0 else { return false }
+
+        for index in 0..<count {
+            let device = discoveryManager.device(at: index)
+            if device.deviceID == deviceId {
+                return sessionManager.startSession(with: device)
+            }
+        }
+
+        return false
+    }
+    
+    // MARK: - Google Cast Session Manager Listener
+    
+    /// Called when a session is about to start
+    /// 
+    /// This delegate method is invoked just before a Cast session begins.
+    /// Updates Flutter with the new session state.
+    ///
+    /// - Parameters:
+    ///   - sessionManager: The session manager instance
+    ///   - session: The session that will start
+    public func sessionManager(_ sessionManager: GCKSessionManager, willStart session: GCKSession) {
+        onSessionChanged(session)
+    }
+    
+    /// Called when a session has successfully started
+    /// 
+    /// This delegate method is invoked after a Cast session has been established.
+    /// Notifies Flutter of the new session and starts media client listening.
+    ///
+    /// - Parameters:
+    ///   - sessionManager: The session manager instance
+    ///   - session: The session that started
+    public func sessionManager(_ sessionManager: GCKSessionManager, didStart session: GCKSession) {
+        if let castSession = session as? GCKCastSession {
+            attachMessageChannels(to: castSession)
+        }
+        onSessionChanged(session)
+        RemoteMediaClientMethodChannel.instance.startListen()
+    }
+    
+    /// Called when a Cast session is about to start
+    /// 
+    /// This delegate method is invoked just before a Cast session begins.
+    /// This is the Cast-specific version of willStart for GCKSession.
+    ///
+    /// - Parameters:
+    ///   - sessionManager: The session manager instance
+    ///   - session: The Cast session that will start
+    public func sessionManager(_ sessionManager: GCKSessionManager, willStart session: GCKCastSession) {
+        onSessionChanged(session)
+    }
+    
+    /// Called when a Cast session fails to start
+    /// 
+    /// This delegate method is invoked when a Cast session initiation fails.
+    /// Updates Flutter with the session state and error information.
+    ///
+    /// - Parameters:
+    ///   - sessionManager: The session manager instance
+    ///   - session: The Cast session that failed to start
+    ///   - error: The error that caused the failure
+    public func sessionManager(_ sessionManager: GCKSessionManager, didFailToStart session: GCKCastSession, withError error: Error) {
+        onSessionChanged(session)
+    }
+    
+    /// Called when a session is about to end
+    /// 
+    /// This delegate method is invoked just before a session terminates.
+    /// Forces `disconnecting` state emission because iOS GCK SDK may set
+    /// `session.connectionState` to `.disconnected` before calling `willEnd`,
+    /// causing the Dart side to never see the `disconnecting` transition.
+    ///
+    /// - Parameters:
+    ///   - sessionManager: The session manager instance
+    ///   - session: The session that will end
+    public func sessionManager(_ sessionManager: GCKSessionManager, willEnd session: GCKSession) {
+        emitDisconnecting(session)
+    }
+    
+    /// Called when a session has ended
+    /// 
+    /// This delegate method is invoked after a session has been terminated.
+    /// Notifies Flutter and stops media client listening.
+    ///
+    /// - Parameters:
+    ///   - sessionManager: The session manager instance
+    ///   - session: The session that ended
+    ///   - error: Optional error if the session ended unexpectedly
+    public func sessionManager(_ sessionManager: GCKSessionManager, didEnd session: GCKSession, withError error: Error?) {
+        onSessionChanged(session)
+        RemoteMediaClientMethodChannel.instance.onSessionEnd()
+    }
+    
+    /// Called when a Cast session is about to end
+    /// 
+    /// This delegate method is invoked just before a Cast session terminates.
+    /// Forces `disconnecting` state emission — same rationale as `willEnd`
+    /// for `GCKSession`.
+    ///
+    /// - Parameters:
+    ///   - sessionManager: The session manager instance
+    ///   - session: The Cast session that will end
+    public func sessionManager(_ sessionManager: GCKSessionManager, willEnd session: GCKCastSession) {
+        emitDisconnecting(session)
+    }
+    
+    /// Called when a Cast session has ended
+    /// 
+    /// This delegate method is invoked after a Cast session has been terminated.
+    /// Clears the session state in Flutter and stops media client operations.
+    ///
+    /// - Parameters:
+    ///   - sessionManager: The session manager instance
+    ///   - session: The Cast session that ended
+    ///   - error: Optional error if the session ended unexpectedly
+    public func sessionManager(_ sessionManager: GCKSessionManager, didEnd session: GCKCastSession, withError error: Error?) {
+        detachMessageChannels(from: session)
+        onSessionChanged(nil)
+        RemoteMediaClientMethodChannel.instance.onSessionEnd()
+    }
+    
+    /// Called when a session fails to start
+    /// 
+    /// This delegate method is invoked when a session initiation fails.
+    /// Updates Flutter with the session state and error information.
+    ///
+    /// - Parameters:
+    ///   - sessionManager: The session manager instance
+    ///   - session: The session that failed to start
+    ///   - error: The error that caused the failure
+    public func sessionManager(_ sessionManager: GCKSessionManager, didFailToStart session: GCKSession, withError error: Error) {
+        onSessionChanged(session)
+    }
+    
+    /// Called when a session is suspended
+    /// 
+    /// This delegate method is invoked when a session is temporarily suspended
+    /// (e.g., app goes to background). Clears the session state in Flutter.
+    ///
+    /// - Parameters:
+    ///   - sessionManager: The session manager instance
+    ///   - session: The session that was suspended
+    ///   - reason: The reason for the suspension
+    public func sessionManager(_ sessionManager: GCKSessionManager, didSuspend session: GCKSession, with reason: GCKConnectionSuspendReason) {
+            onSessionChanged(nil)
+    }
+    
+    /// Called when a Cast session is suspended
+    /// 
+    /// This delegate method is invoked when a Cast session is temporarily suspended.
+    /// This is the Cast-specific version of didSuspend for GCKSession.
+    ///
+    /// - Parameters:
+    ///   - sessionManager: The session manager instance
+    ///   - session: The Cast session that was suspended
+    ///   - reason: The reason for the suspension
+    public func sessionManager(_ sessionManager: GCKSessionManager, didSuspend session: GCKCastSession, with reason: GCKConnectionSuspendReason) {
+            onSessionChanged(nil)
+    }
+    
+    /// Called when a session is about to resume
+    /// 
+    /// This delegate method is invoked just before a suspended session resumes.
+    /// Updates Flutter with the resuming session state.
+    ///
+    /// - Parameters:
+    ///   - sessionManager: The session manager instance
+    ///   - session: The session that will resume
+    public func sessionManager(_ sessionManager: GCKSessionManager, willResumeSession session: GCKSession) {
+        onSessionChanged(session)
+    }
+    
+    /// Called when a session has resumed
+    /// 
+    /// This delegate method is invoked after a suspended session has resumed.
+    /// Restarts media client listening and restores session state.
+    ///
+    /// - Parameters:
+    ///   - sessionManager: The session manager instance
+    ///   - session: The session that resumed
+    public func sessionManager(_ sessionManager: GCKSessionManager, didResumeSession session: GCKSession) {
+        onSessionChanged(session)
+        RemoteMediaClientMethodChannel.instance.startListen()
+        RemoteMediaClientMethodChannel.instance.resumeSession();
+    }
+    
+    /// Called when a Cast session has resumed
+    /// 
+    /// This delegate method is invoked after a suspended Cast session has resumed.
+    /// This is the Cast-specific version of didResumeSession for GCKSession.
+    ///
+    /// - Parameters:
+    ///   - sessionManager: The session manager instance
+    ///   - session: The Cast session that resumed
+    public func sessionManager(_ sessionManager: GCKSessionManager, didResumeCastSession session: GCKCastSession) {
+        attachMessageChannels(to: session)
+        onSessionChanged(session)
+    }
+    
+    /// Called when a Cast session is about to resume
+    /// 
+    /// This delegate method is invoked just before a suspended Cast session resumes.
+    /// This is the Cast-specific version of willResumeSession for GCKSession.
+    ///
+    /// - Parameters:
+    ///   - sessionManager: The session manager instance
+    ///   - session: The Cast session that will resume
+    public func sessionManager(_ sessionManager: GCKSessionManager, willResumeCastSession session: GCKCastSession) {
+        onSessionChanged(session)
+    }
+    
+    /// Called when a device in the session is updated
+    /// 
+    /// This delegate method is invoked when the Cast device information changes
+    /// during an active session (e.g., device name change).
+    ///
+    /// Note: This is a data-only callback and does NOT indicate a connection state change.
+    /// We do NOT call onSessionChanged here to prevent spurious connection state events.
+    ///
+    /// - Parameters:
+    ///   - sessionManager: The session manager instance
+    ///   - session: The session containing the updated device
+    ///   - device: The updated device information
+    public func sessionManager(_ sessionManager: GCKSessionManager, session: GCKSession, didUpdate device: GCKDevice) {
+        // Data-only: device info changed, connection state didn't — skip
+        // to avoid dedup oscillation between GCKSession/GCKCastSession states
+    }
+    
+    /// Called when device volume changes
+    /// 
+    /// This delegate method is invoked when the Cast device's volume or mute
+    /// state changes.
+    ///
+    /// Note: This is a data-only callback and does NOT indicate a connection state change.
+    /// We do NOT call onSessionChanged here to prevent spurious connection state events.
+    ///
+    /// - Parameters:
+    ///   - sessionManager: The session manager instance
+    ///   - session: The session with volume changes
+    ///   - volume: The new volume level (0.0 to 1.0)
+    ///   - muted: Whether the device is muted
+    public func sessionManager(_ sessionManager: GCKSessionManager, session: GCKSession, didReceiveDeviceVolume volume: Float, muted: Bool) {
+        // Data-only: volume changed, connection state didn't — skip
+        // to avoid dedup oscillation between GCKSession/GCKCastSession states
+    }
+    
+    /// Called when Cast device volume changes
+    /// 
+    /// This delegate method is invoked when the Cast device's volume or mute
+    /// state changes. This is the Cast-specific version for GCKCastSession.
+    ///
+    /// Note: This is a data-only callback and does NOT indicate a connection state change.
+    /// We do NOT call onSessionChanged here to prevent spurious connection state events.
+    ///
+    /// - Parameters:
+    ///   - sessionManager: The session manager instance
+    ///   - session: The Cast session with volume changes
+    ///   - volume: The new volume level (0.0 to 1.0)
+    ///   - muted: Whether the device is muted
+    public func sessionManager(_ sessionManager: GCKSessionManager, castSession session: GCKCastSession, didReceiveDeviceVolume volume: Float, muted: Bool) {
+        // Data-only: volume changed, connection state didn't — skip
+        // to avoid dedup oscillation between GCKSession/GCKCastSession states
+    }
+    
+    /// Called when device status changes
+    /// 
+    /// This delegate method is invoked when the Cast device reports a status
+    /// text change (e.g., "Ready to cast", media title, etc.).
+    ///
+    /// Note: This is a data-only callback and does NOT indicate a connection state change.
+    /// We do NOT call onSessionChanged here to prevent spurious connection state events.
+    ///
+    /// - Parameters:
+    ///   - sessionManager: The session manager instance
+    ///   - session: The session with status changes
+    ///   - statusText: The new status text from the device
+    public func sessionManager(_ sessionManager: GCKSessionManager, session: GCKSession, didReceiveDeviceStatus statusText: String?) {
+        // Data-only: device status text changed, connection state didn't — skip
+        // to avoid dedup oscillation between GCKSession/GCKCastSession states
+    }
+
+    // MARK: - Helper Methods
+    
+    /// Forcefully resets a stuck session.
+    ///
+    /// 1. Early-returns when there is no current session — nothing to reset.
+    /// 2. Removes the session manager listener so `endSessionAndStopCasting`
+    ///    does not generate spurious `willEnd`/`didEnd` callbacks on the
+    ///    Flutter side.
+    /// 3. Cleans up the media client (listener, position timer, queue).
+    /// 4. Force-ends the existing session via `endSessionAndStopCasting(true)`.
+    /// 5. Resets the dedup state (`_lastEmittedConnectionState`) so the next
+    ///    session is tracked from scratch.
+    /// 6. Explicitly emits a `null` session to Flutter. `onSessionChanged(nil)`
+    ///    is intentionally bypassed here because its dedup check (`nil == nil`)
+    ///    would silently drop the emission.
+    /// 7. Re-adds the session manager listener.
+    func resetSession() throws -> Bool {
+        FlutterGoogleCastLogger.info(
+            "[GoogleCast] resetSession: force-ending session and cleaning up all state"
+        )
+
+        // Nothing to reset — avoid unnecessary listener churn and media cleanup
+        guard sessionManager.currentSession != nil else {
+            return true
+        }
+
+        // Remove listener so endSessionAndStopCasting does not fire
+        // willEnd/didEnd and produce stale events on the Flutter side
+        sessionManager.remove(self)
+
+        // Clean up media client
+        RemoteMediaClientMethodChannel.instance.cleanUp()
+
+        if let castSession = sessionManager.currentCastSession {
+            detachMessageChannels(from: castSession)
+        }
+
+        // Force-end the existing session
+        sessionManager.endSessionAndStopCasting(true)
+
+        // Reset dedup state — the next session will be tracked from scratch
+        _lastEmittedConnectionState = nil
+
+        // Explicitly notify Flutter that the session is gone. We bypass
+        // onSessionChanged(nil) because its dedup check would silently skip
+        // the emission when no previous null has been tracked.
+        Task { @MainActor in try? await flutterApi?.onSessionChanged(session: nil) }
+
+        // Re-add listener
+        sessionManager.add(self)
+
+        return true
+    }
+    
+    /// Emits a `disconnecting` state to Flutter for `willEnd` callbacks.
+    ///
+    /// iOS GCK SDK may set `session.connectionState` to `.disconnected`
+    /// before firing `willEnd`, so reading the property directly would skip
+    /// the `disconnecting` transition entirely. This method overrides the
+    /// serialized `connectionState` to `.disconnecting`, ensuring the Dart
+    /// side receives the proper state sequence:
+    /// `connected` → `disconnecting` → `disconnected` → `nil`.
+    ///
+    /// - Parameter session: The session that is about to end
+    private func emitDisconnecting(_ session: GCKSession) {
+        var pigeon = toSessionPigeon(session)
+        pigeon?.connectionState = .disconnecting
+        
+        // Reset deduplication to allow disconnecting state to emit
+        _lastEmittedConnectionState = nil
+
+        Task { @MainActor in try? await flutterApi?.onSessionChanged(session: pigeon) }
+    }
+    
+    /// Notifies Flutter of session state changes
+    /// 
+    /// This helper method sends session updates to the Flutter side via
+    /// the Pigeon API. It converts the session object to a Pigeon model
+    /// format suitable for Flutter consumption.
+    /// 
+    /// Deduplicates events: only emits when the connection state actually
+    /// changes, preventing the flood of identical events from multiple
+    /// GCKSessionManagerListener callbacks.
+    ///
+    /// This method includes deduplication logic to prevent spurious events
+    /// caused by iOS GCK SDK firing multiple delegate callbacks for the same
+    /// connection state.
+    ///
+    /// - Parameter session: The session that changed, or nil if session ended
+    private func onSessionChanged(_ session : GCKSession?){
+        let currentState = sessionManager.connectionState
+        
+        // Deduplicate: only emit if connection state has changed
+        if currentState == _lastEmittedConnectionState && session != nil {
+            return
+        }
+        
+        _lastEmittedConnectionState = currentState
+        Task { @MainActor in try? await flutterApi?.onSessionChanged(session: toSessionPigeon(session)) }
+    }
+
+    private func toSessionPigeon(_ session: GCKSession?) -> CastSessionPigeon? {
+        guard let session else { return nil }
+
+        let state: ConnectionStatePigeon
+        switch sessionManager.connectionState {
+        case .connected:
+            state = .connected
+        case .connecting:
+            state = .connecting
+        case .disconnecting:
+            state = .disconnecting
+        default:
+            state = .disconnected
+        }
+
+        let castDevice = session.device
+        let device = CastDevicePigeon(
+            deviceId: castDevice.deviceID ?? "",
+            friendlyName: castDevice.friendlyName ?? "",
+            modelName: castDevice.modelName,
+            statusText: castDevice.statusText,
+            deviceVersion: castDevice.deviceVersion ?? "",
+            isOnLocalNetwork: castDevice.isOnLocalNetwork,
+            category: castDevice.category ?? "",
+            uniqueId: castDevice.uniqueID ?? "",
+            index: nil
+        )
+
+        return CastSessionPigeon(
+            device: device,
+            sessionId: session.sessionID,
+            connectionState: state,
+            currentDeviceMuted: currentCastSession?.currentDeviceMuted ?? false,
+            currentDeviceVolume: Double(currentCastSession?.currentDeviceVolume ?? 0),
+            deviceStatusText: currentCastSession?.deviceStatusText ?? ""
+        )
+    }
+    
+}

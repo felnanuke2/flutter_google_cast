@@ -1,39 +1,5 @@
-/// User actions.
-enum UserAction {
-  /// User indicates a like preference for the currently playing content.
-  like,
-
-  /// User indicates a dislike preference for the currently playing content.
-  dislike,
-
-  /// User wants to follow or star currently playing content.
-  follow,
-
-  /// User wants to stop following currently playing content.
-  unfollow;
-
-  factory UserAction.fromMap(String value) {
-    // Try matching by name (lowerCamelCase)
-    for (final v in values) {
-      if (v.name == value) return v;
-    }
-    // Fallback: match legacy UPPER_SNAKE_CASE
-    switch (value) {
-      case 'LIKE':
-        return UserAction.like;
-      case 'DISLIKE':
-        return UserAction.dislike;
-      case 'FOLLOW':
-        return UserAction.follow;
-      case 'UNFOLLOW':
-        return UserAction.unfollow;
-      default:
-        throw ArgumentError('Unknown UserAction: $value');
-    }
-  }
-
-  @override
-  String toString() {
-    return name;
-  }
-}
+// Re-exported from flutter_chrome_cast_platform_interface.
+// This file exists for backward compatibility with
+// `package:flutter_chrome_cast/common/user_action.dart`.
+// All types are now defined in the platform_interface package.
+export 'package:flutter_chrome_cast_platform_interface/src/common/user_action.dart';

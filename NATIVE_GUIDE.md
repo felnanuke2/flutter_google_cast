@@ -68,17 +68,17 @@ Cast Receiver Device
 **For iOS Development:**
 ```bash
 # Install dependencies
-cd ios/
+cd packages/flutter_chrome_cast_ios/ios/
 pod install
 
-# Open in Xcode
-open Runner.xcworkspace
+# Resolve Swift package dependencies
+swift package resolve
 ```
 
 **For Android Development:**
 ```bash
 # Build project
-cd android/
+cd packages/flutter_chrome_cast_android/android/
 ./gradlew build
 
 # Open in Android Studio

@@ -7,26 +7,21 @@ The Android implementation of the Flutter Chrome Cast plugin is built using **Ko
 ## 📁 File Structure
 
 ```
-android/
-├── build.gradle                           # Plugin build configuration
-├── proguard-rules.pro                     # ProGuard rules
-├── src/main/
-│   ├── AndroidManifest.xml               # Plugin manifest
-│   ├── kotlin/com/felnanuke/google_cast/
-│   │   ├── GoogleCastPlugin.kt           # Main plugin entry point
-│   │   ├── CastContextMethodChannel.kt   # Cast context management
-│   │   ├── DiscoveryManagerMethodChannel.kt # Device discovery
-│   │   ├── SessionManagerMethodChannel.kt   # Session management
-│   │   ├── RemoteMediaClientMethodChannel.kt # Media control
-│   │   ├── GoogleCastOptionsProvider.kt  # Cast options provider
-│   │   └── extensions/                   # Kotlin extensions
-│   │       ├── CastDeviceExtensions.kt
-│   │       ├── MediaInfoExtensions.kt
-│   │       ├── MediaStatusExtensions.kt
-│   │       ├── MetadataExtensions.kt
-│   │       ├── SessionExtensions.kt
-│   │       └── ...
-│   └── res/                              # Android resources
+packages/flutter_chrome_cast_android/
+├── android/
+│   ├── build.gradle                        # Plugin build configuration
+│   ├── proguard-rules.pro                  # ProGuard rules
+│   ├── src/main/
+│   │   ├── AndroidManifest.xml             # Plugin manifest
+│   │   ├── kotlin/com/felnanuke/google_cast/
+│   │   │   ├── GoogleCastPlugin.kt         # Main plugin entry point
+│   │   │   ├── CastContextMethodChannel.kt # Cast context management
+│   │   │   ├── DiscoveryManagerMethodChannel.kt # Device discovery
+│   │   │   ├── SessionManagerMethodChannel.kt   # Session management
+│   │   │   ├── RemoteMediaClientMethodChannel.kt # Media control
+│   │   │   ├── GoogleCastOptionsProvider.kt     # Cast options provider
+│   │   │   └── extensions/                 # Kotlin extensions
+│   │   └── res/                            # Android resources
 ```
 
 ## 🚀 Core Components
@@ -118,8 +113,8 @@ class GoogleCastOptionsProvider : OptionsProvider {
 ### Building the Android Plugin
 
 ```bash
-# Navigate to the Android directory
-cd android/
+# Navigate to the Android implementation directory
+cd packages/flutter_chrome_cast_android/android/
 
 # Build the plugin
 ./gradlew build

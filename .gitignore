@@ -29,11 +29,10 @@ migrate_working_dir/
 .dart_tool/
 .packages
 build/
-.build/
+**/.build/
 coverage/
 
 .fvm/
 
-# Local tooling / vendored package checkouts
-packages/
+# Local tooling
 .kilo/
