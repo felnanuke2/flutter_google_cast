@@ -1,5 +1,8 @@
 package com.felnanuke.google_cast
 
+import android.os.Handler
+import android.os.Looper
+import android.os.SystemClock
 import com.felnanuke.google_cast.pigeon.CastDevicePigeon
 import com.felnanuke.google_cast.pigeon.CastSessionPigeon
 import com.felnanuke.google_cast.pigeon.ConnectionStatePigeon
@@ -18,6 +21,12 @@ import kotlin.coroutines.resume
 
 private const val TAG = "SessionManager"
 
+/** How long after a session teardown a reconnect must wait to not be canceled by the SDK. */
+private const val SESSION_END_GRACE_MS = 1500L
+
+/** Fallback delay before asserting a staged mute when no volume event fires. */
+private const val MUTE_SETTLE_MS = 600L
+
 class SessionManagerMethodChannel(discoveryManager: DiscoveryManagerMethodChannel) : FlutterPlugin,
     SessionManagerHostApi, SessionManagerListener<Session> {
 
@@ -25,6 +34,16 @@ class SessionManagerMethodChannel(discoveryManager: DiscoveryManagerMethodChanne
 
     /** Fire-and-forget scope used to push Flutter API events. */
     private val eventScope = CoroutineScope(Dispatchers.Main)
+
+    private val mainHandler = Handler(Looper.getMainLooper())
+
+    /** Elapsed-realtime mark of the last requested session teardown. */
+    @Volatile
+    private var lastSessionEndAt = 0L
+
+    private fun markSessionEnd() {
+        lastSessionEndAt = SystemClock.elapsedRealtime()
+    }
 
     private val discoveryManagerMethodChannel: DiscoveryManagerMethodChannel = discoveryManager
 
@@ -36,6 +55,50 @@ class SessionManagerMethodChannel(discoveryManager: DiscoveryManagerMethodChanne
     /** Forwards receiver text messages to the Dart message stream. */
     private val messageReceivedCallback = Cast.MessageReceivedCallback { _, namespace, message ->
         eventScope.launch { flutterApi.onMessageReceived(namespace, message) }
+    }
+
+    /** Re-emits session state when the receiver reports volume/mute changes. */
+    private val volumeListener = object : Cast.Listener() {
+        override fun onVolumeChanged() {
+            val session = sessionManager?.currentCastSession
+            CastDebugLog.d(TAG, "onVolumeChanged: volume=${session?.volume} isMute=${session?.isMute}")
+            applyPendingMute()
+            onSessionChanged()
+        }
+    }
+
+    /**
+     * Mute request waiting for the volume change to settle. Many receivers
+     * unmute as a side effect of applying a volume step, so the mute must be
+     * (re-)asserted after the volume lands rather than sent concurrently.
+     */
+    @Volatile
+    private var pendingMute: Boolean? = null
+
+    private fun applyPendingMute() {
+        val mute = pendingMute ?: return
+        val session = sessionManager?.currentCastSession ?: return
+        if (session.isMute != mute) {
+            try {
+                session.setMute(mute)
+                CastDebugLog.d(TAG, "applyPendingMute: setMute($mute) sent")
+            } catch (e: Exception) {
+                CastDebugLog.castError(TAG, "applyPendingMute(setMute=$mute)", e)
+            }
+        }
+        pendingMute = null
+    }
+
+    private fun attachVolumeListener(session: Session) {
+        (session as? CastSession)?.addCastListener(volumeListener)
+    }
+
+    private fun detachVolumeListener(session: Session) {
+        try {
+            (session as? CastSession)?.removeCastListener(volumeListener)
+        } catch (e: Exception) {
+            CastDebugLog.castError(TAG, "detachVolumeListener", e)
+        }
     }
 
     private val sessionManager: SessionManager?
@@ -80,8 +143,19 @@ class SessionManagerMethodChannel(discoveryManager: DiscoveryManagerMethodChanne
             return false
         }
 
-        CastDebugLog.d(TAG, "startSessionWithDevice: Selecting route for deviceId=$deviceId via DiscoveryManager")
-        discoveryManagerMethodChannel.selectRoute(deviceId)
+        // The Cast SDK tears sessions down asynchronously: after
+        // endCurrentSession returns, the underlying controller is still being
+        // disposed and a new connect started in that window is CANCELED by the
+        // SDK. Postpone the route selection when a teardown just happened.
+        val sinceEnd = SystemClock.elapsedRealtime() - lastSessionEndAt
+        if (sinceEnd < SESSION_END_GRACE_MS) {
+            val delay = SESSION_END_GRACE_MS - sinceEnd
+            CastDebugLog.d(TAG, "startSessionWithDevice: teardown finished ${sinceEnd}ms ago; delaying route selection by ${delay}ms")
+            mainHandler.postDelayed({ discoveryManagerMethodChannel.selectRoute(deviceId) }, delay)
+        } else {
+            CastDebugLog.d(TAG, "startSessionWithDevice: Selecting route for deviceId=$deviceId via DiscoveryManager")
+            discoveryManagerMethodChannel.selectRoute(deviceId)
+        }
         CastDebugLog.d(TAG, "startSessionWithDevice: Route selection initiated for deviceId=$deviceId")
         return true
     }
@@ -91,6 +165,7 @@ class SessionManagerMethodChannel(discoveryManager: DiscoveryManagerMethodChanne
         val currentSession = sessionManager?.currentCastSession
         CastDebugLog.d(TAG, "endSession: currentSession=${currentSession?.sessionId}, device=${currentSession?.castDevice?.friendlyName}")
         sessionManager?.endCurrentSession(false)
+        markSessionEnd()
         CastDebugLog.d(TAG, "endSession: endCurrentSession(false) called")
         return true
     }
@@ -100,17 +175,27 @@ class SessionManagerMethodChannel(discoveryManager: DiscoveryManagerMethodChanne
         val currentSession = sessionManager?.currentCastSession
         CastDebugLog.d(TAG, "endSessionAndStopCasting: currentSession=${currentSession?.sessionId}, device=${currentSession?.castDevice?.friendlyName}")
         sessionManager?.endCurrentSession(true)
+        markSessionEnd()
         CastDebugLog.d(TAG, "endSessionAndStopCasting: endCurrentSession(true) called")
         return true
     }
 
-    override fun setDeviceVolume(value: Double) {
-        CastDebugLog.d(TAG, "setDeviceVolume: Setting volume to $value")
+    override fun setDeviceVolume(value: Double, muted: Boolean) {
+        CastDebugLog.d(TAG, "setDeviceVolume: Setting volume to $value muted=$muted")
         try {
-            sessionManager?.currentCastSession?.volume = value
-            CastDebugLog.d(TAG, "setDeviceVolume: Volume set successfully to $value")
+            val session = sessionManager?.currentCastSession
+            if (session == null) {
+                CastDebugLog.e(TAG, "[SESSION ERROR] setDeviceVolume: no active Cast session")
+                return
+            }
+            // Stage the mute first so onVolumeChanged (or the fallback below)
+            // applies it once the receiver has settled the volume change.
+            pendingMute = if (session.isMute != muted) muted else null
+            session.volume = value
+            mainHandler.postDelayed({ applyPendingMute() }, MUTE_SETTLE_MS)
+            CastDebugLog.d(TAG, "setDeviceVolume: applied value=$value muted=$muted (pendingMute=$pendingMute)")
         } catch (e: Exception) {
-            CastDebugLog.castError(TAG, "setDeviceVolume(value=$value)", e)
+            CastDebugLog.castError(TAG, "setDeviceVolume(value=$value, muted=$muted)", e)
         }
     }
 
@@ -191,12 +276,18 @@ class SessionManagerMethodChannel(discoveryManager: DiscoveryManagerMethodChanne
     //SessionManagerLister
     override fun onSessionEnded(session: Session, errorCode: Int) {
         CastDebugLog.sessionEvent(TAG, "onSessionEnded", session.sessionId, (session as? CastSession)?.castDevice?.deviceId, "errorCode=$errorCode")
-        CastDebugLog.d(TAG, "onSessionEnded: Session ended cleanly, errorCode=$errorCode")
+        if (errorCode == 0) {
+            CastDebugLog.d(TAG, "onSessionEnded: Session ended cleanly")
+        } else {
+            CastDebugLog.e(TAG, "[SESSION ERROR] onSessionEnded: errorCode=$errorCode means: ${describeSessionError(errorCode)}")
+        }
+        detachVolumeListener(session)
         onSessionChanged()
     }
 
     override fun onSessionEnding(session: Session) {
         CastDebugLog.sessionEvent(TAG, "onSessionEnding", session.sessionId, (session as? CastSession)?.castDevice?.deviceId)
+        detachVolumeListener(session)
         onSessionChanged()
     }
 
@@ -212,6 +303,7 @@ class SessionManagerMethodChannel(discoveryManager: DiscoveryManagerMethodChanne
         CastDebugLog.sessionEvent(TAG, "onSessionResumed", session.sessionId, (session as? CastSession)?.castDevice?.deviceId, "wasSuspended=$wasSuspended")
         CastDebugLog.d(TAG, "onSessionResumed: Starting RemoteMediaClient listener")
         remoteMediaClientMethodChannel.startListen()
+        attachVolumeListener(session)
         onSessionChanged()
     }
 
@@ -232,6 +324,7 @@ class SessionManagerMethodChannel(discoveryManager: DiscoveryManagerMethodChanne
         CastDebugLog.sessionEvent(TAG, "onSessionStarted", sessionId, (session as? CastSession)?.castDevice?.deviceId)
         CastDebugLog.d(TAG, "onSessionStarted: Starting RemoteMediaClient listener")
         remoteMediaClientMethodChannel.startListen()
+        attachVolumeListener(session)
         onSessionChanged()
     }
 
@@ -243,6 +336,7 @@ class SessionManagerMethodChannel(discoveryManager: DiscoveryManagerMethodChanne
     override fun onSessionSuspended(session: Session, reason: Int) {
         CastDebugLog.sessionEvent(TAG, "onSessionSuspended", session.sessionId, (session as? CastSession)?.castDevice?.deviceId, "reason=$reason")
         CastDebugLog.d(TAG, "onSessionSuspended: Reason: ${describeSessionSuspendReason(reason)}")
+        detachVolumeListener(session)
         onSessionChanged()
     }
 

@@ -525,7 +525,7 @@ protocol SessionManagerHostApi {
   func startSessionWithDevice(request: StartSessionRequest) throws -> Bool
   func endSession() throws -> Bool
   func endSessionAndStopCasting() throws -> Bool
-  func setDeviceVolume(value: Double) throws
+  func setDeviceVolume(value: Double, muted: Bool) throws
   func addMessageChannel(namespace: String) throws -> Bool
   func removeMessageChannel(namespace: String) throws -> Bool
   func sendMessage(namespace: String, message: String) async throws -> Bool
@@ -584,8 +584,9 @@ class SessionManagerHostApiSetup {
       setDeviceVolumeChannel.setMessageHandler { message, reply in
         let args = message as! [Any?]
         let valueArg = args[0] as! Double
+        let mutedArg = args[1] as! Bool
         do {
-          try api.setDeviceVolume(value: valueArg)
+          try api.setDeviceVolume(value: valueArg, muted: mutedArg)
           reply(wrapResult(nil))
         } catch {
           reply(wrapError(error))

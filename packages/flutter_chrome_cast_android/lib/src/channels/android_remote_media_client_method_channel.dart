@@ -1,4 +1,6 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_chrome_cast_platform_interface/flutter_chrome_cast_platform_interface.dart';
+
 import 'package:rxdart/subjects.dart';
 
 class _RemoteMediaFlutterApiHandler extends RemoteMediaClientFlutterApi {
@@ -34,12 +36,16 @@ class _RemoteMediaFlutterApiHandler extends RemoteMediaClientFlutterApi {
 class GoogleCastRemoteMediaClientAndroidMethodChannel
     extends GoogleCastRemoteMediaClientPlatformInterface {
   /// Creates a new Android remote media client method channel.
+  ///
+  /// The native event handler is registered eagerly: a resumed Cast session
+  /// can emit media status during app startup, before any client method is
+  /// called, and a lazily-registered handler would drop those events.
   GoogleCastRemoteMediaClientAndroidMethodChannel();
 
   final RemoteMediaClientHostApi _hostApi = RemoteMediaClientHostApi();
   bool _flutterApiSetUp = false;
 
-  void _ensureFlutterApiSetUp() {
+  void ensureEventHandlersRegistered() {
     if (_flutterApiSetUp) return;
     _flutterApiSetUp = true;
     RemoteMediaClientFlutterApi.setUp(
@@ -52,7 +58,7 @@ class GoogleCastRemoteMediaClientAndroidMethodChannel
   }
 
   RemoteMediaClientHostApi get _api {
-    _ensureFlutterApiSetUp();
+    ensureEventHandlersRegistered();
     return _hostApi;
   }
 
@@ -297,6 +303,10 @@ class GoogleCastRemoteMediaClientAndroidMethodChannel
         .whereType<MediaQueueItem>()
         .map(_toQueueItem)
         .toList();
+    debugPrint(
+      '[RMC][queue] onQueueStatusChanged received=${arguments.length} '
+      'parsed=${queueItems.length} ids=${queueItems.map((e) => e.itemId).toList()}',
+    );
     _queueItemsStreamController.add(queueItems);
   }
 

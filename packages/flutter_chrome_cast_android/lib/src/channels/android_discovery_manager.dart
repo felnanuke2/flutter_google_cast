@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+
 import 'package:flutter_chrome_cast_platform_interface/flutter_chrome_cast_platform_interface.dart';
 import 'package:rxdart/subjects.dart';
 
@@ -20,6 +21,9 @@ class _DiscoveryFlutterApiHandler extends DiscoveryManagerFlutterApi {
 class GoogleCastDiscoveryManagerMethodChannelAndroid
     extends GoogleCastDiscoveryManagerPlatformInterface {
   /// Creates a new Android discovery manager method channel.
+  ///
+  /// The native event handler is registered eagerly so device-list updates
+  /// pushed by the receiver during startup are never dropped.
   GoogleCastDiscoveryManagerMethodChannelAndroid();
 
   final DiscoveryManagerHostApi _hostApi = DiscoveryManagerHostApi();
@@ -28,7 +32,7 @@ class GoogleCastDiscoveryManagerMethodChannelAndroid
     ..add([]);
   bool _flutterApiSetUp = false;
 
-  void _ensureFlutterApiSetUp() {
+  void ensureEventHandlersRegistered() {
     if (_flutterApiSetUp) return;
     _flutterApiSetUp = true;
     DiscoveryManagerFlutterApi.setUp(
@@ -37,7 +41,7 @@ class GoogleCastDiscoveryManagerMethodChannelAndroid
   }
 
   DiscoveryManagerHostApi get _api {
-    _ensureFlutterApiSetUp();
+    ensureEventHandlersRegistered();
     return _hostApi;
   }
 
@@ -89,10 +93,12 @@ class GoogleCastDiscoveryManagerMethodChannelAndroid
         }
       }
 
-      // Enhanced deduplication: remove devices with same name and model
+      // Deduplicate by device id only. Keying on name+model would collapse two
+      // physically different receivers that share a friendly name.
       final Map<String, GoogleCastDevice> uniqueDevices = {};
       for (final device in devices) {
-        final key = '${device.friendlyName}_${device.modelName}';
+        final key = device.deviceID;
+        if (key.isEmpty) continue;
         if (!uniqueDevices.containsKey(key)) {
           uniqueDevices[key] = device;
           if (kDebugMode) {

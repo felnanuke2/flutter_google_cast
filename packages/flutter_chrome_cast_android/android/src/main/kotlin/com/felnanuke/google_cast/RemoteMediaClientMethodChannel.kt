@@ -5,6 +5,7 @@ import android.util.Log
 import com.felnanuke.google_cast.extensions.*
 import com.felnanuke.google_cast.pigeon.*
 import com.google.android.gms.cast.framework.CastContext
+import com.google.android.gms.cast.framework.media.MediaQueue
 import com.google.android.gms.cast.framework.media.RemoteMediaClient
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import kotlinx.coroutines.CoroutineScope
@@ -14,6 +15,9 @@ import kotlinx.coroutines.launch
 import org.json.JSONObject
 
 private const val TAG = "RemoteMediaClient"
+
+/** Delay between lazy retries when queue item payloads are still missing. */
+private const val QUEUE_RETRY_MS = 2500L
 
 /** Fire-and-forget scope used to push Flutter API events. */
 private val flutterApiScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
@@ -26,6 +30,19 @@ class RemoteMediaClientMethodChannel : FlutterPlugin, RemoteMediaClientHostApi,
     private val currentRemoteMediaClient: RemoteMediaClient?
         get() =
             CastContext.getSharedInstance()?.sessionManager?.currentCastSession?.remoteMediaClient
+
+    /**
+     * Cache of the last known Pigeon queue items, keyed by itemId. The
+     * receiver only includes a small window of full item payloads in each
+     * status update, so items are merged here against the authoritative ID
+     * list from [MediaQueue.getItemIds].
+     */
+    private val queueItemCache = LinkedHashMap<Long, MediaQueueItem>()
+
+    private var mediaQueueCallback: MediaQueue.Callback? = null
+
+    private val mainHandler = android.os.Handler(android.os.Looper.getMainLooper())
+    private var queueRetryPending = false
 
     // MARK: - Flutter Plugin Lifecycle
 
@@ -263,8 +280,8 @@ class RemoteMediaClientMethodChannel : FlutterPlugin, RemoteMediaClientHostApi,
             return
         }
         try {
-            client.seek(request.toCastSeekOptions())
-            CastDebugLog.castResult(TAG, "seek", true, "position=${request.position}s")
+            client.seek(request.toCastSeekOptions(client.approximateStreamPosition))
+            CastDebugLog.castResult(TAG, "seek", true, "position=${request.position}s relative=${request.relative}")
         } catch (e: Exception) {
             CastDebugLog.castError(TAG, "seek(position=${request.position})", e)
         }
@@ -365,7 +382,17 @@ class RemoteMediaClientMethodChannel : FlutterPlugin, RemoteMediaClientHostApi,
     }
 
     private fun setTextTrackStyleInternal(style: TextTrackStylePigeon) {
-        CastDebugLog.w(TAG, "setTextTrackStyleInternal: Text track style is currently a no-op (not implemented)")
+        val client = currentRemoteMediaClient
+        if (client == null) {
+            CastDebugLog.e(TAG, "[MEDIA ERROR] setTextTrackStyle: RemoteMediaClient is NULL")
+            return
+        }
+        try {
+            client.setTextTrackStyle(style.toCastTextTrackStyle())
+            CastDebugLog.castResult(TAG, "setTextTrackStyle", true, "applied")
+        } catch (e: Exception) {
+            CastDebugLog.castError(TAG, "setTextTrackStyle", e)
+        }
     }
 
     override fun onStatusUpdated() {
@@ -385,12 +412,95 @@ class RemoteMediaClientMethodChannel : FlutterPlugin, RemoteMediaClientHostApi,
 
     override fun onQueueStatusUpdated() {
         super.onQueueStatusUpdated()
-        val queueItems = currentRemoteMediaClient?.mediaStatus?.queueItems?.map { it.toPigeonMediaQueueItem() } ?: emptyList()
-        CastDebugLog.mediaEvent(TAG, "onQueueStatusUpdated", mapOf(
-            "queueItemCount" to queueItems.size
-        ))
-        flutterApiScope.launch { flutterApi.onQueueStatusChanged(queueItems) }
+        emitQueueItems()
     }
+
+    /**
+     * Emits the full queue: the authoritative ordered ID list from MediaQueue,
+     * with item payloads merged from the status window and the local cache.
+     * Items whose payload has not been fetched yet trigger a fetch via
+     * [MediaQueue.getItemAtIndex]; a later MediaQueue callback re-emits them.
+     */
+    private fun emitQueueItems() {
+        val client = currentRemoteMediaClient
+        val mediaQueue = client?.mediaQueue
+        if (client == null || mediaQueue == null) {
+            flutterApiScope.launch { flutterApi.onQueueStatusChanged(emptyList()) }
+            return
+        }
+        val ids = mediaQueue.itemIds
+        if (ids.isEmpty()) {
+            queueItemCache.clear()
+            flutterApiScope.launch { flutterApi.onQueueStatusChanged(emptyList()) }
+            return
+        }
+        // Drop cache entries that no longer exist in the queue.
+        val idSet = ids.toHashSet()
+        queueItemCache.keys.retainAll { idSet.contains(it.toInt()) }
+
+        // Seed from the status window: every status update carries full
+        // payloads for the items around the current one.
+        client.mediaStatus?.queueItems?.forEach { item ->
+            queueItemCache[item.itemId.toLong()] = item.toPigeonMediaQueueItem()
+        }
+
+        val items = mutableListOf<MediaQueueItem>()
+        var missingPayloadIds = ""
+        for (index in ids.indices) {
+            val native = mediaQueue.getItemAtIndex(index)
+            if (native != null) {
+                queueItemCache[native.itemId.toLong()] = native.toPigeonMediaQueueItem()
+            } else if (queueItemCache[ids[index].toLong()] == null) {
+                missingPayloadIds += "${ids[index]},"
+            }
+            queueItemCache[ids[index].toLong()]?.let { items.add(it) }
+        }
+        CastDebugLog.mediaEvent(TAG, "onQueueStatusUpdated", mapOf(
+            "queueIdCount" to ids.size,
+            "emittedCount" to items.size,
+            "cachedCount" to queueItemCache.size,
+            "missingPayloads" to missingPayloadIds.ifEmpty { "none" }
+        ))
+        flutterApiScope.launch { flutterApi.onQueueStatusChanged(items) }
+
+        // Some item payloads are only delivered lazily; retry shortly so the
+        // Dart side converges on the full queue without a status change.
+        if (missingPayloadIds.isNotEmpty() && !queueRetryPending) {
+            queueRetryPending = true
+            mainHandler.postDelayed({
+                queueRetryPending = false
+                if (currentRemoteMediaClient != null) emitQueueItems()
+            }, QUEUE_RETRY_MS)
+        }
+    }
+
+    private fun createMediaQueueCallback(): MediaQueue.Callback =
+        object : MediaQueue.Callback() {
+            override fun itemsReloaded() {
+                queueItemCache.clear()
+                emitQueueItems()
+            }
+
+            override fun itemsInsertedInRange(startIndex: Int, insertCount: Int) {
+                emitQueueItems()
+            }
+
+            override fun itemsRemovedAtIndexes(indexes: IntArray) {
+                emitQueueItems()
+            }
+
+            override fun itemsReorderedAtIndexes(indexes: List<Int>, newIndex: Int) {
+                emitQueueItems()
+            }
+
+            override fun itemsUpdatedAtIndexes(indexes: IntArray) {
+                emitQueueItems()
+            }
+
+            override fun mediaQueueChanged() {
+                emitQueueItems()
+            }
+        }
 
     override fun onProgressUpdated(progress: Long, duration: Long) {
         // Only log every 5 seconds to avoid flooding
@@ -410,14 +520,23 @@ class RemoteMediaClientMethodChannel : FlutterPlugin, RemoteMediaClientHostApi,
         }
         client.registerCallback(this)
         client.addProgressListener(this, 500)
+        if (mediaQueueCallback == null) {
+            mediaQueueCallback = createMediaQueueCallback().also {
+                client.mediaQueue.registerCallback(it)
+            }
+        }
         CastDebugLog.d(TAG, "startListen: RemoteMediaClient listeners registered successfully")
     }
 
     fun endListen() {
         CastDebugLog.d(TAG, "endListen: Removing RemoteMediaClient callback and progress listener")
         try {
-            currentRemoteMediaClient?.removeProgressListener(this)
-            currentRemoteMediaClient?.unregisterCallback(this)
+            currentRemoteMediaClient?.let { client ->
+                client.removeProgressListener(this)
+                client.unregisterCallback(this)
+                mediaQueueCallback?.let { client.mediaQueue.unregisterCallback(it) }
+                mediaQueueCallback = null
+            }
             CastDebugLog.d(TAG, "endListen: RemoteMediaClient listeners removed successfully")
         } catch (e: Exception) {
             CastDebugLog.castError(TAG, "endListen - failed to remove listeners", e)

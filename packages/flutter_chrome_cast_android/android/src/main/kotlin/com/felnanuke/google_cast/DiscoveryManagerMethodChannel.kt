@@ -33,6 +33,16 @@ class DiscoveryManagerMethodChannel : FlutterPlugin, DiscoveryManagerHostApi {
 
     private lateinit var context: Context
 
+    /**
+     * Whether a discovery router callback is currently registered.
+     *
+     * [MediaRouter.routes] is a poor proxy for this: it always contains at least
+     * the local "Phone" route, so it reports discovery as active even before
+     * [startDiscovery] is ever called. This flag mirrors the real callback
+     * registration state instead.
+     */
+    private var isDiscovering = false
+
     // MARK: - Flutter Plugin Lifecycle
 
     override fun onAttachedToEngine(binding: FlutterPlugin.FlutterPluginBinding) {
@@ -52,6 +62,10 @@ class DiscoveryManagerMethodChannel : FlutterPlugin, DiscoveryManagerHostApi {
     override fun stopDiscovery() {
         CastDebugLog.d(TAG, "stopDiscovery: Removing router callback")
         router.removeCallback(routerCallBack)
+        isDiscovering = false
+        // Drop the last known device list so consumers do not keep acting on
+        // receivers that are no longer being discovered.
+        flutterApiScope.launch { flutterApi.onDevicesChanged(emptyList()) }
         CastDebugLog.discoveryEvent(TAG, "Discovery STOPPED")
     }
 
@@ -69,6 +83,7 @@ class DiscoveryManagerMethodChannel : FlutterPlugin, DiscoveryManagerHostApi {
         }
         CastDebugLog.d(TAG, "startDiscovery: MediaRouteSelector built with categoryForRemotePlayback")
         router.addCallback(selector, routerCallBack, flags)
+        isDiscovering = true
         CastDebugLog.d(TAG, "startDiscovery: Router callback registered with flags=$flags")
         CastDebugLog.discoveryEvent(TAG, "Discovery STARTED", mapOf(
             "totalRoutes" to router.routes.size
@@ -78,7 +93,11 @@ class DiscoveryManagerMethodChannel : FlutterPlugin, DiscoveryManagerHostApi {
     }
 
     override fun isDiscoveryActiveForDeviceCategory(deviceCategory: String): Boolean {
-        val isActive = router.routes.isNotEmpty()
+        // MediaRouter on Android discovers every Cast route in the
+        // "remote playback" category; there is no per-app-category discovery to
+        // query. Report the real callback registration state and keep the
+        // category argument for API parity with iOS.
+        val isActive = isDiscovering
         CastDebugLog.d(TAG, "isDiscoveryActiveForDeviceCategory: category=$deviceCategory, isActive=$isActive, routes=${router.routes.size}")
         return isActive
     }
@@ -132,8 +151,9 @@ class DiscoveryManagerMethodChannel : FlutterPlugin, DiscoveryManagerHostApi {
 
         override fun onRouteVolumeChanged(router: MediaRouter, route: MediaRouter.RouteInfo) {
             super.onRouteVolumeChanged(router, route)
+            // Volume changes do not affect the device list; re-sending the whole
+            // map here only spams the Flutter side with identical payloads.
             CastDebugLog.d(TAG, "onRouteVolumeChanged: route=${route.name}, volume=${route.volume}")
-            getCastDevicesMap()
         }
 
         override fun onProviderAdded(router: MediaRouter, provider: MediaRouter.ProviderInfo) {
@@ -169,8 +189,10 @@ class DiscoveryManagerMethodChannel : FlutterPlugin, DiscoveryManagerHostApi {
 
         fun getCastDevicesMap() {
             val devices = mutableListOf<CastDevicePigeon>()
+            // Deduplicate by device id only. Keying on name+model collapses two
+            // physically different receivers that share a friendly name (very
+            // common with identical TVs), making one of them unreachable.
             val seenDeviceIds = mutableSetOf<String>()
-            val seenDeviceSignatures = mutableSetOf<String>()
 
             CastDebugLog.d(TAG, "getCastDevicesMap: Scanning ${router.routes.size} routes for Cast devices")
 
@@ -180,15 +202,10 @@ class DiscoveryManagerMethodChannel : FlutterPlugin, DiscoveryManagerHostApi {
                     val deviceId = device["id"] as? String
                     val deviceName = device["name"] as? String
                     val deviceModel = device["model_name"] as? String
-                    val deviceSignature = "${deviceName}_${deviceModel}"
 
-                    CastDebugLog.d(TAG, "getCastDevicesMap: Found Cast device - id=$deviceId, name=$deviceName, model=$deviceModel, signature=$deviceSignature")
+                    CastDebugLog.d(TAG, "getCastDevicesMap: Found Cast device - id=$deviceId, name=$deviceName, model=$deviceModel")
 
-                    if (deviceId != null &&
-                        !seenDeviceIds.contains(deviceId) &&
-                        !seenDeviceSignatures.contains(deviceSignature)) {
-                        seenDeviceIds.add(deviceId)
-                        seenDeviceSignatures.add(deviceSignature)
+                    if (deviceId != null && seenDeviceIds.add(deviceId)) {
                         devices.add(
                             CastDevicePigeon(
                                 deviceId = deviceId,
@@ -202,9 +219,9 @@ class DiscoveryManagerMethodChannel : FlutterPlugin, DiscoveryManagerHostApi {
                                 index = null,
                             )
                         )
-                        CastDebugLog.d(TAG, "getCastDevicesMap: Added unique device: $deviceId ($deviceSignature)")
+                        CastDebugLog.d(TAG, "getCastDevicesMap: Added unique device: $deviceId ($deviceName)")
                     } else {
-                        CastDebugLog.d(TAG, "getCastDevicesMap: Skipping duplicate device - ID: $deviceId, signature: $deviceSignature")
+                        CastDebugLog.d(TAG, "getCastDevicesMap: Skipping duplicate device - ID: $deviceId")
                     }
                 } else {
                     CastDebugLog.d(TAG, "getCastDevicesMap: Route '${route.name}' has no Cast device, skipping")
@@ -212,7 +229,31 @@ class DiscoveryManagerMethodChannel : FlutterPlugin, DiscoveryManagerHostApi {
             }
 
             CastDebugLog.d(TAG, "getCastDevicesMap: Sending ${devices.size} unique devices to Flutter")
-            flutterApiScope.launch { flutterApi.onDevicesChanged(devices) }
+            flutterApiScope.launch { flutterApi.onDevicesChanged(collapseAndroidTvDuplicates(devices)) }
+        }
+
+        /**
+         * Android TV receivers publish two routes for the same physical device:
+         * the classic Cast route (opaque hex device id) and a Cast Connect route
+         * (UUID-format device id that also changes across receiver restarts).
+         * Keep the classic route whenever both exist for the same
+         * friendly name + model, so the device list does not show duplicates.
+         */
+        private fun collapseAndroidTvDuplicates(devices: List<CastDevicePigeon>): List<CastDevicePigeon> {
+            fun isAndroidTvRoute(id: String?) = id != null && id.contains("-")
+            val classic = devices.filter { !isAndroidTvRoute(it.deviceId) }
+            val androidTv = devices.filter { isAndroidTvRoute(it.deviceId) }
+            val kept = classic + androidTv.filter { atv ->
+                classic.none { it.friendlyName == atv.friendlyName && it.modelName == atv.modelName }
+            }
+            if (kept.size != devices.size) {
+                CastDebugLog.d(
+                    TAG,
+                    "collapseAndroidTvDuplicates: collapsed ${devices.size} routes -> ${kept.size} devices " +
+                        "(dropped Cast Connect duplicate(s) ${devices.filter { d -> !kept.any { it.deviceId == d.deviceId } }.map { it.deviceId }})"
+                )
+            }
+            return kept
         }
     }
 

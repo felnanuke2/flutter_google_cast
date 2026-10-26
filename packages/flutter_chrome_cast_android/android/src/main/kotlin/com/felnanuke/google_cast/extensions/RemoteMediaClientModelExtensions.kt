@@ -12,6 +12,7 @@ import com.felnanuke.google_cast.pigeon.MediaTrack
 import com.felnanuke.google_cast.pigeon.QueueLoadOptionsPigeon
 import com.felnanuke.google_cast.pigeon.RepeatModePigeon
 import com.felnanuke.google_cast.pigeon.SeekOptionPigeon
+import com.felnanuke.google_cast.pigeon.TextTrackStylePigeon
 import com.felnanuke.google_cast.pigeon.Volume
 import com.google.android.gms.cast.MediaInfo as CastMediaInfo
 import com.google.android.gms.cast.MediaLoadRequestData
@@ -20,6 +21,7 @@ import com.google.android.gms.cast.MediaQueueItem as CastMediaQueueItem
 import com.google.android.gms.cast.MediaSeekOptions
 import com.google.android.gms.cast.MediaStatus as CastMediaStatus
 import com.google.android.gms.cast.MediaTrack as CastMediaTrack
+import com.google.android.gms.cast.TextTrackStyle as CastTextTrackStyle
 import com.google.android.gms.common.images.WebImage
 import com.felnanuke.google_cast.pigeon.MediaImagePigeon
 import com.felnanuke.google_cast.pigeon.MediaMetadataPigeon
@@ -237,20 +239,73 @@ fun MediaQueueItem.toCastMediaQueueItem(): CastMediaQueueItem? {
     return builder.build()
 }
 
-fun SeekOptionPigeon.toCastSeekOptions(): MediaSeekOptions {
+fun SeekOptionPigeon.toCastSeekOptions(currentStreamPositionMs: Long? = null): MediaSeekOptions {
     val resumeState = when (resumeState) {
         MediaResumeStatePigeon.PLAY -> 0
         MediaResumeStatePigeon.PAUSE -> 1
         MediaResumeStatePigeon.UNCHANGED -> 2
     }
-    CastDebugLog.d(TAG, "toCastSeekOptions: position=${position}s, resumeState=$resumeState, seekToInfinity=$seekToInfinity")
+    // The Android Cast SDK has no relative seek; resolve it against the
+    // current stream position (clamped at 0) like the receiver would.
+    val positionMs = if (relative && currentStreamPositionMs != null) {
+        (currentStreamPositionMs + position * 1000).coerceAtLeast(0)
+    } else {
+        position * 1000
+    }
+    CastDebugLog.d(TAG, "toCastSeekOptions: position=${position}s, relative=$relative -> ${positionMs}ms, resumeState=$resumeState, seekToInfinity=$seekToInfinity")
 
     return MediaSeekOptions.Builder()
-        .setPosition(position * 1000)
+        .setPosition(positionMs)
         .setResumeState(resumeState)
         .setIsSeekToInfinite(seekToInfinity)
         .build()
 }
+
+fun TextTrackStylePigeon.toCastTextTrackStyle(): CastTextTrackStyle {
+    val style = CastTextTrackStyle()
+    backgroundColor?.let { style.backgroundColor = it.parseArgbHex() }
+    foregroundColor?.let { style.foregroundColor = it.parseArgbHex() }
+    edgeColor?.let { style.edgeColor = it.parseArgbHex() }
+    windowColor?.let { style.windowColor = it.parseArgbHex() }
+    fontFamily?.let { style.setFontFamily(it) }
+    fontScale?.let { style.fontScale = it.toFloat() }
+    windowRoundedCornerRadius?.let { style.windowCornerRadius = it.toInt() }
+    fontGenericFamily?.let { name ->
+        when (name) {
+            "sansSerif" -> CastTextTrackStyle.FONT_FAMILY_SANS_SERIF
+            "monospacedSansSerif" -> CastTextTrackStyle.FONT_FAMILY_MONOSPACED_SANS_SERIF
+            "serif" -> CastTextTrackStyle.FONT_FAMILY_SERIF
+            "monospacedSerif" -> CastTextTrackStyle.FONT_FAMILY_MONOSPACED_SERIF
+            "casual" -> CastTextTrackStyle.FONT_FAMILY_CASUAL
+            "cursive" -> CastTextTrackStyle.FONT_FAMILY_CURSIVE
+            "smallCapitals" -> CastTextTrackStyle.FONT_FAMILY_SMALL_CAPITALS
+            else -> null
+        }?.let { style.fontGenericFamily = it }
+    }
+    fontStyle?.let { name ->
+        when (name) {
+            "normal" -> CastTextTrackStyle.FONT_STYLE_NORMAL
+            "bold" -> CastTextTrackStyle.FONT_STYLE_BOLD
+            "italic" -> CastTextTrackStyle.FONT_STYLE_ITALIC
+            "boldItalic" -> CastTextTrackStyle.FONT_STYLE_BOLD_ITALIC
+            else -> null
+        }?.let { style.fontStyle = it }
+    }
+    windowType?.let { name ->
+        when (name) {
+            "none" -> CastTextTrackStyle.WINDOW_TYPE_NONE
+            "normal" -> CastTextTrackStyle.WINDOW_TYPE_NORMAL
+            "roundedCorners" -> CastTextTrackStyle.WINDOW_TYPE_ROUNDED
+            else -> null
+        }?.let { style.windowType = it }
+    }
+    customData?.let { style.setCustomData(it.toJsonObject()) }
+    return style
+}
+
+/** Parses "#RRGGBBAA" / "#AARRGGBB" style hex into an ARGB int. */
+private fun String.parseArgbHex(): Int =
+    android.graphics.Color.parseColor(if (startsWith("#")) this else "#$this")
 
 fun RepeatModePigeon?.toCastRepeatMode(): Int {
     return when (this) {

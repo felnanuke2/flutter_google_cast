@@ -1,17 +1,6 @@
 group 'com.felnanuke.google_cast'
 version '1.0-SNAPSHOT'
 
-buildscript {
-    repositories {
-        google()
-        mavenCentral()
-    }
-
-    dependencies {
-        classpath 'com.android.tools.build:gradle:8.6.0'
-    }
-}
-
 rootProject.allprojects {
     repositories {
         google()

@@ -185,7 +185,7 @@ class GoogleCastSessionManagerIOSMethodChannel
 
   @override
   void setDeviceVolumeLevel(CastDeviceVolume volume) {
-    _api.setDeviceVolume(volume.value);
+    _api.setDeviceVolume(volume.value, volume.muted);
   }
 
   @override

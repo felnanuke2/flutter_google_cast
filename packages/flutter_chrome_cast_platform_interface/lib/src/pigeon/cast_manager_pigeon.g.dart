@@ -544,14 +544,14 @@ class SessionManagerHostApi {
     return pigeonVar_replyValue! as bool;
   }
 
-  Future<void> setDeviceVolume(double value) async {
+  Future<void> setDeviceVolume(double value, bool muted) async {
     final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_chrome_cast_platform_interface.SessionManagerHostApi.setDeviceVolume$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
       binaryMessenger: pigeonVar_binaryMessenger,
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[value]);
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[value, muted]);
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
     _extractReplyValueOrThrow(

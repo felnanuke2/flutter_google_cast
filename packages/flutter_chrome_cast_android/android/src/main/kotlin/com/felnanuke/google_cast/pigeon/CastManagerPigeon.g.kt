@@ -532,7 +532,7 @@ interface SessionManagerHostApi {
   fun startSessionWithDevice(request: StartSessionRequest): Boolean
   fun endSession(): Boolean
   fun endSessionAndStopCasting(): Boolean
-  fun setDeviceVolume(value: Double)
+  fun setDeviceVolume(value: Double, muted: Boolean)
   fun addMessageChannel(namespace: String): Boolean
   fun removeMessageChannel(namespace: String): Boolean
   suspend fun sendMessage(namespace: String, message: String): Boolean
@@ -600,8 +600,9 @@ interface SessionManagerHostApi {
           channel.setMessageHandler { message, reply ->
             val args = message as List<Any?>
             val valueArg = args[0] as Double
+            val mutedArg = args[1] as Boolean
             val wrapped: List<Any?> = try {
-              api.setDeviceVolume(valueArg)
+              api.setDeviceVolume(valueArg, mutedArg)
               listOf(null)
             } catch (exception: Throwable) {
               CastManagerPigeonPigeonUtils.wrapError(exception)

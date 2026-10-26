@@ -133,8 +133,9 @@ public class FGCSessionManagerMethodChannel : UIResponder, FlutterPlugin, GCKSes
         return true
     }
 
-    func setDeviceVolume(value: Double) throws {
+    func setDeviceVolume(value: Double, muted: Bool) throws {
         sessionManager.currentCastSession?.setDeviceVolume(Float(value))
+        sessionManager.currentCastSession?.setDeviceMuted(muted)
     }
     
     // MARK: - Custom Cast Message Channels

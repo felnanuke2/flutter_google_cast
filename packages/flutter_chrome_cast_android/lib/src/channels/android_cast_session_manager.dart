@@ -35,12 +35,17 @@ class _SessionFlutterApiHandler extends SessionManagerFlutterApi {
 class GoogleCastSessionManagerAndroidMethodChannel
     extends GoogleCastSessionManagerPlatformInterface {
   /// Creates a new Android session manager method channel.
+  ///
+  /// The native event handler is registered eagerly: the Cast SDK can
+  /// auto-resume a saved session during app startup, BEFORE any session
+  /// manager method is called, and a lazily-registered handler would drop
+  /// that first `onSessionChanged` event.
   GoogleCastSessionManagerAndroidMethodChannel();
 
   final SessionManagerHostApi _hostApi = SessionManagerHostApi();
   bool _flutterApiSetUp = false;
 
-  void _ensureFlutterApiSetUp() {
+  void ensureEventHandlersRegistered() {
     if (_flutterApiSetUp) return;
     _flutterApiSetUp = true;
     SessionManagerFlutterApi.setUp(
@@ -49,7 +54,7 @@ class GoogleCastSessionManagerAndroidMethodChannel
   }
 
   SessionManagerHostApi get _api {
-    _ensureFlutterApiSetUp();
+    ensureEventHandlersRegistered();
     return _hostApi;
   }
 
@@ -98,12 +103,35 @@ class GoogleCastSessionManagerAndroidMethodChannel
 
   @override
   Future<bool> endSession() async {
-    return _api.endSession();
+    final ok = await _api.endSession();
+    await _waitForDisconnect();
+    return ok;
   }
 
   @override
   Future<bool> endSessionAndStopCasting() async {
-    return _api.endSessionAndStopCasting();
+    final ok = await _api.endSessionAndStopCasting();
+    await _waitForDisconnect();
+    return ok;
+  }
+
+  /// Blocks until the Cast SDK has actually torn the session down.
+  ///
+  /// The native `endCurrentSession` call returns immediately while the
+  /// teardown continues asynchronously; resolving [endSession] before the
+  /// session is really gone makes an immediately following
+  /// [startSessionWithDevice] race the teardown. The native side additionally
+  /// delays reconnects that arrive inside the teardown grace window.
+  Future<void> _waitForDisconnect({
+    Duration timeout = const Duration(seconds: 10),
+  }) async {
+    final deadline = DateTime.now().add(timeout);
+    while (DateTime.now().isBefore(deadline)) {
+      if (connectionState == GoogleCastConnectState.disconnected) return;
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+    }
+    // Do not fail endSession because of a slow receiver; the SDK finishes the
+    // teardown on its own.
   }
 
   @override
@@ -186,7 +214,7 @@ class GoogleCastSessionManagerAndroidMethodChannel
 
   @override
   void setDeviceVolumeLevel(CastDeviceVolume volume) {
-    _api.setDeviceVolume(volume.value);
+    _api.setDeviceVolume(volume.value, volume.muted);
   }
 
   @override

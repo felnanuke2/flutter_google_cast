@@ -95,7 +95,7 @@ abstract class SessionManagerHostApi {
 
   bool endSessionAndStopCasting();
 
-  void setDeviceVolume(double value);
+  void setDeviceVolume(double value, bool muted);
 
   bool addMessageChannel(String namespace);
 
