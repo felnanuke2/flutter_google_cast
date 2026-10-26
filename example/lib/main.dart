@@ -8,6 +8,7 @@ import 'package:flutter_chrome_cast/themes.dart';
 import 'package:flutter_chrome_cast/widgets.dart';
 import 'package:flutter_chrome_cast/models.dart';
 import 'dart:async';
+import 'homologation.dart';
 import 'media_urls.dart';
 
 void main() {
@@ -91,6 +92,20 @@ class _MyAppState extends State<MyApp> {
               title: const Text('Google Cast'),
               centerTitle: false,
               actions: [
+                Builder(
+                  builder: (navContext) => IconButton(
+                    key: const ValueKey('open_homologation'),
+                    tooltip: 'Homologation',
+                    icon: const Icon(Icons.science_outlined),
+                    onPressed: () {
+                      Navigator.of(navContext).push(
+                        MaterialPageRoute<void>(
+                          builder: (_) => const HomologationScreen(),
+                        ),
+                      );
+                    },
+                  ),
+                ),
                 StreamBuilder<GoogleCastSession?>(
                   stream:
                       GoogleCastSessionManager.instance.currentSessionStream,
