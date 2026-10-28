@@ -408,8 +408,18 @@ fun MediaMetadata.toPigeonMetadata(): MediaMetadataPigeon {
         getInt(MediaMetadata.KEY_EPISODE_NUMBER)?.toLong()
     } else null
 
-    val releaseDate = getDate(MediaMetadata.KEY_RELEASE_DATE)?.let {
-        java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US).format(it)
+    // MediaMetadata.getDate() is declared to return a Date, but when the
+    // metadata is deserialized from receiver JSON the underlying value can
+    // actually be a Calendar (or String), which makes SimpleDateFormat.format
+    // throw IllegalArgumentException. Widen to Any? and convert defensively.
+    val rawDate: Any? = getDate(MediaMetadata.KEY_RELEASE_DATE)
+    val releaseDate = when (rawDate) {
+        null -> null
+        is java.util.Date -> SimpleDateFormat("yyyy-MM-dd", Locale.US).format(rawDate)
+        is java.util.Calendar -> SimpleDateFormat("yyyy-MM-dd", Locale.US).format(rawDate.time)
+        is Number -> SimpleDateFormat("yyyy-MM-dd", Locale.US).format(java.util.Date(rawDate.toLong()))
+        is String -> rawDate.takeIf { it.isNotBlank() }
+        else -> null
     }
 
     return MediaMetadataPigeon(
