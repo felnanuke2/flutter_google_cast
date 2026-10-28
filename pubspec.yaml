@@ -1,16 +1,34 @@
 name: flutter_chrome_cast
 description: A Flutter plugin for integrating Google Cast devices. Discover, connect, and control media playback on Chromecast and Cast-enabled devices.
-version: 2.0.0
+version: 2.1.0-dev.1
 repository: https://github.com/felnanuke2/flutter_google_cast
 license: BSD-3-Clause
 
 environment:
-  sdk: ^3.12.0
+  # Flutter 3.44.x ships with Dart 3.12.x.
+  sdk: ">=3.12.0 <4.0.0"
   flutter: ">=3.44.0"
+
+# ---------------------------------------------------------------------------
+# Dart Workspace — Stage 1 (Folder Shuffle)
+# All sub-packages share a single dependency resolution graph.
+# Add new member paths here as the federation grows.
+# ---------------------------------------------------------------------------
+workspace:
+  - example
+  - packages/flutter_chrome_cast_platform_interface
+  - packages/flutter_chrome_cast_android
+  - packages/flutter_chrome_cast_ios
 
 dependencies:
   flutter:
     sdk: flutter
+  flutter_chrome_cast_platform_interface:
+    version: ^2.1.0-dev.1
+  flutter_chrome_cast_android:
+    version: ^2.1.0-dev.1
+  flutter_chrome_cast_ios:
+    version: ^2.1.0-dev.1
   get: ^4.7.2
   marquee: ^2.2.3
   multicast_dns: ^0.3.3+1
@@ -22,17 +40,17 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^6.0.0
+  mockito: ^5.4.5
   pigeon: ^29.0.6
 
-# For information on the generic Dart part of this file, see the
-# following page: https://dart.dev/tools/pub/pubspec
+# For information on the generic Dart part of this file, see
+# the following page: https://dart.dev/tools/pub/pubspec
 
 # The following section is specific to Flutter packages.
 flutter:
   plugin:
     platforms:
       android:
-        package: com.felnanuke.google_cast
-        pluginClass: GoogleCastPlugin
+        default_package: flutter_chrome_cast_android
       ios:
-        pluginClass: GoogleCastPlugin
+        default_package: flutter_chrome_cast_ios

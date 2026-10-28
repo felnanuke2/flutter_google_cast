@@ -1,26 +1,5 @@
-/// A text message received from a custom Google Cast namespace.
-class GoogleCastMessage {
-  /// Creates a custom Cast message.
-  const GoogleCastMessage({required this.namespace, required this.message});
-
-  /// The Cast namespace that delivered the message.
-  final String namespace;
-
-  /// The UTF-8 text payload delivered by the receiver.
-  final String message;
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is GoogleCastMessage &&
-          namespace == other.namespace &&
-          message == other.message;
-
-  @override
-  int get hashCode => Object.hash(namespace, message);
-
-  @override
-  String toString() =>
-      'GoogleCastMessage(namespace: $namespace, '
-      'message: $message)';
-}
+// Re-exported from flutter_chrome_cast_platform_interface.
+// This file exists for backward compatibility with
+// `package:flutter_chrome_cast/entities/cast_message.dart`.
+// All types are now defined in the platform_interface package.
+export 'package:flutter_chrome_cast_platform_interface/src/entities/cast_message.dart';

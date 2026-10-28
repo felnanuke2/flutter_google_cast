@@ -1,0 +1,26 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+  package="com.felnanuke.google_cast">
+
+  <!-- Cast sessions stream media over the local network / internet. -->
+  <uses-permission android:name="android.permission.INTERNET" />
+  <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+  <!--
+    Device discovery. The Cast SDK delegates route discovery to Google Play
+    services, which holds its own permissions, so discovery works without these
+    on current releases. They are declared anyway so that consumer apps inherit
+    them and so discovery keeps working on devices where the receiver is
+    resolved by the app itself (mDNS / wifi-aware paths) and on future releases
+    that tighten the requirements.
+  -->
+  <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+  <uses-permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE" />
+
+  <!-- Android 13+ (API 33) requires NEARBY_WIFI_DEVICES for Cast discovery.
+       neverForLocation asserts we only use it to find receivers, not to derive
+       the user's location. -->
+  <uses-permission
+      android:name="android.permission.NEARBY_WIFI_DEVICES"
+      android:usesPermissionFlags="neverForLocation" />
+
+</manifest>

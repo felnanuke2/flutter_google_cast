@@ -1,6 +1,5 @@
-export 'cast_media_metadata.dart';
-export 'generic_media_metadata.dart';
-export 'movie_media_metadata.dart';
-export 'music_track_media_metadata.dart';
-export 'photo_media_metadata.dart';
-export 'tv_show_media_metadata.dart';
+// Re-exported from flutter_chrome_cast_platform_interface.
+// This file exists for backward compatibility with
+// `package:flutter_chrome_cast/entities/media_metadata/media_metadata.dart`.
+// All types are now defined in the platform_interface package.
+export 'package:flutter_chrome_cast_platform_interface/src/entities/media_metadata/media_metadata.dart';

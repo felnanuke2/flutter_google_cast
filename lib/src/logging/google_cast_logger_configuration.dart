@@ -1,21 +1,35 @@
 // ignore_for_file: public_member_api_docs
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter_chrome_cast_platform_interface/flutter_chrome_cast_platform_interface.dart'
+    as platform_interface;
 
 import 'cast_log_level.dart';
 
-/// Internal logging state shared by the public API and method-channel code.
+/// Internal logging state shared by the public API and the platform packages.
 ///
 /// A `null` level intentionally means that the application has not opted in to
 /// log filtering. Native implementations use that distinction to retain their
 /// legacy logging behavior exactly.
+///
+/// The value is stored in the platform interface package so the platform
+/// implementations can read it while initializing the native Cast context.
 class GoogleCastLoggerConfiguration {
   GoogleCastLoggerConfiguration._();
 
   static const channelArgumentKey = 'logLevel';
 
-  static CastLogLevel? level;
+  /// The configured log level, or `null` when the app did not opt in.
+  static CastLogLevel? get level => platform_interface.GoogleCastLoggerConfiguration.level;
 
+  static set level(CastLogLevel? value) =>
+      platform_interface.GoogleCastLoggerConfiguration.level = value;
+
+  /// Adds the configured level to a method-channel argument map.
+  ///
+  /// Kept for compatibility with integrations that still pass arguments
+  /// through method channels. The pigeon APIs carry the level in the Cast
+  /// options instead.
   static void addToChannelArguments(Map<String, dynamic> arguments) {
     final configuredLevel = level;
     if (configuredLevel != null) {

@@ -25,7 +25,7 @@ cd example && flutter pub get && cd ..
 echo "⚙️  Configuring Android build settings..."
 
 # Configure main plugin gradle.properties
-cat > android/gradle.properties << EOF
+cat > packages/flutter_chrome_cast_android/android/gradle.properties << EOF
 org.gradle.jvmargs=-Xmx3072M -XX:MaxMetaspaceSize=512m
 android.useAndroidX=true
 android.enableJetifier=true
@@ -71,6 +71,10 @@ echo "🧹 Cleaning Gradle caches..."
 cd example/android
 ./gradlew clean --quiet
 cd ../..
+
+cd packages/flutter_chrome_cast_android/android
+./gradlew clean --quiet
+cd ../../..
 
 echo "📋 Checking for outdated dependencies..."
 flutter pub outdated || true
