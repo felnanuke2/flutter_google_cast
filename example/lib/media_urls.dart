@@ -7,10 +7,12 @@ class MediaUrls {
 
   // ── Videos ────────────────────────────────────────────────────────────────
 
-  /// Big Buck Bunny – full short film (~62 MB, MP4/H.264).
-  /// Source: Blender Foundation https://peach.blender.org
+  /// Big Buck Bunny – full short film (~10 min, 720p MP4/H.264).
+  /// Source: Blender Foundation via Internet Archive https://peach.blender.org
+  /// (download.blender.org removed the peach movie files; this mirror
+  /// supports range requests and was verified with HTTP 206.)
   static const bigBuckBunnyVideo =
-      'https://download.blender.org/peach/bigbuckbunny_movies/BigBuckBunny_320x180.mp4';
+      'https://archive.org/download/BigBuckBunny_124/Content/big_buck_bunny_720p_surround.mp4';
 
   /// Sintel – official trailer (~4 MB, MP4/H.264).
   /// Source: Blender Foundation https://durian.blender.org
