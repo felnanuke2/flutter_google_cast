@@ -18,6 +18,14 @@ class _FakeAndroidContextHostApi extends GoogleCastContextHostApi {
 }
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
+  setUp(() {
+    // setSharedInstanceWithOptions registers native event handlers on every
+    // manager, so the federated implementations must be wired up first.
+    FlutterChromeCastAndroid.registerWith();
+  });
+
   group('GoogleCastContextAndroidMethodChannel', () {
     test('implements context platform contract', () {
       final context = GoogleCastContextAndroidMethodChannel(
