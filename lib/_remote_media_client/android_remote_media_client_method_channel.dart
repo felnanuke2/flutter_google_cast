@@ -72,7 +72,7 @@ class GoogleCastRemoteMediaClientAndroidMethodChannel
   Future<void> loadMedia(
     GoogleCastMediaInformation mediaInfo, {
     bool autoPlay = true,
-    Duration playPosition = Duration.zero,
+    Duration? playPosition = Duration.zero,
     double playbackRate = 1.0,
     List<int>? activeTrackIds,
     String? credentials,
@@ -82,7 +82,7 @@ class GoogleCastRemoteMediaClientAndroidMethodChannel
     await _channel.invokeMethod('loadMedia', {
       'mediaInfo': mediaInfo.toMap(),
       'autoPlay': autoPlay,
-      'playPosition': playPosition.inSeconds,
+      'playPosition': playPosition?.inSeconds,
       'playbackRate': playbackRate,
       'activeTrackIds': activeTrackIds,
       'credentials': credentials,

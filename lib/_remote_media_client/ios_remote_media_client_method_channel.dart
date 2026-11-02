@@ -42,6 +42,9 @@ class GoogleCastRemoteMediaClientIOSMethodChannel
   //      within a small tolerance.
   // A safety timeout releases the guard if convergence never happens (e.g.
   // playback was stopped/seeked before reaching the expected position).
+  // When `loadMedia` omits the start position, the expected position is
+  // unknown, so only condition 1 is checked.
+  bool _pendingLoadGuardArmed = false;
   Duration? _pendingLoadExpectedPosition;
   int? _pendingLoadPreviousMediaSessionId;
   Timer? _pendingLoadGuardTimer;
@@ -88,7 +91,7 @@ class GoogleCastRemoteMediaClientIOSMethodChannel
   Future<void> loadMedia(
     GoogleCastMediaInformation mediaInfo, {
     bool autoPlay = true,
-    Duration playPosition = Duration.zero,
+    Duration? playPosition = Duration.zero,
     double playbackRate = 1.0,
     List<int>? activeTrackIds,
     String? credentials,
@@ -103,7 +106,7 @@ class GoogleCastRemoteMediaClientIOSMethodChannel
       mediaInfo.toMap()..addAll(
         {
           'autoPlay': autoPlay,
-          'playPosition': playPosition.inSeconds,
+          'playPosition': playPosition?.inSeconds,
           'playbackRate': playbackRate,
           'activeTrackIds': activeTrackIds,
           'credentials': credentials,
@@ -174,8 +177,8 @@ class GoogleCastRemoteMediaClientIOSMethodChannel
 
   Future _onUpdatePlayerPosition(int seconds) async {
     final duration = Duration(seconds: seconds);
-    final expected = _pendingLoadExpectedPosition;
-    if (expected != null) {
+    if (_pendingLoadGuardArmed) {
+      final expected = _pendingLoadExpectedPosition;
       final currentSessionId =
           _mediaStatusStreamController.value?.mediaSessionID;
       // `mediaSessionID` is non-null `int` (defaults to 0 when no status yet).
@@ -185,6 +188,7 @@ class GoogleCastRemoteMediaClientIOSMethodChannel
           currentSessionId != 0 &&
           currentSessionId != _pendingLoadPreviousMediaSessionId;
       final converged =
+          expected == null ||
           (duration - expected).abs() <= _pendingLoadGuardTolerance;
       if (!sessionChanged || !converged) {
         return;
@@ -194,7 +198,8 @@ class GoogleCastRemoteMediaClientIOSMethodChannel
     _playerPositionStreamController.add(duration);
   }
 
-  void _armPendingLoadGuard(Duration expectedPosition) {
+  void _armPendingLoadGuard(Duration? expectedPosition) {
+    _pendingLoadGuardArmed = true;
     _pendingLoadExpectedPosition = expectedPosition;
     _pendingLoadPreviousMediaSessionId =
         _mediaStatusStreamController.value?.mediaSessionID;
@@ -204,7 +209,9 @@ class GoogleCastRemoteMediaClientIOSMethodChannel
     // previous content's last reported position. Without this, even though
     // `onUpdatePlayerPosition` ticks are filtered, the stale cached value
     // leaks into the app right after `loadMedia`.
-    _playerPositionStreamController.add(expectedPosition);
+    if (expectedPosition != null) {
+      _playerPositionStreamController.add(expectedPosition);
+    }
     _pendingLoadGuardTimer?.cancel();
     _pendingLoadGuardTimer = Timer(_pendingLoadGuardTimeout, () {
       _releasePendingLoadGuard();
@@ -212,6 +219,7 @@ class GoogleCastRemoteMediaClientIOSMethodChannel
   }
 
   void _releasePendingLoadGuard() {
+    _pendingLoadGuardArmed = false;
     _pendingLoadExpectedPosition = null;
     _pendingLoadPreviousMediaSessionId = null;
     _pendingLoadGuardTimer?.cancel();
