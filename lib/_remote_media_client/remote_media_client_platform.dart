@@ -34,6 +34,10 @@ abstract class GoogleCastRemoteMediaClientPlatformInterface
 
   /// Loads media on the remote media client.
   ///
+  /// [playPosition] is the initial playback position. Pass `null` to omit it
+  /// from the load request so that the receiver uses its default position
+  /// (the live edge for LIVE streams, the beginning for VOD).
+  ///
   /// [customData] is an optional arbitrary data map that is forwarded to the
   /// Cast receiver application via the standard Google Cast SDK
   /// `MediaLoadRequestData.customData` field. The receiver application can
@@ -43,7 +47,7 @@ abstract class GoogleCastRemoteMediaClientPlatformInterface
   Future<void> loadMedia(
     GoogleCastMediaInformation mediaInfo, {
     bool autoPlay = true,
-    Duration playPosition = Duration.zero,
+    Duration? playPosition = Duration.zero,
     double playbackRate = 1.0,
     List<int>? activeTrackIds,
     String? credentials,
